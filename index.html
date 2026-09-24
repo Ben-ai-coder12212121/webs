@@ -3368,6 +3368,137 @@ run(root,c){return with3D(root,c,()=>{
   F.intro(M,'Frostline','A Detour original · 3D ice powers','<p>You’re <b>Frostline</b>. Everywhere you skate, you leave a trail of ice behind you, and it melts after a few seconds.</p><p>Here’s your big trick: <b>skate a full loop</b> and everything inside it freezes solid. Fires, monsters, even a walking bonfire. Your trail also lets you skate across canals, as long as you keep moving.</p>','WASD to skate (you slide, so plan your turns), mouse to look (click to lock). <b>Shift</b> boosts. Hold <b>E</b> or <b>right-click</b> to carve: a tight, fast turn that sprays ice. <b>Click</b> or F blasts frost. <b>Space</b> jumps. P pauses. The city goes on forever, so skate as far as you like. On a phone: joystick, drag to look, and the FROST, BOOST, JUMP and CARVE buttons.');
   return()=>st3.dispose()})}});
 
+G.push({id:'hs_villain',name:'Overlord',kind:'hero',levels:true,wide:true,tint:'#B3122E',blurb:'3D villain rampage. Fly, burn through skyscrapers with laser eyes, and bring the city to its knees.',fmt:b=>'$'+(b/10).toFixed(1)+'M',
+art:'<rect width="120" height="72" fill="#3a1030"/><rect y="46" width="120" height="26" fill="#FF9F43" opacity=".35"/><path d="M4 72V36h14v36M22 72V22h16v50M84 72V30h14v42M100 72V44h14v28" fill="#5A5470" stroke="#1D1A2F" stroke-width="2.5"/><path d="M38 40L22 47" stroke="#FFD23F" stroke-width="6" stroke-linecap="round"/><path d="M38 40L22 47" stroke="#F2352A" stroke-width="3" stroke-linecap="round"/><path d="M60 32l-22 24 30-10z" fill="#8B0000" stroke="#1D1A2F" stroke-width="2.5" stroke-linejoin="round"/><rect x="54" y="30" width="18" height="22" rx="3" fill="#1D1A2F"/><circle cx="63" cy="24" r="8" fill="#f1c7a0" stroke="#1D1A2F" stroke-width="2.5"/><path d="M58 23h4M64 23h4" stroke="#F2352A" stroke-width="3"/><path d="M60 38l3 5 3-5z" fill="#F2352A"/>',
+run(root,c){return with3D(root,c,()=>{
+  const st3=Stage3D(root,c,{lock:true,dragLook:true,fov:70,far:560,fireLabel:'LASER',altLabel:'BOOST',jumpLabel:'UP'});
+  const M=[{name:'Grand Entrance',brief:['Metro City has never heard of you. Time to fix that.','Hold <b>click</b> to fire your laser eyes and burn through anything. Ram buildings at full speed, and press <b>Q</b> to slam into the ground.'],goal:'Cause the target amount of damage before the clock runs out.'},
+    {name:'Hero Corps',brief:['The city sent the Hero Corps after you: a squadron of shiny blue jets with a strong sense of justice.','They fire stun blasts, so keep moving. Laser them out of the sky or ram them.'],goal:'Take down 12 Hero Corps jets.'},
+    {name:'Captain Valor',brief:['Metro City’s greatest hero has come to stop you. He is fast, he is strong, and he has great hair.','Keep your laser on him while he circles, and dodge when he charges. Ram him at full speed for big damage.'],goal:'Defeat Captain Valor.'}];
+  const K=heroKit(st3,c,{id:'hs_villain',issues:3,camDist:7,camH:1.4,fogNear:140,fogFar:320,finale:'The city is yours!',start:mi=>start(mi)});
+  const{T,scene,camera,input,TM,cam,H,F}=K;cam.pmin=-1.35;cam.pmax=1.3;
+  K.sky('#3a1030','#FF9F43');K.lights(0xffe0d0,0x6a3050,.75);
+  const city=K.streamCity({blk:28,st:18,hmul:1.5,chunk:3,radius:2,seed:13});city.update(0,0,true);cam.boxes=city.boxes;
+  K.touchBtn('TURN','drift');K.touchBtn('SLAM','slam','left:auto;right:240px;bottom:120px');
+  const hero=K.fig({suit:0x1D1A2F,trim:0xB3122E,mask:0x111111,cape:0x8B0000,emblemSides:3,hair:0x111111,bulk:1.1});hero.position.y=-1;const HR=new T.Group();HR.add(hero);HR.rotation.order='YXZ';scene.add(HR);
+  const eyeG=new T.MeshBasicMaterial({color:0xFF2A2A});[-.1,.1].forEach(x=>{const e=part(T,bx(T,.11,.07,.03),eyeG,x,.3,.245,hero.userData.neck);e.userData.noInk=1});
+  // laser beam
+  const beam=new T.Group();const beamCore=new T.Mesh(new T.CylinderGeometry(.12,.12,1,8,1,true),new T.MeshBasicMaterial({color:0xFFF3C4}));const beamGlow=new T.Mesh(new T.CylinderGeometry(.5,.5,1,10,1,true),new T.MeshBasicMaterial({color:0xFF2A2A,transparent:true,opacity:.6,depthWrite:false,blending:T.AdditiveBlending}));beam.add(beamCore,beamGlow);beam.visible=false;scene.add(beam);
+  const hitGlow=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:0xFF7A2A,transparent:true,opacity:.6,depthWrite:false,blending:T.AdditiveBlending}));hitGlow.visible=false;scene.add(hitGlow);
+  const cross=el('div',{style:'position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:3px solid #FF2A2A;border-radius:50%;box-shadow:0 0 0 2px #1D1A2F;pointer-events:none'});K.hud.append(cross);
+  
+  const hpB=H.bar('HEALTH','#2BB673'),htB=H.bar('LASER HEAT','#FF2A2A'),spB=H.bar('SPEED','#FF9F43');const rad=K.radar(160);const ptr=K.pointer();
+  const diff=c.pick(.75,1,1.2);
+  const P={prev:new T.Vector3(),p:new T.Vector3(),v:new T.Vector3(),spd:0,hp:100,heat:1,hot:0,inv:0,bank:0,t:0,slam:0,boost:1};
+  let mi=0,score=0,objs=[],cars=[],jets=[],shots=[],scorch=[],boss=null,timeLeft=0,target=0,downed=0,collapsed=0,carsN=0,spawnT=0,lzT=0,slamL=false,wave=0;
+  const add=o=>{scene.add(o);objs.push(o);return o};
+  const money=v=>'$'+(v/10).toFixed(1)+'M';
+  const V=new T.Vector3(),UP=new T.Vector3(0,1,0);
+  function rayBox(o,d,b){let t0=0,t1=1e9;const lo=[b.x0,0,b.z0],hi=[b.x1,b.h,b.z1],oo=[o.x,o.y,o.z],dd=[d.x,d.y,d.z];for(let i=0;i<3;i++){if(Math.abs(dd[i])<1e-6){if(oo[i]<lo[i]||oo[i]>hi[i])return null;continue}let a=(lo[i]-oo[i])/dd[i],b2=(hi[i]-oo[i])/dd[i];if(a>b2){const q=a;a=b2;b2=q}t0=Math.max(t0,a);t1=Math.min(t1,b2);if(t0>t1)return null}return t0}
+  function raySph(o,d,p,r){const ox=p.x-o.x,oy=p.y-o.y,oz=p.z-o.z;const t=ox*d.x+oy*d.y+oz*d.z;if(t<0)return null;const d2=ox*ox+oy*oy+oz*oz-t*t;return d2<r*r?t-Math.sqrt(r*r-d2):null}
+  function cast(o,d,max){let best=max,hit=null,kind='air';for(const b of city.boxes){if(b.tree||b.dead)continue;const t=rayBox(o,d,b);if(t!=null&&t<best){best=t;hit=b;kind='bld'}}
+    if(d.y<-1e-4){const t=-o.y/d.y;if(t>0&&t<best){best=t;hit=null;kind='gnd'}}
+    const tg=q=>{const t=raySph(o,d,q.p,q.aim||q.r);if(t!=null&&t<best){best=t;hit=q;kind='tg'}};cars.forEach(q=>{if(!q.dead)tg(q)});jets.forEach(tg);if(boss&&!boss.dead)tg(boss);
+    return{t:best,pt:o.clone().addScaledVector(d,best),hit,kind}}
+  // ---- traffic ----
+  function onStreetX(x){const k=Math.round(x/city.cell)*city.cell;return Math.abs(x-k)<city.st/2-1}
+  function placeCar(q,near){for(let k=0;k<20;k++){const p=city.streetPt(P.p.x,P.p.z,near?40:150,near?220:260);if(!p)continue;const alongZ=onStreetX(p.x);q.ax=alongZ?'z':'x';const lane=(Math.random()<.5?-1:1)*3;if(alongZ)p.x=Math.round(p.x/city.cell)*city.cell+lane;else p.z=Math.round(p.z/city.cell)*city.cell+lane;q.p.set(p.x,0,p.z);q.dir=Math.sign(lane);q.m.rotation.set(0,alongZ?(q.dir>0?0:Math.PI):(q.dir>0?Math.PI/2:-Math.PI/2),0);q.dead=false;q.fly=null;q.m.visible=true;return}}
+  function makeCar(){const m=toonCar(K,pick([0x7FC8F8,0xFF8FB1,0x6EE7B7,0xFFD23F,0xB9A7FF,0xffffff,0xFF9F43]),Math.random()<.15);scene.add(m);const q={m,p:m.position,r:2.6,sp:10+Math.random()*8,kind:'car'};placeCar(q,true);return q}
+  function blowCar(q,from){if(q.dead)return;q.dead=true;carsN++;score+=3;const a=Math.atan2(q.p.x-from.x,q.p.z-from.z);q.fly={vy:14+Math.random()*8,vx:Math.sin(a)*10,vz:Math.cos(a)*10,rx:(Math.random()-.5)*8,rz:(Math.random()-.5)*8,l:3};K.burst(q.p.clone().setY(1.5),[0xFF9F43,0xF2352A,0xFFD23F,0x1D1A2F],26,14,.8);K.puff(q.p.clone().setY(2),0x3a3552,2.4,1.4);H.pow(pick(['KA-BLAM!','BOOM!','KRUNCH!']),q.p.clone().setY(3));noise(.4,'lowpass',400,.3)}
+  // ---- jets ----
+  function makeJet(){const g=add(new T.Group());part(T,bx(T,1.4,.9,4.2),TM(0x2d6fd6),0,0,0,g);part(T,bx(T,6,.18,1.6),TM(0xffffff),0,0,-.3,g);part(T,bx(T,.2,1.4,1.2),TM(0xFFD23F),0,.8,-1.6,g);part(T,bx(T,.9,.5,1.2),TM(0x9fd6ff),0,.55,.9,g);const fl=part(T,sp(T,.45),new T.MeshBasicMaterial({color:0x7FC8F8}),0,0,-2.3,g);K.ink(g,.05);
+    const a=Math.random()*6.28,r=90+Math.random()*50;g.position.set(P.p.x+Math.cos(a)*r,40+Math.random()*50,P.p.z+Math.sin(a)*r);const j={g,p:g.position,r:3.2,aim:c.pick(8,6.5,5),hp:c.pick(.5,.7,.9),v:new T.Vector3(),cd:2+Math.random()*2,off:Math.random()*6.28,fl,kind:'jet'};jets.push(j);return j}
+  function killJet(j,how){j.dead=true;downed++;score+=15;K.burst(j.p.clone(),[0x2d6fd6,0xFFD23F,0xffffff,0xFF9F43],40,20,1);K.ring(j.p.clone(),0xFFD23F,1,14,.5);H.pow(how||'KA-POW!',j.p.clone().add(new T.Vector3(0,3,0)),'#FFD23F');noise(.6,'lowpass',500,.35);scene.remove(j.g)}
+  function shoot(from,col,spd,dmg){const m=add(part(T,sp(T,.55),new T.MeshBasicMaterial({color:col}),from.x,from.y,from.z));const lead=P.v.clone().multiplyScalar(.5);const d=P.p.clone().add(lead).sub(from).normalize();shots.push({m,v:d.multiplyScalar(spd),l:5,dmg})}
+  // ---- boss ----
+  function makeBoss(){const f=K.fig({suit:0x2d6fd6,trim:0xFFD23F,mask:0x2d6fd6,cape:0xFFD23F,emblemSides:5,hair:0x6b3f14,bulk:1.1});f.scale.setScalar(1.6);const g=add(new T.Group());g.add(f);f.position.y=-1.6;g.position.set(P.p.x,90,P.p.z-160);return{g,f,p:g.position,r:3.4,aim:c.pick(7,6,5),hp:100,st:'circle',t:4,a:0,v:new T.Vector3(),cd:2,flash:0,kind:'boss'}}
+  function hurt(d,why){if(P.inv>0||F.state!=='play')return;P.hp-=d*c.pick(.55,.85,1.15);P.inv=.6;cam.shake=.8;H.tint('rgba(127,200,248,.45)',1);beep(160,.2,'sawtooth',.08);if(why)H.say(why,1100);if(P.hp<=0){P.hp=0;F.lose(M,'Defeated!','The heroes haul you off to Metro Max, a prison with surprisingly nice pillows. Try again?')}}
+  F.revive=()=>{P.hp=100;P.inv=2};
+  function clearAll(){objs.forEach(o=>scene.remove(o));objs=[];jets=[];shots=[];boss=null;scorch.forEach(s=>scene.remove(s));scorch=[];H.boss(null)}
+  function start(i){mi=i;clearAll();P.p.set(0,50,40);P.v.set(0,0,-10);P.spd=10;P.hp=100;P.heat=1;P.hot=0;P.inv=1.5;P.boost=1;P.slam=0;cam.yaw=0;cam.pitch=-.15;score=0;downed=0;collapsed=0;carsN=0;spawnT=2;wave=0;city.update(0,0,true);
+    if(!cars.length)for(let k=0;k<28;k++)cars.push(makeCar());else cars.forEach(q=>placeCar(q,true));
+    timeLeft=i===0?c.pick(170,150,130):0;target=c.pick(120,200,280);
+    if(i===2){boss=makeBoss();H.say('Captain Valor has arrived!',1800)}else if(i>=0)H.say(M[i].name,1800)}
+  function onCollapse(b){collapsed++;score+=Math.max(8,Math.round(b.w*b.d*b.h/1500));K.ring(new T.Vector3(b.cx,.5,b.cz),0xFF9F43,4,40,1)}
+  function wreck(b,pt,pw){const r=K.smash(b,pt,pw,{onCollapse});if(r){score+=1}return r}
+  function scorchAt(pt){const m=new T.Mesh(new T.CircleGeometry(.9+Math.random()*.8,9),new T.MeshBasicMaterial({color:0x1D1A2F,transparent:true,opacity:.7,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set(pt.x,.06+Math.random()*.02,pt.z);scene.add(m);scorch.push(m);if(scorch.length>90)scene.remove(scorch.shift())}
+  function slamWave(){const pt=P.p.clone().setY(.3);K.ring(pt,0xFF9F43,2,46,.9,1);K.ring(pt,0xffffff,1,30,.6,.5);K.burst(pt,[0xd8d4e4,0x8c86a3,0xFF9F43],50,24,1.2);H.pow('KA-THOOOM!',pt.clone().setY(5),'#FF9F43');noise(1.4,'lowpass',120,.55);cam.shake=1.6;score+=4;
+    const near=city.boxes.filter(b=>!b.tree&&!b.dead&&Math.hypot(clamp(P.p.x,b.x0,b.x1)-P.p.x,clamp(P.p.z,b.z0,b.z1)-P.p.z)<22);near.forEach(b=>wreck(b,new T.Vector3(clamp(P.p.x,b.x0,b.x1),3,clamp(P.p.z,b.z0,b.z1)),120));
+    cars.forEach(q=>{if(!q.dead&&q.p.distanceTo(pt)<34)blowCar(q,pt)});jets.forEach(j=>{if(!j.dead&&j.p.distanceTo(P.p)<30)j.hp=0});if(boss&&boss.p.distanceTo(P.p)<22){boss.hp-=10;boss.flash=.3}}
+  let lzL=false;/*DBGV*/
+  st3.onFrame((dt,now)=>{K.fxTick(dt);H.tick(dt);const play=F.state==='play'&&!F.paused();const I=input,Kk=I.keys;P.t+=dt;
+    // traffic
+    cars.forEach(q=>{if(q.fly){const f=q.fly;f.vy-=30*dt;q.p.x+=f.vx*dt;q.p.y+=f.vy*dt;q.p.z+=f.vz*dt;q.m.rotation.x+=f.rx*dt;q.m.rotation.z+=f.rz*dt;if(q.p.y<0){q.p.y=0;f.vy*=-.3;f.vx*=.5;f.vz*=.5;f.rx*=.4;f.rz*=.4}f.l-=dt;if(Math.random()<dt*6)K.puff(q.p.clone().setY(1.5),0x3a3552,1.2,1);if(f.l<=0){q.fly=null;placeCar(q,false)}return}
+      if(q.dead){placeCar(q,false);return}if(q.ax==='z')q.p.z+=q.dir*q.sp*dt;else q.p.x+=q.dir*q.sp*dt;if(Math.abs(q.p.x-P.p.x)>300||Math.abs(q.p.z-P.p.z)>300||K.inBox(q.p.x,.5,q.p.z,city.boxes,1))placeCar(q,false)});
+    if(!play){beam.visible=false;hitGlow.visible=false;ptr(null);cross.style.display='none';cam.yaw+=dt*.1;K.pose(hero,'hover',P.t*2);K.capeAnim(hero,.2,now/1000,5);HR.position.copy(P.p);HR.rotation.set(.1,cam.yaw+Math.PI,0);cam.place(P.p,dt,9,1.6,0);H.lines(0);return}
+    cross.style.display='';cam.look(1.1);P.inv-=dt;
+    // flight (same feel as Skybound)
+    const dir=cam.dir3();const f=(Kk.w||Kk.arrowup?1:0)-(Kk.s||Kk.arrowdown?1:0)-(I.joy.y<-.2?-1:I.joy.y>.2?1:0);const strafe=(Kk.d||Kk.arrowright?1:0)-(Kk.a||Kk.arrowleft?1:0)+(Math.abs(I.joy.x)>.2?I.joy.x:0);
+    const boosting=(Kk.shift||I.alt)&&P.boost>.02&&f>=0;const cruise=boosting?150:f>0?85:f<0?0:Math.max(12,Math.min(P.spd,85));
+    P.spd+=(cruise-P.spd)*Math.min(1,dt*(f<0?2.2:boosting?1.6:.9));P.spd+=-dir.y*30*dt*(P.spd>6?1:0);P.spd=clamp(P.spd,0,190);
+    if(boosting)P.boost=Math.max(0,P.boost-dt*.25);else P.boost=Math.min(1,P.boost+dt*.08);
+    const want=dir.clone().multiplyScalar(P.spd);const rt=new T.Vector3(-dir.z,0,dir.x).normalize();want.addScaledVector(rt,strafe*12);const up=(Kk[' ']||I.jumpBtn?1:0)-(Kk.c||Kk.control?1:0);want.y+=up*14;
+    const tight=I.right||Kk.e||I.drift;if(tight)want.multiplyScalar(.7);
+    // slam
+    const slamK=Kk.q||Kk.g||I.slam;if(slamK&&!slamL&&P.slam<=0&&P.p.y>4){P.slam=1;beep(300,.2,'sawtooth',.06);H.say('SLAM!',500)}slamL=slamK;
+    if(P.slam>0){P.v.set(P.v.x*.9,-130,P.v.z*.9);P.spd=0}else P.v.lerp(want,Math.min(1,dt*(tight?11:4)));
+    P.prev.copy(P.p);P.p.addScaledVector(P.v,dt);
+    const b=K.inBox(P.p.x,P.p.y-.2,P.p.z,city.boxes,.7);if(b){if(P.p.y>b.h-1.6&&P.v.y<=2){P.p.y=b.h+.2;if(P.slam>0){P.slam=0;P.v.set(0,0,0);wreck(b,P.p.clone().setY(b.h-1),200);slamWave()}else if(P.v.y<0)P.v.y=0}else{const sp0=P.v.length();const q={x:P.p.x,z:P.p.z};K.push(q,.8,[b]);P.p.x=q.x;P.p.z=q.z;if(sp0>40){const r=wreck(b,P.p.clone().add(new T.Vector3(0,1,0)),sp0*1.3);H.pow(r==='collapse'?'KRA-KOOOM!':pick(['CRUNCH!','KRAK!','WHAM!']),P.p.clone(),'#FF9F43');P.v.multiplyScalar(r==='collapse'?.8:.4);P.spd*=r==='collapse'?.8:.45;cam.shake=Math.max(cam.shake,.9)}else{if(q.nx)P.v.x=0;else P.v.z=0}}}
+    if(P.p.y<.2){if(P.slam>0||P.v.y<-40){P.slam=0;slamWave()}P.p.y=.2;if(P.v.y<0)P.v.y=0}
+    if(P.p.y>230)P.p.y=230;city.update(P.p.x,P.p.z);
+    // ram cars/jets
+    cars.forEach(q=>{if(!q.dead&&!q.fly&&q.p.distanceTo(P.p)<3.2)blowCar(q,P.p)});
+    // pose
+    const vs=P.v.length();const a=clamp((vs-5)/12,0,1);const climb=vs>1?Math.asin(clamp(P.v.y/vs,-1,1)):0;const yaw=vs>2&&P.slam<=0?Math.atan2(P.v.x,P.v.z):cam.yaw+Math.PI;
+    const turn=wrapA(yaw-(HR.userData.py||yaw))/Math.max(dt,.001);HR.userData.py=yaw;P.bank+=(clamp(-turn*.25,-.9,.9)-P.bank)*Math.min(1,dt*4);
+    HR.position.copy(P.p).add(new T.Vector3(0,1,0));HR.rotation.set(P.slam>0?Math.PI:a*(Math.PI/2-climb)+(1-a)*.08,yaw,P.bank*a);K.pose(hero,a>.5?'fly':'hover',P.t*3);K.capeAnim(hero,.2+a*.9,now/1000,6+a*8);
+    H.lines((vs-60)/70);const fv=70+clamp(vs-30,0,120)*.25;if(Math.abs(camera.fov-fv)>.2){camera.fov+=(fv-camera.fov)*Math.min(1,dt*3);camera.updateProjectionMatrix()}
+    if(vs>110&&!P.mach){P.mach=1;K.ring(P.p.clone(),0xffffff,1,50,.8);H.pow('SONIC BOOM!',P.p.clone().add(new T.Vector3(0,3,0)),'#fff');noise(1,'lowpass',150,.5);cam.shake=1.2;cars.forEach(q=>{if(!q.dead&&q.p.distanceTo(P.p)<30)blowCar(q,P.p)})}else if(vs<90)P.mach=0;
+    // laser eyes
+    const firing=(I.down||I.fire||Kk.f||Kk.j)&&P.hot<=0&&P.heat>0;
+    if(firing){P.heat=Math.max(0,P.heat-dt*.16);if(P.heat<=0){P.hot=1.6;H.say('Overheated! Cooling down…',1100);beep(200,.3,'square',.05)}}else{P.heat=Math.min(1,P.heat+dt*(P.hot>0?.35:.28));P.hot-=dt}
+    if(firing){camera.getWorldDirection(V);const hit=cast(camera.position.clone(),V.clone(),420);const eye=new T.Vector3();hero.userData.neck.getWorldPosition(eye);eye.y+=.3;
+      const seg=hit.pt.clone().sub(eye);const L=seg.length();beam.visible=true;beam.position.copy(eye).addScaledVector(seg,.5);beam.quaternion.setFromUnitVectors(UP,seg.normalize());beam.scale.set(1+Math.random()*.3,L,1+Math.random()*.3);
+      hitGlow.visible=hit.kind!=='air';hitGlow.position.copy(hit.pt);hitGlow.scale.setScalar(1.2+Math.random()*.8);
+      if(Math.random()<dt*40&&hit.kind!=='air')K.burst(hit.pt.clone(),[0xFFD23F,0xFF7A2A,0xffffff],3,8,.35);
+      if(Math.random()<dt*14)beep(900+Math.random()*300,.03,'sawtooth',.018);
+      lzT-=dt;if(lzT<=0){lzT=.18;
+        if(hit.kind==='bld')wreck(hit.hit,hit.pt,c.pick(55,45,40));
+        else if(hit.kind==='gnd'){scorchAt(hit.pt);cars.forEach(q=>{if(!q.dead&&q.p.distanceTo(hit.pt)<4)blowCar(q,hit.pt)})}
+        else if(hit.kind==='tg'){const q=hit.hit;if(q.kind==='car')blowCar(q,hit.pt);else if(q.kind==='jet'){q.hp-=.3;if(q.hp<=0&&!q.dead)killJet(q,'ZZZAP!')}else if(q.kind==='boss'){q.hp-=c.pick(4.4,3.6,2.9);q.flash=.12;score+=1}}}}
+    else{beam.visible=false;hitGlow.visible=false}
+    // jets & shots
+    const dots=[];
+    jets=jets.filter(j=>{if(j.dead)return false;const to=P.p.clone().sub(j.p);const d=to.length();const orbit=new T.Vector3(Math.cos(P.t*.6+j.off)*50,20+Math.sin(P.t+j.off)*8,Math.sin(P.t*.6+j.off)*50);const goal=P.p.clone().add(orbit);const dv=goal.sub(j.p).normalize().multiplyScalar(d>90?Math.max(90,vs*1.05):40);j.v.lerp(dv,Math.min(1,dt*1.6));j.p.addScaledVector(j.v,dt);j.g.lookAt(j.p.clone().add(j.v));j.fl.scale.setScalar(.8+Math.random()*.5);
+      j.cd-=dt;if(j.cd<=0&&d<130){j.cd=c.pick(3.2,2.4,1.8)+Math.random();shoot(j.p.clone(),0x7FC8F8,55*diff,8)}
+      if(d<4.5&&vs>30){killJet(j,'KRUNCH!');return false}if(j.hp<=0){killJet(j);return false}dots.push({x:j.p.x,z:j.p.z,col:'#2d6fd6',r:5});return true});
+    shots=shots.filter(s=>{s.l-=dt;s.m.position.addScaledVector(s.v,dt);if(s.m.position.distanceTo(P.p.clone().setY(P.p.y+1))<2){hurt(s.dmg,'');K.burst(s.m.position.clone(),[0x7FC8F8,0xffffff],12,8,.5);scene.remove(s.m);return false}if(s.l<=0||s.m.position.y<0){scene.remove(s.m);return false}return true});
+    // missions
+    let tg=null,tl='';
+    if(mi<0){H.cap('Free roam · Metro City','Damage '+money(score)+' · towers toppled '+collapsed+' · cars wrecked '+carsN+' · P for menu')}
+    if(mi===0){timeLeft-=dt;H.cap('Issue #1 · Grand Entrance','Damage '+money(score)+' / '+money(target)+' · '+Math.max(0,Math.ceil(timeLeft))+'s left');
+      if(score>=target)F.win(M,score+Math.round(timeLeft)*2,[[money(score),'damage'],[collapsed,'toppled'],[carsN,'cars'],[LVN[c.level],'mode']],'Metro City now knows your name. It’s on every news channel, usually followed by the word “RUN”.');
+      else if(timeLeft<=0)F.lose(M,'Not scary enough','The news called it “a mild inconvenience”. How insulting. Try again?')}
+    if(mi===1){spawnT-=dt;const total=12;if(spawnT<=0&&jets.length<c.pick(3,4,5)&&downed+jets.length<total){spawnT=c.pick(3,2.4,1.8);makeJet()}
+      let bj=null,bd=1e9;jets.forEach(j=>{const d=j.p.distanceTo(P.p);if(d<bd){bd=d;bj=j}});if(bj){tg=bj.p.clone();tl='JET '+Math.round(bd)+'m'}
+      H.cap('Issue #2 · Hero Corps','Jets downed '+downed+'/'+total+' · damage '+money(score));if(downed>=total)F.win(M,score+Math.round(P.hp)*3,[[downed,'jets'],[money(score),'damage'],[Math.round(P.hp),'health'],[LVN[c.level],'mode']],'The Hero Corps retreats to repaint their jets. Nobody else is brave enough to get in your way. Almost nobody.')}
+    if(mi===2&&boss){const B=boss;B.flash-=dt;B.t-=dt;const to=P.p.clone().sub(B.p);const d=to.length();
+      if(B.st==='circle'){B.a+=dt*.7*diff;const goal=P.p.clone().add(new T.Vector3(Math.cos(B.a)*45,12+Math.sin(B.a*2)*8,Math.sin(B.a)*45));{const gv=goal.sub(B.p).multiplyScalar(1.4);if(gv.length()>170)gv.setLength(170);B.v.lerp(gv,Math.min(1,dt*2))};B.cd-=dt;if(B.cd<=0){B.cd=c.pick(2.6,2,1.5);shoot(B.p.clone(),0xFFD23F,65*diff,10)}if(B.t<=0){B.st='wind';B.t=.9;H.say('Valor is charging!',800);beep(500,.4,'sawtooth',.05)}}
+      else if(B.st==='wind'){B.v.multiplyScalar(Math.pow(.05,dt));if(B.t<=0){B.st='charge';B.t=1.6;B.cv=to.normalize().multiplyScalar(110*diff)}}
+      else if(B.st==='charge'){B.v.copy(B.cv);if(d<4){hurt(20,'POW! Captain Valor lands a punch!');P.v.addScaledVector(B.cv,.6);B.st='circle';B.t=5+Math.random()*2}if(B.t<=0){B.st='circle';B.t=5+Math.random()*2}const bb=K.inBox(B.p.x,B.p.y,B.p.z,city.boxes,1);if(bb){wreck(bb,B.p.clone(),120);B.st='dizzy';B.t=2.5;B.v.set(0,0,0);H.say('He crashed! Hit him now!',1100)}}
+      else if(B.st==='dizzy'){B.v.multiplyScalar(Math.pow(.1,dt));if(B.t<=0){B.st='circle';B.t=5}}
+      B.p.addScaledVector(B.v,dt);if(B.p.y<3)B.p.y=3;B.g.lookAt(B.st==='charge'?B.p.clone().add(B.v):P.p);K.pose(B.f,B.st==='charge'?'fly':'hover',P.t*3);K.capeAnim(B.f,.6,now/1000,8);B.f.rotation.x=B.st==='charge'?Math.PI/2:0;B.f.visible=!(B.flash>0&&Math.sin(now/30)>0);
+      if(d<5&&vs>60&&P.inv<=0&&B.st!=='charge'){B.hp-=c.pick(14,11,9);B.flash=.4;P.v.multiplyScalar(-.4);P.inv=.5;H.pow('KA-POW!',B.p.clone().add(new T.Vector3(0,3,0)),'#FFD23F');cam.shake=1;noise(.5,'lowpass',400,.3)}
+      H.boss('CAPTAIN VALOR',Math.max(0,B.hp)/100);dots.push({x:B.p.x,z:B.p.z,col:'#FFD23F',r:9});tg=B.p.clone().add(new T.Vector3(0,3,0));tl='VALOR '+Math.round(d)+'m';
+      H.cap('Issue #3 · Captain Valor',B.st==='dizzy'?'He’s dizzy! Laser him!':'Keep your laser on him · dodge his charge');
+      if(B.hp<=0){B.dead=true;H.boss(null);K.burst(B.p.clone(),[0x2d6fd6,0xFFD23F,0xffffff],80,24,1.4);H.pow('DEFEATED!',B.p.clone().add(new T.Vector3(0,4,0)),'#FFD23F');B.g.visible=false;boss=null;F.win(M,score+Math.round(P.hp)*8,[[money(score),'damage'],[collapsed,'toppled'],[Math.round(P.hp),'health'],[LVN[c.level],'mode']],'Captain Valor limps away to “regroup”. Metro City has a new ruler, and it’s you. Try not to let it go to your head.')}}
+    ptr(tg,tl);
+    if(P.slam<=0)P.hp=Math.min(100,P.hp+dt*1.5);
+    hpB(P.hp/100,'HEALTH '+Math.ceil(P.hp));htB(P.heat,P.hot>0?'OVERHEATED':'LASER  [hold click]');spB(vs/160,Math.round(vs*7)+' MPH · ALT '+Math.round(P.p.y)+'m · [Q] slam');H.score(score,'havoc');rad(P.p.x,P.p.z,cam.yaw,dots,city.boxes);c.stat('Overlord · '+F.tag(mi)+' · '+money(score));
+    cam.place(P.p.clone().addScaledVector(rt,1.9),dt,7+clamp(vs,0,150)*.02,1.5,10)});
+  F.intro(M,'Overlord','A Detour original · 3D villain rampage','<p>You’re <b>Overlord</b>: faster than a jet, stronger than a building, and not a nice person at all.</p><p>Your laser eyes burn through anything you look at. Skyscrapers crack, then crumble. Cars go flying. The heroes of Metro City are going to have a very long day.</p>','Fly where you look with WASD and the mouse (click the game to lock the mouse). <b>Hold click</b> or F to fire your laser eyes where the red circle points. <b>Shift</b> boosts, <b>Space</b> rises, C drops, hold <b>E or right-click</b> for tight turns, and <b>Q</b> slams into the ground. Ram buildings at speed to smash them. P pauses. On a phone: joystick, drag to look, and the LASER, BOOST, UP, TURN and SLAM buttons.');
+  return()=>st3.dispose()})}});
+
 /* ================= PHYSICS SMASH ================= */
 let matterP=null;
 function loadMatter(){if(window.Matter)return Promise.resolve(window.Matter);if(matterP)return matterP;matterP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js';s.onload=()=>res(window.Matter);s.onerror=()=>{matterP=null;rej(new Error('physics failed'))};document.head.append(s)});return matterP}
