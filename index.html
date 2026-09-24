@@ -2820,7 +2820,11 @@ function heroKit(st3,c,cfg){
   F.lose=(M,title,text)=>{if(F.state!=='play')return;if(F.free){F.revive&&F.revive();H.say('Back on your feet!',1400);beep(660,.15,'triangle',.06);return}F.state='dead';sweep(400,90,.6,'sawtooth',.07);c.after(()=>ov('<small class="kick">Oh no!</small><h2>'+title+'</h2><p>'+text+'</p>',[['Try again',()=>F.brief(M),true]]),1100)};
   F.roam=k=>{F.free=true;F.state='play';H.say('Free roam: no missions, no time limits. Press P for the menu.',2600);cfg.start(-1-(k||0))};
   F.roamMenu=()=>{const L=cfg.roamLevels;if(!L)return F.roam(0);F.state='menu';ov('<small class="kick">Free roam</small><h2>Pick a place</h2><p>No missions, no time limits, no losing. Press P any time for the menu.</p>',L.map((n,k)=>[n,()=>F.roam(k),k===0]))};
-  F.intro=(...a)=>{F._intro=a;F.free=false;F.state='menu';const [M,title,tag,cover,ctl]=a;return ov('<small class="kick">'+tag+'</small><h2>'+title+'</h2>'+cover+'<p class="ctl"><b>Controls:</b> '+ctl+'</p>',[[F.mi>0?'Continue at issue #'+(F.mi+1):'Start',()=>F.brief(M),true]].concat(F.mi>0?[['Start over',()=>{F.mi=0;F.brief(M)}]]:[]).concat([['Free roam',()=>F.roamMenu()]]))};
+  const ctlBox=el('div',{style:'position:absolute;right:10px;bottom:78px;max-width:270px;background:rgba(29,26,47,.66);color:#FFFDF6;font:600 10.5px/1.4 Figtree,sans-serif;padding:6px 9px;border-radius:7px;pointer-events:auto;cursor:pointer;z-index:3;user-select:none'});hud.append(ctlBox);let ctlOpen=S.get('ctl_open',!('ontouchstart' in window)),ctlLines=[];
+  function paintCtl(){ctlBox.innerHTML=ctlOpen?'<b style="color:#FFD23F">🎮 Controls</b> <span style="opacity:.6">(H to hide)</span>'+ctlLines.map(l=>'<div>• '+l+'</div>').join(''):'<b style="color:#FFD23F">🎮 Controls</b> <span style="opacity:.6">(H)</span>'}
+  function setCtl(html){const t=el('div',{html:html}).textContent.replace(/\(click the game to lock the mouse\)|\(click to lock\)/g,'').replace(/\s+/g,' ').trim();ctlLines=t.split(/(?<=\.)\s+(?=[A-Z0-9])/).map(x=>x.replace(/\.$/,'').trim()).filter(x=>x&&!/^On a phone/i.test(x));paintCtl()}
+  ctlBox.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();ctlOpen=!ctlOpen;S.set('ctl_open',ctlOpen);paintCtl()});c.on(document,'keydown',e=>{if(e.key.toLowerCase()==='h'&&!e.repeat&&F.state==='play'){ctlOpen=!ctlOpen;S.set('ctl_open',ctlOpen);paintCtl()}});
+  F.intro=(...a)=>{F._intro=a;F.free=false;F.state='menu';const [M,title,tag,cover,ctl]=a;if(ctl)setCtl(ctl);return ov('<small class="kick">'+tag+'</small><h2>'+title+'</h2>'+cover+'<p class="ctl"><b>Controls:</b> '+ctl+'</p>',[[F.mi>0?'Continue at issue #'+(F.mi+1):'Start',()=>F.brief(M),true]].concat(F.mi>0?[['Start over',()=>{F.mi=0;F.brief(M)}]]:[]).concat([['Free roam',()=>F.roamMenu()]]))};
   const pauseBtns=()=>[['Resume',null,true]].concat([[F.free?'Leave free roam':'Quit to menu',()=>{F.free=false;F.state='menu';H.boss&&H.boss(null);F.intro(...F._intro)}]]);
   c.on(document,'pointerlockchange',()=>{if(!document.pointerLockElement&&F.state==='play'&&!wrap.querySelector('.ov3')&&!input.touch)ov('<small class="kick">Paused</small><h2>Taking a breather</h2><p>Click Resume, then click the game to steer with the mouse again.</p>',pauseBtns())});
   c.on(document,'keydown',e=>{if((e.key==='p'||e.key==='P')&&F.state==='play'&&!wrap.querySelector('.ov3'))ov('<small class="kick">Paused</small><h2>Taking a breather</h2>',pauseBtns())});
@@ -3945,10 +3949,10 @@ run(root,c){return with3D(root,c,()=>{
     noise(3,'lowpass',70,.55);cam.shake=Math.max(cam.shake,clamp(2.4-Math.hypot(P.p.x-cx,P.p.z-cz)/120,.3,2.4));
     if(floors>=3){stats.towers++;towers++;addScore(40+floors*8);slowT=Math.max(slowT,.9);const pt=new T.Vector3(cx,(L+2)*BS,cz);H.pow(floors>=12?'SKYSCRAPER DOWN!':pick(['TOWER DOWN!','TIMBERRR!','KRA-KOOOM!']),pt,'#FFD23F');if(combo>300)H.say('🔥 DESTRUCTION COMBO ×'+Math.floor(combo),1500)}}
   /* ---------- player ---------- */
-  const hero=K.fig({suit:0x2b2b33,trim:0xF2352A,mask:0x111111,helm:0x3a3a44,emblemSides:3,bulk:1.25});hero.scale.setScalar(1.15);const HR=new T.Group();HR.add(hero);scene.add(HR);hero.traverse(o=>{if(o.isMesh)o.castShadow=true});
+  const hero=K.fig({suit:0x2b2b33,trim:0xF2352A,mask:0x111111,helm:0x3a3a44,emblemSides:3,bulk:1.25,cape:0x7a1020});hero.scale.setScalar(1.15);const HR=new T.Group();HR.add(hero);scene.add(HR);hero.traverse(o=>{if(o.isMesh)o.castShadow=true});
   const U=hero.userData;const glowM=c0=>new T.MeshBasicMaterial({color:c0,transparent:true,opacity:.9,depthWrite:false,blending:T.AdditiveBlending});
   part(T,bx(T,.48,.08,.05),new T.MeshBasicMaterial({color:0xF2352A}),0,.31,.25,U.neck).userData.noInk=1;
-  const cape=part(T,bx(T,.7,1.3,.06),TM(0xF2352A),0,-.1,-.26,U.torso);const jets=[];
+  const jets=[];
   [-.42,.42].forEach(x0=>part(T,bx(T,.3,.22,.46),TM(0x3a3a44),x0*1.25,.72,0,U.torso));
   // weapon models (attached to right arm)
   const WG=new T.Group();WG.position.set(0,-.72,.35);U.armR.add(WG);const wModels=[];const dark=TM(0x2b2b33),steel=TM(0x6a6a78);
@@ -4130,7 +4134,7 @@ run(root,c){return with3D(root,c,()=>{
     const hs=Math.hypot(P.v.x,P.v.z);const aimB=P.fireT>0||I.right;const want=aimB||hs<1?cam.yaw+Math.PI:Math.atan2(P.v.x,P.v.z);if(aimB&&!P.ground)HR.rotation.x=0;let dy=want-P.yaw;dy=Math.atan2(Math.sin(dy),Math.cos(dy));P.yaw+=dy*Math.min(1,dt*(aimB?16:9));HR.rotation.order='YXZ';HR.rotation.y=P.yaw;HR.rotation.z=0;HR.position.copy(P.p);
     const fl3=Math.hypot(P.v.x,P.v.y,P.v.z);if(!P.ground){const a=clamp((fl3-8)/18,0,1);K.pose(hero,a>.5?'fly':'hover',P.t*3);const climb=fl3>1?Math.asin(clamp(P.v.y/fl3,-1,1)):0;HR.rotation.x=(aimB?.1:1)*a*(Math.PI/2-climb)*.9}else HR.rotation.x=0;if(!P.ground){}else if(hs>13)K.pose(hero,'sprint',P.t*hs*.45);else if(hs>.8)K.pose(hero,'run',P.t*hs*.6,clamp(hs/9,0,1));else K.pose(hero,'idle',P.t*2);
     if(aimB||w.k!=='mg'){const pit=cam.pitch;U.armR.rotation.set(-Math.PI/2-pit*.85+P.kick,0,0);U.armL.rotation.set(-Math.PI/2-pit*.7+P.kick*.5,0,.45);U.torso.rotation.y=0}else{U.armR.rotation.x=-.5}
-    cape.rotation.x=P.ground?.1:clamp(fl3*.03,.2,1.3);
+    K.capeAnim(hero,P.ground?.15+Math.min(.5,hs*.03):clamp(.3+fl3*.025,.3,1),P.t,6+Math.min(10,fl3*.2));
     if(P.ground&&hs>14&&Math.random()<dt*10)K.puff(P.p.clone().setY(.3),0xd8d0c4,.8,.5);
     // camera
     const fw=new T.Vector3(-Math.sin(cam.yaw),0,-Math.cos(cam.yaw)),rt=new T.Vector3(-fw.z,0,fw.x);const fovW=72+clamp(hs-12,0,20)*.5+(P.charge>0?-P.charge*8:0);if(Math.abs(camera.fov-fovW)>.2){camera.fov+=(fovW-camera.fov)*Math.min(1,rdt*4);camera.updateProjectionMatrix()}
