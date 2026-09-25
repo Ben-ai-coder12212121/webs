@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /tiktok-ads/
+Disallow: /netlify/
+
+Sitemap: https://detourr.netlify.app/sitemap.xml
