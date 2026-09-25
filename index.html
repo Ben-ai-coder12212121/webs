@@ -173,7 +173,8 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 .sw.sel{box-shadow:0 0 0 3px var(--sun),0 0 0 6px var(--ink)}
 .arena.wide{max-width:900px}
 .tile.top{position:relative;border-color:#1D1A2F;background:#FFF3C4;box-shadow:0 0 0 4px #FFD23F,6px 6px 0 4px #1D1A2F}.tile.top .topb{position:absolute;top:8px;left:8px;z-index:2;background:#F2352A;color:#fff;font:800 11px/1 var(--mono,monospace);letter-spacing:.04em;padding:5px 9px;border-radius:99px;border:2px solid #1D1A2F;transform:rotate(-3deg);font-style:normal}.sec.topsec h3{color:#B3122E}
-@media (max-width:1250px){#fs .t{display:none}}
+@media (max-width:1250px){#fs .t,#lbBtn .t{display:none}}
+#lbPanel{position:fixed;right:12px;top:78px;bottom:12px;width:min(360px,calc(100vw - 24px));z-index:60;background:#FFFDF6;border:3px solid #1D1A2F;border-radius:16px;box-shadow:6px 6px 0 #1D1A2F;padding:14px;overflow:auto;color:#1D1A2F;font:600 14px/1.35 Figtree,sans-serif}#lbPanel[hidden]{display:none}.lbhead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:17px}.lbx{padding:4px 10px}.lblive{color:#2BB673;font-size:12px;margin:4px 0 8px}.lbyou{background:#FFF3C4;border:2px solid #1D1A2F;border-radius:10px;padding:8px 10px;margin-bottom:8px}#lbPanel ol{list-style:none;margin:0;padding:0}#lbPanel li{display:grid;grid-template-columns:34px 1fr auto;grid-template-rows:auto auto;column-gap:6px;padding:6px 4px;border-bottom:1px dashed #d8d4e4}#lbPanel li small{grid-column:2/4;color:#8c86a3;font-size:11px}#lbPanel li .lbn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#lbPanel li .lbs{font-weight:900}#lbPanel li.me{background:#E8F7EE;border-radius:8px}.lbmuted{color:#8c86a3;font-size:12px}.lbname{margin-top:12px;border-top:2px solid #1D1A2F;padding-top:10px}.lbname label{display:block;font-weight:800}.lbname input{display:block;box-sizing:border-box;width:100%;margin-top:4px;padding:8px;border:2px solid #1D1A2F;border-radius:8px;font:inherit}.lbsave{margin-top:8px}#lbToast{position:fixed;left:50%;top:84px;transform:translate(-50%,-20px);opacity:0;pointer-events:none;z-index:70;background:#1D1A2F;color:#FFD23F;font:800 15px Figtree,sans-serif;padding:10px 16px;border-radius:12px;box-shadow:4px 4px 0 #F2352A;transition:all .25s;max-width:92vw;text-align:center}#lbToast.on{opacity:1;transform:translate(-50%,0)}
 #stage.fs .arena{max-width:none;padding:8px 10px}#stage.fs .hint{display:none}
 #stage.fs3{overflow:hidden}#stage.fs3 .arena{height:calc(100vh - var(--sbh,64px));justify-content:center}#stage.fs3 .g3{flex:1 1 auto;min-height:0;max-height:none;aspect-ratio:auto;border-radius:8px;box-shadow:none}
 .linkbtn{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}
@@ -470,9 +471,9 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
   <div class="aboutcard">
     <button class="btn" id="aboutClose" type="button">Close</button>
     <h2 id="aboutH">About Detourr</h2>
-    <p>Detourr is a free collection of browser games, puzzles, sports challenges, music toys and time-killers. No account, no ads, and no tracking.</p>
+    <p>Detourr is a free collection of browser games, puzzles, sports challenges, music toys and time-killers. No account needed and no ads.</p>
     <h3>Privacy</h3>
-    <p>Detourr doesn’t collect personal information. High scores, difficulty settings and streaks live only in your own browser’s storage on this device. Clearing your browser data erases them.</p>
+    <p>Detourr doesn’t ask for personal information. High scores, difficulty settings and streaks live in your own browser’s storage on this device. Clearing your browser data erases them.</p><p><b>Leaderboards:</b> if you choose a leaderboard name, that nickname and your best scores in skill games are sent to our server and shown publicly. Use a nickname, not your real name. <b>Analytics:</b> we use Google Analytics to count visits and see which games are popular.</p>
     <h3>Fair play</h3>
     <p>Detourr is an independent project. It isn’t affiliated with, endorsed by, or connected to any other game website, app, company or brand. Every game here is original code written for Detourr. Classic game ideas like tic-tac-toe, sudoku and mazes are public-domain traditions, and names of people, brands and games in Hype Check are only there to identify quiz topics.</p>
     <h3>Credits</h3>
@@ -492,6 +493,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
     <h3 id="stTitle">Game</h3>
     <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
     <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
     <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
     <button class="btn" id="mute" type="button">Sound: on</button>
     <button class="btn primary" id="again" type="button">Another detour</button>
@@ -8229,14 +8231,44 @@ function makeCtx(g){const ds=[];let alive=true;return{
   stat(t){statEl.textContent=t},
   level:g.levels?S.get('lvl_'+g.id,1):1,
   pick(a,b,c){return[a,b,c][this.level]},
-  best(v,lower){const k=bestKey(g),b=S.get(k,null);if(v!=null&&(b==null||(lower?v<b:v>b))){S.set(k,v);return v}return b},
+  best(v,lower){const k=bestKey(g),b=S.get(k,null);if(v!=null&&(b==null||(lower?v<b:v>b))){S.set(k,v);try{LB.best(g,k,v,lower)}catch(e){}return v}return b},
   dispose(){alive=false;ds.forEach(f=>f())}}}
 const LVN=['Easy','Normal','Hard'];
 function bestKey(g){const l=g.levels?S.get('lvl_'+g.id,1):1;return'best_'+g.id+(l!==1?'_'+l:'')}
 document.querySelectorAll('#lvl button').forEach(b=>b.addEventListener('click',()=>{if(!current)return;S.set('lvl_'+current.id,+b.dataset.l);beep(500,.05,'triangle');openGame(current)}));
+/* ---------- live leaderboards (Netlify function at /api/lb) ---------- */
+const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','smash']),LVN2=['Easy','Normal','Hard'];let ok=null,cur=null,timer=null,pend={},shown=false;
+  const btn=$('#lbBtn'),panel=el('div',{id:'lbPanel',hidden:true}),toastEl=el('div',{id:'lbToast'});document.body.append(panel,toastEl);
+  const cid=()=>{let v=S.get('lb_id',null);if(!v||!/^[a-z0-9]{8,40}$/.test(v)){v=(Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^a-z0-9]/g,'').slice(0,24);S.set('lb_id',v)}return v};
+  const eligible=g=>!!(g&&g.fmt&&!SKIP.has(g.kind)&&!g.noLb);
+  const name=()=>S.get('lb_name','');
+  async function probe(){if(ok!==null)return ok;if(location.protocol==='file:'){ok=false;return ok}try{const r=await fetch(API+'?probe=1',{cache:'no-store'});ok=r.ok&&(await r.json()).ok===true}catch(e){ok=false}return ok}
+  let tT=0;function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('on'),4200)}
+  async function send(k,g,v,lower,quiet){if(!await probe()||!name())return null;try{const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({game:k,name:name(),score:v,lower:!!lower,id:cid()})});if(!r.ok)return null;const j=await r.json();if(!quiet&&j.rank)toast('🏆 New best in '+g.name+'! You’re #'+j.rank+' of '+j.total+' on the leaderboard');if(cur&&cur.k===k&&!panel.hidden)refresh();return j}catch(e){return null}}
+  function best(g,k,v,lower){if(!eligible(g))return;lower=!!(lower||g.lower);const p=pend[k]||(pend[k]={});clearTimeout(p.t);p.t=setTimeout(()=>{delete pend[k];if(!name()){if(ok!==false&&!shown){shown=true;probe().then(o=>{if(o)toast('🏆 New best! Tap the trophy to put it on the leaderboard')})}return}send(k,g,v,lower)},2500)}
+  const ago=t=>{const s=Math.max(1,Math.round((Date.now()-t)/1000));return s<60?s+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'};
+  function keyInfo(g){const k=bestKey(g);const l=g.levels?S.get('lvl_'+g.id,1):1;return{k,label:g.levels?LVN2[l]:''}}
+  async function refresh(){if(!cur)return;const {g,k,label}=cur;try{const r=await fetch(API+'?game='+encodeURIComponent(k)+'&id='+cid(),{cache:'no-store'});const j=await r.json();if(!cur||cur.k!==k)return;render(j)}catch(e){panel.querySelector('.lbl').innerHTML='<p class="lbmuted">Couldn’t reach the leaderboard. Retrying…</p>'}}
+  function render(j){const {g,label}=cur;const L=panel.querySelector('.lbl');const fmt=v=>{try{return g.fmt(v)}catch(e){return String(v)}};
+    if(!j.top||!j.top.length){L.innerHTML='<p class="lbmuted">No scores yet. Be the first!</p>'}else L.innerHTML='<ol>'+j.top.map((e,i)=>'<li class="'+(e.me?'me':'')+'"><b>'+(i<3?['🥇','🥈','🥉'][i]:(i+1)+'.')+'</b><span class="lbn"></span><span class="s">'+fmt(e.s)+'</span><small>'+ago(e.t)+'</small></li>').join('')+'</ol>';
+    L.querySelectorAll('li .lbn').forEach((s,i)=>{s.textContent=j.top[i].n});
+    const you=panel.querySelector('.lbyou');const mine=S.get(cur.k,null);
+    if(j.you)you.innerHTML='You: <b>#'+j.you.rank+'</b> of '+j.total+' · '+fmt(j.you.s);else if(!name())you.textContent='Set a name to join the leaderboard'+(mine!=null?' with your best: '+fmt(mine):'.');else if(mine!=null)you.textContent='Your best '+fmt(mine)+' is being submitted…';else you.textContent='Play to get on the board! '+j.total+' players so far.';
+    panel.querySelector('.lblive').textContent='● Live · updated '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})}
+  function openPanel(){if(!current)return;const g=current;const ki=keyInfo(g);cur={g,...ki};
+    panel.innerHTML='<div class="lbhead"><b>🏆 '+g.name+(ki.label?' · '+ki.label:'')+'</b><button class="btn lbx" type="button" aria-label="Close">✕</button></div><div class="lblive">● Live</div><div class="lbyou"></div><div class="lbl"><p class="lbmuted">Loading…</p></div><div class="lbname"><label>Your leaderboard name <input maxlength="14" placeholder="Pick a nickname" autocomplete="off" spellcheck="false"></label><button class="btn primary lbsave" type="button">Save</button><p class="lbmuted">Nicknames only, please. It’s shown publicly next to your scores.</p></div>';
+    const inp=panel.querySelector('input');inp.value=name();['keydown','keyup','keypress'].forEach(ev=>inp.addEventListener(ev,e=>e.stopPropagation()));
+    panel.querySelector('.lbx').addEventListener('click',closePanel);panel.querySelector('.lbsave').addEventListener('click',()=>{const n=inp.value.replace(/[^A-Za-z0-9 _.\-]/g,'').trim().slice(0,14);if(n.length<2){inp.focus();toast('Names need at least 2 letters or numbers');return}const first=!name();S.set('lb_name',n);toast(first?'🏆 Welcome, '+n+'! Uploading your best scores…':'Name updated to '+n);syncAll(first?null:cur.k)});
+    panel.hidden=false;if(document.pointerLockElement)document.exitPointerLock();refresh();clearInterval(timer);timer=setInterval(()=>{if(!document.hidden)refresh()},8000)}
+  function closePanel(){panel.hidden=true;clearInterval(timer);timer=null;cur=null}
+  async function syncAll(only){const jobs=[];G.forEach(g=>{if(!eligible(g))return;const lv=g.levels?[0,1,2]:[1];lv.forEach(l=>{const k='best_'+g.id+(l!==1?'_'+l:'');if(only&&k!==only)return;const v=S.get(k,null);if(v!=null&&Number.isFinite(+v))jobs.push([k,g,+v,!!g.lower])})});
+    let i=0;const worker=async()=>{while(i<jobs.length){const j=jobs[i++];await send(j[0],j[1],j[2],j[3],true)}};await Promise.all([worker(),worker(),worker(),worker()]);if(cur)refresh()}
+  btn.addEventListener('click',()=>panel.hidden?openPanel():closePanel());
+  function open(g){closePanel();btn.hidden=true;if(!eligible(g))return;probe().then(o=>{if(o&&current===g)btn.hidden=false})}
+  return{best,open,close:()=>{closePanel();btn.hidden=true},eligible,probe}})();
 function openGame(g){if(ctx){ctx.dispose();if(ctx.extra)ctx.extra()}current=g;arena.innerHTML='';arena.classList.toggle('wide',!!g.wide);statEl.textContent='';$('#stTitle').textContent=g.name;stage.hidden=false;document.body.style.overflow='hidden';const lv=$('#lvl');lv.hidden=!g.levels;if(g.levels){const l=S.get('lvl_'+g.id,1);lv.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.l===l))}stage.scrollTop=0;
-  ctx=makeCtx(g);const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}try{history.replaceState(null,'','#'+g.id)}catch(e){}}
-function closeGame(){try{if(fsEl())(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}if(ctx){ctx.dispose();if(ctx.extra)ctx.extra();ctx=null}current=null;arena.innerHTML='';stage.hidden=true;document.body.style.overflow='';renderGrid();try{history.replaceState(null,'',location.pathname)}catch(e){}}
+  ctx=makeCtx(g);try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}try{history.replaceState(null,'','#'+g.id)}catch(e){}}
+function closeGame(){try{LB.close()}catch(e){}try{if(fsEl())(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}if(ctx){ctx.dispose();if(ctx.extra)ctx.extra();ctx=null}current=null;arena.innerHTML='';stage.hidden=true;document.body.style.overflow='';renderGrid();try{history.replaceState(null,'',location.pathname)}catch(e){}}
 const isBig=g=>g.big!=null?g.big:(g.kind==='hero'||g.kind==='shooter'||/with3D|runShooter/.test(String(g.run)));let rndMode=S.get('rndMode','all');
 function syncRnd(){document.querySelectorAll('#rndMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===rndMode));$('#rndPlate').textContent=rndMode==='simple'?'Random simple game':'Random game (anything)'}
 document.querySelectorAll('#rndMode button').forEach(b=>b.addEventListener('click',()=>{rndMode=b.dataset.m;S.set('rndMode',rndMode);beep(500,.05,'triangle');syncRnd()}));syncRnd();

@@ -1,0 +1,9 @@
+# Detourr on Netlify: the site is the static index.html at the repo root,
+# plus one serverless function for live leaderboards (netlify/functions/lb.mjs).
+[build]
+  publish = "."
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
