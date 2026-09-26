@@ -62,7 +62,7 @@ button{font:inherit;color:inherit}
 .hero small{color:var(--muted);font-weight:600}
 .press{display:flex;flex-direction:column;align-items:center;gap:14px}
 #rndMode button{font-size:13px}
-.big{width:min(340px,86vw);background:none;border:0;padding:0;cursor:pointer;filter:drop-shadow(0 10px 0 #1D1A2F);transform:translateY(-6px) rotate(-3deg);transition:transform .08s,filter .08s}
+.big{width:min(290px,72vw);background:none;border:0;padding:0;cursor:pointer;filter:drop-shadow(0 10px 0 #1D1A2F);transform:translateY(-6px) rotate(-2deg);transition:transform .08s,filter .08s}
 .big svg{display:block;width:100%;height:auto}
 .big:hover{transform:translateY(-9px) rotate(-3deg)}
 .big:active,.big.down{transform:translateY(4px) rotate(-3deg);filter:drop-shadow(0 2px 0 #1D1A2F)}
@@ -482,7 +482,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
       <ul class="perks"><li><b>🔀 One button, endless detours</b>Satisfying, weird, clever or chaotic. Something new every press.</li><li><b>🎮 <span id="count2">200+</span> games, toys &amp; cool stuff</b>From ten-second toys and mind-blowing facts to giant 3D rampages.</li><li><b>🌐 Nothing to download</b>Works on phones, tablets, Chromebooks and school laptops.</li></ul>
     </div>
     <div class="press">
-      <button class="big" id="bigBtn" type="button" aria-label="Take a detour to a random game"><svg viewBox="0 0 300 150" aria-hidden="true"><path d="M10 38h200V8l82 67-82 67v-30H10z" fill="#FF7A00" stroke="#1D1A2F" stroke-width="9" stroke-linejoin="round"/><path d="M26 52h196V36l50 39-50 39V98H26z" fill="none" stroke="#1D1A2F" stroke-width="3"/><text x="124" y="70" text-anchor="middle" font-family="Overpass,Arial Black,sans-serif" font-weight="900" font-size="30" fill="#1D1A2F">TAKE A</text><text x="124" y="104" text-anchor="middle" font-family="Overpass,Arial Black,sans-serif" font-weight="900" font-size="38" fill="#1D1A2F" letter-spacing="2">DETOUR</text></svg></button>
+      <button class="big" id="bigBtn" type="button" aria-label="Take a detour to a random game"><svg viewBox="0 0 300 330" aria-hidden="true"><g transform="translate(20 0) scale(2.6)"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></g><rect x="42" y="258" width="216" height="64" rx="12" fill="#161616"/><rect x="50" y="266" width="200" height="48" rx="7" fill="none" stroke="#FF7A1A" stroke-width="3.5"/><text x="150" y="300" text-anchor="middle" font-family="Arial Black,Helvetica Neue,Arial,sans-serif" font-weight="900" font-size="26" fill="#FF7A1A" textLength="184" lengthAdjust="spacingAndGlyphs">TAKE A DETOUR</text></svg></button>
       <div class="plate" id="rndPlate">Random game</div>
       <div class="seg" id="rndMode" role="group" aria-label="What the random button picks"><button type="button" data-m="simple">Simple games only</button><button type="button" data-m="all">Everything</button></div>
       <div class="dcount" id="dcount"></div>
