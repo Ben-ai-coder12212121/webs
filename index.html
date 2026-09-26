@@ -8364,7 +8364,7 @@ const ui=(()=>{const idB=el('b'),idS=el('small'),id=el('div',{class:'gs-id'},idB
   function sync(){if(!W)return;const d=W.d;idB.textContent=d.name;idS.textContent=CAL[d.cal].n+' · '+d.desc;gB.forEach((b,i)=>b.classList.toggle('on',i===W.i));mB.forEach(([k,b])=>b.classList.toggle('on',k===MODE));
     bM.hidden=!d.modes;bE.textContent=d.type==='pump'?'Pump':d.type==='bolt'?'Cycle bolt':d.type==='rev'?'Cock hammer':'Rack';bF.hidden=d.safety==='none';bS.classList.toggle('on',SLOW);slow.style.display=SLOW?'block':'none';
     const R=MODE==='range';bA.hidden=!R;bD.hidden=!R;bT.hidden=!R;bP.hidden=!R;bA.classList.toggle('on',adsOn);if(RG)bP.textContent='Paper '+RG.paper.target+' m';sc.style.display=R?'block':'none';
-    help.textContent=R?'Click to lock aim · mouse to look · click/Space fire · right-click or C aim · R reload · E rack · F safety · B mode · T slow-mo · 1–6 guns':'Click the gun or press Space to fire · drag to turn · scroll to zoom · R reload · E rack · F safety · B mode · T slow-mo · 1–6 guns';ui.dirty=true}
+    help.textContent=R?'Click to lock aim · mouse to look · click/Space fire · hold Q (or right-click) to aim · C toggles aim · R reload · E rack · F safety · B mode · T slow-mo · 1–6 guns':'Click the gun or press Space to fire · drag to turn · scroll to zoom · R reload · E rack · F safety · B mode · T slow-mo · 1–6 guns';ui.dirty=true}
   function draw(){if(!W)return;const d=W.d;let n,plus='',cap=d.cap,live;
     if(d.type==='rev'){n=W.ch6.filter(x=>x==='live').length;live=n}else{n=W.mag;plus=W.ch==='live'?'+1':'';live=W.mag}
     const mode=W.safe?'SAFE':d.modes?d.modes[W.mode]:d.type==='rev'?(W.cocked?'SINGLE ACTION':'DOUBLE ACTION'):d.type==='pump'?'PUMP':d.type==='bolt'?'BOLT':'SEMI';
@@ -8377,7 +8377,7 @@ const orb={th:PI-.2,ph:.26,z:1,fit:true,tth:PI-.2,tph:.26};
 function setMode(m){if(m===MODE)return;MODE=m;cos=[];bodies.forEach(b=>fxRoot.remove(b.o));bodies.length=0;bits.forEach(b=>fxRoot.remove(b.o));bits.length=0;decals.forEach(d=>fxRoot.remove(d));decals.length=0;
   if(m==='range'){if(!RG)buildRange();rangeW.visible=true;benchW.visible=false;scene.environment=ENV_R.texture;scene.background=new T.Color(0x0b0b0c);camera.add(mount);scene.add(camera);camera.fov=62;yaw=0;pitch=-.03;adsOn=false;ads=0;ui.score('Paper at '+RG.paper.dist+' m · shoot the plates, bottles and melon');renderer.toneMappingExposure=1.15}
   else{rangeW.visible=false;benchW.visible=true;scene.environment=ENV_B.texture;scene.background=new T.Color(0x0f0e0d);scene.add(mount);mount.position.set(0,0,0);mount.rotation.set(0,0,0);camera.fov=30;orb.fit=true;renderer.toneMappingExposure=1;if(document.pointerLockElement)document.exitPointerLock()}
-  camera.updateProjectionMatrix();drill.on=false;drill.wait=0;ui.drill(null);setRoom(m);setGun(W.i);ui.sync();if(m==='range')ui.toast(wrap.classList.contains('touch')?'Drag to aim · FIRE to shoot · Aim for sights':'Click to grab the mouse · right-click to aim down sights')}
+  camera.updateProjectionMatrix();drill.on=false;drill.wait=0;ui.drill(null);setRoom(m);setGun(W.i);ui.sync();if(m==='range')ui.toast(wrap.classList.contains('touch')?'Drag to aim · FIRE to shoot · Aim for sights':'Click to grab the mouse · hold Q or right-click to aim down sights')}
 scene.environment=ENV_B.texture;
 const hold=new V3(),adsP=new V3(),tmpE=new T.Euler();
 function camBench(dt){const d=W.d,asp=camera.aspect,vf=camera.fov*PI/360,hf=Math.atan(Math.tan(vf)*asp);const need=Math.max(W.len*(asp<1?.64:.56)/Math.tan(hf),(W.hi-W.low)*.9/Math.tan(vf));
@@ -8413,9 +8413,9 @@ c.on(document,'mousemove',e=>{if(MODE==='range'&&document.pointerLockElement===c
 c.on(document,'mouseup',e=>{if(MODE==='range'&&document.pointerLockElement===cvs){if(e.button===0)trigUp();if(e.button===2){adsOn=false;ui.sync()}}});
 c.on(document,'mousedown',e=>{if(MODE==='range'&&document.pointerLockElement===cvs&&e.target!==cvs){if(e.button===0)trigDown();if(e.button===2){adsOn=true;ui.sync()}}});
 c.on(cvs,'wheel',e=>{if(MODE==='bench'){orb.z=Math.min(2.6,Math.max(.35,orb.z*(e.deltaY>0?1.1:.9)));e.preventDefault()}},{passive:false});
-c.on(document,'keydown',e=>{if(!W||e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();if(k===' '){e.preventDefault();if(!e.repeat)trigDown();return}if(e.repeat)return;
+c.on(document,'keydown',e=>{if(!W||e.target&&/INPUT|TEXTAREA/.test(e.target.tagName))return;const k=e.key.toLowerCase();if(k===' '){e.preventDefault();if(!e.repeat)trigDown();return}if(k==='q'&&MODE==='range'){if(!e.repeat&&!adsOn){adsOn=true;ui.sync()}return}if(e.repeat)return;
   if(k==='r')reload();else if(k==='e')rack();else if(k==='f')toggleSafety();else if(k==='b'||k==='v')cycleMode();else if(k==='t'){SLOW=!SLOW;TS=SLOW?.1:1;ui.sync()}else if(k==='c'&&MODE==='range'){adsOn=!adsOn;ui.sync()}else if(k==='g')setMode(MODE==='bench'?'range':'bench');else if(/^[1-6]$/.test(k))setGun(+k-1);else if(k==='q')setGun((W.i+1)%GUNS.length)});
-c.on(document,'keyup',e=>{if(e.key===' ')trigUp()});
+c.on(document,'keyup',e=>{if(e.key===' ')trigUp();if(e.key.toLowerCase()==='q'&&MODE==='range'&&adsOn){adsOn=false;ui.sync()}});
 
 /* ---------- main loop ---------- */
 st3.onFrame(dtr=>{if(!W||dead)return;const dt=dtr*TS;
