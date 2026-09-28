@@ -49,27 +49,29 @@
 <script src="/js/catalog.js"></script>
 <script src="/js/lib/io2.js"></script>
 <script src="/js/lib/io.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Tank Arena: game code ===================== */
 G.push({id:'io_tanks',name:'Tank Arena',kind:'io',wide:true,tint:'#7FC8F8',blurb:'Blast shapes for XP, level up, and pour points into reload, damage, speed and armour. Out-gun the bot tanks. Classic .io tank-arena action.',fmt:b=>'level '+b,
 art:'<rect width="120" height="72" fill="#dfe6ee"/><g stroke="#1D1A2F" stroke-width="2.5"><rect x="58" y="30" width="30" height="12" fill="#8c86a3"/><circle cx="54" cy="36" r="16" fill="#2d6fd6"/><rect x="92" y="10" width="14" height="14" fill="#FFD23F"/><path d="M20 52l8-14 8 14z" fill="#F2352A"/></g><circle cx="98" cy="36" r="4" fill="#2d6fd6"/>',
 run(root,c){const{cv,x,W,H}=ioCanvas(root);const D=ioDir(c,cv,W,H);const up=el('div',{class:'row',style:'flex-wrap:wrap;gap:6px;justify-content:center'});root.append(up,el('p',{class:'hint'},'WASD to drive, aim with the mouse and hold click to shoot (E toggles auto-fire). On a phone, drag to drive; it aims and fires by itself. Spend level-up points on the buttons (or keys 1–6).'));
   const WS=3000;const ST=[['Reload','⚡'],['Damage','💥'],['Bullet speed','➶'],['Move speed','🏃'],['Max health','❤️'],['Regen','➕']];let tanks=[],shapes=[],bullets=[],me,auto=false,camx=0,camy=0,parts=[];
-  const btns=ST.map((s2,i)=>{const b=el('button',{class:'btn',type:'button',style:'font-size:13px;padding:6px 9px'},'');b.addEventListener('click',()=>spend(me,i));up.append(b);return b});
-  c.on(document,'keydown',e=>{const k=e.key;if(k>='1'&&k<='6')spend(me,+k-1);if(k.toLowerCase()==='e')auto=!auto});
+  const btns=ST.map((s2,i)=>{const b=el('button',{class:'btn',type:'button',style:'font-size:13px;padding:6px 9px'},'');b.addEventListener('click',()=>GUEST?on.act({spend:i}):spend(me,i));up.append(b);return b});
+  c.on(document,'keydown',e=>{const k=e.key;if(k>='1'&&k<='6')GUEST?on.act({spend:+k-1}):spend(me,+k-1);if(k.toLowerCase()==='e')auto=!auto});
   const xpFor=l=>Math.round(20*Math.pow(1.35,l));
   function mkTank(name,col,bot){const t={name,col,bot,x:300+Math.random()*(WS-600),y:300+Math.random()*(WS-600),vx:0,vy:0,a:0,lvl:1,xp:0,pts:0,st:[0,0,0,0,0,0],hp:100,cd:0,dead:false,rt:0,score:0,ai:{t:0,tx:0,ty:0},hurtT:9};tanks.push(t);return t}
-  const maxHp=t=>100+t.st[4]*25+t.lvl*4;
+  const maxHp=t=>t.mh||100+t.st[4]*25+t.lvl*4;
   function spend(t,i){if(!t||t.pts<=0||t.st[i]>=7)return;t.st[i]++;t.pts--;if(i===4)t.hp+=25;if(t===me){beep(700+i*60,.06,'triangle',.05);paint()}}
   function paint(){btns.forEach((b,i)=>{b.textContent=ST[i][1]+' '+ST[i][0]+' '+'●'.repeat(me.st[i])+'○'.repeat(7-me.st[i]);b.disabled=me.pts<=0||me.st[i]>=7;b.classList.toggle('primary',me.pts>0&&me.st[i]<7)})}
   function mkShape(){const r=Math.random();const k=r<.6?0:r<.9?1:2;const hp=[10,30,120][k];shapes.push({k,x:Math.random()*WS,y:Math.random()*WS,hp,hp0:hp,xp:[10,25,130][k],r:[14,16,26][k],a:Math.random()*6,va:(Math.random()-.5)*.6,vx:(Math.random()-.5)*6,vy:(Math.random()-.5)*6})}
   function start(){tanks=[];shapes=[];bullets=[];me=mkTank('You','#2d6fd6',false);shuffle(IO_NAMES).slice(0,8).forEach((n,i)=>{const b=mkTank(n,['#F2352A','#FF9F43','#B9A7FF','#FF8FB1','#2BB673','#8c86a3','#e8c48a','#c9e89a'][i],true);b.lvl=1+rand(8);b.xp=0;for(let k=0;k<b.lvl-1;k++)spend2(b)});for(let i=0;i<260;i++)mkShape();paint()}
   function spend2(b){b.pts++;const pr=[0,1,1,2,4,3,5];spend(b,pick(pr))}
-  function gain(t,xp){t.xp+=xp;t.score+=xp;while(t.xp>=xpFor(t.lvl)&&t.lvl<45){t.xp-=xpFor(t.lvl);t.lvl++;if(t.bot)spend2(t);else{t.pts++;beep(1000,.12,'triangle',.06);paint()}}}
+  function gain(t,xp){t.xp+=xp;t.score+=xp;while(t.xp>=xpFor(t.lvl)&&t.lvl<45){t.xp-=xpFor(t.lvl);t.lvl++;if(t.bot)spend2(t);else{t.pts++;if(t===me){beep(1000,.12,'triangle',.06);paint()}}}}
   function fire(t){const rl=Math.max(.1,.55-t.st[0]*.06);if(t.cd>0)return;t.cd=rl;const sp=380+t.st[2]*45,dm=12+t.st[1]*5;bullets.push({x:t.x+Math.cos(t.a)*30,y:t.y+Math.sin(t.a)*30,vx:Math.cos(t.a)*sp+t.vx*.3,vy:Math.sin(t.a)*sp+t.vy*.3,dm,l:1.3,o:t,r:6+t.st[1]*.4});t.vx-=Math.cos(t.a)*8;t.vy-=Math.sin(t.a)*8;if(t===me&&Math.random()<.5)beep(220,.03,'square',.02)}
   function kill(t,by){t.dead=true;for(let i=0;i<16;i++)parts.push({x:t.x,y:t.y,vx:(Math.random()-.5)*300,vy:(Math.random()-.5)*300,l:.6,c:t.col});if(by)gain(by,Math.round(40+t.score*.4));if(t===me){noise(.6,'lowpass',300,.3);c.best(me.lvl)}setTimeout(()=>{t.dead=false;t.x=300+Math.random()*(WS-600);t.y=300+Math.random()*(WS-600);t.lvl=Math.max(1,Math.floor(t.lvl/2));t.xp=0;t.score=0;t.st=[0,0,0,0,0,0];t.pts=t.lvl-1;if(t.bot){const p=t.pts;t.pts=0;for(let k=0;k<p;k++)spend2(t)}t.hp=maxHp(t);if(t===me)paint()},t===me?3000:4000)}
   function step(dt){for(const t of tanks){if(t.dead)continue;t.cd-=dt;t.hurtT+=dt;const mh=maxHp(t);if(t.hurtT>3)t.hp=Math.min(mh,t.hp+dt*(2+t.st[5]*2.5));let mv={x:0,y:0,m:0},shoot=false;
-      if(!t.bot){mv=D.dir();const touch=('ontouchstart' in window)&&D.ptr.down;if(touch||!D.ptr.moved){let best=null,bd=600;for(const o of tanks)if(o!==t&&!o.dead){const d=Math.hypot(o.x-t.x,o.y-t.y);if(d<bd){bd=d;best=o}}if(!best)for(const s2 of shapes){const d=Math.hypot(s2.x-t.x,s2.y-t.y);if(d<bd){bd=d;best=s2}}if(best){t.a=Math.atan2(best.y-t.y,best.x-t.x);shoot=true}if(!D.ptr.down&&!Object.values(D.keys).some(Boolean))mv={x:0,y:0,m:0}}else{const wx=camx+(D.ptr.x-W/2),wy=camy+(D.ptr.y-H/2);t.a=Math.atan2(wy-t.y,wx-t.x);shoot=D.ptr.down||auto;if(!Object.values(D.keys).some(Boolean))mv={x:0,y:0,m:0}}}
+      if(t.net){const q=t.inp||{};mv={x:q.x||0,y:q.y||0,m:q.m||0};if(Number.isFinite(q.a))t.a=q.a;shoot=!!q.s}
+      else if(!t.bot){mv=D.dir();const touch=('ontouchstart' in window)&&D.ptr.down;if(touch||!D.ptr.moved){let best=null,bd=600;for(const o of tanks)if(o!==t&&!o.dead){const d=Math.hypot(o.x-t.x,o.y-t.y);if(d<bd){bd=d;best=o}}if(!best)for(const s2 of shapes){const d=Math.hypot(s2.x-t.x,s2.y-t.y);if(d<bd){bd=d;best=s2}}if(best){t.a=Math.atan2(best.y-t.y,best.x-t.x);shoot=true}if(!D.ptr.down&&!Object.values(D.keys).some(Boolean))mv={x:0,y:0,m:0}}else{const wx=camx+(D.ptr.x-W/2),wy=camy+(D.ptr.y-H/2);t.a=Math.atan2(wy-t.y,wx-t.x);shoot=D.ptr.down||auto;if(!Object.values(D.keys).some(Boolean))mv={x:0,y:0,m:0}}}
       else{const ai=t.ai;ai.t-=dt;let tgt=null,bd=500;for(const o of tanks)if(o!==t&&!o.dead){const d=Math.hypot(o.x-t.x,o.y-t.y);if(d<bd){bd=d;tgt=o}}if(tgt&&tgt.lvl>t.lvl+4&&bd<300){mv={x:(t.x-tgt.x)/bd,y:(t.y-tgt.y)/bd,m:1}}else{if(!tgt){let sd=700;for(const s2 of shapes){const d=Math.hypot(s2.x-t.x,s2.y-t.y);if(d<sd){sd=d;tgt=s2}}}if(tgt){const d=Math.hypot(tgt.x-t.x,tgt.y-t.y);t.a+=(Math.atan2(tgt.y-t.y,tgt.x-t.x)-t.a+Math.PI*3)%(Math.PI*2)-Math.PI;t.a=t.a;shoot=d<520;mv=d>220?{x:(tgt.x-t.x)/d,y:(tgt.y-t.y)/d,m:.8}:{x:-(tgt.y-t.y)/d,y:(tgt.x-t.x)/d,m:.5}}else{if(ai.t<=0){ai.t=3;ai.tx=Math.random()*WS;ai.ty=Math.random()*WS}const d=Math.hypot(ai.tx-t.x,ai.ty-t.y)||1;mv={x:(ai.tx-t.x)/d,y:(ai.ty-t.y)/d,m:.7}}}t.a+=0}
       const sp=(170+t.st[3]*18)*(t.bot?c.pick(.8,.95,1.05):1);t.vx+=(mv.x*sp*mv.m-t.vx)*Math.min(1,dt*5);t.vy+=(mv.y*sp*mv.m-t.vy)*Math.min(1,dt*5);t.x=clamp(t.x+t.vx*dt,20,WS-20);t.y=clamp(t.y+t.vy*dt,20,WS-20);if(shoot)fire(t)}
     for(const s2 of shapes){s2.a+=s2.va*dt;s2.x=clamp(s2.x+s2.vx*dt,0,WS);s2.y=clamp(s2.y+s2.vy*dt,0,WS)}
@@ -87,7 +89,29 @@ run(root,c){const{cv,x,W,H}=ioCanvas(root);const D=ioDir(c,cv,W,H);const up=el('
     x.setTransform(1,0,0,1,0,0);x.fillStyle='rgba(29,26,47,.75)';x.fillRect(W/2-160,H-34,320,20);x.fillStyle='#FFD23F';x.fillRect(W/2-158,H-32,316*me.xp/xpFor(me.lvl),16);x.fillStyle='#fff';x.font='800 13px Figtree, sans-serif';x.textAlign='center';x.fillText('Level '+me.lvl+(me.pts?' · '+me.pts+' upgrade points!':'')+(auto?' · AUTO-FIRE':''),W/2,H-20);
     const lb=tanks.slice().sort((a,b)=>b.score-a.score).slice(0,6);x.fillStyle='rgba(29,26,47,.7)';x.fillRect(W-190,10,180,20+lb.length*20);x.textAlign='left';lb.forEach((t,i)=>{x.fillStyle=t===me?'#FFD23F':'#fff';x.fillText((i+1)+'. '+t.name+'  '+t.score,W-180,28+i*20)});
     const mm=120;x.fillStyle='rgba(29,26,47,.55)';x.fillRect(10,H-mm-10,mm,mm);tanks.forEach(t=>{if(t.dead)return;x.fillStyle=t===me?'#FFD23F':t.col;x.fillRect(10+t.x/WS*mm-2,H-mm-10+t.y/WS*mm-2,4,4)});if(me.dead)banner(x,W,H,'Destroyed!','Respawning with half your levels…')}
-  start();c.loop(dt=>{step(Math.min(.05,dt/1000));draw()})}});
+  /* online: the host runs the arena; friends drive their own tanks and send aim, movement and upgrades */
+  let GUEST=false,snap=null,sendT=0;
+  const on=Online.party({game:'io_tanks',max:8,title:'Friends join the host’s arena as tanks. Top score wins bragging rights.',
+    onStart:role=>{if(role==='guest'){GUEST=true;tanks=[];shapes=[];bullets=[]}},
+    onJoin:peer=>{if(tanks.some(t=>t.peer&&t.peer.id===peer.id))return;const bot=tanks.find(t=>t.bot);if(bot)tanks.splice(tanks.indexOf(bot),1);const t=mkTank(peer.name,['#2BB673','#FFD23F','#6EE7B7','#FF8FB1','#B9A7FF','#FF9F43','#7FC8F8'][tanks.length%7],false);t.net=true;t.peer=peer;t.id=peer.id;t.inp={}},
+    onLeave:peer=>{const t=tanks.find(q=>q.peer&&q.peer.id===peer.id);if(t)tanks.splice(tanks.indexOf(t),1);mkTank(pick(IO_NAMES),'#8c86a3',true)},
+    onInput:(peer,i)=>{const t=tanks.find(q=>q.peer&&q.peer.id===peer.id);if(t)t.inp=i},
+    onAct:(peer,a)=>{const t=tanks.find(q=>q.peer&&q.peer.id===peer.id);if(t&&a.spend!=null)spend(t,a.spend)},
+    onSnap:sn=>{snap=sn},onEnd:()=>{if(GUEST){GUEST=false;start()}else tanks.filter(t=>t.net).forEach(t=>{tanks.splice(tanks.indexOf(t),1);mkTank(pick(IO_NAMES),'#8c86a3',true)})}});
+  root.append(el('div',{class:'row'},on.button));
+  const r1=v=>Math.round(v);
+  function snapFor(me2){const near=(px,py)=>Math.abs(px-me2.x)<W/2+90&&Math.abs(py-me2.y)<H/2+90;
+    return{t:tanks.map(t=>[t.id||(t===me?'h':t.name),t.name,t.col,r1(t.x),r1(t.y),+t.a.toFixed(2),t.lvl,r1(t.hp),r1(maxHp(t)),t.dead?1:0,t.score]),s:shapes.filter(q=>near(q.x,q.y)).flatMap(q=>[q.k,r1(q.x),r1(q.y),Math.round(q.a*100),Math.round(q.hp/q.hp0*100)]),
+      b:bullets.filter(q=>near(q.x,q.y)).map(q=>[r1(q.x),r1(q.y),Math.round(q.r),q.o.col]),me:{xp:me2.xp,lvl:me2.lvl,pts:me2.pts,st:me2.st}}}
+  function guestFrame(dt){let mv=D.dir(),aim=null,sh=false;const touch=('ontouchstart' in window)&&D.ptr.down;
+    if(me&&(touch||!D.ptr.moved)){let best=null,bd=600;for(const o of tanks)if(o!==me&&!o.dead){const d=Math.hypot(o.x-me.x,o.y-me.y);if(d<bd){bd=d;best=o}}if(!best)for(const q of shapes){const d=Math.hypot(q.x-me.x,q.y-me.y);if(d<bd){bd=d;best=q}}if(best){aim=Math.atan2(best.y-me.y,best.x-me.x);sh=true}if(!D.ptr.down&&!Object.values(D.keys).some(Boolean))mv={x:0,y:0,m:0}}
+    else if(me){aim=Math.atan2(camy+(D.ptr.y-H/2)-me.y,camx+(D.ptr.x-W/2)-me.x);sh=D.ptr.down||auto;if(!Object.values(D.keys).some(Boolean))mv={x:0,y:0,m:0}}
+    on.input({x:+mv.x.toFixed(2),y:+mv.y.toFixed(2),m:+mv.m.toFixed(2),a:aim==null?null:+aim.toFixed(3),s:sh?1:0});if(!snap)return;const sn=snap;
+    const old=new Map(tanks.map(t=>[t.id,t]));const k=Math.min(1,dt*14);tanks=sn.t.map(([id,name,col,x2,y2,a,lvl,hp,mh,dead,score])=>{const o=old.get(id);return{id,name:id===on.myId?'You':name,col,x:o?o.x+(x2-o.x)*k:x2,y:o?o.y+(y2-o.y)*k:y2,a,lvl,hp,mh,dead:!!dead,score,st:[0,0,0,0,0,0]}});
+    shapes=[];for(let i=0;i<sn.s.length;i+=5){const kk=sn.s[i];shapes.push({k:kk,x:sn.s[i+1],y:sn.s[i+2],a:sn.s[i+3]/100,hp:sn.s[i+4],hp0:100,r:[14,16,26][kk]})}
+    bullets=sn.b.map(([x2,y2,r,col])=>({x:x2,y:y2,r,o:{col}}));const mine=tanks.find(t=>t.id===on.myId);if(mine){const was=me&&me.pts;me=Object.assign(mine,sn.me);if(me.pts!==was)paint()}
+    if(me&&!me.dead){camx+=(me.x-camx)*Math.min(1,dt*8);camy+=(me.y-camy)*Math.min(1,dt*8)}c.stat('Tank Arena · online · level '+(me?me.lvl:1))}
+  start();c.loop(dt=>{const d2=Math.min(.05,dt/1000);if(GUEST)guestFrame(d2);else{step(d2);if(on.active){sendT-=d2;if(sendT<=0){sendT=1/15;tanks.forEach(t=>{if(t.net)on.snapTo(t.peer,snapFor(t))})}}}if(me)draw();if(on.active){x.save();x.setTransform(1,0,0,1,0,0);x.fillStyle='rgba(29,26,47,.8)';x.font='800 13px Figtree, sans-serif';const t2=on.role==='host'?'🌐 Hosting · '+on.friends.length+' friend'+(on.friends.length===1?'':'s'):'🌐 Online in a friend’s arena';const tw=x.measureText(t2).width+24;x.beginPath();x.roundRect(W/2-tw/2,8,tw,26,13);x.fill();x.fillStyle='#fff';x.textAlign='center';x.fillText(t2,W/2,26);x.restore()}})}});
 </script>
 <script src="/js/app.js"></script>
 </body></html>

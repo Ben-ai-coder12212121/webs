@@ -49,6 +49,7 @@
 <script src="/js/catalog.js"></script>
 <script src="/js/lib/io2.js"></script>
 <script src="/js/lib/io.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Swallow: game code ===================== */
 G.push({id:'io_hole',name:'Swallow',kind:'io',wide:true,tint:'#1D1A2F',blurb:'You’re a hole in the ground. Swallow cones, people, cars, trees and whole buildings to grow, and gobble up smaller holes. Biggest hole after two minutes wins.',fmt:b=>b+' size',
@@ -61,11 +62,28 @@ run(root,c){const{cv,x,W,H}=ioCanvas(root);const D=ioDir(c,cv,W,H);root.append(e
       for(let k=0;k<10;k++){const onX=Math.random()<.5;const px=onX?bx0+Math.random()*BLK:bx0+(Math.random()<.5?18:BLK-18),py=onX?by0+(Math.random()<.5?18:BLK-18):by0+Math.random()*BLK;objs.push(mkObj(pick([0,1,1,1,2,4]),px,py))}
       for(let k=0;k<2;k++){const o=mkObj(pick([6,6,6,7,8]),bx0+(k?BLK/2:4),by0+(k?4:BLK/2));o.dir=k?0:1;o.sp=40+Math.random()*40;objs.push(o)}}}
   function mkHole(name,col,bot){const h={name,col,bot,r:18,x:200+Math.random()*(WS-400),y:200+Math.random()*(WS-400),vx:0,vy:0,dead:false,score:0,ai:{tx:0,ty:0,t:0}};holes.push(h);return h}
-  function start(){holes=[];falling=[];populate();me=mkHole('You','#2BB673',false);shuffle(IO_NAMES).slice(0,6).forEach((n,i)=>mkHole(n,IO_COLS[i],true));t=c.pick(150,120,100);state='play'}
+  function start(){holes=[];falling=[];populate();me=mkHole('You','#2BB673',false);me.id='h';const fr=on&&on.active&&on.role==='host'?on.friends:[];fr.forEach((f,i)=>{const h=mkHole(f.name,IO_COLS[(i+7)%IO_COLS.length],false);h.net=true;h.peer=f;h.id=f.id;h.inp={x:0,y:0,m:0}});shuffle(IO_NAMES).slice(0,Math.max(2,6-fr.length)).forEach((n,i)=>{const h=mkHole(n,IO_COLS[i],true);h.id='b'+i});t=c.pick(150,120,100);state='play'}
+  /* online: the host runs the city; friends play their own holes, rounds are timed */
+  let GUEST=false,snap=null,sendT=0,myDead=false;
+  const on=Online.party({game:'io_hole',max:8,title:'Everyone plays in the host’s city. Biggest hole when the timer runs out wins.',
+    onStart:role=>{if(role==='guest'){GUEST=true;holes=[];objs=[];me=null;state='play'}else start()},
+    onJoin:peer=>{if(state!=='play'){start();return}const h=mkHole(peer.name,IO_COLS[(holes.length+5)%IO_COLS.length],false);h.net=true;h.peer=peer;h.id=peer.id;h.inp={x:0,y:0,m:0}},
+    onLeave:peer=>{holes=holes.filter(h=>!(h.peer&&h.peer.id===peer.id))},
+    onInput:(peer,i)=>{const h=holes.find(q=>q.peer&&q.peer.id===peer.id);if(h&&Number.isFinite(i.x))h.inp=i},
+    onSnap:sn=>{snap=sn},onEnd:()=>{if(GUEST){GUEST=false;me=null;state='ready'}else holes=holes.filter(h=>!h.net)}});
+  root.append(el('div',{class:'row'},on.button));
+  const r1=v=>Math.round(v);
+  function snapFor(h){const sc=clamp(1.5*18/Math.max(18,h.r*.75),.28,1.5),vw=W/sc/2+90,vh=H/sc/2+90;const near=o=>Math.abs(o.x-h.x)<vw+o.r&&Math.abs(o.y-h.y)<vh+o.r;
+    return{h:holes.map(q=>[q.id,q.name,q.col,r1(q.x),r1(q.y),Math.round(q.r*10),q.dead?1:0]),o:objs.filter(near).flatMap(o=>[o.k,r1(o.x),r1(o.y),Math.round(o.r*10),Math.round(o.a*100)]),t:+t.toFixed(1),st:state}}
+  function guestFrame(dt){const d=D.dir();on.input({x:+d.x.toFixed(2),y:+d.y.toFixed(2),m:+d.m.toFixed(2)});if(!snap)return;const sn=snap;t=sn.t;
+    const old=new Map(holes.map(h=>[h.id,h]));holes=sn.h.map(([id,name,col,x2,y2,r,dead])=>{const o=old.get(id);const k=Math.min(1,dt*14);return{id,name:id===on.myId?'You':name,col,x:o?o.x+(x2-o.x)*k:x2,y:o?o.y+(y2-o.y)*k:y2,r:r/10,dead:!!dead,bot:false}});
+    objs=[];for(let i=0;i<sn.o.length;i+=5){const T0=TYPES[sn.o[i]];objs.push({k:sn.o[i],x:sn.o[i+1],y:sn.o[i+2],r:sn.o[i+3]/10,a:sn.o[i+4]/100,col:T0[2],shape:T0[3],name:T0[0]})}
+    me=holes.find(h=>h.id===on.myId)||me;if(me&&me.dead&&!myDead){myDead=true;noise(.6,'lowpass',200,.3)}if(me&&!me.dead)myDead=false;
+    state=sn.st==='over'?'over':me&&me.dead?'dead':'play';if(me){const ts=clamp(1.5*18/Math.max(18,me.r*.75),.28,1.5);cam.s+=(ts-cam.s)*Math.min(1,dt*2);cam.x=me.x;cam.y=me.y}c.stat('Swallow · online · '+Math.ceil(t)+'s')}
   const area=r=>r*r;
   function eat(h,o){falling.push({o,h,t:0});h.r=Math.sqrt(area(h.r)+area(o.r)*.32);h.score+=Math.round(o.r);if(h===me){beep(300+Math.min(900,o.r*12),.05,'triangle',.04);if(o.r>30)noise(.3,'lowpass',300,.2)}}
-  function step(dt){if(state!=='play')return;t-=dt;if(t<=0){state='over';const rank=holes.slice().sort((a,b)=>b.r-a.r).indexOf(me)+1;c.best(Math.round(me.r));c.stat('Swallow · #'+rank+' · size '+Math.round(me.r));return}
-    for(const h of holes){if(h.dead)continue;let d;if(!h.bot)d=D.dir();else{const ai=h.ai;ai.t-=dt;if(ai.t<=0){ai.t=.6+Math.random()*.8;let best=null,bd=1e9;for(const o of objs){if(o.r<h.r*.8){const dd=Math.hypot(o.x-h.x,o.y-h.y)-o.r*3;if(dd<bd){bd=dd;best=o}}}for(const o of holes)if(o!==h&&!o.dead&&o.r<h.r*.8){const dd=Math.hypot(o.x-h.x,o.y-h.y)-60;if(dd<bd){bd=dd;best=o}}ai.tx=best?best.x:Math.random()*WS;ai.ty=best?best.y:Math.random()*WS;for(const o of holes)if(o!==h&&!o.dead&&o.r>h.r*1.2&&Math.hypot(o.x-h.x,o.y-h.y)<o.r*4){ai.tx=h.x-(o.x-h.x)*3;ai.ty=h.y-(o.y-h.y)*3}}const dx=ai.tx-h.x,dy=ai.ty-h.y,l=Math.hypot(dx,dy)||1;d={x:dx/l,y:dy/l,m:1}}
+  function step(dt){if(state!=='play'&&!(on.active&&state==='dead'))return;t-=dt;if(t<=0){state='over';const rank=holes.slice().sort((a,b)=>b.r-a.r).indexOf(me)+1;c.best(Math.round(me.r));c.stat('Swallow · #'+rank+' · size '+Math.round(me.r));return}
+    for(const h of holes){if(h.dead)continue;let d;if(h.net)d=h.inp;else if(!h.bot)d=D.dir();else{const ai=h.ai;ai.t-=dt;if(ai.t<=0){ai.t=.6+Math.random()*.8;let best=null,bd=1e9;for(const o of objs){if(o.r<h.r*.8){const dd=Math.hypot(o.x-h.x,o.y-h.y)-o.r*3;if(dd<bd){bd=dd;best=o}}}for(const o of holes)if(o!==h&&!o.dead&&o.r<h.r*.8){const dd=Math.hypot(o.x-h.x,o.y-h.y)-60;if(dd<bd){bd=dd;best=o}}ai.tx=best?best.x:Math.random()*WS;ai.ty=best?best.y:Math.random()*WS;for(const o of holes)if(o!==h&&!o.dead&&o.r>h.r*1.2&&Math.hypot(o.x-h.x,o.y-h.y)<o.r*4){ai.tx=h.x-(o.x-h.x)*3;ai.ty=h.y-(o.y-h.y)*3}}const dx=ai.tx-h.x,dy=ai.ty-h.y,l=Math.hypot(dx,dy)||1;d={x:dx/l,y:dy/l,m:1}}
       const sp=(170-Math.min(80,h.r*.6))*(h.bot?c.pick(.75,.9,1):1);h.vx+=(d.x*sp*d.m-h.vx)*Math.min(1,dt*6);h.vy+=(d.y*sp*d.m-h.vy)*Math.min(1,dt*6);h.x=clamp(h.x+h.vx*dt,h.r,WS-h.r);h.y=clamp(h.y+h.vy*dt,h.r,WS-h.r)}
     for(const o of objs){if(!o.mv)continue;if(o.name==='person'){o.a+=(Math.random()-.5)*dt*2;o.x+=Math.cos(o.a)*14*dt;o.y+=Math.sin(o.a)*14*dt;const nh=holes.find(h=>!h.dead&&Math.hypot(h.x-o.x,h.y-o.y)<h.r+40&&h.r>o.r*1.2);if(nh){const a=Math.atan2(o.y-nh.y,o.x-nh.x);o.x+=Math.cos(a)*30*dt;o.y+=Math.sin(a)*30*dt}}else if(o.dir!=null){if(o.dir)o.y=(o.y+o.sp*dt+WS)%WS;else o.x=(o.x+o.sp*dt+WS)%WS;o.a=o.dir?Math.PI/2:0}o.x=clamp(o.x,0,WS);o.y=clamp(o.y,0,WS)}
     for(const h of holes){if(h.dead)continue;for(let i=objs.length-1;i>=0;i--){const o=objs[i];if(o.r<h.r*.88&&Math.hypot(o.x-h.x,o.y-h.y)<h.r-o.r*.4){objs.splice(i,1);eat(h,o)}}
@@ -81,9 +99,9 @@ run(root,c){const{cv,x,W,H}=ioCanvas(root);const D=ioDir(c,cv,W,H);root.append(e
     for(const o of objs){if(!vis(o))continue;x.save();x.translate(o.x,o.y);x.rotate(o.a);x.fillStyle='rgba(0,0,0,.18)';x.fillRect(-o.r+4,-o.r*.6+4,o.r*2,o.r*1.2);shape(o);x.restore()}
     x.font='700 '+(14/s|0)+'px Figtree, sans-serif';x.textAlign='center';for(const h of holes){if(h.dead||!vis(h))continue;x.fillStyle='#fff';x.fillText(h.name,h.x,h.y-h.r-6/s)}
     x.setTransform(1,0,0,1,0,0);const lb=holes.filter(h=>!h.dead).sort((a,b)=>b.r-a.r).slice(0,6);x.fillStyle='rgba(29,26,47,.7)';x.fillRect(W-180,10,170,24+lb.length*20);x.font='700 14px Figtree, sans-serif';x.textAlign='left';x.fillStyle='#fff';x.fillText('⏱️ '+Math.max(0,Math.ceil(t))+'s',W-170,28);lb.forEach((h,i)=>{x.fillStyle=h===me?'#FFD23F':'#fff';x.fillText((i+1)+'. '+h.name+'  '+Math.round(h.r),W-170,48+i*20)});
-    if(state==='ready')banner(x,W,H,'Swallow','Tap to start'),0;if(state==='over'){const rank=holes.slice().sort((a,b)=>b.r-a.r).indexOf(me)+1;banner(x,W,H,rank===1?'🏆 Biggest hole!':'#'+rank+' place','Size '+Math.round(me.r)+' · tap to play again')}if(state==='dead')banner(x,W,H,'Swallowed!','A bigger hole got you · tap to play again')}
+    if(state==='ready')banner(x,W,H,'Swallow','Tap to start'),0;if(state==='over'){const rank=holes.slice().sort((a,b)=>b.r-a.r).indexOf(me)+1;banner(x,W,H,rank===1?'🏆 Biggest hole!':'#'+rank+' place','Size '+Math.round(me.r)+(GUEST?' · waiting for the host':' · tap to play again'))}if(state==='dead')banner(x,W,H,'Swallowed!',on.active?'A bigger hole got you · watch until the timer ends':'A bigger hole got you · tap to play again')}
   function shape(o){x.fillStyle=o.col;x.strokeStyle='#1D1A2F';x.lineWidth=2;if(o.shape===1){x.beginPath();x.arc(0,0,o.r,0,7);x.fill();x.stroke()}else if(o.shape===0){x.fillStyle='#2BB673';x.beginPath();x.arc(0,0,o.r,0,7);x.fill();x.stroke();x.fillStyle='#6EE7B7';x.beginPath();x.arc(-o.r*.3,-o.r*.3,o.r*.4,0,7);x.fill()}else if(o.shape===2){x.fillRect(-o.r,-o.r*.55,o.r*2,o.r*1.1);x.strokeRect(-o.r,-o.r*.55,o.r*2,o.r*1.1);x.fillStyle='rgba(29,26,47,.45)';x.fillRect(o.r*.2,-o.r*.45,o.r*.5,o.r*.9)}else{x.fillRect(-o.r,-o.r,o.r*2,o.r*2);x.strokeRect(-o.r,-o.r,o.r*2,o.r*2);x.fillStyle='rgba(255,255,255,.35)';for(let i=-o.r+6;i<o.r-6;i+=12)for(let j=-o.r+6;j<o.r-6;j+=12)x.fillRect(i,j,6,6)}}
-  c.on(cv,'pointerdown',()=>{if(state!=='play')start()});c.loop(dt=>{step(Math.min(.05,dt/1000));if(me)draw();else{x.fillStyle='#5A5470';x.fillRect(0,0,W,H);banner(x,W,H,'Swallow','Tap to start')}})}});
+  c.on(cv,'pointerdown',()=>{if(GUEST)return;if(state!=='play')start()});c.loop(dt=>{if(GUEST)guestFrame(Math.min(.05,dt/1000));else{step(Math.min(.05,dt/1000));if(on.active){sendT-=dt/1000;if(sendT<=0){sendT=1/14;holes.forEach(h=>{if(h.net)on.snapTo(h.peer,snapFor(h))})}}}if(me){draw();if(on.active){x.save();x.fillStyle='rgba(29,26,47,.8)';x.font='800 13px Figtree, sans-serif';const t2=on.role==='host'?'🌐 Hosting · '+on.friends.length+' friend'+(on.friends.length===1?'':'s'):'🌐 Online in a friend’s city';const tw=x.measureText(t2).width+24;x.beginPath();x.roundRect(W/2-tw/2,8,tw,26,13);x.fill();x.fillStyle='#fff';x.textAlign='center';x.fillText(t2,W/2,26);x.restore()}}else{x.fillStyle='#5A5470';x.fillRect(0,0,W,H);banner(x,W,H,'Swallow','Tap to start')}})}});
 </script>
 <script src="/js/app.js"></script>
 </body></html>
