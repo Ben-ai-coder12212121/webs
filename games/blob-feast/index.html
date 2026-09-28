@@ -48,31 +48,61 @@
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
 <script src="/js/lib/io.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Blob Feast: game code ===================== */
 G.push({id:'io_blob',name:'Blob Feast',kind:'io',wide:true,tint:'#7FC8F8',blurb:'Eat pellets, eat smaller blobs, avoid bigger ones. Split to pounce. Classic .io arena action, with bots.',fmt:b=>b+' mass',
 art:'<rect width="120" height="72" fill="#FFFDF6"/><g stroke="#e8e1d0"><path d="M0 18h120M0 36h120M0 54h120M20 0v72M40 0v72M60 0v72M80 0v72M100 0v72"/></g><circle cx="48" cy="38" r="20" fill="#2BB673" stroke="#1f8a56" stroke-width="3"/><circle cx="90" cy="24" r="10" fill="#FF8FB1" stroke="#d96b8c" stroke-width="3"/><g fill="#FFD23F"><circle cx="20" cy="14" r="3"/><circle cx="84" cy="56" r="3" fill="#B9A7FF"/><circle cx="104" cy="44" r="3" fill="#FF9F43"/><circle cx="16" cy="60" r="3" fill="#7FC8F8"/></g>',
 run(root,c){const{cv,x,W,H}=ioCanvas(root);const ptr=ioPointer(c,cv,W,H);root.append(el('p',{class:'hint'},'Move the mouse (or drag) to steer. Space splits your blob to pounce, W shoots out a bit of mass. Eat things at least 25% smaller than you.'));
+  /* online: the host runs the arena; friends replace bots and send where they steer */
+  let GUEST=false,snap=null;const disp=new Map();
+  const on=Online.party({game:'io_blob',max:8,
+    onStart:role=>{if(role==='guest'){GUEST=true;players=[];pellets=[];viruses=[];me={name:'You',col:'#2BB673',cells:[],dead:false,maxM:10}}},
+    onJoin:peer=>{if(players.some(p=>p.id===peer.id))return;const bot=players.find(p=>p.bot);if(bot)players.splice(players.indexOf(bot),1);const p=mkPlayer(peer.name,pick(IO_COLS),false);p.net=true;p.id=peer.id;p.peer=peer;p.target={x:p.cells[0].x,y:p.cells[0].y}},
+    onLeave:peer=>{const p=players.find(q=>q.id===peer.id);if(p)players.splice(players.indexOf(p),1);mkPlayer(pick(IO_NAMES),pick(IO_COLS),true)},
+    onInput:(peer,i)=>{const p=players.find(q=>q.id===peer.id);if(p&&Number.isFinite(i.x))p.target={x:i.x,y:i.y}},
+    onAct:(peer,a)=>{const p=players.find(q=>q.id===peer.id);if(!p)return;if(a.split)split(p);if(a.eject)eject(p);if(a.respawn&&p.dead)spawn(p,10)},
+    onSnap:s=>{snap=s},
+    onEnd:t=>{if(GUEST){GUEST=false;players=[];pellets=[];viruses=[];for(let i=0;i<900;i++)pellets.push(pel());for(let i=0;i<14;i++)viruses.push({x:200+Math.random()*(WS-400),y:200+Math.random()*(WS-400),m:100});me=mkPlayer('You','#2BB673',false);shuffle(IO_NAMES).slice(0,17).forEach((n,i)=>mkPlayer(n,IO_COLS[i%IO_COLS.length],true));dead=false}else players.filter(p=>p.net).forEach(p=>{players.splice(players.indexOf(p),1);mkPlayer(pick(IO_NAMES),pick(IO_COLS),true)});if(t)onMsg=t;onMsgT=4}});
+  root.append(el('div',{class:'row'},on.button));let onMsg='',onMsgT=0;
+  const tgt=p=>p===me&&!p.net?toWorld():p.net?p.target:{x:p.ai.tx,y:p.ai.ty};
   const WS=3000,R=m=>6+Math.sqrt(m)*4;let players=[],pellets=[],viruses=[],me=null,dead=false,deadT=0,killer='',best=0,shake=0;
-  const keys={};c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(k===' '){e.preventDefault();if(!keys[' '])split(me)}if(k==='w'&&!keys.w)eject(me);keys[k]=true});c.on(document,'keyup',e=>{keys[e.key.toLowerCase()]=false});
-  let tapT=0;c.on(cv,'pointerdown',()=>{const n=performance.now();if(n-tapT<300)split(me);tapT=n});
+  const keys={};c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(k===' '){e.preventDefault();if(!keys[' '])GUEST?on.act({split:1}):split(me)}if(k==='w'&&!keys.w)GUEST?on.act({eject:1}):eject(me);keys[k]=true});c.on(document,'keyup',e=>{keys[e.key.toLowerCase()]=false});
+  let tapT=0;c.on(cv,'pointerdown',()=>{const n=performance.now();if(n-tapT<300)GUEST?on.act({split:1}):split(me);tapT=n});
   const pel=()=>({x:Math.random()*WS,y:Math.random()*WS,c:pick(IO_COLS),r:4+Math.random()*2});
   for(let i=0;i<900;i++)pellets.push(pel());for(let i=0;i<14;i++)viruses.push({x:200+Math.random()*(WS-400),y:200+Math.random()*(WS-400),m:100});
   function spawn(p,m){let cx,cy,t=0;do{cx=200+Math.random()*(WS-400);cy=200+Math.random()*(WS-400);t++}while(t<50&&players.some(o=>o!==p&&!o.dead&&o.cells.some(q=>Math.hypot(q.x-cx,q.y-cy)<(p.bot?500:700))));p.cells=[{x:cx,y:cy,m:m||10,vx:0,vy:0,merge:0}];p.dead=false;p.maxM=m||10;p.safe=p.bot?0:3}
   function mkPlayer(name,col,bot){const p={name,col,bot,cells:[],dead:false,maxM:10,ai:{t:0,tx:0,ty:0,wander:Math.random()*6}};spawn(p,bot?10+Math.random()*120:10);players.push(p);return p}
   me=mkPlayer('You','#2BB673',false);shuffle(IO_NAMES).slice(0,17).forEach((n,i)=>mkPlayer(n,IO_COLS[i%IO_COLS.length],true));
   const mass=p=>p.cells.reduce((s,q)=>s+q.m,0);
-  function split(p){if(!p||p.dead||p.cells.length>=8)return;const add=[];p.cells.forEach(q=>{if(q.m<36||p.cells.length+add.length>=8)return;const tx=p===me?toWorld().x:p.ai.tx,ty=p===me?toWorld().y:p.ai.ty;const a=Math.atan2(ty-q.y,tx-q.x);q.m/=2;q.merge=12;add.push({x:q.x+Math.cos(a)*R(q.m),y:q.y+Math.sin(a)*R(q.m),m:q.m,vx:Math.cos(a)*900,vy:Math.sin(a)*900,merge:12})});p.cells.push(...add);if(p===me&&add.length)sweep(300,900,.15,'triangle',.05)}
-  function eject(p){if(!p||p.dead)return;p.cells.forEach(q=>{if(q.m<30)return;const tx=toWorld().x,ty=toWorld().y;const a=Math.atan2(ty-q.y,tx-q.x);q.m-=12;pellets.push({x:q.x+Math.cos(a)*(R(q.m)+14),y:q.y+Math.sin(a)*(R(q.m)+14),c:p.col,r:9,m:10,vx:Math.cos(a)*600,vy:Math.sin(a)*600})});beep(500,.04,'triangle',.03)}
+  function split(p){if(!p||p.dead||p.cells.length>=8)return;const add=[];p.cells.forEach(q=>{if(q.m<36||p.cells.length+add.length>=8)return;const tt=tgt(p),tx=tt.x,ty=tt.y;const a=Math.atan2(ty-q.y,tx-q.x);q.m/=2;q.merge=12;add.push({x:q.x+Math.cos(a)*R(q.m),y:q.y+Math.sin(a)*R(q.m),m:q.m,vx:Math.cos(a)*900,vy:Math.sin(a)*900,merge:12})});p.cells.push(...add);if(p===me&&add.length)sweep(300,900,.15,'triangle',.05)}
+  function eject(p){if(!p||p.dead)return;p.cells.forEach(q=>{if(q.m<30)return;const tt=tgt(p),tx=tt.x,ty=tt.y;const a=Math.atan2(ty-q.y,tx-q.x);q.m-=12;pellets.push({x:q.x+Math.cos(a)*(R(q.m)+14),y:q.y+Math.sin(a)*(R(q.m)+14),c:p.col,r:9,m:10,vx:Math.cos(a)*600,vy:Math.sin(a)*600})});beep(500,.04,'triangle',.03)}
   let cam={x:0,y:0,z:1};const toWorld=()=>({x:cam.x+(ptr.x-W/2)/cam.z,y:cam.y+(ptr.y-H/2)/cam.z});
   function ai(p,dt){const a=p.ai;a.t-=dt;if(a.t>0)return;a.t=.2+Math.random()*.2;const c0=p.cells.reduce((b,q)=>q.m>b.m?q:b,p.cells[0]);const my=c0.m;let fx=0,fy=0,prey=null,pd=1e9;
     players.forEach(o=>{if(o===p||o.dead)return;o.cells.forEach(q=>{const d=Math.hypot(q.x-c0.x,q.y-c0.y);if(q.m>my*1.25&&d<R(q.m)+320){fx-=(q.x-c0.x)/d*(600/d);fy-=(q.y-c0.y)/d*(600/d)}else if(q.m*1.3<my&&d<450&&d<pd){pd=d;prey=q}})});
     if(Math.hypot(fx,fy)>.5){a.tx=c0.x+fx*200;a.ty=c0.y+fy*200}else if(prey){a.tx=prey.x;a.ty=prey.y;if(pd<260&&my>prey.m*2.8&&p.cells.length<3&&Math.random()<.25){split(p)}}else{let bp=null,bd=1e9;for(let k=0;k<40;k++){const q=pellets[rand(pellets.length)];const d=Math.hypot(q.x-c0.x,q.y-c0.y);if(d<bd){bd=d;bp=q}}if(bp){a.tx=bp.x;a.ty=bp.y}}
     a.tx=clamp(a.tx,50,WS-50);a.ty=clamp(a.ty,50,WS-50)}
-  function die(p,by){p.dead=true;p.cells=[];if(p===me){dead=true;deadT=0;killer=by?by.name:'something';best=Math.max(best,Math.round(me.maxM));c.best(Math.round(me.maxM));noise(.5,'lowpass',300,.3)}else c.after(()=>{if(!p.dead)return;spawn(p,10+Math.random()*60)},3000)}
-  c.on(cv,'pointerup',()=>{if(dead&&deadT>1){spawn(me,10);dead=false}});
+  function die(p,by){p.dead=true;p.cells=[];if(p===me){dead=true;deadT=0;killer=by?by.name:'something';best=Math.max(best,Math.round(me.maxM));c.best(Math.round(me.maxM));noise(.5,'lowpass',300,.3)}else if(p.net){p.killer=by?by.name:'something'}else c.after(()=>{if(!p.dead)return;spawn(p,10+Math.random()*60)},3000)}
+  c.on(cv,'pointerup',()=>{if(dead&&deadT>1){if(GUEST){on.act({respawn:1});deadT=0}else{spawn(me,10);dead=false}}});
+  let all=[],sendT=0;
+  const r1=v=>Math.round(v);
+  function snapFor(p){let cx=WS/2,cy=WS/2,tr=0,sm=0,sx=0,sy=0;p.cells.forEach(q=>{sx+=q.x*q.m;sy+=q.y*q.m;sm+=q.m;tr+=R(q.m)});if(sm){cx=sx/sm;cy=sy/sm}const z=clamp(1.6/(1+tr/140),.35,1.3),vw=W/2/z+60,vh=H/2/z+60;
+    const near=(x2,y2,r)=>Math.abs(x2-cx)<vw+r&&Math.abs(y2-cy)<vh+r;
+    return{p:players.filter(o=>!o.dead&&o.cells.some(q=>near(q.x,q.y,R(q.m)))).map(o=>[o.id||(o===me?'h':o.name),o.name,o.col,o.safe>0?1:0,o.cells.map(q=>[r1(q.x),r1(q.y),r1(q.m)])]),
+      pe:pellets.filter(q=>near(q.x,q.y,10)).map(q=>[r1(q.x),r1(q.y),q.r,q.c]),v:viruses.filter(v=>near(v.x,v.y,80)).map(v=>[r1(v.x),r1(v.y),v.m]),
+      lb:players.filter(o=>!o.dead).map(o=>[o.name,Math.round(mass(o)),o.id||'']).sort((a,b)=>b[1]-a[1]).slice(0,9),dead:p.dead?1:0,k:p.killer||'',mx:Math.round(p.maxM)}}
+  let lbNet=[];
+  function guestFrame(dt){const t=toWorld();on.input({x:Math.round(t.x),y:Math.round(t.y)});if(!snap)return;const s=snap;
+    const seen=new Set();players=s.p.map(([id,name,col,safe,cs])=>{const key=id;seen.add(key);let d=disp.get(key);if(!d){d=cs.map(q=>({x:q[0],y:q[1],m:q[2]}));disp.set(key,d)}
+      while(d.length<cs.length){const q=cs[d.length];d.push({x:q[0],y:q[1],m:q[2]})}d.length=cs.length;const k=Math.min(1,dt*14);cs.forEach((q,i)=>{d[i].x+=(q[0]-d[i].x)*k;d[i].y+=(q[1]-d[i].y)*k;d[i].m+=(q[2]-d[i].m)*k});
+      return{id,name:id===on.myId?'You':name,col,safe,cells:d,dead:false}});[...disp.keys()].forEach(k2=>{if(!seen.has(k2))disp.delete(k2)});
+    pellets=s.pe.map(q=>({x:q[0],y:q[1],r:q[2],c:q[3]}));viruses=s.v.map(v=>({x:v[0],y:v[1],m:v[2]}));
+    const mine=players.find(p=>p.id===on.myId);if(mine){me=mine;me.maxM=s.mx}else{me={name:'You',col:'#2BB673',cells:[],dead:true,maxM:s.mx}}
+    if(s.dead&&!dead){dead=true;deadT=0;killer=s.k||'something';c.best(s.mx);noise(.5,'lowpass',300,.3)}if(!s.dead&&dead)dead=false;
+    lbNet=s.lb;all=[];players.forEach(p=>p.cells.forEach(q=>all.push([q,p])));all.sort((a,b)=>b[0].m-a[0].m)}
   c.loop(dtm=>{const dt=Math.min(.05,dtm/1000);
-    players.forEach(p=>{if(p.dead)return;if(p.bot)ai(p,dt);const t=p===me?toWorld():{x:p.ai.tx,y:p.ai.ty};
+    if(GUEST){guestFrame(dt)}else{
+    players.forEach(p=>{if(p.dead)return;if(p.bot)ai(p,dt);const t=tgt(p);
       p.cells.forEach(q=>{const r=R(q.m);const dx=t.x-q.x,dy=t.y-q.y,d=Math.hypot(dx,dy)||1;const sp=320*Math.pow(q.m,-.22)*Math.min(1,d/(r*.8));q.x+=(dx/d*sp+q.vx)*dt;q.y+=(dy/d*sp+q.vy)*dt;q.vx*=Math.pow(.02,dt);q.vy*=Math.pow(.02,dt);q.x=clamp(q.x,r*.5,WS-r*.5);q.y=clamp(q.y,r*.5,WS-r*.5);q.merge=Math.max(0,q.merge-dt);if(q.m>150)q.m*=1-.002*dt*Math.log10(q.m)});
       for(let i=0;i<p.cells.length;i++)for(let j=i+1;j<p.cells.length;j++){const a=p.cells[i],b=p.cells[j];const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||.01,ra=R(a.m),rb=R(b.m);if(a.merge>0||b.merge>0){if(d<ra+rb){const k=(ra+rb-d)*.5;a.x-=dx/d*k;a.y-=dy/d*k;b.x+=dx/d*k;b.y+=dy/d*k}}else if(d<Math.max(ra,rb)*.6){a.m+=b.m;b.m=0}}p.cells=p.cells.filter(q=>q.m>0);
       p.cells.forEach(q=>{const r=R(q.m);for(let i=pellets.length-1;i>=0;i--){const pe=pellets[i];if(Math.abs(pe.x-q.x)>r||Math.abs(pe.y-q.y)>r)continue;if(Math.hypot(pe.x-q.x,pe.y-q.y)<r){q.m+=pe.m||1;pellets.splice(i,1);if(!pe.m)pellets.push(pel());if(p===me&&Math.random()<.3)beep(900+Math.random()*600,.02,'sine',.02)}}
@@ -80,9 +110,11 @@ run(root,c){const{cv,x,W,H}=ioCanvas(root);const ptr=ioPointer(c,cv,W,H);root.ap
       const m=mass(p);p.maxM=Math.max(p.maxM,m)});
     pellets.forEach(pe=>{if(pe.vx){pe.x+=pe.vx*dt;pe.y+=pe.vy*dt;pe.vx*=Math.pow(.01,dt);pe.vy*=Math.pow(.01,dt);if(Math.abs(pe.vx)<1)pe.vx=0}});
     // eat each other
-    const all=[];players.forEach(p=>{if(!p.dead)p.cells.forEach(q=>all.push([q,p]))});all.sort((a,b)=>b[0].m-a[0].m);
+    all=[];players.forEach(p=>{if(!p.dead)p.cells.forEach(q=>all.push([q,p]))});all.sort((a,b)=>b[0].m-a[0].m);
     for(let i=0;i<all.length;i++){const[a,pa]=all[i];if(a.m<=0)continue;const ra=R(a.m);for(let j=i+1;j<all.length;j++){const[b,pb]=all[j];if(b.m<=0||pa===pb)continue;if(a.m<b.m*1.25||pb.safe>0)continue;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<ra-R(b.m)*.35){a.m+=b.m;b.m=0;b.by=pa;if(pa===me){pw_pop(b,'+'+Math.round(b.m||0));beep(300,.08,'square',.05)}}}}
     players.forEach(p=>{if(p.dead)return;p.safe=Math.max(0,(p.safe||0)-dt);let by=null;p.cells.forEach(q=>{if(q.m<=0&&q.by)by=q.by});p.cells=p.cells.filter(q=>q.m>0);if(!p.cells.length)die(p,by)});
+    if(on.active){sendT-=dt;if(sendT<=0){sendT=1/14;players.forEach(p=>{if(p.net)on.snapTo(p.peer,snapFor(p))})}}
+    }
     // camera
     if(!me.dead&&me.cells.length){let sx=0,sy=0,sm=0,tr=0;me.cells.forEach(q=>{sx+=q.x*q.m;sy+=q.y*q.m;sm+=q.m;tr+=R(q.m)});cam.x+=(sx/sm-cam.x)*.15;cam.y+=(sy/sm-cam.y)*.15;const tz=clamp(1.6/(1+tr/140),.35,1.3);cam.z+=(tz-cam.z)*.05}else deadT+=dt;
     // draw
@@ -97,9 +129,11 @@ run(root,c){const{cv,x,W,H}=ioCanvas(root);const ptr=ioPointer(c,cv,W,H);root.ap
       if(r>16){x.fillStyle='#fff';x.strokeStyle='#1D1A2F';x.lineWidth=Math.max(2,r*.06);x.font='800 '+Math.max(12,r*.32)+'px Figtree, sans-serif';x.textAlign='center';x.textBaseline='middle';x.strokeText(p.name,q.x,q.y);x.fillText(p.name,q.x,q.y);if(r>30){x.font='700 '+Math.max(10,r*.2)+'px Figtree, sans-serif';x.strokeText(Math.round(q.m),q.x,q.y+r*.36);x.fillText(Math.round(q.m),q.x,q.y+r*.36)}}});
     viruses.forEach(v=>{if(cells.some(([q])=>q.m>v.m*1.2))drawV(v)});
     x.restore();
-    const lb=players.filter(p=>!p.dead).map(p=>[p.name,Math.round(mass(p)),p===me]).sort((a,b)=>b[1]-a[1]);const myRank=lb.findIndex(r=>r[2]);ioBoard(x,W,lb.slice(0,8).concat(myRank>=8?[lb[myRank]]:[]),'Leaderboard');
+    const lb=GUEST?lbNet.map(([n,v,id])=>[id===on.myId?'You':n,v,id===on.myId]):players.filter(p=>!p.dead).map(p=>[p.name,Math.round(mass(p)),p===me]).sort((a,b)=>b[1]-a[1]);const myRank=lb.findIndex(r=>r[2]);ioBoard(x,W,lb.slice(0,8).concat(myRank>=8?[lb[myRank]]:[]),'Leaderboard');
     x.fillStyle='#1D1A2F';x.font='700 16px "JetBrains Mono", monospace';x.textAlign='left';x.fillText('MASS '+Math.round(mass(me))+'   BEST '+Math.round(me.maxM),16,28);
-    if(dead)ioOver(x,W,H,'Eaten by '+killer+'!','You reached '+Math.round(me.maxM)+' mass. Click to play again.');c.stat('Blob Feast · mass '+Math.round(mass(me)))});
+    if(dead)ioOver(x,W,H,'Eaten by '+killer+'!','You reached '+Math.round(me.maxM)+' mass. Click to play again.');
+    if(on.active){x.save();x.fillStyle='rgba(29,26,47,.8)';x.font='800 13px Figtree, sans-serif';const t2=on.role==='host'?'🌐 Hosting · '+(on.friends.length)+' friend'+(on.friends.length===1?'':'s')+' in your arena':'🌐 Online in a friend’s arena';const tw=x.measureText(t2).width+24;x.beginPath();x.roundRect(W/2-tw/2,8,tw,26,13);x.fill();x.fillStyle='#fff';x.textAlign='center';x.fillText(t2,W/2,26);x.restore()}
+    if(onMsgT>0){onMsgT-=1/60;ioOver(x,W,H,'Online game ended',onMsg)}c.stat('Blob Feast · mass '+Math.round(mass(me)))});
   function pw_pop(){} }});
 </script>
 <script src="/js/app.js"></script>

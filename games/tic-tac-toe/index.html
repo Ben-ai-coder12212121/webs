@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Tic-Tac-Toe: game code ===================== */
 G.push({id:'ttt',levels:true,name:'Tic-Tac-Toe',kind:'game',tint:'var(--pink)',blurb:'Beat the computer. On hard, a draw is a win.',fmt:b=>b+' wins',
@@ -60,11 +61,18 @@ run(root,c){
   function tl(){c.stat('W '+tally.w+' · L '+tally.l+' · D '+tally.d);S.set('ttt_tally',tally);c.best(tally.w)}
   function draw(){bs.forEach((x,i)=>{x.textContent=b[i];x.className=b[i]?b[i].toLowerCase():''})}
   function end(){const w=win(b);if(!w)return false;over=true;if(w.l)w.l.forEach(i=>bs[i].classList.add('win'));
+    if(on.active){msg.textContent=w.p==='draw'?'Draw. Press New round for a rematch.':w.p===me()?'You win! Press New round for a rematch.':on.friend+' wins this one.';beep(w.p===me()?880:w.p==='draw'?400:160,.25,'triangle');return true}
     if(w.p==='X'){tally.w++;msg.textContent='You win!';beep(880,.25,'triangle')}else if(w.p==='O'){tally.l++;msg.textContent='The computer wins this one.';beep(160,.3,'sawtooth')}else{tally.d++;msg.textContent='Draw.';beep(400,.15)}tl();return true}
-  function play(i){if(over||b[i])return;b[i]='X';beep(500,.05);draw();if(end())return;over=true;
+  /* online: host is X and moves first, the friend is O */
+  const me=()=>on.active&&on.role==='guest'?'O':'X',them=()=>me()==='X'?'O':'X';let turn='X';
+  const on=Online.pair({game:'ttt',onStart:(role,name)=>{reset();msg.textContent=role==='host'?'Online vs '+name+'. You are X: your move.':'Online vs '+name+'. You are O: wait for X.'},
+    onMsg:m=>{if(m.t==='mv'&&!over&&!b[m.i]&&turn===them()){b[m.i]=them();turn=me();beep(340,.05);draw();if(!end())msg.textContent='Your move.'}if(m.t==='reset')reset(true)},
+    onEnd:t=>{reset();msg.textContent=t+' Back to playing the computer.'}});
+  function play(i){if(on.active){if(over||b[i]||turn!==me())return;b[i]=me();turn=them();beep(500,.05);draw();on.send({t:'mv',i});if(!end())msg.textContent='Waiting for '+on.friend+'…';return}
+    if(over||b[i])return;b[i]='X';beep(500,.05);draw();if(end())return;over=true;
     c.after(()=>{const empty=b.map((v,k)=>v?-1:k).filter(k=>k>=0);const mv=Math.random()<miss?pick(empty):mm(b,'O',0).i;b[mv]='O';over=false;beep(340,.05);draw();end()},280)}
-  function reset(){b=Array(9).fill('');over=false;draw();msg.textContent='You are X. Tap a square.'}
-  root.append(grid,msg,el('div',{class:'row'},el('button',{class:'btn',type:'button',onclick:reset},'New round')),el('p',{class:'hint'},c.pick('Easy: the computer makes lots of mistakes.','Normal: the computer slips up now and then.','Hard: the computer never loses. Aim for a draw.')));reset();tl();
+  function reset(fromNet){b=Array(9).fill('');over=false;turn='X';draw();msg.textContent=on&&on.active?(me()==='X'?'Your move.':'Waiting for '+on.friend+'…'):'You are X. Tap a square.';if(on&&on.active&&!fromNet)on.send({t:'reset'})}
+  root.append(grid,msg,el('div',{class:'row'},el('button',{class:'btn',type:'button',onclick:()=>reset()},'New round'),on.button),el('p',{class:'hint'},c.pick('Easy: the computer makes lots of mistakes.','Normal: the computer slips up now and then.','Hard: the computer never loses. Aim for a draw.')));reset();tl();
 }});
 </script>
 <script src="/js/app.js"></script>
