@@ -3,3 +3,7 @@ Game art used by Detourr's 3D games
 - Leaf-cluster foliage textures: ambientCG (ambientcg.com), CC0.
 - Characters: three.js example models (Soldier, Xbot, Michelle from Mixamo; Ready Player Me sample avatar).
 - Loaders: three.js r128 examples (MIT).
+- Animated characters (chars/q_*.glb): Quaternius (quaternius.com), CC0: Universal Base Characters (head, eyes, hair),
+  Modular Character Outfits - Fantasy (Ranger and Peasant outfits) and Universal Animation Library (motion clips).
+  Converted for the web: textures downsized to WebP, cloth mask baked into the outfit texture's alpha channel.
+- Trees, rocks, grass and bushes (models/n_nature.glb): Quaternius Stylized Nature MegaKit, CC0. Leaf textures greyed so games can tint them.

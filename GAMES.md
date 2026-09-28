@@ -189,7 +189,7 @@ All pages also load `css/site.css`, `js/core.js`, `js/catalog.js` and `js/app.js
 | Neon Harbor | `/games/neon-harbor/` | bk | three.js (CDN), assets/ (23 files) |
 | The Hollow | `/games/the-hollow/` | bk hollow | three.js (CDN), assets/ (21 files) |
 | Silent Contract | `/games/silent-contract/` | bk | three.js (CDN), assets/ (31 files) |
-| Moonblade | `/games/moonblade/` | bk | three.js (CDN), assets/ (19 files) |
+| Moonblade | `/games/moonblade/` | bk, qchar | three.js (CDN), assets/ (25 files, incl. chars/q_*.glb and models/n_nature.glb) |
 | Iron Palm | `/games/iron-palm/` | bk | three.js (CDN), assets/ (26 files) |
 | Spellbound Academy | `/games/spellbound-academy/` | bk | three.js (CDN), assets/ (19 files) |
 | Blob Feast | `/games/blob-feast/` | io | none |
