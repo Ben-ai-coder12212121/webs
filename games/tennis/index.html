@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Tennis: game code ===================== */
 G.push({id:'tennis',name:'Tennis',kind:'sports',levels:true,wide:true,tint:'#2BB673',blurb:'3D tennis tie-break. Time your swing to aim: early goes cross-court, late goes down the line.',fmt:b=>b+' wins',
@@ -61,24 +62,42 @@ run(root,c){return with3D(root,c,()=>{
   const me=mkP(0x2d6fd6),op=mkP(0xF2352A);const ball=part(T,sp(T,.045),M(T,0xdfff3a,{emissive:0x333300}),0,1,0,scene);const shadow=new T.Mesh(new T.CircleGeometry(.06,12),new T.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.3}));shadow.rotation.x=-Math.PI/2;scene.add(shadow);
   let st='menu',B={p:new T.Vector3(),v:new T.Vector3(),bounces:0,side:0,last:0,live:false},pm={x:0,z:HL+.8},om={x:0,z:-HL-.8},score=[0,0],server=0,swingT=-9,oswingT=-9,serveWait=0,msgT=0,wins=S.get('ten_w',0);
   const opSp=c.pick(4,5.2,7),opErr=c.pick(.3,.18,.08),win=c.pick(1.8,1.35,.8);
-  function upd(){Hh.obj('Tie-break · first to 7, win by 2',(server===0?'You serve':'CPU serves'));Hh.big('You '+score[0]+' – '+score[1]+' CPU','');c.stat('You '+score[0]+' – '+score[1]+' · Wins '+wins)}
+  /* online: the host plays the near side and runs the ball; the friend plays the far side */
+  let GUEST=false,snap=null,netX=null,sendT=0;const NET=()=>on&&on.active;const OPN=()=>NET()?(GUEST?'Host':(on.friends[0]||{name:'Friend'}).name):'CPU';
+  const hideOv=()=>{const ov=st3.wrap.querySelector('.ov3');if(ov)ov.remove();st3.wrap.classList.remove('paused')};
+  const on=Online.party({game:'tennis',max:2,title:'You play the near side, your friend the far side. First to 7, win by 2.',
+    onStart:role=>{GUEST=role==='guest';if(GUEST){hideOv();st='net'}upd()},onJoin:()=>upd(),onLeave:()=>{netX=null},
+    onInput:(peer,i)=>{if(Number.isFinite(i.x))netX=i.x},onAct:(peer,a)=>{if(a.go&&st!=='play'){hideOv();start()}if(a.sw)netHit(a.ax||0)},onSnap:sn=>{snap=sn},
+    onEnd:()=>{if(GUEST){GUEST=false;st='menu';st3.overlay('<h2>Tennis</h2><p>The online game ended.</p>',[['Play the computer',start,true]])}netX=null}});
+  root.append(el('div',{class:'row'},on.button));
+  function netHit(ax){oswingT=performance.now();if(!B.live&&serveWait<=0&&server===1&&st==='play'){hitTo(1,(Math.random()-.5)*2.5+1.8,4.5,1.0);return}const d=Math.hypot(B.p.x-om.x,B.p.z-om.z);if(!B.live||B.last===1||d>2.7||B.p.y>2.8)return;const early=(B.p.z-om.z);const aim=clamp(early*1.6,-1,1);const tx=-aim*HW*.9+ax*1.2,tz=HL*(.55+Math.random()*.35);if(Math.abs(early)>=1.35){hitTo(1,tx*1.6,HL+3-Math.random()*2,.9)}else hitTo(1,clamp(tx,-HW+.3,HW-.3),tz,.95)}
+  function upd(){const me0=GUEST?1:0,th=1-me0;Hh.obj('Tie-break · first to 7, win by 2',(server===me0?'You serve':OPN()+' serves'));Hh.big('You '+score[me0]+' – '+score[th]+' '+OPN(),'');c.stat('You '+score[me0]+' – '+score[th]+(NET()?' · online':' · Wins '+wins))}
   function setServe(){B.live=false;B.bounces=0;serveWait=1;pm.x=server===0?1:0;om.x=server===1?-1:0;if(server===0){B.p.set(pm.x+.3,2.2,pm.z-.2)}else{B.p.set(om.x-.3,2.2,om.z+.2)}B.v.set(0,0,0);upd()}
-  function point(w,why){score[w]++;Hh.say((w===0?'Your point':'CPU point')+(why?' · '+why:''),1300);beep(w===0?880:180,.3,w===0?'triangle':'sawtooth');B.live=false;const[a,b]=score;if((a>=7||b>=7)&&Math.abs(a-b)>=2){st='over';const won=a>b;if(won){wins++;S.set('ten_w',wins);c.best(wins)}c.after(()=>st3.overlay('<h2>'+(won?'Game, set, match!':'CPU takes the tie-break')+'</h2><p>'+a+' – '+b+'</p>',[['Play again',start,true]]),1200);return}if((a+b)%2===1)server=1-server;c.after(()=>{if(st==='play')setServe()},1300)}
+  function point(w,why){score[w]++;Hh.say((w===0?'Your point':OPN()+' point')+(why?' · '+why:''),1300);beep(w===0?880:180,.3,w===0?'triangle':'sawtooth');B.live=false;const[a,b]=score;if((a>=7||b>=7)&&Math.abs(a-b)>=2){st='over';const won=a>b;if(won&&!NET()){wins++;S.set('ten_w',wins);c.best(wins)}c.after(()=>st3.overlay('<h2>'+(won?'Game, set, match!':OPN()+' takes the tie-break')+'</h2><p>'+a+' – '+b+'</p>',[['Play again',start,true]]),1200);return}if((a+b)%2===1)server=1-server;c.after(()=>{if(st==='play')setServe()},1300)}
   function start(){score=[0,0];server=0;st='play';setServe()}
   function hitTo(fromSide,tx,tz,speedT){const p=B.p;const T2=speedT;const vx=(tx-p.x)/T2,vz=(tz-p.z)/T2;const vy=(0-p.y+.5*9.8*T2*T2)/T2;B.v.set(vx,vy,vz);B.last=fromSide;B.bounces=0;B.live=true;noise(.05,'highpass',2500,.4);beep(300,.05,'triangle',.08)}
   function myHit(){if(!B.live&&serveWait<=0&&server===0&&st==='play'){swingT=performance.now();hitTo(0,(Math.random()-.5)*2.5+(-1.8),-4.5,1.0);return}const d=Math.hypot(B.p.x-pm.x,B.p.z-pm.z);swingT=performance.now();if(!B.live||B.last===0||d>c.pick(3.2,2.7,2.1)||B.p.y>2.8)return;const early=(pm.z-B.p.z);const aim=clamp(early*1.6,-1,1);const tx=aim*HW*.9+(input.mx||0)*1.2,tz=-HL*(.55+Math.random()*.35);const good=Math.abs(early)<win;if(!good){hitTo(0,tx*1.6,-HL-3+Math.random()*2,.9);Hh.say(early>0?'Too early!':'Too late!',700)}else hitTo(0,clamp(tx,-HW+.3,HW-.3),tz,c.pick(1.05,.95,.85))}
   function opHit(){oswingT=performance.now();if(Math.random()<opErr){const t2=Math.random()<.5;hitTo(1,t2?(Math.random()-.5)*4:(Math.random()<.5?-1:1)*(HW+1),t2?-.4:HL*.7,1);return}hitTo(1,(Math.random()<.5?-1:1)*(1+Math.random()*2.6),HL*(.5+Math.random()*.35),c.pick(1.4,1.15,.9))}
   let lat=false;
-  st3.onFrame(dt=>{if(st!=='play'){camera.position.set(0,3.2,HL+5.5);camera.lookAt(0,0,-4);return}const K=input.keys;
+  let glat=false;
+  st3.onFrame(dt=>{if(GUEST){const K=input.keys;let tx=-(input.mx||0)*HW*1.5;if(K.a||K.arrowleft)tx=om.x+dt*7;if(K.d||K.arrowright)tx=om.x-dt*7;on.input({x:+clamp(tx,-HW-1.5,HW+1.5).toFixed(2)});
+      const click=(input.tap||input.fire||K[' '])&&!glat;glat=input.down||input.fire||K[' '];if(click){oswingT=performance.now();on.act(st==='over'?{go:1}:{sw:1,ax:+(-(input.mx||0)).toFixed(2)})}
+      if(snap){const s2=snap;if(s2.sc[0]!==score[0]||s2.sc[1]!==score[1]){const mine=s2.sc[1]>score[1];score=s2.sc.slice();Hh.say(mine?'Your point':'Host point',1200);beep(mine?880:180,.3,mine?'triangle':'sawtooth')}server=s2.sv;B.p.set(s2.b[0],s2.b[1],s2.b[2]);pm.x=s2.pm;om.x=s2.om;if(s2.osw)swingT=performance.now()-s2.osw;
+        if(s2.st==='over'&&st!=='over'){st='over';const won=score[1]>score[0];c.after(()=>st3.overlay('<h2>'+(won?'Game, set, match!':'Host takes the tie-break')+'</h2><p>'+score[1]+' – '+score[0]+'</p>',[['Rematch',()=>{hideOv();on.act({go:1})},true]]),800)}if(s2.st==='play'&&st==='over'){hideOv();st='net'}upd()}
+      ball.position.copy(B.p);shadow.position.set(B.p.x,.01,B.p.z);me.position.set(pm.x,0,pm.z);op.position.set(om.x,0,om.z);me.rotation.y=Math.PI;op.rotation.y=0;
+      const sw=(performance.now()-swingT)/250,osw=(performance.now()-oswingT)/250;me.userData.arms[1].rotation.x=sw<1?-2.4+sw*2.8:-.4;op.userData.arms[1].rotation.x=osw<1?-2.4+osw*2.8:-.4;
+      camera.position.lerp(new T.Vector3(om.x*.5,3.3,-HL-5.8),Math.min(1,dt*3));camera.lookAt(om.x*.2,0,3);return}
+    if(NET()){sendT-=dt;if(sendT<=0){sendT=1/30;const sw0=performance.now()-swingT;on.friends.forEach(f=>on.snapTo(f,{b:[+B.p.x.toFixed(3),+B.p.y.toFixed(3),+B.p.z.toFixed(3)],pm:+pm.x.toFixed(2),om:+om.x.toFixed(2),sc:score,sv:server,st,osw:sw0<300?Math.round(sw0):0}))}}
+    if(st!=='play'){camera.position.set(0,3.2,HL+5.5);camera.lookAt(0,0,-4);return}const K=input.keys;
     let tx=clamp((input.mx||0)*HW*1.5,-HW-1.5,HW+1.5);if(input.touch)tx=pm.x+input.joy.x*dt*9;if(K.a||K.arrowleft)tx=pm.x-dt*7;if(K.d||K.arrowright)tx=pm.x+dt*7;if(c.level<2&&B.live&&B.last===1){const tt=(pm.z-B.p.z)/Math.max(1,B.v.z);const w2=c.level===0?.75:.5;tx=tx*(1-w2)+(B.p.x+B.v.x*tt)*w2}
     pm.x+=clamp(tx-pm.x,-8*dt,8*dt);const click=(input.tap||input.fire||K[' '])&&!lat;lat=input.down||input.fire||K[' '];if(click)myHit();
-    if(serveWait>0){serveWait-=dt;if(server===1&&serveWait<=0){oswingT=performance.now();hitTo(1,(Math.random()-.5)*3+1.5,4.8,c.pick(1.15,1,.9))}}
+    if(serveWait>0){serveWait-=dt;if(server===1&&serveWait<=0&&!(NET()&&on.friends.length)){oswingT=performance.now();hitTo(1,(Math.random()-.5)*3+1.5,4.8,c.pick(1.15,1,.9))}}
     if(B.live){const p=B.p,pz=p.z;for(let k=0;k<4;k++){const d=dt/4;B.v.y-=9.8*d;p.addScaledVector(B.v,d);if(p.y<.045){p.y=.045;B.v.y=Math.abs(B.v.y)*.72;B.v.x*=.9;B.v.z*=.9;B.bounces++;const side=p.z>0?0:1;beep(200,.02,'square',.05);
         if(B.bounces===1){const inX=Math.abs(p.x)<=HW+.05,inZ=Math.abs(p.z)<=HL+.05;if(!inX||!inZ||side===B.last){point(B.last===0?1:0,'Out');return}}else if(B.bounces>=2){point(side===0?1:0,'Double bounce');return}}
         if((pz>0)!==(p.z>0)&&p.y<.93){B.v.z*=-.2;B.v.x*=.2;point(B.last===0?1:0,'Into the net');return}}
-      if(B.last===0&&p.z<0&&B.v.z<0){const tt=(om.z-p.z)/B.v.z;const px=p.x+B.v.x*Math.max(0,tt);om.x+=clamp(px-om.x,-opSp*dt,opSp*dt)}else om.x+=clamp(0-om.x,-2*dt,2*dt);
-      if(B.last===0&&Math.hypot(p.x-om.x,p.z-om.z)<1.6&&p.y<2.4&&(B.bounces===1||p.z>-HL+1&&B.bounces===0&&Math.random()<.02))opHit();
-      if(p.z>HL+4)point(1,'Missed it');if(p.z<-HL-4)point(0,'CPU missed');if(Math.abs(p.x)>HW+8)point(B.last===0?1:0,'Way out')}
+      if(NET()&&netX!=null){om.x+=clamp(netX-om.x,-8*dt,8*dt)}else{if(B.last===0&&p.z<0&&B.v.z<0){const tt=(om.z-p.z)/B.v.z;const px=p.x+B.v.x*Math.max(0,tt);om.x+=clamp(px-om.x,-opSp*dt,opSp*dt)}else om.x+=clamp(0-om.x,-2*dt,2*dt);
+      if(B.last===0&&Math.hypot(p.x-om.x,p.z-om.z)<1.6&&p.y<2.4&&(B.bounces===1||p.z>-HL+1&&B.bounces===0&&Math.random()<.02))opHit()}
+      if(p.z>HL+4)point(1,'Missed it');if(p.z<-HL-4)point(0,OPN()+' missed');if(Math.abs(p.x)>HW+8)point(B.last===0?1:0,'Way out')}
     ball.position.copy(B.p);shadow.position.set(B.p.x,.01,B.p.z);me.position.set(pm.x,0,pm.z);op.position.set(om.x,0,om.z);me.rotation.y=Math.PI;op.rotation.y=0;
     const sw=(performance.now()-swingT)/250,osw=(performance.now()-oswingT)/250;me.userData.arms[1].rotation.x=sw<1?-2.4+sw*2.8:-.4;me.userData.arms[1].rotation.z=sw<1?-.5:0;op.userData.arms[1].rotation.x=osw<1?-2.4+osw*2.8:-.4;
     camera.position.lerp(new T.Vector3(pm.x*.5,3.3,HL+5.8),Math.min(1,dt*3));camera.lookAt(pm.x*.2,0,-3)});
