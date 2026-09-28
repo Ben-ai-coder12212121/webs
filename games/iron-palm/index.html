@@ -33,7 +33,7 @@
 </div>
 <div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
 <div class="seo">
-<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Iron Palm</h1><p>A kung fu revenge brawler in the spirit of Sifu. Chain strikes, parry and break structure for brutal takedowns, fight with bats, pipes and bottles, and slam enemies into walls. A cursed pendant revives you, but every death ages you. Take down five bosses before old age does.</p></div></main></div>
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Iron Palm</h1><p>A kung fu revenge brawler inspired by classic martial-arts action films. Chain strikes, parry and break structure for brutal takedowns, fight with bats, pipes and bottles, and slam enemies into walls. A cursed pendant revives you, but every death ages you. Take down five bosses before old age does.</p></div></main></div>
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
@@ -195,7 +195,7 @@ st3.onFrame(update);
 window.__IP=window.__BK={P,EN,RUN,ROOMS,PROPS,LVL,PROG,K,startLevel,pStart,killE,sim(n,dt){for(let i=0;i<n;i++)update(dt||1/30);return this.tick()},tick(){return{hp:P.hp|0,age:P.age,deaths:P.deaths,room:P.room,state:RUN.state,en:EN.filter(e=>!e.dead).length,boss:RUN.boss?RUN.boss.hp|0:null,pos:[+P.pos.x.toFixed(1),+P.pos.z.toFixed(1)]}}};
 return()=>{K.dispose();st3.dispose()}})}
 G.push({id:'ironpalm',name:'Iron Palm',kind:'game',wide:true,big:true,major:true,tags:['kung fu','brawler','martial arts'],tint:'#1a1210',
-  blurb:'A kung fu revenge brawler in the spirit of Sifu. Chain strikes, parry and break structure for brutal takedowns, fight with bats, pipes and bottles, and slam enemies into walls. A cursed pendant revives you, but every death ages you. Take down five bosses before old age does.',fmt:b=>Math.floor(b/100)+'/5 bosses',
+  blurb:'A kung fu revenge brawler inspired by classic martial-arts action films. Chain strikes, parry and break structure for brutal takedowns, fight with bats, pipes and bottles, and slam enemies into walls. A cursed pendant revives you, but every death ages you. Take down five bosses before old age does.',fmt:b=>Math.floor(b/100)+'/5 bosses',
   art:'<rect width="120" height="72" fill="#1a1210"/><rect y="54" width="120" height="18" fill="#2a1e18"/><circle cx="60" cy="30" r="22" fill="#a8281e" opacity=".35"/><circle cx="46" cy="20" r="5" fill="#d8b090"/><path d="M40 28l6-3 8 6 16-6-2 5-14 6-4 14 6 14h-5l-6-12-6 12h-5l6-16z" fill="#0a0a0a"/><path d="M66 24l14-4" stroke="#e8e0d0" stroke-width="3"/><circle cx="92" cy="30" r="5" fill="#a87858"/><path d="M86 38l6-2 6 2-2 16 3 16h-4l-3-12-3 12h-4l3-16z" fill="#5a3a2a"/><circle cx="60" cy="62" r="3" fill="#4ac88a"/>',
   run(root,c){return ironPalm(root,c)}});
 </script>
