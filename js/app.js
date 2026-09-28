@@ -1,6 +1,6 @@
 /* app.js: the game player (top bar, levels, leaderboards, full screen, random button) and the homepage grid */
 const ALLG=G.slice();const PAGE=window.PAGE_GAME||null;const gameUrl=g=>(g.url||("/games/"+g.id+"/"));
-const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound'];
+const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'mindreader'];
 const WIP=G.filter(g=>WIP_IDS.includes(g.id));
 WIP.forEach(g=>G.splice(G.indexOf(g),1));
 const stage=$('#stage'),arena=$('#arena'),statEl=$('#stat'),grid=$('#grid');
