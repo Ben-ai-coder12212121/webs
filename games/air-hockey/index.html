@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Air Hockey: game code ===================== */
 G.push({id:'airhockey',name:'Air Hockey',kind:'sports',levels:true,wide:true,tint:'#7FC8F8',blurb:'3D air hockey against the computer. First to 7 goals wins.',fmt:b=>b+' wins',
@@ -59,15 +60,28 @@ run(root,c){return with3D(root,c,()=>{
   const rail=M(T,0x3a3552);[[0,-ZL-.05,XW*2+.2,.1],[0,ZL+.05,XW*2+.2,.1]].forEach(([x2,z,w,d])=>{part(T,bx(T,(w-GW*2)/2-.05,.12,d),rail,-(GW+(w-GW*2)/4),.06,z,scene);part(T,bx(T,(w-GW*2)/2-.05,.12,d),rail,GW+(w-GW*2)/4,.06,z,scene)});[-XW-.05,XW+.05].forEach(x2=>part(T,bx(T,.1,.12,ZL*2+.2),rail,x2,.06,0,scene));part(T,bx(T,XW*2+.5,.8,ZL*2+.5),M(T,0x2a2640),0,-.41,0,scene);
   const puck=part(T,cy(T,PR,PR,.03,24),M(T,0x1D1A2F),0,.02,0,scene);const mk=(col)=>{const g=new T.Group();part(T,cy(T,MR,MR,.04,24),M(T,col),0,.02,0,g);part(T,cy(T,.04,.05,.1,16),M(T,col),0,.08,0,g);part(T,sp(T,.055),M(T,col),0,.14,0,g);scene.add(g);return g};const me=mk(0x2d6fd6),cpu=mk(0xF2352A);
   let P={x:0,z:0,vx:0,vz:0},A={x:0,z:1.5,vx:0,vz:0},B={x:0,z:-1.5,vx:0,vz:0},sm=0,sc2=0,state='menu',serveT=0,wins=S.get('ah_w',0);const cpuSp=c.pick(1.6,2.5,3.6),react=c.pick(.25,.12,.04);let cpuT={x:0,z:-1.5},rT=0;
+  /* online: the host plays blue and runs the puck; the friend plays red from the other end of the table */
+  let GUEST=false,snap=null,netB=null,sendT=0;const NET=()=>on&&on.active;const hideOv=()=>{const ov=wrap.querySelector('.ov3');if(ov)ov.remove();wrap.classList.remove('paused')};
+  const on=Online.party({game:'airhockey',max:2,title:'You play blue, your friend plays red. First to 7.',
+    onStart:role=>{GUEST=role==='guest';if(GUEST){hideOv();state='net'}upd()},onJoin:()=>upd(),onLeave:()=>{netB=null},
+    onInput:(peer,i)=>{if(Number.isFinite(i.x))netB=i},onAct:(peer,a)=>{if(a.go&&state!=='play'){hideOv();start()}},onSnap:sn=>{snap=sn},
+    onEnd:()=>{if(GUEST){GUEST=false;state='menu';st3.overlay('<h2>Air Hockey</h2><p>The online game ended.</p>',[['Play the computer',start,true]])}netB=null}});
+  root.append(el('div',{class:'row'},on.button));
   function serve(toMe){P={x:0,z:toMe?.5:-.5,vx:0,vz:0};serveT=.8}
   function start(){sm=0;sc2=0;A={x:0,z:1.5,vx:0,vz:0};B={x:0,z:-1.5,vx:0,vz:0};state='play';serve(Math.random()<.5);upd()}
-  function upd(){Hh.obj('First to 7','You '+sm+' – '+sc2+' CPU');Hh.big('Wins '+wins,sm+' : '+sc2);c.stat('You '+sm+' – '+sc2+' CPU · Wins '+wins)}
-  function goal(mine){if(mine)sm++;else sc2++;Hh.say(mine?'GOAL!':'CPU scores',1200);beep(mine?880:180,.4,mine?'triangle':'sawtooth');noise(.4,'lowpass',600,.3);upd();if(sm>=7||sc2>=7){state='over';const w=sm>sc2;if(w){wins++;S.set('ah_w',wins);c.best(wins)}c.after(()=>st3.overlay('<h2>'+(w?'You win!':'CPU wins')+'</h2><p>'+sm+' – '+sc2+'</p>',[['Rematch',start,true]]),700)}else serve(!mine)}
+  function upd(){const them=NET()?(GUEST?'Host':(on.friends[0]||{name:'Friend'}).name):'CPU';if(GUEST){Hh.obj('First to 7','You '+sc2+' – '+sm+' '+them);Hh.big('Online',sc2+' : '+sm);c.stat('You '+sc2+' – '+sm+' Host');return}Hh.obj('First to 7','You '+sm+' – '+sc2+' '+them);Hh.big('Wins '+wins,sm+' : '+sc2);c.stat('You '+sm+' – '+sc2+' CPU · Wins '+wins)}
+  function goal(mine){if(mine)sm++;else sc2++;Hh.say(mine?'GOAL!':'CPU scores',1200);beep(mine?880:180,.4,mine?'triangle':'sawtooth');noise(.4,'lowpass',600,.3);upd();if(sm>=7||sc2>=7){state='over';const w=sm>sc2;if(w&&!NET()){wins++;S.set('ah_w',wins);c.best(wins)}c.after(()=>st3.overlay('<h2>'+(w?'You win!':'CPU wins')+'</h2><p>'+sm+' – '+sc2+'</p>',[['Rematch',start,true]]),700)}else serve(!mine)}
   function hitM(m){const dx=P.x-m.x,dz=P.z-m.z,d=Math.hypot(dx,dz);if(d<PR+MR&&d>0){const nx=dx/d,nz=dz/d;P.x=m.x+nx*(PR+MR);P.z=m.z+nz*(PR+MR);const rv=(P.vx-m.vx)*nx+(P.vz-m.vz)*nz;if(rv<0){P.vx-=1.9*rv*nx;P.vz-=1.9*rv*nz}const s=Math.hypot(P.vx,P.vz),smax=c.pick(5.5,7,8.5);if(s>smax){P.vx*=smax/s;P.vz*=smax/s}beep(500+Math.random()*200,.04,'square',.06);noise(.03,'highpass',2000,.2)}}
-  st3.onFrame(dt=>{camera.position.set(0,2.9,3.1);camera.lookAt(0,0,.1);if(state!=='play')return;
+  st3.onFrame(dt=>{if(GUEST){camera.position.set(0,2.9,-3.1);camera.lookAt(0,0,-.1);const rc=new T.Raycaster();rc.setFromCamera({x:input.mx||0,y:input.my||0},camera);const o=rc.ray.origin,d=rc.ray.direction,t=(0.02-o.y)/d.y;
+      on.input({x:+clamp(o.x+d.x*t,-XW+MR,XW-MR).toFixed(3),z:+clamp(o.z+d.z*t,-ZL+MR,-MR-.02).toFixed(3)});
+      if(snap){const s2=snap;if(s2.sm!==sm||s2.sc!==sc2){const mine=s2.sc>sc2;sm=s2.sm;sc2=s2.sc;Hh.say(mine?'GOAL!':'Host scores',1200);upd()}P=s2.P;A=s2.A;B=s2.B;if(s2.st==='over'&&state!=='over'){state='over';c.after(()=>st3.overlay('<h2>'+(sc2>sm?'You win!':'Host wins')+'</h2><p>'+sc2+' – '+sm+'</p>',[['Rematch',()=>{hideOv();on.act({go:1})},true]]),500)}if(s2.st==='play'&&state==='over'){hideOv();state='net'}}
+      puck.position.set(P.x,.02,P.z);me.position.set(A.x,0,A.z);cpu.position.set(B.x,0,B.z);return}
+    camera.position.set(0,2.9,3.1);camera.lookAt(0,0,.1);
+    if(NET()){sendT-=dt;if(sendT<=0){sendT=1/30;const r3=v=>+v.toFixed(3);on.friends.forEach(f=>on.snapTo(f,{P:{x:r3(P.x),z:r3(P.z)},A:{x:r3(A.x),z:r3(A.z)},B:{x:r3(B.x),z:r3(B.z)},sm,sc:sc2,st:state}))}}
+    if(state!=='play')return;
     const tgt=rayToPlaneZ(T,camera,input.mx||0,input.my||0,0);const rc=new T.Raycaster();rc.setFromCamera({x:input.mx||0,y:input.my||0},camera);const o=rc.ray.origin,d=rc.ray.direction,t=(0.02-o.y)/d.y;let mx=o.x+d.x*t,mz=o.z+d.z*t;
     mx=clamp(mx,-XW+MR,XW-MR);mz=clamp(mz,MR+.02,ZL-MR);A.vx=(mx-A.x)/dt;A.vz=(mz-A.z)/dt;A.x=mx;A.z=mz;
-    rT-=dt;if(rT<=0){rT=react;const defend=P.z>0||P.vz>1;cpuT=defend?{x:clamp(P.x*.6,-.5,.5),z:-ZL+.35}:{x:P.x+(P.x>0?.05:-.05),z:P.z-.18}}const dx=cpuT.x-B.x,dz=cpuT.z-B.z,dd=Math.hypot(dx,dz),mv=Math.min(dd,cpuSp*dt);const nbx=clamp(B.x+(dd?dx/dd*mv:0),-XW+MR,XW-MR),nbz=clamp(B.z+(dd?dz/dd*mv:0),-ZL+MR,-MR-.02);B.vx=(nbx-B.x)/dt;B.vz=(nbz-B.z)/dt;B.x=nbx;B.z=nbz;
+    if(NET()&&netB){const nbx=clamp(netB.x,-XW+MR,XW-MR),nbz=clamp(netB.z,-ZL+MR,-MR-.02);B.vx=(nbx-B.x)/dt;B.vz=(nbz-B.z)/dt;B.x=nbx;B.z=nbz}else{rT-=dt;if(rT<=0){rT=react;const defend=P.z>0||P.vz>1;cpuT=defend?{x:clamp(P.x*.6,-.5,.5),z:-ZL+.35}:{x:P.x+(P.x>0?.05:-.05),z:P.z-.18}}const dx=cpuT.x-B.x,dz=cpuT.z-B.z,dd=Math.hypot(dx,dz),mv=Math.min(dd,cpuSp*dt);const nbx=clamp(B.x+(dd?dx/dd*mv:0),-XW+MR,XW-MR),nbz=clamp(B.z+(dd?dz/dd*mv:0),-ZL+MR,-MR-.02);B.vx=(nbx-B.x)/dt;B.vz=(nbz-B.z)/dt;B.x=nbx;B.z=nbz}
     if(serveT>0)serveT-=dt;else for(let k=0;k<6;k++){const s=dt/6;P.x+=P.vx*s;P.z+=P.vz*s;if(P.x<-XW+PR){P.x=-XW+PR;P.vx=Math.abs(P.vx)*.92;beep(300,.02,'square',.03)}if(P.x>XW-PR){P.x=XW-PR;P.vx=-Math.abs(P.vx)*.92;beep(300,.02,'square',.03)}
       if(P.z<-ZL+PR){if(Math.abs(P.x)<GW){goal(true);break}P.z=-ZL+PR;P.vz=Math.abs(P.vz)*.92}if(P.z>ZL-PR){if(Math.abs(P.x)<GW){goal(false);break}P.z=ZL-PR;P.vz=-Math.abs(P.vz)*.92}hitM(A);hitM(B);P.vx*=Math.pow(.97,s);P.vz*=Math.pow(.97,s)}
     puck.position.set(P.x,.02,P.z);me.position.set(A.x,0,A.z);cpu.position.set(B.x,0,B.z)});

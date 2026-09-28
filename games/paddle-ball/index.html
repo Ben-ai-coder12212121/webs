@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Paddle Ball: game code ===================== */
 G.push({id:'pong',levels:true,name:'Paddle Ball',kind:'game',wide:true,tint:'#3a3552',blurb:'The classic. First to 7 beats the computer.',fmt:b=>b+' wins',
@@ -54,11 +55,19 @@ art:'<rect x="14" y="16" width="7" height="26" rx="2" fill="#FFD23F"/><rect x="9
 run(root,c){
   const W=600,H=400,PH=80;const[cv,x]=mk(W,H,'width:min(100%,640px)');let p,q,b,sc,state,held={u:0,d:0},wins=S.get('pong_wins',0);
   function serve(dir){b={x:W/2,y:H/2,vx:.3*dir,vy:(Math.random()-.5)*.3}}
-  function st(){c.stat('You '+sc[0]+' – '+sc[1]+' CPU · Wins '+wins)}
+  function st(){c.stat(NET()?(GUEST?on.friendName+' '+sc[0]+' – '+sc[1]+' You':'You '+sc[0]+' – '+sc[1]+' '+(on.friends[0]||{}).name):'You '+sc[0]+' – '+sc[1]+' CPU · Wins '+wins)}
+  /* online: the host plays the left paddle and runs the ball; the friend plays the right paddle */
+  let GUEST=false,snap=null,netQ=null,sendT=0;const NET=()=>on&&on.active;
+  const on=Online.party({game:'pong',max:2,title:'You on the left, your friend on the right. First to 7.',
+    onStart:role=>{GUEST=role==='guest';on.friendName=role==='guest'?'Host':'';reset()},onJoin:()=>{reset()},onLeave:()=>{netQ=null},
+    onInput:(peer,i)=>{if(Number.isFinite(i.y))netQ=i.y},onAct:(peer,a)=>{if(a.go)go()},onSnap:sn=>{snap=sn},onEnd:()=>{GUEST=false;netQ=null;reset()}});
+  root.append(el('div',{class:'row'},on.button));
   function reset(){p=q=H/2;sc=[0,0];state='ready';serve(1);st()}
   function go(){if(state==='ready')state='run';else if(state==='over'){reset();state='run'}}
-  function point(w){sc[w]++;beep(w?150:880,.2,w?'sawtooth':'triangle');if(sc[w]>=7){state='over';if(!w){wins++;S.set('pong_wins',wins);c.best(wins)}}else serve(w?1:-1);st()}
-  function update(dt){p=clamp(p+(held.d-held.u)*.5*dt,PH/2,H-PH/2);const tgt=b.vx>0?b.y:H/2;const cs=c.pick(.16,.26,.38);q=clamp(q+clamp(tgt-q,-cs*dt,cs*dt),PH/2,H-PH/2);if(state!=='run')return;
+  function point(w){sc[w]++;beep(w?150:880,.2,w?'sawtooth':'triangle');if(sc[w]>=7){state='over';if(!w&&!NET()){wins++;S.set('pong_wins',wins);c.best(wins)}}else serve(w?1:-1);st()}
+  function update(dt){if(GUEST){q=clamp(q+(held.d-held.u)*.5*dt,PH/2,H-PH/2);on.input({y:Math.round(q)});if(snap){p=snap.p;b=snap.b;sc=snap.sc;state=snap.st;st()}return}
+    p=clamp(p+(held.d-held.u)*.5*dt,PH/2,H-PH/2);if(NET()&&netQ!=null)q=clamp(netQ,PH/2,H-PH/2);else{const tgt=b.vx>0?b.y:H/2;const cs=c.pick(.16,.26,.38);q=clamp(q+clamp(tgt-q,-cs*dt,cs*dt),PH/2,H-PH/2)}
+    if(NET()){sendT-=dt;if(sendT<=0){sendT=33;on.friends.forEach(f=>on.snapTo(f,{p:Math.round(p),b:{x:Math.round(b.x),y:Math.round(b.y),vx:b.vx,vy:b.vy},sc,st:state}))}}if(state!=='run')return;
     b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.y<8){b.y=8;b.vy=Math.abs(b.vy)}if(b.y>H-8){b.y=H-8;b.vy=-Math.abs(b.vy)}
     if(b.vx<0&&b.x-8<34&&b.x>14&&Math.abs(b.y-p)<PH/2+8){b.vx=Math.min(.8,Math.abs(b.vx)*1.07);b.vy=(b.y-p)/(PH/2)*.35;beep(440,.04,'square',.05)}
     if(b.vx>0&&b.x+8>W-34&&b.x<W-14&&Math.abs(b.y-q)<PH/2+8){b.vx=-Math.min(.8,Math.abs(b.vx)*1.07);b.vy=(b.y-q)/(PH/2)*.35;beep(330,.04,'square',.05)}
@@ -66,9 +75,10 @@ run(root,c){
   function draw(){x.fillStyle='#1D1A2F';x.fillRect(0,0,W,H);x.strokeStyle='rgba(255,253,246,.3)';x.setLineDash([8,10]);x.lineWidth=3;x.beginPath();x.moveTo(W/2,0);x.lineTo(W/2,H);x.stroke();x.setLineDash([]);
     x.fillStyle='rgba(255,253,246,.25)';x.font='64px "Bagel Fat One", sans-serif';x.textAlign='center';x.fillText(sc[0],W/2-70,80);x.fillText(sc[1],W/2+70,80);
     x.fillStyle='#FFD23F';rr(x,20,p-PH/2,12,PH,4);x.fill();rr(x,W-32,q-PH/2,12,PH,4);x.fill();x.fillStyle='#FFFDF6';x.beginPath();x.arc(b.x,b.y,8,0,7);x.fill();
-    if(state==='ready')banner(x,W,H,'Paddle Ball','Mouse, finger or ↑↓ to move. Click to serve.');if(state==='over')banner(x,W,H,sc[0]>sc[1]?'You win!':'CPU wins','Click to play again')}
-  c.on(cv,'pointermove',e=>{p=canvasPos(cv,e).y});c.on(cv,'pointerdown',e=>{e.preventDefault();p=canvasPos(cv,e).y;go()});
-  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')held.u=1;if(k==='arrowdown'||k==='s')held.d=1;if(k===' ')go()});
+    if(NET()){x.fillStyle='rgba(255,253,246,.7)';x.font='800 13px Figtree, sans-serif';x.fillText(GUEST?'Host':'You',60,H-12);x.fillText(GUEST?'You':(on.friends[0]||{name:'Friend'}).name,W-60,H-12)}
+    if(state==='ready')banner(x,W,H,'Paddle Ball',NET()?'Click to serve. First to 7.':'Mouse, finger or ↑↓ to move. Click to serve.');if(state==='over'){const myS=GUEST?sc[1]:sc[0],thS=GUEST?sc[0]:sc[1];banner(x,W,H,myS>thS?'You win!':NET()?'Your friend wins':'CPU wins','Click to play again')}}
+  c.on(cv,'pointermove',e=>{if(GUEST)q=canvasPos(cv,e).y;else p=canvasPos(cv,e).y});c.on(cv,'pointerdown',e=>{e.preventDefault();if(GUEST){q=canvasPos(cv,e).y;on.act({go:1});return}p=canvasPos(cv,e).y;go()});
+  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')held.u=1;if(k==='arrowdown'||k==='s')held.d=1;if(k===' '){GUEST?on.act({go:1}):go()}});
   c.on(document,'keyup',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')held.u=0;if(k==='arrowdown'||k==='s')held.d=0});
   reset();root.append(cv);c.loop(dt=>{update(dt);draw()});
 }});
