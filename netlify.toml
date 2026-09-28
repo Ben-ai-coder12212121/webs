@@ -7,3 +7,9 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+# Game art (CC0 textures, HDRIs, glTF models): long-lived browser cache
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"

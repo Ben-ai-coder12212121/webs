@@ -1,0 +1,5 @@
+Game art used by Detourr's 3D games
+- Textures, HDRIs and props: Poly Haven (polyhaven.com), CC0.
+- Leaf-cluster foliage textures: ambientCG (ambientcg.com), CC0.
+- Characters: three.js example models (Soldier, Xbot, Michelle from Mixamo; Ready Player Me sample avatar).
+- Loaders: three.js r128 examples (MIT).
