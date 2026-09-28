@@ -1,0 +1,5 @@
+/* lib/info2.js: code shared by several games (from src/heroes/info2.js) */
+function chipRow(opts,cur,on,multi){const row=el('div',{class:'row',style:'flex-wrap:wrap;gap:6px;justify-content:center'});const bs=opts.map((o,i)=>{const b=el('button',{type:'button',class:'btn',style:'font-size:14px;padding:6px 11px'},o);b.addEventListener('click',()=>{on(i);paint()});row.append(b);return b});function paint(){const s=cur();bs.forEach((b,i)=>b.classList.toggle('primary',multi?s.includes(i):s===i))}paint();row.paint=paint;return row}
+const fmtN=(n,d)=>n.toLocaleString('en-US',{maximumFractionDigits:d||0,minimumFractionDigits:d||0});
+function fmtDur(h){if(!isFinite(h))return'forever';const m=h*60;if(m<1)return fmtN(m*60,1)+' seconds';if(h<1)return fmtN(m,m<10?1:0)+' minutes';if(h<48)return fmtN(h,h<10?1:0)+' hours';const d=h/24;if(d<365*2)return fmtN(d,d<10?1:0)+' days';const y=d/365.25;if(y<1e6)return fmtN(y,y<10?1:0)+' years';if(y<1e9)return fmtN(y/1e6,1)+' million years';return fmtN(y/1e9,1)+' billion years'}
+const savedBday=()=>{const s=S.get('bday','');return s?new Date(s+'T12:00:00'):null};

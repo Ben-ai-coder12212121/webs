@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ancient Blocks | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="ancient"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Ancient Blocks</h1><p>Fit carved stone pieces into the temple wall so there are no gaps. Rotate pieces to make them fit.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Ancient Blocks: game code ===================== */
+G.push({id:'ancient',name:'Ancient Blocks',kind:'puzzle',levels:true,tint:'#c9a36a',blurb:'Fit carved stone pieces into the temple wall so there are no gaps. Rotate pieces to make them fit.',fmt:b=>'level '+b,
+art:'<rect width="120" height="72" fill="#e8d3a3"/><path d="M20 62V30l40-20 40 20v32z" fill="#c9a36a" stroke="#1D1A2F" stroke-width="2.5"/><g stroke="#1D1A2F" stroke-width="2"><rect x="34" y="36" width="14" height="14" fill="#8a5a2b"/><rect x="48" y="36" width="14" height="14" fill="#8a5a2b"/><rect x="62" y="36" width="14" height="26" fill="#6b8a5a"/></g>',
+run(root,c){const Wc=720,Hc=620;const[cv,x]=mk(Wc,Hc,'width:min(100%,720px)');root.append(cv,el('p',{class:'hint'},'Drag the stones into the carved outline. Right-click or double-tap a stone to rotate it. Fill every gap to open the temple.'));
+  let lvl=Math.max(1,S.get('anc_lv',1)),N,region,pieces,board,drag=null,state='play',Q,OX,OY;const COL=['#8a5a2b','#6b8a5a','#a0522d','#7a6a9a','#b08a4a','#5a7a8a','#9a5a5a','#6a6a4a'];
+  function build(){N=Math.min(9,4+Math.floor(lvl/2));const target=Math.min(N*N-4,8+lvl*3);const reg=new Set();const c0=Math.floor(N/2)*N+Math.floor(N/2);reg.add(c0);while(reg.size<target){const arr=[...reg];const k=pick(arr);const d=pick([1,-1,N,-N]);const j=k+d;if(j<0||j>=N*N||(d===1&&j%N===0)||(d===-1&&k%N===0))continue;reg.add(j)}region=reg;
+    const owner=new Map();const cellsL=shuffle([...reg]);let pid=0;const maxP=lvl<3?3:lvl<6?4:5;for(const cc of cellsL){if(owner.has(cc))continue;const grp=[cc];owner.set(cc,pid);let tries=0;const want=Math.min(maxP,2+rand(maxP-1));while(grp.length<want&&tries++<30){const k=pick(grp);const d=pick([1,-1,N,-N]);const j=k+d;if(!reg.has(j)||owner.has(j)||(d===1&&j%N===0)||(d===-1&&k%N===0))continue;owner.set(j,pid);grp.push(j)}pid++}
+    pieces=[];for(let p=0;p<pid;p++){const cs=[...owner].filter(([k,v])=>v===p).map(([k])=>[k%N,k/N|0]);const mx=Math.min(...cs.map(q=>q[0])),my=Math.min(...cs.map(q=>q[1]));let sh=cs.map(([a,b])=>[a-mx,b-my]);for(let r=rand(4);r>0;r--)sh=rot(sh);pieces.push({sh,col:COL[p%COL.length],placed:null,tx:0,ty:0})}
+    Q=Math.min(52,340/N);OX=40;OY=(Hc-N*Q)/2;board=new Map();layoutTray();state='play';c.stat('Ancient Blocks · level '+lvl)}
+  function rot(sh){const r=sh.map(([a,b])=>[-b,a]);const mx=Math.min(...r.map(q=>q[0])),my=Math.min(...r.map(q=>q[1]));return r.map(([a,b])=>[a-mx,b-my])}
+  function layoutTray(){let tx=OX+N*Q+40,ty=40;const rowH=[];pieces.filter(p=>!p.placed).forEach(p=>{const w=(Math.max(...p.sh.map(q=>q[0]))+1)*Q*.7,h=(Math.max(...p.sh.map(q=>q[1]))+1)*Q*.7;if(tx+w>Wc-20){tx=OX+N*Q+40;ty+=Math.max(...rowH,0)+20;rowH.length=0}p.tx=tx;p.ty=ty;tx+=w+20;rowH.push(h)})}
+  const canPlace=(p,gx,gy)=>p.sh.every(([a,b])=>{const X=gx+a,Y=gy+b;const k=Y*N+X;return X>=0&&Y>=0&&X<N&&Y<N&&region.has(k)&&!board.has(k)});
+  function draw(){x.fillStyle='#e8d3a3';x.fillRect(0,0,Wc,Hc);x.fillStyle='rgba(138,90,43,.15)';for(let i=0;i<30;i++)x.fillRect((i*137)%Wc,(i*71)%Hc,40,3);
+    for(let k=0;k<N*N;k++){const gx=k%N,gy=k/N|0;if(!region.has(k))continue;x.fillStyle='#b8966a';x.fillRect(OX+gx*Q+1,OY+gy*Q+1,Q-2,Q-2);x.strokeStyle='rgba(29,26,47,.3)';x.setLineDash([4,3]);x.strokeRect(OX+gx*Q+3,OY+gy*Q+3,Q-6,Q-6);x.setLineDash([])}
+    const drawP=(p,px,py,q)=>{p.sh.forEach(([a,b])=>{x.fillStyle=p.col;x.fillRect(px+a*q+1,py+b*q+1,q-2,q-2);x.strokeStyle='#1D1A2F';x.lineWidth=2;x.strokeRect(px+a*q+1,py+b*q+1,q-2,q-2);x.fillStyle='rgba(255,255,255,.15)';x.fillRect(px+a*q+4,py+b*q+4,q*.4,4)})};
+    pieces.forEach(p=>{if(p.placed&&p!==(drag&&drag.p))drawP(p,OX+p.placed[0]*Q,OY+p.placed[1]*Q,Q)});pieces.forEach(p=>{if(!p.placed&&p!==(drag&&drag.p))drawP(p,p.tx,p.ty,Q*.7)});
+    if(drag){const gx=Math.round((drag.x-drag.ox-OX)/Q),gy=Math.round((drag.y-drag.oy-OY)/Q);if(canPlace(drag.p,gx,gy)){x.globalAlpha=.35;drawP(drag.p,OX+gx*Q,OY+gy*Q,Q);x.globalAlpha=1}drawP(drag.p,drag.x-drag.ox,drag.y-drag.oy,Q)}
+    x.fillStyle='#1D1A2F';x.font='700 16px "JetBrains Mono"';x.textAlign='left';x.fillText('LEVEL '+lvl+'   stones left '+pieces.filter(p=>!p.placed).length,20,28);if(state==='won')banner(x,Wc,Hc,'The temple opens!','Tap for level '+(lvl+1))}
+  function hitPiece(px,py){for(const p of pieces.slice().reverse()){const bx=p.placed?OX+p.placed[0]*Q:p.tx,by=p.placed?OY+p.placed[1]*Q:p.ty,q=p.placed?Q:Q*.7;if(p.sh.some(([a,b])=>px>bx+a*q&&px<bx+a*q+q&&py>by+b*q&&py<by+b*q+q))return{p,bx,by,q}}return null}
+  function rotate(p){if(p.placed){p.placed[2].forEach(k=>board.delete(k));p.placed=null}p.sh=rot(p.sh);layoutTray();beep(600,.04,'triangle',.03)}
+  let lastTap=0;c.on(cv,'contextmenu',e=>e.preventDefault());c.on(cv,'pointerdown',e=>{if(state==='won'){lvl++;build();return}const p=canvasPos(cv,e);const h=hitPiece(p.x,p.y);if(!h)return;const now=performance.now();if(e.button===2||now-lastTap<300&&h){rotate(h.p);lastTap=0;return}lastTap=now;if(h.p.placed){h.p.placed[2].forEach(k=>board.delete(k));h.p.placed=null}const scale=Q/h.q;drag={p:h.p,x:p.x,y:p.y,ox:(p.x-h.bx)*scale,oy:(p.y-h.by)*scale};cv.setPointerCapture(e.pointerId)});
+  c.on(cv,'pointermove',e=>{if(drag){const p=canvasPos(cv,e);drag.x=p.x;drag.y=p.y}});c.on(cv,'pointerup',()=>{if(!drag)return;const gx=Math.round((drag.x-drag.ox-OX)/Q),gy=Math.round((drag.y-drag.oy-OY)/Q);const p=drag.p;if(canPlace(p,gx,gy)){const ks=p.sh.map(([a,b])=>(gy+b)*N+gx+a);ks.forEach(k=>board.set(k,p));p.placed=[gx,gy,ks];noise(.08,'lowpass',400,.2);if(board.size===region.size){state='won';S.set('anc_lv',Math.max(S.get('anc_lv',1),lvl+1));c.best(lvl);[392,523,659,784].forEach((q,i)=>c.after(()=>beep(q,.18,'triangle',.06),i*110))}}drag=null;layoutTray()});
+  build();c.loop(()=>draw())}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

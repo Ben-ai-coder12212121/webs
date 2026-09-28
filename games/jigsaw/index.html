@@ -2,43 +2,98 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Jigsaw: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="Real interlocking pieces. Drag them into place to rebuild the picture.">
-<link rel="canonical" href="https://detourr.netlify.app/games/jigsaw/">
+<link rel="canonical" href="https://detourr.net/games/jigsaw/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="Jigsaw: play free on Detourr"><meta property="og:description" content="Real interlocking pieces. Drag them into place to rebuild the picture.">
-<meta property="og:url" content="https://detourr.netlify.app/games/jigsaw/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/jigsaw/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Jigsaw", "description": "Real interlocking pieces. Drag them into place to rebuild the picture.", "url": "https://detourr.netlify.app/games/jigsaw/", "genre": "Puzzle", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Jigsaw", "description": "Real interlocking pieces. Drag them into place to rebuild the picture.", "url": "https://detourr.net/games/jigsaw/", "genre": "Puzzle", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
 <style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+/* styles used only by this game */
+.jarea{position:relative;width:100%;background:rgba(255,255,255,.35);border:3px solid var(--ink);border-radius:14px;overflow:hidden;touch-action:none}
+.jboard{position:absolute;background:#fff;box-shadow:inset 0 0 0 2px rgba(29,26,47,.3)}
+.jboard canvas{display:block}
+.jarea.noghost .jboard canvas{opacity:0}
+.jpiece{position:absolute;cursor:grab;touch-action:none;filter:drop-shadow(2px 3px 2px rgba(0,0,0,.35));transition:filter .1s}
+</style>
+</head><body class="gamepage">
+<script>window.PAGE_GAME="jigsaw"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#jigsaw" style="background:var(--orange)" aria-label="Play Jigsaw"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M20 14h24c0-10 14-10 14 0h24v22c-10 0-10 14 0 14v16H58c0-10-14-10-14 0H20V50c10 0 10-14 0-14z" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><path d="M84 36c10 0 10 14 0 14" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/></svg></a>
+<main class="card"><a class="hero" href="/games/jigsaw/" style="background:var(--orange)" aria-label="Play Jigsaw"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M20 14h24c0-10 14-10 14 0h24v22c-10 0-10 14 0 14v16H58c0-10-14-10-14 0H20V50c10 0 10-14 0-14z" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><path d="M84 36c10 0 10 14 0 14" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/></svg></a>
 <div class="body"><span class="chip">Puzzle</span><h1>Jigsaw</h1>
 <p>Real interlocking pieces. Drag them into place to rebuild the picture.</p>
-<a class="play" href="/#jigsaw">▶ Play Jigsaw free</a>
+<a class="play" href="/games/jigsaw/">▶ Play Jigsaw free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li><li>Easy, Normal and Hard difficulty</li><li>Live leaderboard: beat other players’ high scores</li></ul>
 <p>Jigsaw is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Puzzle games</h2><div class="grid"><a class="rg" href="/games/2048/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="18" y="10" width="40" height="40" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="40" height="40" rx="6" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><text x="38" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#1D1A2F">16</text><text x="82" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#fff">32</text></svg></span><b>2048</b></a><a class="rg" href="/games/mine-sweep/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="36" r="16" fill="#1D1A2F"/><g stroke="#1D1A2F" stroke-width="5" stroke-linecap="round"><path d="M60 10V62M34 36H86M42 18L78 54M78 18L42 54"/></g><circle cx="54" cy="30" r="4" fill="#fff"/></svg></span><b>Mine Sweep</b></a><a class="rg" href="/games/five-letters/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3"><rect x="8" y="22" width="18" height="18" rx="3" fill="#2BB673"/><rect x="30" y="22" width="18" height="18" rx="3" fill="#8c86a3"/><rect x="52" y="22" width="18" height="18" rx="3" fill="#FF9F43"/><rect x="74" y="22" width="18" height="18" rx="3" fill="#2BB673"/><rect x="96" y="22" width="18" height="18" rx="3" fill="#FFFDF6"/></g></svg></span><b>Five Letters</b></a><a class="rg" href="/games/lights-off/"><span class="ra" style="background:#3a3552"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3"><rect x="30" y="6" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="51" y="6" width="18" height="18" rx="3" fill="#5A5470"/><rect x="72" y="6" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="30" y="27" width="18" height="18" rx="3" fill="#5A5470"/><rect x="51" y="27" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="72" y="27" width="18" height="18" rx="3" fill="#5A5470"/><rect x="30" y="48" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="51" y="48" width="18" height="18" rx="3" fill="#5A5470"/><rect x="72" y="48" width="18" height="18" rx="3" fill="#5A5470"/></g></svg></span><b>Lights Off</b></a><a class="rg" href="/games/sliding-puzzle/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3" fill="#7FC8F8"><rect x="30" y="6" width="28" height="28" rx="4"/><rect x="62" y="6" width="28" height="28" rx="4"/><rect x="30" y="38" width="28" height="28" rx="4"/></g><g font-family="monospace" font-weight="700" font-size="15" text-anchor="middle" fill="#1D1A2F"><text x="44" y="25">1</text><text x="76" y="25">2</text><text x="44" y="57">3</text></g></svg></span><b>Sliding Puzzle</b></a><a class="rg" href="/games/word-scramble/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3" fill="#FFFDF6"><rect x="10" y="22" width="18" height="22" rx="3" transform="rotate(-8 19 33)"/><rect x="32" y="22" width="18" height="22" rx="3" transform="rotate(6 41 33)"/><rect x="54" y="22" width="18" height="22" rx="3"/><rect x="76" y="22" width="18" height="22" rx="3" transform="rotate(-5 85 33)"/><rect x="98" y="22" width="16" height="22" rx="3" transform="rotate(9 106 33)"/></g><g font-family="monospace" font-weight="700" font-size="13" text-anchor="middle" fill="#1D1A2F"><text x="19" y="38">L</text><text x="41" y="38">E</text><text x="63" y="38">W</text><text x="85" y="38">O</text><text x="106" y="38">H</text></g></svg></span><b>Word Scramble</b></a><a class="rg" href="/games/tower-of-hanoi/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M10 64H110M30 64V14M60 64V14M90 64V14" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><g stroke="#1D1A2F" stroke-width="2.5"><rect x="14" y="52" width="32" height="10" rx="3" fill="#F2352A"/><rect x="18" y="42" width="24" height="10" rx="3" fill="#FF9F43"/><rect x="50" y="52" width="20" height="10" rx="3" fill="#FFE27A"/></g></svg></span><b>Tower of Hanoi</b></a><a class="rg" href="/games/sudoku/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="30" y="6" width="60" height="60" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><path d="M50 6V66M70 6V66M30 26H90M30 46H90" stroke="#1D1A2F" stroke-width="2"/><g font-family="monospace" font-weight="700" font-size="13" fill="#1D1A2F" text-anchor="middle"><text x="40" y="21">5</text><text x="80" y="41">3</text><text x="60" y="61">9</text><text x="40" y="61" fill="#2d6fd6">1</text></g></svg></span><b>Sudoku</b></a><a class="rg" href="/games/picture-grid/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="36" y="16" width="50" height="50" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><g fill="#1D1A2F"><rect x="46" y="26" width="10" height="10"/><rect x="66" y="26" width="10" height="10"/><rect x="46" y="46" width="30" height="10"/></g><g font-family="monospace" font-size="9" font-weight="700" fill="#1D1A2F"><text x="20" y="34">1 1</text><text x="26" y="54">3</text><text x="48" y="12">1</text><text x="68" y="12">1</text></g></svg></span><b>Picture Grid</b></a><a class="rg" href="/games/word-search/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="24" y="6" width="72" height="60" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><rect x="30" y="14" width="58" height="12" rx="6" fill="#FF8FB1" opacity=".7"/><g font-family="monospace" font-weight="700" font-size="11" fill="#1D1A2F"><text x="34" y="24">C A T S</text><text x="34" y="42">Q W O X</text><text x="34" y="60">L D O G</text></g></svg></span><b>Word Search</b></a><a class="rg" href="/games/fireworks/"><span class="ra" style="background:#1D1A2F"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke-width="3" stroke-linecap="round"><path d="M60 30L60 14M60 30L74 20M60 30L78 32M60 30L72 44M60 30L60 46M60 30L46 42M60 30L42 30M60 30L46 18" stroke="#FFD23F"/><path d="M30 60v-8M26 56h8" stroke="#FF8FB1"/><path d="M92 58v-8M88 54h8" stroke="#7FC8F8"/></g></svg></span><b>Fireworks</b></a><a class="rg" href="/games/keep-the-beat/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="36" r="26" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36L60 16" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><path d="M60 36L74 30" stroke="#F2352A" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="36" r="3" fill="#1D1A2F"/></svg></span><b>Keep the Beat</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Jigsaw: game code ===================== */
+function paintScene(x,W,H,kind){const g=(a,b,stops)=>{const gr=x.createLinearGradient(0,a,0,b);stops.forEach(([o,cl])=>gr.addColorStop(o,cl));return gr};
+  if(kind===0){x.fillStyle=g(0,H,[[0,'#2b1b5c'],[.45,'#e8517a'],[.7,'#ffb35c'],[1,'#ffe39a']]);x.fillRect(0,0,W,H);x.fillStyle='#fff3c4';x.beginPath();x.arc(W*.62,H*.55,H*.12,0,7);x.fill();
+    [['#4b2f73',.62,.9],['#3a2560',.7,1.2],['#261a45',.8,1.5]].forEach(([cl,y0,f])=>{x.fillStyle=cl;x.beginPath();x.moveTo(0,H);for(let i=0;i<=W;i+=W/40)x.lineTo(i,H*y0-Math.abs(Math.sin(i/W*Math.PI*f*3+y0*7))*H*.2);x.lineTo(W,H);x.fill()});
+    x.fillStyle='rgba(255,210,150,.25)';for(let i=0;i<30;i++)x.fillRect(W*.5+Math.random()*W*.25,H*.82+i*H*.005,W*.1,2)}
+  else if(kind===1){x.fillStyle=g(0,H,[[0,'#0b1030'],[1,'#1f2c6b']]);x.fillRect(0,0,W,H);for(let i=0;i<150;i++){x.fillStyle='rgba(255,255,255,'+Math.random()+')';x.fillRect(Math.random()*W,Math.random()*H*.6,2,2)}x.fillStyle='#f5f0d0';x.beginPath();x.arc(W*.18,H*.2,H*.08,0,7);x.fill();
+    for(let i=0;i<22;i++){const bw=W*(.04+Math.random()*.06),bh=H*(.2+Math.random()*.45),bx=i*W/22+Math.random()*10;x.fillStyle=['#232a55','#2e3770','#1a1f45'][i%3];x.fillRect(bx,H-bh,bw,bh);for(let wy=H-bh+8;wy<H-6;wy+=12)for(let wx=bx+4;wx<bx+bw-6;wx+=9)if(Math.random()<.45){x.fillStyle=pick(['#ffd96b','#ffe9a8','#8fd0ff']);x.fillRect(wx,wy,4,6)}}}
+  else if(kind===2){x.fillStyle=g(0,H,[[0,'#3fc2e0'],[1,'#0b3b6b']]);x.fillRect(0,0,W,H);for(let i=0;i<8;i++){x.fillStyle='rgba(255,255,255,.08)';x.beginPath();x.moveTo(W*i/8,0);x.lineTo(W*i/8+60,0);x.lineTo(W*i/8-40,H);x.lineTo(W*i/8-80,H);x.fill()}
+    x.fillStyle='#e8c98a';x.beginPath();x.moveTo(0,H);for(let i=0;i<=W;i+=20)x.lineTo(i,H*.88-Math.sin(i/50)*8);x.lineTo(W,H);x.fill();
+    for(let i=0;i<9;i++){const cx=Math.random()*W,cy=H*.88;x.fillStyle=pick(['#ff6f91','#ff9f43','#b9a7ff','#2bb673']);for(let k=0;k<6;k++){x.beginPath();x.ellipse(cx+(k-3)*8,cy-20-k%3*14,6,24+k*5,(k-3)*.2,0,7);x.fill()}}
+    for(let i=0;i<14;i++){const fx=Math.random()*W,fy=H*.15+Math.random()*H*.6,s=10+Math.random()*18,cl=pick(['#FFD23F','#F2352A','#FF9F43','#7FC8F8','#fff']);x.fillStyle=cl;x.beginPath();x.ellipse(fx,fy,s,s*.55,0,0,7);x.fill();x.beginPath();x.moveTo(fx-s*.8,fy);x.lineTo(fx-s*1.6,fy-s*.6);x.lineTo(fx-s*1.6,fy+s*.6);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.arc(fx+s*.5,fy-s*.12,s*.12,0,7);x.fill()}}
+  else{x.fillStyle=g(0,H,[[0,'#8fd0ff'],[1,'#e6f5ff']]);x.fillRect(0,0,W,H);x.fillStyle='#7cc576';x.beginPath();x.moveTo(0,H);for(let i=0;i<=W;i+=10)x.lineTo(i,H*.8-Math.sin(i/120)*25);x.lineTo(W,H);x.fill();
+    for(let i=0;i<6;i++){x.fillStyle='rgba(255,255,255,.9)';const cx=Math.random()*W,cy=Math.random()*H*.4;for(let k=0;k<4;k++){x.beginPath();x.arc(cx+k*18,cy+(k%2)*6,18,0,7);x.fill()}}
+    for(let i=0;i<7;i++){const bx=W*(.1+i*.13)+Math.random()*20,by=H*(.2+Math.random()*.45),r=H*(.06+Math.random()*.05);const cls=shuffle(['#F2352A','#FFD23F','#2d6fd6','#2BB673','#FF9F43','#B9A7FF']);for(let k=0;k<6;k++){x.fillStyle=cls[k];x.beginPath();x.moveTo(bx,by);x.arc(bx,by,r,-Math.PI+k*Math.PI/6,-Math.PI+(k+1)*Math.PI/6);x.fill()}x.beginPath();x.fillStyle=cls[0];x.ellipse(bx,by,r,r*1.15,0,0,Math.PI);x.fill();x.strokeStyle='#5a3a1a';x.lineWidth=1.5;x.beginPath();x.moveTo(bx-r*.6,by+r);x.lineTo(bx-r*.3,by+r*1.6);x.moveTo(bx+r*.6,by+r);x.lineTo(bx+r*.3,by+r*1.6);x.stroke();x.fillStyle='#8a5a2b';x.fillRect(bx-r*.3,by+r*1.6,r*.6,r*.4)}}}
+G.push({id:'jigsaw',name:'Jigsaw',kind:'puzzle',levels:true,tint:'var(--orange)',blurb:'Real interlocking pieces. Drag them into place to rebuild the picture.',fmt:b=>fmtT(b),lower:true,
+art:'<path d="M20 14h24c0-10 14-10 14 0h24v22c-10 0-10 14 0 14v16H58c0-10-14-10-14 0H20V50c10 0 10-14 0-14z" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><path d="M84 36c10 0 10 14 0 14" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/>',
+run(root,c){
+  const[R,C]=c.pick([3,4],[4,6],[6,8]);const area=el('div',{class:'jarea'});const msg=el('p',{class:'hint'},'Drag pieces onto the board. They snap when they’re close.');let pieces=[],placed=0,tm=null,ghost=true,z=10;
+  root.append(area,el('div',{class:'row'},el('button',{class:'btn',type:'button',onclick:()=>{ghost=!ghost;area.classList.toggle('noghost',!ghost)}},'Toggle outline picture'),el('button',{class:'btn primary',type:'button',onclick:build}, 'New picture')),msg);
+  function build(){area.innerHTML='';pieces=[];placed=0;const AW=area.clientWidth||600;const BW=Math.min(AW-24,560),pw=Math.floor(BW/C),ph=Math.floor(pw*.75),BWr=pw*C,BH=ph*R;const t=Math.min(pw,ph)*.22;const trayH=Math.ceil(R*C*(pw+2*t)*(ph+2*t)/(AW-20)/0.55)+ph;const AH=BH+30+Math.max(trayH,ph*2.5);area.style.height=AH+'px';const bx=Math.round((AW-BWr)/2),by=16;const img=document.createElement('canvas');img.width=BWr;img.height=BH;paintScene(img.getContext('2d'),BWr,BH,rand(4));
+    const board=el('div',{class:'jboard',style:`left:${bx}px;top:${by}px;width:${BWr}px;height:${BH}px`});const gc=document.createElement('canvas');gc.width=BWr;gc.height=BH;const gx=gc.getContext('2d');gx.globalAlpha=.22;gx.drawImage(img,0,0);board.append(gc);area.append(board);
+    const H=[...Array(R)].map(()=>[...Array(C)].map(()=>Math.random()<.5?1:-1)),V=[...Array(R)].map(()=>[...Array(C)].map(()=>Math.random()<.5?1:-1));
+    const edge=(x2,sx,sy,ex,ey,dir)=>{if(!dir){x2.lineTo(ex,ey);return}const dx=ex-sx,dy=ey-sy,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,nx=-uy*dir,ny=ux*dir;const P=(a,b)=>[sx+ux*a*L+nx*b*t,sy+uy*a*L+ny*b*t];const p1=P(.36,0),p2=P(.32,1),p3=P(.5,1.25),p4=P(.68,1),p5=P(.64,0);x2.lineTo(...p1);x2.bezierCurveTo(...P(.4,.4),...P(.24,.9),...p2);x2.bezierCurveTo(...P(.38,1.35),...P(.62,1.35),...p4);x2.bezierCurveTo(...P(.76,.9),...P(.6,.4),...p5);x2.lineTo(ex,ey)};
+    for(let r=0;r<R;r++)for(let q=0;q<C;q++){const cv=document.createElement('canvas');cv.width=pw+2*t;cv.height=ph+2*t;const x2=cv.getContext('2d');
+      const top=r?-H[r-1][q]:0,right=q<C-1?V[r][q]:0,bottom=r<R-1?H[r][q]:0,left=q?-V[r][q-1]:0;
+      x2.beginPath();x2.moveTo(t,t);edge(x2,t,t,t+pw,t,top?-top:0);edge(x2,t+pw,t,t+pw,t+ph,right?-right:0);edge(x2,t+pw,t+ph,t,t+ph,bottom?-bottom:0);edge(x2,t,t+ph,t,t,left?-left:0);x2.closePath();
+      x2.save();x2.clip();x2.drawImage(img,-q*pw+t,-r*ph+t);x2.restore();x2.strokeStyle='rgba(29,26,47,.7)';x2.lineWidth=1.5;x2.stroke();
+      cv.className='jpiece';const home={x:bx+q*pw-t,y:by+r*ph-t};const px2=Math.random()*(AW-pw-2*t),py2=by+BH+14+Math.random()*Math.max(4,AH-BH-by-14-ph-2*t);
+      const pc={el:cv,home,x:px2,y:py2,done:false};cv.style.left=px2+'px';cv.style.top=py2+'px';area.append(cv);pieces.push(pc);
+      cv.addEventListener('pointerdown',e=>{if(pc.done)return;e.preventDefault();cv.setPointerCapture(e.pointerId);cv.style.zIndex=++z;const sx=e.clientX,sy=e.clientY,ox2=pc.x,oy2=pc.y;cv.classList.add('lift');
+        const mv=ev=>{pc.x=ox2+ev.clientX-sx;pc.y=oy2+ev.clientY-sy;cv.style.left=pc.x+'px';cv.style.top=pc.y+'px'};
+        const up=()=>{cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);cv.classList.remove('lift');if(Math.hypot(pc.x-home.x,pc.y-home.y)<Math.max(14,pw*.18)){pc.x=home.x;pc.y=home.y;cv.style.left=pc.x+'px';cv.style.top=pc.y+'px';pc.done=true;cv.style.zIndex=1;cv.classList.add('placed');placed++;beep(700+placed*8,.06,'triangle',.06);st();
+          if(placed===R*C){tm.stop();const b=c.best(tm.s,true);msg.textContent='Finished in '+fmtT(tm.s)+'! Best: '+fmtT(b)+'.';beep(880,.3,'triangle');c.after(()=>beep(1320,.3,'triangle'),150)}}else beep(300,.03,'square',.03)};
+        cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up)})}
+    tm&&tm.stop();tm=clock(c,()=>st());st()}
+  const st=()=>c.stat(placed+'/'+R*C+' pieces · '+(tm?fmtT(tm.s):'0:00'));
+  c.after(build,30);return()=>tm&&tm.stop();
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

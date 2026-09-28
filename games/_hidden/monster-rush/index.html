@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monster Rush | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="monsterrush"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Monster Rush</h1><p>A hungry little monster sprints through a cave. Flip gravity to run on the ceiling, dodge spikes and gobble candy.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Monster Rush: game code ===================== */
+G.push({id:'monsterrush',name:'Monster Rush',kind:'casual',tint:'#B9A7FF',blurb:'A hungry little monster sprints through a cave. Flip gravity to run on the ceiling, dodge spikes and gobble candy.',fmt:b=>b+' m',
+art:'<rect width="120" height="72" fill="#3a2a6a"/><rect width="120" height="10" fill="#1D1A2F"/><rect y="62" width="120" height="10" fill="#1D1A2F"/><path d="M70 62l6-10 6 10zM90 10l6 10 6-10z" fill="#fff"/><circle cx="36" cy="50" r="10" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="2.5"/><circle cx="40" cy="47" r="3" fill="#fff"/><circle cx="41" cy="47" r="1.5" fill="#1D1A2F"/><circle cx="58" cy="34" r="4" fill="#FF8FB1"/>',
+run(root,c){const W=820,H=400,TOP=40,BOT=360;const[cv,x]=mk(W,H,'width:100%');root.append(cv,el('p',{class:'hint'},'Tap, click or Space to flip gravity. Avoid the spikes on the floor and ceiling, and eat candy for points.'));
+  let M,obs,candy,sp,dist,score,state='ready',flipCd=0;
+  function reset(){M={y:BOT-16,vy:0,g:1,ph:0};obs=[];candy=[];sp=300;dist=0;score=0;state='play'}
+  function flip(){if(state!=='play'){reset();return}if(flipCd>0)return;M.g*=-1;flipCd=.12;beep(M.g>0?400:700,.05,'triangle',.04)}
+  function step(dt){if(state!=='play')return;flipCd-=dt;sp=Math.min(sp+dt*6,c.pick(460,540,620));dist+=sp*dt/40;M.vy+=M.g*2600*dt;M.y+=M.vy*dt;if(M.y>BOT-16){M.y=BOT-16;M.vy=0}if(M.y<TOP+16){M.y=TOP+16;M.vy=0}M.ph+=dt*sp/30;
+    const lo=obs[obs.length-1];if(!lo||lo.x+lo.n*24<W-Math.max(200,sp*.62)-Math.random()*180){const onTop=Math.random()<.5;const n=1+rand(3);obs.push({x:W+30,top:onTop,n,moving:dist>200&&Math.random()<.25,ph:0});if(Math.random()<.6)candy.push({x:W+140,y:onTop?BOT-40:TOP+40})}
+    obs.forEach(o=>{o.x-=sp*dt;if(o.moving){o.ph+=dt*3}});candy.forEach(q=>q.x-=sp*dt);
+    for(const o of obs){const w=o.n*24;if(160+14>o.x&&160-14<o.x+w){const sy=o.top?TOP:BOT;const reach=o.moving?(36+Math.sin(o.ph)*20):30;if(o.top?M.y-16<sy+reach:M.y+16>sy-reach){die();return}}}
+    candy.forEach(q=>{if(!q.got&&Math.abs(q.x-160)<24&&Math.abs(q.y-M.y)<30){q.got=true;score+=10;beep(1100,.05,'triangle',.05)}});obs=obs.filter(o=>o.x>-100);candy=candy.filter(q=>q.x>-20&&!q.got);c.stat('Monster Rush · '+Math.floor(dist)+' m')}
+  function die(){state='over';c.best(Math.floor(dist)+score);noise(.4,'lowpass',400,.3)}
+  function draw(){x.fillStyle='#3a2a6a';x.fillRect(0,0,W,H);x.fillStyle='rgba(185,167,255,.15)';for(let i=0;i<10;i++){const bx=((i*110-dist*4)%1100+1100)%1100-60;x.beginPath();x.arc(bx,H/2,30+i%3*14,0,7);x.fill()}x.fillStyle='#1D1A2F';x.fillRect(0,0,W,TOP);x.fillRect(0,BOT,W,H-BOT);
+    obs.forEach(o=>{const reach=o.moving?(36+Math.sin(o.ph)*20):30;x.fillStyle=o.moving?'#F2352A':'#fff';x.strokeStyle='#1D1A2F';x.lineWidth=2;for(let k=0;k<o.n;k++){const bx=o.x+k*24;x.beginPath();if(o.top){x.moveTo(bx,TOP);x.lineTo(bx+12,TOP+reach);x.lineTo(bx+24,TOP)}else{x.moveTo(bx,BOT);x.lineTo(bx+12,BOT-reach);x.lineTo(bx+24,BOT)}x.closePath();x.fill();x.stroke()}});
+    candy.forEach(q=>{x.fillStyle='#FF8FB1';x.strokeStyle='#1D1A2F';x.lineWidth=2;x.beginPath();x.arc(q.x,q.y,9,0,7);x.fill();x.stroke();x.fillStyle='#fff';x.fillRect(q.x-2,q.y-6,3,5)});
+    x.save();x.translate(160,M.y);x.scale(1,M.g);x.fillStyle='#6EE7B7';x.strokeStyle='#1D1A2F';x.lineWidth=3;x.beginPath();x.arc(0,0,16,0,7);x.fill();x.stroke();x.fillStyle='#fff';x.beginPath();x.arc(5,-4,6,0,7);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.arc(7,-4,3,0,7);x.fill();x.beginPath();x.moveTo(-2,6);x.lineTo(12,6);x.stroke();const lg=Math.sin(M.ph)*6;x.beginPath();x.moveTo(-6,14);x.lineTo(-6+lg,22);x.moveTo(6,14);x.lineTo(6-lg,22);x.stroke();x.restore();
+    x.fillStyle='#fff';x.font='800 18px "JetBrains Mono"';x.textAlign='left';x.fillText(Math.floor(dist)+' m  🍬 '+score,14,28);if(state==='ready')banner(x,W,H,'Monster Rush','Tap to run');if(state==='over')banner(x,W,H,Math.floor(dist)+' m · '+score+' candy','Ouch! Tap to run again')}
+  c.on(cv,'pointerdown',e=>{e.preventDefault();flip()});c.on(document,'keydown',e=>{if(e.key===' '||e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();flip()}});reset();state='ready';c.loop(dt=>{step(Math.min(.03,dt/1000));draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

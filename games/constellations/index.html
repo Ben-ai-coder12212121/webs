@@ -2,43 +2,67 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Constellations: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="Connect the stars to draw your own constellations, then give them names. Your sky is saved.">
-<link rel="canonical" href="https://detourr.netlify.app/games/constellations/">
+<link rel="canonical" href="https://detourr.net/games/constellations/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="Constellations: play free on Detourr"><meta property="og:description" content="Connect the stars to draw your own constellations, then give them names. Your sky is saved.">
-<meta property="og:url" content="https://detourr.netlify.app/games/constellations/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/constellations/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Constellations", "description": "Connect the stars to draw your own constellations, then give them names. Your sky is saved.", "url": "https://detourr.netlify.app/games/constellations/", "genre": "Chill", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
-<style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Constellations", "description": "Connect the stars to draw your own constellations, then give them names. Your sky is saved.", "url": "https://detourr.net/games/constellations/", "genre": "Chill", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="ch_stars"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#ch_stars" style="background:#0d0a22" aria-label="Play Constellations"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#0d0a22"/><g stroke="#7FC8F8" stroke-width="1.5"><path d="M20 50L40 24 64 34 86 14 100 40"/></g><g fill="#fff"><circle cx="20" cy="50" r="2.5"/><circle cx="40" cy="24" r="3"/><circle cx="64" cy="34" r="2"/><circle cx="86" cy="14" r="3"/><circle cx="100" cy="40" r="2"/></g></svg></a>
+<main class="card"><a class="hero" href="/games/constellations/" style="background:#0d0a22" aria-label="Play Constellations"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#0d0a22"/><g stroke="#7FC8F8" stroke-width="1.5"><path d="M20 50L40 24 64 34 86 14 100 40"/></g><g fill="#fff"><circle cx="20" cy="50" r="2.5"/><circle cx="40" cy="24" r="3"/><circle cx="64" cy="34" r="2"/><circle cx="86" cy="14" r="3"/><circle cx="100" cy="40" r="2"/></g></svg></a>
 <div class="body"><span class="chip">Chill</span><h1>Constellations</h1>
 <p>Connect the stars to draw your own constellations, then give them names. Your sky is saved.</p>
-<a class="play" href="/#ch_stars">▶ Play Constellations free</a>
+<a class="play" href="/games/constellations/">▶ Play Constellations free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li></ul>
 <p>Constellations is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Chill games</h2><div class="grid"><a class="rg" href="/games/bubble-popper/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><g fill="#e6f5ff" stroke="#1D1A2F" stroke-width="2.5"><circle cx="24" cy="22" r="10"/><circle cx="48" cy="22" r="10"/><circle cx="72" cy="22" r="10"/><circle cx="96" cy="22" r="10"/><circle cx="36" cy="48" r="10"/><circle cx="60" cy="48" r="10" stroke-dasharray="4 3" fill="#c3e0f2"/><circle cx="84" cy="48" r="10"/></g></svg></span><b>Bubble Popper</b></a><a class="rg" href="/games/doodle-pad/"><span class="ra" style="background:var(--paper)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M14 50C24 20 36 58 48 34S70 12 78 36 96 56 106 26" fill="none" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/><path d="M20 62C40 56 60 62 90 58" fill="none" stroke="#2d6fd6" stroke-width="4" stroke-linecap="round"/></svg></span><b>Doodle Pad</b></a><a class="rg" href="/games/something-to-do/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3" fill="#FFFDF6"><rect x="22" y="10" width="14" height="14" rx="3"/><rect x="22" y="30" width="14" height="14" rx="3"/><rect x="22" y="50" width="14" height="14" rx="3"/></g><path d="M25 17l3 3 6-7M25 37l3 3 6-7" stroke="#F2352A" stroke-width="3.5" fill="none" stroke-linecap="round"/><g stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"><path d="M44 17H96M44 37H86M44 57H92"/></g></svg></span><b>Something To Do</b></a><a class="rg" href="/games/would-you-rather/"><span class="ra" style="background:var(--pink)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="10" y="12" width="48" height="48" rx="8" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="12" width="48" height="48" rx="8" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/><text x="34" y="44" font-family="sans-serif" font-weight="800" font-size="22" text-anchor="middle" fill="#1D1A2F">A</text><text x="86" y="44" font-family="sans-serif" font-weight="800" font-size="22" text-anchor="middle" fill="#1D1A2F">B</text></svg></span><b>Would You Rather</b></a><a class="rg" href="/games/riddle-box/"><span class="ra" style="background:var(--lilac)"><svg viewBox="0 0 120 72" aria-hidden="true"><text x="60" y="58" font-family="Georgia,serif" font-weight="700" font-size="60" text-anchor="middle" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3">?</text></svg></span><b>Riddle Box</b></a><a class="rg" href="/games/oracle-ball/"><span class="ra" style="background:var(--lilac)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="36" r="28" fill="#1D1A2F"/><circle cx="60" cy="36" r="12" fill="#FFFDF6"/><text x="60" y="42" font-family="sans-serif" font-weight="800" font-size="16" text-anchor="middle" fill="#1D1A2F">8</text></svg></span><b>Oracle Ball</b></a><a class="rg" href="/games/coin-dice/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="40" cy="36" r="20" fill="#FFD23F" stroke="#1D1A2F" stroke-width="3"/><text x="40" y="43" font-family="sans-serif" font-weight="800" font-size="18" text-anchor="middle" fill="#1D1A2F">H</text><rect x="68" y="18" width="36" height="36" rx="7" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><circle cx="78" cy="28" r="3.5" fill="#1D1A2F"/><circle cx="86" cy="36" r="3.5" fill="#1D1A2F"/><circle cx="94" cy="44" r="3.5" fill="#1D1A2F"/></svg></span><b>Coin &amp; Dice</b></a><a class="rg" href="/games/fortune-cookie/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M24 46C24 24 96 24 96 46C84 38 72 50 60 42C48 50 36 38 24 46Z" fill="#e7b56a" stroke="#1D1A2F" stroke-width="3"/><rect x="48" y="44" width="46" height="12" fill="#fff" stroke="#1D1A2F" stroke-width="2" transform="rotate(-6 71 50)"/></svg></span><b>Fortune Cookie</b></a><a class="rg" href="/games/breathe/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="36" r="28" fill="none" stroke="#1D1A2F" stroke-width="2" stroke-dasharray="4 4"/><circle cx="60" cy="36" r="18" fill="#4DA3E0" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Breathe</b></a><a class="rg" href="/games/weird-facts/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="30" r="18" fill="#FFD23F" stroke="#1D1A2F" stroke-width="3"/><rect x="52" y="48" width="16" height="12" rx="2" fill="#8c86a3" stroke="#1D1A2F" stroke-width="3"/><path d="M60 22v12" stroke="#1D1A2F" stroke-width="3" stroke-linecap="round"/></svg></span><b>Weird Facts</b></a><a class="rg" href="/games/demolition/"><span class="ra" style="background:#FF9F43"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#FF9F43"/><path d="M0 58h120" stroke="#F2352A" stroke-width="2.5" stroke-dasharray="6 4"/><g stroke="#1D1A2F" stroke-width="2.5"><rect x="44" y="12" width="34" height="60" fill="#d8d4e4"/><rect x="50" y="20" width="8" height="10" fill="#9fd6ff"/><rect x="64" y="20" width="8" height="10" fill="#9fd6ff"/><rect x="50" y="40" width="22" height="7" rx="2" fill="#F2352A"/></g><text x="61" y="46" font-family="Arial Black" font-size="6" fill="#fff" text-anchor="middle">TNT</text><path d="M20 72V56h12v16" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2.5"/><path d="M26 56V46M20 46h12" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Demolition</b></a><a class="rg" href="/games/day-night/"><span class="ra" style="background:#2d6fd6"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#2d6fd6"/><rect x="8" y="10" width="104" height="52" rx="6" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="2.5"/><path d="M60 10q-20 26 0 52H112V10z" fill="#1D1A2F" opacity=".55"/><path d="M18 26q10-8 22-2t6 16-16 2zM70 20q16-6 28 4t-6 16-20-4z" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="2"/><circle cx="30" cy="18" r="5" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2"/><circle cx="96" cy="52" r="3" fill="#FFE27A"/></svg></span><b>Day &amp; Night</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/toys.js"></script>
+<script>
+/* ===================== Constellations: game code ===================== */
+G.push({id:'ch_stars',name:'Constellations',kind:'chill',wide:true,tint:'#0d0a22',blurb:'Connect the stars to draw your own constellations, then give them names. Your sky is saved.',fmt:null,
+art:'<rect width="120" height="72" fill="#0d0a22"/><g stroke="#7FC8F8" stroke-width="1.5"><path d="M20 50L40 24 64 34 86 14 100 40"/></g><g fill="#fff"><circle cx="20" cy="50" r="2.5"/><circle cx="40" cy="24" r="3"/><circle cx="64" cy="34" r="2"/><circle cx="86" cy="14" r="3"/><circle cx="100" cy="40" r="2"/></g>',
+run(root,c){const{cv,x,W,H,P}=glowCanvas(root,'Click a star, then another to draw a line between them. Finish a shape and name it below.','pointer');const seed=S.get('sky_seed',Date.now()%100000);S.set('sky_seed',seed);let sd=seed;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280};
+  const ST=[...Array(150)].map(()=>({x:20+rnd()*(W-40),y:20+rnd()*(H-40),r:.6+Math.pow(rnd(),3)*3.2,ph:rnd()*6}));let data=S.get('sky_lines',{lines:[],names:[]});let sel=-1,t=0;
+  const row=el('div',{class:'row'});const name=el('input',{class:'typein',placeholder:'Name your constellation…',maxlength:'28',style:'max-width:260px'});const save=el('button',{class:'btn primary',type:'button'},'Name it');const clr=el('button',{class:'btn',type:'button'},'Clear sky');row.append(name,save,clr);root.append(row);let fresh=[];
+  save.addEventListener('click',()=>{if(!fresh.length||!name.value.trim())return;const pts=[...new Set(fresh.flat())];const cx=pts.reduce((s,i)=>s+ST[i].x,0)/pts.length,cy=pts.reduce((s,i)=>s+ST[i].y,0)/pts.length;data.names.push({x:cx,y:cy,t:name.value.trim()});fresh=[];name.value='';S.set('sky_lines',data);beep(880,.2,'sine',.04)});
+  clr.addEventListener('click',()=>{data={lines:[],names:[]};fresh=[];sel=-1;S.set('sky_lines',data)});
+  c.on(cv,'pointerdown',()=>{let best=-1,bd=26;ST.forEach((s,i)=>{const d=Math.hypot(s.x-P.x,s.y-P.y);if(d<bd){bd=d;best=i}});if(best<0){sel=-1;return}if(sel>=0&&sel!==best){data.lines.push([sel,best]);fresh.push([sel,best]);S.set('sky_lines',data);beep(600+ST[best].r*200,.15,'sine',.04)}else beep(900,.05,'sine',.03);sel=best});
+  c.loop(dt=>{t+=dt/1000;const g=x.createRadialGradient(W/2,H,50,W/2,H/2,W*.8);g.addColorStop(0,'#1d1740');g.addColorStop(1,'#07051a');x.fillStyle=g;x.fillRect(0,0,W,H);x.globalCompositeOperation='lighter';x.fillStyle='rgba(185,167,255,.05)';for(let i=0;i<5;i++){x.beginPath();x.ellipse(W*.3+i*90,H*.4+Math.sin(i)*60,220,60,-.5,0,7);x.fill()}
+    x.lineWidth=1.6;data.lines.forEach(([a,b])=>{const A=ST[a],B=ST[b];x.strokeStyle='rgba(127,200,248,.55)';x.beginPath();x.moveTo(A.x,A.y);x.lineTo(B.x,B.y);x.stroke()});
+    ST.forEach((s,i)=>{const tw=.6+.4*Math.sin(t*2+s.ph);const r=s.r*(i===sel?1.8:1);const gg=x.createRadialGradient(s.x,s.y,0,s.x,s.y,r*5);gg.addColorStop(0,`rgba(255,255,255,${tw})`);gg.addColorStop(1,'rgba(180,200,255,0)');x.fillStyle=gg;x.beginPath();x.arc(s.x,s.y,r*5,0,7);x.fill()});
+    if(sel>=0){x.strokeStyle='rgba(255,210,63,.5)';x.setLineDash([4,5]);x.beginPath();x.moveTo(ST[sel].x,ST[sel].y);x.lineTo(P.x,P.y);x.stroke();x.setLineDash([])}x.globalCompositeOperation='source-over';
+    x.font='italic 700 15px Figtree, sans-serif';x.textAlign='center';data.names.forEach(n=>{x.fillStyle='rgba(255,226,122,.85)';x.fillText(n.t,n.x,n.y-14)})})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

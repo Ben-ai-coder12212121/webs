@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jailbreak Dog | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="jailbreak"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Jailbreak Dog</h1><p>3D third-person. A dog in prison stripes busts out, bonking pig cops with tennis balls.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Jailbreak Dog: game code ===================== */
+function heroDog(T){const g=humanoid(T,{skin:0xb8742a,shirt:0xffffff,pants:0x1D1A2F,eye:0x1D1A2F});const b=g.userData.body;for(let k=0;k<3;k++)part(T,bx(T,.74,.08,.42),M(T,0x1D1A2F),0,-.25+k*.25,0,b);const h=g.userData.head;part(T,bx(T,.12,.34,.18),M(T,0x6b3f14),-.3,-.05,0,h);part(T,bx(T,.12,.34,.18),M(T,0x6b3f14),.3,-.05,0,h);part(T,bx(T,.26,.18,.2),M(T,0xe0a86a),0,-.08,.3,h);part(T,sp(T,.06),M(T,0x1D1A2F),0,-.02,.42,h);return g}
+function pigCop(T,o){const g=humanoid(T,{skin:0xFF8FB1,shirt:o&&o.swat?0x1D1A2F:0x2d4fb3,pants:0x1D1A2F,eye:0x1D1A2F});const h=g.userData.head;part(T,bx(T,.3,.2,.12),M(T,0xff6f9c),0,-.06,.3,h);part(T,bx(T,.56,.14,.56),M(T,o&&o.swat?0x1D1A2F:0x2d4fb3),0,.3,0,h);part(T,bx(T,.62,.04,.3),M(T,0x1D1A2F),0,.23,.2,h);part(T,bx(T,.1,.1,.02),M(T,0xFFD23F),0,.32,.29,h);[-.2,.2].forEach(x=>part(T,new T.ConeGeometry(.09,.16,4),M(T,0xFF8FB1),x,.34,-.05,h));if(!(o&&o.swat))part(T,cy(T,.04,.04,.6),M(T,0x1D1A2F),.52,1.1,.1,g);return g}
+const PRISON={wall:TX.bricks('#9a9aa6','#6a6a76'),wall2:(x,w,h)=>{x.fillStyle='#3a3a44';x.fillRect(0,0,w,h);x.fillStyle='#9a9aa6';for(let i=8;i<w;i+=26)x.fillRect(i,0,8,h);x.fillRect(0,10,w,8);x.fillRect(0,h-18,w,8)},floor:TX.noise('#8a8a94','#5a5a64',2500),ceil:TX.noise('#6a6a76','#4a4a54',800),sky:0x14121f,fogNear:18,fogFar:60,amb:.7,hemi:0xe8f0ff,ground:0x30303a,sun:.25,lampCol:0xdfe8ff};
+G.push({id:'jailbreak',name:'Jailbreak Dog',kind:'weird',levels:true,wide:true,tint:'var(--orange)',blurb:'3D third-person. A dog in prison stripes busts out, bonking pig cops with tennis balls.',fmt:b=>b+' pts',
+art:'<circle cx="40" cy="38" r="16" fill="#b8742a" stroke="#1D1A2F" stroke-width="3"/><path d="M28 30q-6 12 2 16" fill="#6b3f14" stroke="#1D1A2F" stroke-width="2.5"/><circle cx="46" cy="34" r="2.5" fill="#1D1A2F"/><circle cx="55" cy="40" r="3.5" fill="#1D1A2F"/><circle cx="66" cy="30" r="4" fill="#c7e83a" stroke="#1D1A2F" stroke-width="2"/><circle cx="92" cy="40" r="14" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/><rect x="80" y="20" width="24" height="8" fill="#2d4fb3" stroke="#1D1A2F" stroke-width="2"/><ellipse cx="92" cy="44" rx="6" ry="4" fill="#ff6f9c" stroke="#1D1A2F" stroke-width="2"/>',
+run(root,c){
+  return runShooter(root,c,{id:'jail3',short:'Jailbreak Dog',view:'tps',hero:heroDog,camDist:4.3,tag:'A Detourr original · 3D third-person shooter',title:'Jailbreak Dog',hitColor:[0xc7e83a,0xFF8FB1],killColors:[0xFF8FB1,0xFFD23F,0x2d4fb3],killWord:'cops bonked',
+    intro:['You are <b>Biscuit</b>, a very good dog who was framed for eating the Mayor’s birthday cake. (You did lick it. Once.)','Now you’re in Hogsworth Penitentiary, run by pig cops. You’ve smuggled in a tennis ball launcher. Tonight, you break out.'],
+    player:{hp:100,speed:6.2},hpLabel:'GOOD BOY',
+    weapons:[{name:'Tennis Ball Launcher',auto:true,rate:.16,dmg:18,proj:{speed:34,color:0xc7e83a,size:.13},model:gunModel(0xF2352A,0xc7e83a,{tank:0xc7e83a}),sound:()=>{beep(600,.04,'square',.04);noise(.05,'lowpass',900,.15)}},
+      {name:'Squeaky Shotgun',rate:.85,dmg:12,pellets:9,spread:.14,ammo:26,tracer:0xFF8FB1,kick:.2,model:gunModel(0xFF8FB1,0x1D1A2F,{len:.6,bore:.09}),sound:()=>{beep(1500,.08,'square',.06);beep(1100,.12,'square',.05);noise(.1,'lowpass',1000,.2)}},
+      {name:'Frisbee Bomb',rate:1,dmg:75,ammo:10,proj:{speed:20,grav:3,splash:4,color:0xFFD23F,size:.22,geo:T=>cy(T,.3,.3,.06,16)},model:gunModel(0x2d6fd6,0xFFD23F,{drum:0xFFD23F}),sound:()=>sweep(900,300,.25,'sine',.08)}],
+    enemies:{c:{name:'Pig Cop',hp:50,speed:3,kind:'melee',dmg:13,cooldown:1,score:120,height:2.1,drop:.22,build:T=>pigCop(T),attackSound:()=>beep(160,.12,'square',.07)},
+      s:{name:'Pig SWAT',hp:60,speed:2.4,kind:'ranged',range:20,cooldown:1.6,score:160,height:2.1,drop:.3,proj:{speed:15,color:0x1D1A2F,dmg:10,size:.12},build:T=>pigCop(T,{swat:true})},
+      W:{name:'Warden Hogsworth',hp:1500,speed:2,kind:'ranged',range:30,cooldown:1.1,score:3500,height:2.3,radius:1,proj:{speed:16,color:0xF2352A,dmg:13,size:.25},build:T=>{const g=pigCop(T);g.scale.setScalar(2);return g}}},
+    boss:{ch:'W',deathLine:'Warden Hogsworth is out cold. The main gate swings open!',special:(e,dt,api,{dist,dx,dz})=>{e.spT=(e.spT||3)-dt;if(e.spT<=0){e.spT=c.pick(3.4,2.6,2);for(let k=-3;k<=3;k++)api.enemyShoot(e,e.d.proj,dx,dz,dist,k*.13);api.say('“SIT! STAY!”',1000)}const fr=e.hp/e.max;if(fr<.66&&e.phase<1||fr<.33&&e.phase<2){e.phase++;api.say('The Warden calls for backup!',1600);[[3,0],[-3,0],[0,3]].forEach(([a,b2])=>{const s=api.spawn(Math.random()<.5?'c':'s',e.x+a,e.z+b2);s.seen=true})}}},
+    levels:[
+      {name:'Cell Block D',goal:'Break out of the cell block',objective:'exit',theme:Object.assign({},PRISON,{ceil:TX.noise('#6a6a76','#4a4a54',800)}),brief:['Your cell door is open (you chewed through the lock). Pig cops patrol the block.','Find the way out to the laundry room.'],talk:[['Biscuit','“Bork.”'],['Pig Cop','“Hey! Who let the dog out?!”']],after:'The laundry room smells like 400 socks. You love it.',
+        map:['######################','#P.%...%...%...%...%.#','#..%.c.%...%.c.%...%.#','#..%...%...%...%...%.#','#....................#','#.....c........s.....#','#....................#','#..%...%...%...%.h.%.#','#..%.s.%...%.c.%...%.#','#..%...%.a.%...%...%E#','######################']},
+      {name:'The Laundry',goal:'Find the key to the yard',objective:'exit',theme:Object.assign({},PRISON,{wall:TX.tiles('#dfe8f0','#c8d4e0',6)}),brief:['Washing machines everywhere. The yard gate needs a keycard, and a guard dropped one somewhere in here.'],after:'The yard gate clanks open. Floodlights sweep the grass.',
+        map:['######################','#P....==.....#...s...#','#.....==..c..#.......#','#..==.....==.#.==.==.#','#k........c..#.......#','#.==..s......D...c...#','#####.########.#####.#','#.c.....#.h..........#','#..==...#..s...==....#','#.......D.......c....#','#E......#....a.......#','######################']},
+      {name:'The Yard',goal:'Survive the lockdown',objective:'waves',waves:[[['c',6]],[['c',5],['s',3]],[['c',6],['s',5]]],theme:Object.assign({},PRISON,{ceil:null,outside:TX.grass,floor:TX.grass,sky:0x0f1430,fog:0x0f1430}),brief:['The sirens are going off. Every pig cop in the prison is heading for the yard.'],talk:[['Loudspeaker','“ATTENTION: A VERY GOOD DOG IS LOOSE. REPEAT: A VERY GOOD DOG.”']],after:'The Warden’s office is the last thing between you and freedom.',
+        map:['####################','#S.......S........S#','#..==..........==..#','#.......%%%%.......#','#S................S#','#........P.........#','#.......h..a.......#','#..==..........==..#','#S.......S........S#','##########E#########']},
+      {name:'The Warden’s Office',goal:'Defeat Warden Hogsworth',objective:'boss',theme:Object.assign({},PRISON,{wall:TX.panel('#5a3a2a','#3a2418'),floor:TX.carpet('#6b2a3a','#5a2030'),lampCol:0xffb07a}),brief:['Warden Hogsworth is huge, mean, and throws donuts at very high speed.'],talk:[['Warden Hogsworth','“Nobody escapes Hogsworth!”'],['Biscuit','“Bork bork.” (Translation: watch me.)']],
+        map:['####################','#h.......L........a#','#..%%..........%%..#','#..%%....B.....%%..#','#..................#','#.....=......=.....#','#..................#','#..%%..........%%..#','#..%%....P.....%%..#','#a.......E........h#','####################']}],
+    winTitle:'FREEDOM!',epilogue:'Biscuit sprints through the main gate into the moonlight. Two days later, the real cake thief is caught: the Mayor’s own cat. Biscuit is pardoned and gets a medal and a lifetime supply of tennis balls.'})
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

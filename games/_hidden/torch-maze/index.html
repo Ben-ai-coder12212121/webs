@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Torch Maze | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="torchmaze"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Torch Maze</h1><p>A dark maze and a flickering torch. Find the keys, unlock the door, and grab oil before your light runs out.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/simpledrive.js"></script>
+<script>
+/* ===================== Torch Maze: game code ===================== */
+G.push({id:'torchmaze',name:'Torch Maze',kind:'puzzle',levels:true,tint:'#1D1A2F',blurb:'A dark maze and a flickering torch. Find the keys, unlock the door, and grab oil before your light runs out.',fmt:b=>'maze '+b,
+art:'<rect width="120" height="72" fill="#0b0a14"/><circle cx="50" cy="40" r="26" fill="#FF9F43" opacity=".25"/><path d="M30 20h40v10H40v20h20" stroke="#5A5470" stroke-width="6" fill="none"/><circle cx="50" cy="40" r="5" fill="#FFD23F"/><text x="90" y="30" font-size="14">🔑</text>',
+run(root,c){const Wc=640,Hc=640;const[cv,x]=mk(Wc,Hc,'width:min(100%,640px)');root.append(cv);const keys=holdPad(root,[['l','◀'],['u','▲'],['d','▼'],['r','▶']]);root.append(el('p',{class:'hint'},'Arrows/WASD to move. Collect every key 🔑 to open the exit door. Your torch fades over time, so grab oil 🛢 to keep it burning.'));
+  let lvl=Math.max(1,S.get('tm_lv',1)),N,G2,P,keysL,oil,door,need,got,light,state='play',seen,mvT=0,pressed={};
+  function build(){N=Math.min(41,11+lvl*4)|1;G2=Array(N*N).fill(1);const st=[[1,1]];G2[N+1]=0;while(st.length){const[a,b]=st[st.length-1];const nb=shuffle([[2,0],[-2,0],[0,2],[0,-2]]).filter(([dx,dy])=>{const nx=a+dx,ny=b+dy;return nx>0&&ny>0&&nx<N-1&&ny<N-1&&G2[ny*N+nx]===1});if(!nb.length){st.pop();continue}const[dx,dy]=nb[0];G2[(b+dy/2)*N+a+dx/2]=0;G2[(b+dy)*N+a+dx]=0;st.push([a+dx,b+dy])}
+    for(let i=0;i<N*lvl/2;i++){const px=1+rand(N-2),py=1+rand(N-2);if(G2[py*N+px]===1&&((G2[py*N+px-1]===0&&G2[py*N+px+1]===0)||(G2[(py-1)*N+px]===0&&G2[(py+1)*N+px]===0)))G2[py*N+px]=0}
+    const cells=[];for(let i=0;i<N*N;i++)if(G2[i]===0)cells.push(i);const far=cells.slice().sort((a,b)=>((b%N)+(b/N|0))-((a%N)+(a/N|0)));door=far[0];need=Math.min(4,1+Math.floor(lvl/2));keysL=shuffle(cells.filter(i=>i!==door&&i!==N+1)).slice(0,need);oil=shuffle(cells.filter(i=>!keysL.includes(i)&&i!==door)).slice(0,2+lvl);P={x:1,y:1,dx:1,dy:1};got=0;light=1;state='play';seen=new Set();c.stat('Torch Maze · maze '+lvl)}
+  function move(dx,dy){if(state!=='play')return;const nx=P.x+dx,ny=P.y+dy,i=ny*N+nx;if(G2[i]===1)return;if(i===door&&got<need){beep(180,.08,'square',.04);return}P.x=nx;P.y=ny;const ki=keysL.indexOf(i);if(ki>=0){keysL.splice(ki,1);got++;beep(1000,.1,'triangle',.06)}const oi=oil.indexOf(i);if(oi>=0){oil.splice(oi,1);light=Math.min(1,light+.45);beep(600,.1,'sine',.05)}if(i===door&&got>=need){state='won';S.set('tm_lv',Math.max(S.get('tm_lv',1),lvl+1));c.best(lvl);[523,659,784].forEach((q,k)=>c.after(()=>beep(q,.15,'triangle',.06),k*100))}}
+  function step(dt){if(state!=='play')return;light-=dt*c.pick(.012,.018,.026);if(light<=0){state='dark';light=0;noise(.5,'lowpass',200,.2)}P.dx+=(P.x-P.dx)*Math.min(1,dt*16);P.dy+=(P.y-P.dy)*Math.min(1,dt*16);mvT-=dt;const L=pressed.arrowleft||pressed.a||keys.l,R=pressed.arrowright||pressed.d||keys.r,U=pressed.arrowup||pressed.w||keys.u,D=pressed.arrowdown||pressed.s||keys.d;if(mvT<=0&&(L||R||U||D)){mvT=.11;move(R?1:L?-1:0,D?1:U?-1:0===0&&!L&&!R?(D?1:-1):0)}}
+  function draw(){const view=13,Q=Wc/view;x.fillStyle='#0b0a14';x.fillRect(0,0,Wc,Hc);const cx=P.dx-view/2+.5,cy=P.dy-view/2+.5;const rad=1.6+light*4.4;for(let gy=Math.floor(cy)-1;gy<cy+view+1;gy++)for(let gx=Math.floor(cx)-1;gx<cx+view+1;gx++){if(gx<0||gy<0||gx>=N||gy>=N)continue;const i=gy*N+gx;const d=Math.hypot(gx-P.x,gy-P.y);if(d<rad)seen.add(i);if(!seen.has(i))continue;const px=(gx-cx)*Q,py=(gy-cy)*Q;x.fillStyle=G2[i]?'#5A5470':'#2a2640';x.fillRect(px,py,Q+1,Q+1);if(i===door){x.fillStyle=got>=need?'#2BB673':'#8a5a2b';x.fillRect(px+Q*.15,py+Q*.1,Q*.7,Q*.8)}if(d<rad){x.font=(Q*.6)+'px sans-serif';x.textAlign='center';x.textBaseline='middle';if(keysL.includes(i))x.fillText('🔑',px+Q/2,py+Q/2);if(oil.includes(i))x.fillText('🛢',px+Q/2,py+Q/2)}}
+    const sx=(P.dx-cx)*Q+Q/2,sy=(P.dy-cy)*Q+Q/2;const fl=1+Math.sin(performance.now()/90)*.03;const g=x.createRadialGradient(sx,sy,Q*.5,sx,sy,rad*Q*fl);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.7,'rgba(11,10,20,.55)');g.addColorStop(1,'rgba(11,10,20,.97)');x.fillStyle=g;x.fillRect(0,0,Wc,Hc);x.fillStyle='rgba(255,159,67,.12)';x.beginPath();x.arc(sx,sy,rad*Q*.6,0,7);x.fill();x.fillStyle='#FFD23F';x.beginPath();x.arc(sx,sy,Q*.3,0,7);x.fill();
+    x.fillStyle='#fff';x.font='700 15px "JetBrains Mono"';x.textAlign='left';x.fillText('MAZE '+lvl+'  🔑 '+got+'/'+need,14,24);x.fillStyle='#3a3552';x.fillRect(Wc-174,12,160,12);x.fillStyle=light<.25?'#F2352A':'#FF9F43';x.fillRect(Wc-174,12,160*light,12);if(state==='won')banner(x,Wc,Hc,'Escaped!','Tap for maze '+(lvl+1));if(state==='dark')banner(x,Wc,Hc,'Your torch went out','Tap to try again')}
+  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();pressed[k]=1;if(k.startsWith('arrow'))e.preventDefault()});c.on(document,'keyup',e=>{pressed[e.key.toLowerCase()]=0});c.on(cv,'pointerdown',()=>{if(state==='won'){lvl++;build()}else if(state==='dark')build()});build();c.loop(dt=>{step(Math.min(.05,dt/1000));draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

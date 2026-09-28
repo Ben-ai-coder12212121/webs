@@ -2,43 +2,71 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Number Memory: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="Remember a number that keeps getting longer.">
-<link rel="canonical" href="https://detourr.netlify.app/games/number-memory/">
+<link rel="canonical" href="https://detourr.net/games/number-memory/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="Number Memory: play free on Detourr"><meta property="og:description" content="Remember a number that keeps getting longer.">
-<meta property="og:url" content="https://detourr.netlify.app/games/number-memory/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/number-memory/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Number Memory", "description": "Remember a number that keeps getting longer.", "url": "https://detourr.netlify.app/games/number-memory/", "genre": "Arcade & Quick", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Number Memory", "description": "Remember a number that keeps getting longer.", "url": "https://detourr.net/games/number-memory/", "genre": "Arcade & Quick", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
 <style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+/* styles used only by this game */
+.tbar{width:100%;height:10px;border:2px solid var(--ink);border-radius:99px;overflow:hidden;background:var(--paper)}
+.tbar i{display:block;height:100%;width:0;background:var(--red)}
+</style>
+</head><body class="gamepage">
+<script>window.PAGE_GAME="nummem"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#nummem" style="background:var(--lilac)" aria-label="Play Number Memory"><svg viewBox="0 0 120 72" aria-hidden="true"><text x="60" y="46" font-family="monospace" font-weight="700" font-size="24" text-anchor="middle" fill="#1D1A2F" letter-spacing="3">48159</text></svg></a>
+<main class="card"><a class="hero" href="/games/number-memory/" style="background:var(--lilac)" aria-label="Play Number Memory"><svg viewBox="0 0 120 72" aria-hidden="true"><text x="60" y="46" font-family="monospace" font-weight="700" font-size="24" text-anchor="middle" fill="#1D1A2F" letter-spacing="3">48159</text></svg></a>
 <div class="body"><span class="chip">Arcade &amp; Quick</span><h1>Number Memory</h1>
 <p>Remember a number that keeps getting longer.</p>
-<a class="play" href="/#nummem">▶ Play Number Memory free</a>
+<a class="play" href="/games/number-memory/">▶ Play Number Memory free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li><li>Live leaderboard: beat other players’ high scores</li></ul>
 <p>Number Memory is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Arcade &amp; Quick games</h2><div class="grid"><a class="rg" href="/games/snake/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M12 48H44V22H76V38" fill="none" stroke="#1D1A2F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><circle cx="96" cy="38" r="7" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Snake</b></a><a class="rg" href="/games/memory-match/"><span class="ra" style="background:var(--lilac)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="22" y="12" width="34" height="46" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3" transform="rotate(-8 39 35)"/><rect x="64" y="12" width="34" height="46" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3" transform="rotate(8 81 35)"/><text x="39" y="42" font-size="20" text-anchor="middle" fill="#F2352A" transform="rotate(-8 39 35)">♥</text><text x="81" y="42" font-size="20" text-anchor="middle" fill="#F2352A" transform="rotate(8 81 35)">♥</text></svg></span><b>Memory Match</b></a><a class="rg" href="/games/reaction-time/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="38" r="22" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="4"/><path d="M60 38V24M60 38L70 44" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><rect x="54" y="6" width="12" height="7" rx="2" fill="#1D1A2F"/></svg></span><b>Reaction Time</b></a><a class="rg" href="/games/tic-tac-toe/"><span class="ra" style="background:var(--pink)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"><path d="M46 8V64M74 8V64M24 28H96M24 46H96"/></g><path d="M29 12L41 24M41 12L29 24" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="37" r="7" fill="none" stroke="#2d6fd6" stroke-width="5"/><path d="M79 51L91 63M91 51L79 63" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/></svg></span><b>Tic-Tac-Toe</b></a><a class="rg" href="/games/flap/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="80" y="0" width="18" height="24" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="3"/><rect x="80" y="48" width="18" height="24" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="3"/><circle cx="44" cy="36" r="12" fill="#FFD23F" stroke="#1D1A2F" stroke-width="3"/><circle cx="48" cy="32" r="2.5" fill="#1D1A2F"/><path d="M55 37l8 2-8 3z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2"/></svg></span><b>Flap</b></a><a class="rg" href="/games/bonk-a-mole/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><ellipse cx="60" cy="58" rx="36" ry="9" fill="#3b2a1f"/><path d="M40 58V38a20 20 0 0 1 40 0v20z" fill="#9b6b43" stroke="#1D1A2F" stroke-width="3"/><circle cx="53" cy="38" r="3" fill="#1D1A2F"/><circle cx="67" cy="38" r="3" fill="#1D1A2F"/><ellipse cx="60" cy="46" rx="5" ry="3.5" fill="#FF8FB1"/></svg></span><b>Bonk-a-Mole</b></a><a class="rg" href="/games/speed-typing/"><span class="ra" style="background:var(--paper)"><svg viewBox="0 0 120 72" aria-hidden="true"><g fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"><rect x="14" y="14" width="18" height="16" rx="3"/><rect x="36" y="14" width="18" height="16" rx="3"/><rect x="58" y="14" width="18" height="16" rx="3"/><rect x="80" y="14" width="18" height="16" rx="3"/><rect x="24" y="34" width="18" height="16" rx="3"/><rect x="46" y="34" width="18" height="16" rx="3"/><rect x="68" y="34" width="18" height="16" rx="3"/><rect x="30" y="54" width="60" height="10" rx="3"/></g></svg></span><b>Speed Typing</b></a><a class="rg" href="/games/echo/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M60 36V6A30 30 0 0 0 30 36z" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36V6A30 30 0 0 1 90 36z" fill="#2d6fd6" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H30A30 30 0 0 0 60 66z" fill="#2BB673" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H90A30 30 0 0 1 60 66z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Echo</b></a><a class="rg" href="/games/brick-smash/"><span class="ra" style="background:var(--pink)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="2.5"><rect x="12" y="8" width="22" height="10" fill="#F2352A"/><rect x="37" y="8" width="22" height="10" fill="#FF9F43"/><rect x="62" y="8" width="22" height="10" fill="#FFD23F"/><rect x="87" y="8" width="22" height="10" fill="#6EE7B7"/><rect x="24" y="21" width="22" height="10" fill="#7FC8F8"/><rect x="74" y="21" width="22" height="10" fill="#B9A7FF"/><rect x="40" y="58" width="36" height="7" rx="3" fill="#1D1A2F"/></g><circle cx="64" cy="46" r="5" fill="#1D1A2F"/></svg></span><b>Brick Smash</b></a><a class="rg" href="/games/hype-check/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="8" y="10" width="50" height="52" rx="6" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="50" height="52" rx="6" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/><text x="33" y="42" font-family="monospace" font-weight="700" font-size="13" text-anchor="middle" fill="#1D1A2F">12.4M</text><text x="87" y="44" font-family="sans-serif" font-weight="800" font-size="24" text-anchor="middle" fill="#1D1A2F">?</text></svg></span><b>Hype Check</b></a><a class="rg" href="/games/rope-swing/"><span class="ra" style="background:#7FC8F8"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M30 6Q40 30 70 44" fill="none" stroke="#8a5a2b" stroke-width="3" stroke-dasharray="4 2"/><circle cx="74" cy="48" r="10" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><ellipse cx="100" cy="20" rx="8" ry="10" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2"/><circle cx="30" cy="6" r="4" fill="#1D1A2F"/></svg></span><b>Rope Swing</b></a><a class="rg" href="/games/mine-sweep/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="36" r="16" fill="#1D1A2F"/><g stroke="#1D1A2F" stroke-width="5" stroke-linecap="round"><path d="M60 10V62M34 36H86M42 18L78 54M78 18L42 54"/></g><circle cx="54" cy="30" r="4" fill="#fff"/></svg></span><b>Mine Sweep</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Number Memory: game code ===================== */
+G.push({id:'nummem',name:'Number Memory',kind:'game',tint:'var(--lilac)',blurb:'Remember a number that keeps getting longer.',fmt:b=>'level '+b,
+art:'<text x="60" y="46" font-family="monospace" font-weight="700" font-size="24" text-anchor="middle" fill="#1D1A2F" letter-spacing="3">48159</text>',
+run(root,c){
+  let n=3,num='',phase='idle';const disp=el('p',{class:'big-text',style:'text-align:center;font-family:var(--mono);font-size:clamp(28px,9vw,54px);word-break:break-all;min-height:1.3em'},'…');const bar=el('div',{class:'tbar'},el('i'));
+  const inp=el('input',{class:'typein',id:'nummem',inputmode:'numeric',autocomplete:'off','aria-label':'Your answer',placeholder:'Type the number, then Enter'});inp.hidden=true;
+  const go=el('button',{class:'btn primary',type:'button',onclick:round},'Start');const msg=el('p',{class:'hint'},'A number flashes on screen. Remember it, then type it back.');
+  function round(){num='';for(let i=0;i<n;i++)num+=i?rand(10):1+rand(9);disp.textContent=num;phase='show';go.hidden=true;inp.hidden=true;const ms=1200+n*450;const i=bar.firstChild;i.style.transition='none';i.style.width='100%';void i.offsetWidth;i.style.transition='width '+ms+'ms linear';i.style.width='0%';c.stat('Level '+(n-2)+' · Best '+(c.best()||0));
+    c.after(()=>{disp.textContent='?'.repeat(n);phase='ask';inp.hidden=false;inp.value='';inp.focus()},ms)}
+  c.on(inp,'keydown',e=>{if(e.key!=='Enter'||phase!=='ask')return;phase='idle';inp.hidden=true;
+    if(inp.value.trim()===num){beep(880,.12,'triangle');msg.textContent='Correct! The next one is longer.';c.best(n-2);n++;c.after(round,700)}
+    else{beep(150,.3,'sawtooth');msg.textContent='The number was '+num+'. You typed '+(inp.value||'nothing')+'.';disp.textContent=num;c.stat('Reached level '+(n-2)+' · Best '+(c.best()||0));n=3;go.textContent='Try again';go.hidden=false}});
+  root.append(disp,bar,inp,go,msg);c.stat('Best level '+(c.best()||0));
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>
