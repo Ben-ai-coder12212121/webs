@@ -47,22 +47,23 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Four Colors: game code ===================== */
 G.push({id:'fourcolors',name:'Four Colors',kind:'board',levels:true,tint:'#2BB673',blurb:'Match the color or the number, play skips, reverses and +2s, and empty your hand before three computer players.',fmt:b=>b+' wins',
 art:'<rect width="120" height="72" fill="#2BB673"/><g stroke="#1D1A2F" stroke-width="2.5"><rect x="22" y="14" width="26" height="40" rx="5" fill="#F2352A" transform="rotate(-12 35 34)"/><rect x="40" y="12" width="26" height="40" rx="5" fill="#FFD23F" transform="rotate(-3 53 32)"/><rect x="58" y="12" width="26" height="40" rx="5" fill="#2d6fd6" transform="rotate(6 71 32)"/><rect x="76" y="14" width="26" height="40" rx="5" fill="#fff" transform="rotate(14 89 34)"/></g><text x="71" y="38" font-family="Arial Black" font-size="14" fill="#fff" text-anchor="middle" transform="rotate(6 71 32)">7</text>',
 run(root,c){
   const W=900,H=560;const[cv,x]=mk(W,H,'width:100%');root.append(cv);const CC=['#F2352A','#FFD23F','#2BB673','#2d6fd6'],CN=['red','yellow','green','blue'];
-  let deck,disc,hands,turn,dir,cur,state,pending=0,msg='',msgT=0,chooser=false,wins=S.get('fc_w',0),hover=-1,drewThisTurn=false;const NAMES=['You','Robo','Bubbles','Captain'];
+  let deck,disc,hands,turn,dir,cur,state,pending=0,msg='',msgT=0,chooser=false,wins=S.get('fc_w',0),hover=-1,drewThisTurn=false;const NAMES=['You','Robo','Bubbles','Captain'];const CPU=NAMES.slice();
   function newDeck(){const d=[];for(let k=0;k<4;k++){d.push({c:k,v:0});for(let v=1;v<=9;v++){d.push({c:k,v},{c:k,v})}['skip','rev','+2'].forEach(s=>d.push({c:k,v:s},{c:k,v:s}))}for(let i=0;i<4;i++)d.push({c:-1,v:'wild'},{c:-1,v:'+4'});return shuffle(d)}
   const draw1=()=>{if(!deck.length){const top=disc.pop();deck=shuffle(disc.map(q=>q.v==='wild'||q.v==='+4'?{c:-1,v:q.v}:q));disc=[top]}return deck.pop()};
   function start(){deck=newDeck();hands=[[],[],[],[]];for(let i=0;i<7;i++)hands.forEach(h=>h.push(draw1()));let top=draw1();while(top.c<0){deck.unshift(top);top=draw1()}disc=[top];cur=top.c;turn=0;dir=1;state='play';chooser=false;drewThisTurn=false;msg='Your turn';msgT=2}
   const top=()=>disc[disc.length-1];const ok=cd=>cd.c<0||cd.c===cur||cd.v===top().v;
-  function next(skip){turn=(turn+dir*(skip?2:1)+8)%4;drewThisTurn=false;if(turn!==0)setTimeout(aiTurn,c.pick(900,700,550))}
+  function next(skip){turn=(turn+dir*(skip?2:1)+8)%4;drewThisTurn=false;if(turn!==0&&!seatPeer[turn])setTimeout(aiTurn,c.pick(900,700,550));pushAll()}
   function playCard(p,i,chosen){const cd=hands[p].splice(i,1)[0];disc.push(cd);cur=cd.c<0?chosen:cd.c;beep(500+p*80,.07,'triangle',.05);
-    if(!hands[p].length){state='over';if(p===0){wins++;S.set('fc_w',wins);c.best(wins)}msg=p===0?'You win! 🎉':NAMES[p]+' wins!';msgT=99;return}if(hands[p].length===1){msg=NAMES[p]+': FOUR!';msgT=1.4;beep(900,.2,'square',.05)}
+    if(!hands[p].length){state='over';pushAll();if(p===0){wins++;S.set('fc_w',wins);c.best(wins)}msg=p===0?'You win! 🎉':NAMES[p]+' wins!';msgT=99;return}if(hands[p].length===1){msg=NAMES[p]+': FOUR!';msgT=1.4;beep(900,.2,'square',.05)}
     let skip=false;if(cd.v==='skip')skip=true;if(cd.v==='rev'){dir*=-1;msg='Reverse!';msgT=1}if(cd.v==='+2'||cd.v==='+4'){const vic=(turn+dir+4)%4;for(let k=0;k<(cd.v==='+2'?2:4);k++)hands[vic].push(draw1());msg=NAMES[vic]+' draws '+(cd.v==='+2'?2:4)+'!';msgT=1.2;skip=true}next(skip)}
-  function aiTurn(){if(state!=='play'||turn===0)return;const h=hands[turn];const lvl=c.level;let idx=h.map((q,i)=>i).filter(i=>ok(h[i]));if(!idx.length){h.push(draw1());const i=h.length-1;if(ok(h[i])){idx=[i]}else{next(false);return}}
+  function aiTurn(){if(state!=='play'||turn===0||seatPeer[turn])return;const h=hands[turn];const lvl=c.level;let idx=h.map((q,i)=>i).filter(i=>ok(h[i]));if(!idx.length){h.push(draw1());const i=h.length-1;if(ok(h[i])){idx=[i]}else{next(false);return}}
     idx.sort((a,b)=>{const s=q=>(q.c<0?-3:0)+(typeof q.v==='string'?(lvl>0?2:0):0)+(lvl>1&&hands[0].length<=2&&(q.v==='+2'||q.v==='+4'||q.v==='skip')?9:0);return s(h[b])-s(h[a])});const i=lvl===0?pick(idx):idx[0];let ch=0;if(h[i].c<0){const cnt=[0,0,0,0];h.forEach(q=>{if(q.c>=0)cnt[q.c]++});ch=cnt.indexOf(Math.max(...cnt))}playCard(turn,i,ch)}
   function cardAt(i,n){const w=64,gap=Math.min(70,(W-160)/Math.max(1,n));const x0=W/2-(gap*(n-1)+w)/2;return{x:x0+i*gap,y:H-120,w,h:96}}
   function card(cd,px,py,w,h,faceUp,lift){x.save();x.translate(px,py-(lift?14:0));x.fillStyle='rgba(0,0,0,.25)';x.fillRect(3,4,w,h);x.fillStyle=faceUp?(cd.c<0?'#1D1A2F':CC[cd.c]):'#1D1A2F';x.strokeStyle='#fff';x.lineWidth=3;x.beginPath();x.roundRect?x.roundRect(0,0,w,h,8):x.rect(0,0,w,h);x.fill();x.stroke();
@@ -75,9 +76,27 @@ run(root,c){
     if(chooser){x.fillStyle='rgba(0,0,0,.6)';x.fillRect(0,0,W,H);CC.forEach((cl,k)=>{x.fillStyle=cl;x.fillRect(W/2-170+k*88,H/2-40,76,76);x.strokeStyle='#fff';x.strokeRect(W/2-170+k*88,H/2-40,76,76)});x.fillStyle='#fff';x.font='800 20px Figtree';x.textAlign='center';x.fillText('Pick a color',W/2,H/2-60)}
     if(msgT>0){x.fillStyle='rgba(29,26,47,.75)';x.fillRect(W/2-170,H/2+40,340,40);x.fillStyle='#FFD23F';x.font='800 20px Figtree';x.textAlign='center';x.fillText(msg,W/2,H/2+67)}if(state==='over')banner(x,W,H,msg,'Click to deal again');c.stat('Four Colors · wins '+wins)}
   let pendingI=-1;c.on(cv,'pointermove',e=>{const p=canvasPos(cv,e);hover=-1;hands&&hands[0].forEach((cd,i)=>{const r=cardAt(i,hands[0].length);if(p.x>r.x&&p.x<r.x+Math.min(r.w,cardAt(i+1,hands[0].length).x-r.x||r.w)&&p.y>r.y-14&&p.y<r.y+r.h)hover=i})});
-  c.on(cv,'pointerdown',e=>{const p=canvasPos(cv,e);if(state==='over'){start();return}if(turn!==0)return;if(chooser){for(let k=0;k<4;k++){if(p.x>W/2-170+k*88&&p.x<W/2-94+k*88&&p.y>H/2-40&&p.y<H/2+36){chooser=false;playCard(0,pendingI,k);return}}return}
+  c.on(cv,'pointerdown',e=>{const p=canvasPos(cv,e);if(state==='over'){if(GUEST)on.act({deal:1});else start();return}if(turn!==0)return;if(chooser){for(let k=0;k<4;k++){if(p.x>W/2-170+k*88&&p.x<W/2-94+k*88&&p.y>H/2-40&&p.y<H/2+36){chooser=false;if(GUEST)on.act({play:pendingI,col:k});else playCard(0,pendingI,k);return}}return}
+    if(GUEST){if(p.x>W/2-90&&p.x<W/2-20&&p.y>H/2-80&&p.y<H/2+20){on.act({draw:1});return}for(let i=hands[0].length-1;i>=0;i--){const r=cardAt(i,hands[0].length);if(p.x>r.x&&p.x<r.x+r.w&&p.y>r.y-14&&p.y<r.y+r.h){const cd=hands[0][i];if(!ok(cd)){beep(180,.08,'square',.04);return}if(drewThisTurn&&i!==hands[0].length-1)return;if(cd.c<0){chooser=true;pendingI=i}else on.act({play:i});return}}return}
     if(p.x>W/2-90&&p.x<W/2-20&&p.y>H/2-80&&p.y<H/2+20){if(drewThisTurn){next(false);return}hands[0].push(draw1());drewThisTurn=true;beep(400,.05,'triangle',.04);if(!ok(hands[0][hands[0].length-1]))next(false);return}
     for(let i=hands[0].length-1;i>=0;i--){const r=cardAt(i,hands[0].length);if(p.x>r.x&&p.x<r.x+r.w&&p.y>r.y-14&&p.y<r.y+r.h){const cd=hands[0][i];if(!ok(cd)){beep(180,.08,'square',.04);return}if(drewThisTurn&&i!==hands[0].length-1)return;if(cd.c<0){chooser=true;pendingI=i}else playCard(0,i,cd.c);return}}});
+  /* online: the host deals; friends take computer seats, send the cards they play, and see only their own hand */
+  const seatPeer=[null,null,null,null];let GUEST=false,snap=null,mySeat=0;
+  const seatOf=peer=>seatPeer.findIndex(q=>q&&q.id===peer.id);
+  const pushAll=()=>{if(!on||!on.active||on.role!=='host')return;seatPeer.forEach((pr,sx)=>{if(!pr)return;on.snapTo(pr,{seat:sx,hand:hands[sx],n:hands.map(h=>h.length),top:top(),cur,dir,turn,st:state,msg:msgT>0?msg:'',names:NAMES,drew:drewThisTurn})})};
+  const on=Online.party({game:'fourcolors',max:4,title:'Up to 4 players around one table. Empty seats are played by the computer.',
+    onStart:role=>{if(role==='guest'){GUEST=true}else{start();pushAll()}},
+    onJoin:peer=>{const sx=[1,2,3].find(k=>!seatPeer[k]);if(sx==null)return;seatPeer[sx]=peer;NAMES[sx]=peer.name;msg=peer.name+' joined';msgT=1.5;pushAll()},
+    onLeave:peer=>{const sx=seatOf(peer);if(sx<0)return;seatPeer[sx]=null;NAMES[sx]=CPU[sx];if(turn===sx&&state==='play')setTimeout(aiTurn,500);pushAll()},
+    onAct:(peer,a)=>{const sx=seatOf(peer);if(sx<0)return;if(a.deal&&state==='over'){start();pushAll();return}if(state!=='play'||turn!==sx)return;
+      if(a.draw){if(drewThisTurn){next(false);return}hands[sx].push(draw1());drewThisTurn=true;if(!ok(hands[sx][hands[sx].length-1]))next(false);else pushAll();return}
+      if(a.play!=null){const cd=hands[sx][a.play];if(!cd||!ok(cd)||(drewThisTurn&&a.play!==hands[sx].length-1))return;playCard(sx,a.play,cd.c<0?(a.col|0):cd.c);pushAll()}},
+    onSnap:sn=>{snap=sn;mySeat=sn.seat;applySnap()},
+    onEnd:()=>{if(GUEST){GUEST=false;NAMES.splice(0,4,...CPU);start()}else{seatPeer.fill(null);NAMES.splice(0,4,...CPU);if(turn!==0&&state==='play')setTimeout(aiTurn,500)}}});
+  root.append(el('div',{class:'row'},on.button));
+  function applySnap(){const sn=snap,sx=sn.seat,V=p=>(p-sx+4)%4;hands=[[],[],[],[]];for(let p=0;p<4;p++)hands[V(p)]=p===sx?sn.hand.slice():Array(sn.n[p]).fill({c:0,v:0});disc=[sn.top];cur=sn.cur;dir=sn.dir;turn=V(sn.turn);state=sn.st;drewThisTurn=sn.drew&&sn.turn===sx;
+    for(let p=0;p<4;p++)NAMES[V(p)]=p===sx?'You':p===0?'Host':sn.names[p];if(sn.msg){msg=sn.msg.replace(/^You /,'Host ').replace('You win! 🎉','Host wins!');msgT=1.5}if(state==='over'&&sn.msg)msgT=99}
+  setInterval(()=>pushAll(),400);
   start();c.loop(dt=>{if(msgT>0&&msgT<50)msgT-=dt/1000;render()})}});
 </script>
 <script src="/js/app.js"></script>

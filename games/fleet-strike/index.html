@@ -47,27 +47,36 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Fleet Strike: game code ===================== */
 G.push({id:'battleship',name:'Fleet Strike',kind:'board',levels:true,tint:'#2d6fd6',blurb:'Hide your fleet, hunt down the computer’s ships, and sink them all before it finds yours.',fmt:b=>b+' wins',
 art:'<rect width="120" height="72" fill="#2d6fd6"/><g stroke="rgba(255,255,255,.35)"><path d="M0 18h120M0 36h120M0 54h120M30 0v72M60 0v72M90 0v72"/></g><rect x="34" y="40" width="52" height="10" rx="5" fill="#8c86a3" stroke="#1D1A2F" stroke-width="2"/><rect x="52" y="32" width="14" height="8" fill="#8c86a3" stroke="#1D1A2F" stroke-width="2"/><circle cx="96" cy="18" r="6" fill="#F2352A"/><circle cx="18" cy="56" r="4" fill="#fff"/>',
 run(root,c){const N=10,SHIPS=[5,4,3,3,2];const wrap=el('div',{style:'display:flex;flex-wrap:wrap;gap:14px;justify-content:center;width:100%'});const msg=el('p',{class:'big-text',style:'text-align:center;min-height:1.4em'});const row=el('div',{class:'row'});const sh=el('button',{class:'btn',type:'button'},'🔀 Move my ships'),ng=el('button',{class:'btn primary',type:'button'},'New game');row.append(sh,ng);
+  /* online: each player keeps their own fleet secret; shots and results are sent back and forth. Host fires first */
+  const NET=()=>on&&on.active;const blank=()=>({g:Array(N*N).fill(-1),ships:[{cells:Array(99),hits:0}],shot:Array(N*N).fill(0)});
+  const on=Online.pair({game:'battleship',onStart:(role,name)=>{newGame(true);turn=role==='host'?'me':'ai';paint()},
+    onMsg:m=>{if(m.t==='shot'&&NET()&&!over&&turn==='ai'&&!me.shot[m.i]){const r=hit(me,m.i);const s2=me.g[m.i];const done=me.ships.every(q=>q.hits>=q.cells.length);if(r!=='miss')noise(.3,'lowpass',300,.3);on.send({t:'res',i:m.i,r,cells:r==='sunk'?me.ships[s2].cells:null,all:done});if(done){over=true;paint();msg.textContent=on.friend+' sank your fleet!';return}turn='me';paint()}
+      if(m.t==='res'&&NET()){ai.shot[m.i]=1;if(m.r==='hit')ai.g[m.i]=0;if(m.r==='sunk'){const k=ai.ships.length;ai.ships.push({cells:m.cells,hits:m.cells.length});m.cells.forEach(q=>{ai.g[q]=k;ai.shot[q]=1})}beep(m.r==='miss'?300:m.r==='sunk'?120:180,.15,m.r==='miss'?'sine':'sawtooth',.06);if(m.all){over=true;paint();msg.textContent='🏆 You sank '+on.friend+'’s whole fleet!';return}turn='ai';paint();msg.textContent=m.r==='sunk'?'💥 You sunk a ship! Waiting for '+on.friend+'…':m.r==='hit'?'💥 Hit! Waiting for '+on.friend+'…':'Splash, miss. Waiting for '+on.friend+'…'}
+      if(m.t==='new'){newGame(true);turn='ai';paint()}},
+    onEnd:t=>{newGame();msg.textContent=t+' Back to playing the computer.'}});
+  row.append(on.button);
   root.append(msg,wrap,row,el('p',{class:'hint'},'Tap a square on the enemy waters to fire. Red means hit, white means miss. '+c.pick('Easy: the computer fires randomly.','Normal: the computer hunts around hits.','Hard: the computer hunts smart and never wastes shots.')));
   let me,ai,turn,over,started,aiQ=[];
   function place(){const g=Array(N*N).fill(-1);const ships=[];SHIPS.forEach((L,si)=>{for(let t=0;t<500;t++){const hz=Math.random()<.5,x0=rand(hz?N-L+1:N),y0=rand(hz?N:N-L+1);const cells=[];for(let k=0;k<L;k++)cells.push((y0+(hz?0:k))*N+x0+(hz?k:0));if(cells.every(i=>g[i]<0)){cells.forEach(i=>g[i]=si);ships.push({cells,hits:0});break}}});return{g,ships,shot:Array(N*N).fill(0)}}
   function grid(title,enemy){const box=el('div',{style:'flex:1 1 300px;max-width:420px'});box.append(el('h4',{style:'margin:0 0 6px;text-align:center'},title));const gd=el('div',{style:'display:grid;grid-template-columns:repeat(10,1fr);gap:2px;background:#1D1A2F;border:3px solid #1D1A2F;border-radius:8px;overflow:hidden'});const cells=[];for(let i=0;i<N*N;i++){const b=el('button',{type:'button','aria-label':(enemy?'enemy ':'my ')+'square '+(i%N+1)+','+(Math.floor(i/N)+1),style:'aspect-ratio:1;border:0;padding:0;background:#7FC8F8;font-size:clamp(10px,2.4vw,18px);cursor:'+(enemy?'crosshair':'default')});if(enemy)b.addEventListener('click',()=>fire(i));cells.push(b);gd.append(b)}box.append(gd);wrap.append(box);return cells}
   let myC,aiC;function build(){wrap.innerHTML='';myC=grid('Your fleet',false);aiC=grid('Enemy waters',true)}
   function paint(){for(let i=0;i<N*N;i++){const m=me.g[i],s=me.shot[i];myC[i].style.background=s?(m>=0?(me.ships[m].hits>=me.ships[m].cells.length?'#5A5470':'#F2352A'):'#dbe9f7'):(m>=0?'#8c86a3':'#7FC8F8');myC[i].textContent=s?(m>=0?'💥':'•'):'';const a=ai.g[i],t=ai.shot[i];aiC[i].style.background=t?(a>=0?(ai.ships[a].hits>=ai.ships[a].cells.length?'#5A5470':'#F2352A'):'#dbe9f7'):(over&&a>=0?'#b9c7d8':'#7FC8F8');aiC[i].textContent=t?(a>=0?'💥':'•'):''}
-    const left=b=>b.ships.filter(s2=>s2.hits<s2.cells.length).length;if(!over)msg.textContent=turn==='me'?'Your turn: fire! (enemy ships left: '+left(ai)+')':'Enemy is aiming…'}
-  function newGame(){me=place();ai=place();turn='me';over=false;started=false;aiQ=[];build();paint()}
+    const left=b=>b.ships.filter(s2=>s2.hits<s2.cells.length).length;if(!over)msg.textContent=turn==='me'?'Your turn: fire! (enemy ships left: '+(NET()?5-(ai.ships.length-1):left(ai))+')':NET()?on.friend+' is aiming…':'Enemy is aiming…'}
+  function newGame(fromNet){if(NET()&&fromNet!==true)on.send({t:'new'});me=place();ai=NET()?blank():place();turn='me';over=false;started=false;aiQ=[];build();paint()}
   function hit(b,i){b.shot[i]=1;const s=b.g[i];if(s<0)return'miss';const sh2=b.ships[s];sh2.hits++;return sh2.hits>=sh2.cells.length?'sunk':'hit'}
-  function fire(i){if(over||turn!=='me'||ai.shot[i])return;started=true;const r=hit(ai,i);beep(r==='miss'?300:r==='sunk'?120:180,.15,r==='miss'?'sine':'sawtooth',.06);if(r!=='miss')noise(.3,'lowpass',400,.3);msg.textContent=r==='sunk'?'💥 You sunk a ship!':r==='hit'?'💥 Hit!':'Splash, miss.';
+  function fire(i){if(NET()){if(over||turn!=='me'||ai.shot[i])return;started=true;turn='wait';on.send({t:'shot',i});msg.textContent='Firing…';return}if(over||turn!=='me'||ai.shot[i])return;started=true;const r=hit(ai,i);beep(r==='miss'?300:r==='sunk'?120:180,.15,r==='miss'?'sine':'sawtooth',.06);if(r!=='miss')noise(.3,'lowpass',400,.3);msg.textContent=r==='sunk'?'💥 You sunk a ship!':r==='hit'?'💥 Hit!':'Splash, miss.';
     if(ai.ships.every(s2=>s2.hits>=s2.cells.length)){over=true;paint();msg.textContent='🏆 You sank the whole fleet!';const w=(S.get('bs_w',0)||0)+1;S.set('bs_w',w);c.best(w);return}turn='ai';paint();c.after(aiTurn,650)}
   function aiPick(){const lvl=c.level;const free=[];for(let i=0;i<N*N;i++)if(!me.shot[i])free.push(i);if(lvl===0)return pick(free);
     aiQ=aiQ.filter(i=>!me.shot[i]);if(aiQ.length)return aiQ.shift();if(lvl===2){const par=free.filter(i=>((i%N)+Math.floor(i/N))%2===0);if(par.length)return pick(par)}return pick(free)}
   function aiTurn(){if(over)return;const i=aiPick();const r=hit(me,i);if(r!=='miss'){noise(.3,'lowpass',300,.3);const x0=i%N,y0=Math.floor(i/N);const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[x0+dx,y0+dy]).filter(([a,b])=>a>=0&&b>=0&&a<N&&b<N).map(([a,b])=>b*N+a).filter(j=>!me.shot[j]);if(r==='hit'){if(c.level===2){const prevHits=aiQ.length?[]:[];aiQ=nb.concat(aiQ)}else aiQ=aiQ.concat(nb)}else if(r==='sunk'&&c.level===2)aiQ=[]}
     if(me.ships.every(s2=>s2.hits>=s2.cells.length)){over=true;paint();msg.textContent='The computer sank your fleet. Try again!';return}turn='me';paint()}
-  sh.addEventListener('click',()=>{if(started){msg.textContent='You can only move ships before the first shot.';return}me=place();paint()});ng.addEventListener('click',newGame);newGame();c.stat('Fleet Strike')}});
+  sh.addEventListener('click',()=>{if(started){msg.textContent='You can only move ships before the first shot.';return}me=place();paint()});ng.addEventListener('click',()=>newGame());newGame();c.stat('Fleet Strike')}});
 </script>
 <script src="/js/app.js"></script>
 </body></html>
