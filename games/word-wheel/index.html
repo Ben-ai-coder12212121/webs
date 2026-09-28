@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Word Wheel | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_wordwheel"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Word Wheel</h1><p>Swipe across the letter wheel to spell words and fill the crossword. Extra words earn coins for hints. 20 puzzles.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Word Wheel: game code ===================== */
+G.push({id:'m_wordwheel',name:'Word Wheel',kind:'puzzle',tint:'#e8f0ff',blurb:'Swipe across the letter wheel to spell words and fill the crossword. Extra words earn coins for hints. 20 puzzles.',fmt:b=>b+' puzzles',
+art:'<circle cx="60" cy="44" r="26" fill="#fff" stroke="#1D1A2F" stroke-width="3"/><text x="60" y="30" font-size="13" font-weight="800" text-anchor="middle" fill="#3a6ae8">A</text><text x="40" y="52" font-size="13" font-weight="800" text-anchor="middle" fill="#3a6ae8">T</text><text x="80" y="52" font-size="13" font-weight="800" text-anchor="middle" fill="#3a6ae8">C</text><path d="M60 26L40 48L80 48" stroke="#ffb020" stroke-width="3" fill="none"/><rect x="4" y="4" width="14" height="14" fill="#ffd23f" stroke="#1D1A2F" stroke-width="2"/><rect x="18" y="4" width="14" height="14" fill="#ffd23f" stroke="#1D1A2F" stroke-width="2"/>',
+run(root,c){const W=400,H=640;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts(),FL=MOB.floats();
+  const P=['PLANET:PLANET,PLANE,PLANT,PANEL,PETAL,LEAPT,NEAT,PLAN,LANE,LATE,PANT,PEAT,TAPE,PALE,LEAN,TEN,NET,PEN,PET,TAN,PAN,APE,ANT,EAT,TEA,ATE,LAP,PAL',
+    'GARDEN:GARDEN,DANGER,RANGED,GRADE,RAGED,RANGE,ANGER,GRAND,DEAR,READ,DARE,EARN,NEAR,GEAR,RAGE,DRAG,AGED,END,DEN,RED,RAN,AGE,EAR,ERA,AND',
+    'STREAM:STREAM,MASTER,TAMER,STEAM,MEATS,MATES,SMEAR,TEAMS,STARE,RATES,TEARS,MEAT,TEAM,MATE,SEAM,STAR,RATE,TEAR,EAST,SEAT,EATS,ARM,ART,RAT,MAT,SAT,SET,TEA,EAT,ATE,ERA,EAR',
+    'FLOWER:FLOWER,LOWER,FOWL,WOLF,LORE,ROLE,FLOW,FLEW,FEW,LOW,OWL,ROW,ORE,FOE,OWE,FOR',
+    'CASTLE:CASTLE,CLEATS,SCALE,SLATE,STEAL,LEAST,TALES,CLEAT,LACE,CAST,CATS,SALE,SEAL,LAST,SALT,LATE,TALE,EAST,SEAT,ACE,SEA,TEA,CAT,ACT,SAT,LET,SET',
+    'BRIDGE:BRIDGE,BRIDE,RIDGE,DIRGE,BIRD,GRID,BIDE,RIDE,DIRE,BRED,BIG,DIG,RIG,BID,RID,RED,BED,BEG,IRE',
+    'WINTER:WINTER,TWINE,WRITE,TWIN,WENT,WIRE,WINE,RENT,TIRE,TIER,TERN,WIT,WIN,NET,TEN,TIN,WET,NEW,TIE',
+    'MARBLE:MARBLE,RAMBLE,BLAME,AMBLE,REALM,BLARE,MALE,MEAL,LAME,BEAM,BEAR,BARE,BALE,ABLE,MARE,EARL,REAL,ARM,BAR,EAR,ERA,ELM,LAB',
+    'ORANGE:ORANGE,GROAN,ORGAN,RANGE,ANGER,GONE,GEAR,RAGE,EARN,NEAR,OGRE,ORE,EGO,NAG,RAG,EAR,AGE,AGO,OAR,ERA',
+    'PLAYER:PLAYER,REPLAY,PEARL,EARLY,LAYER,RELAY,PALER,YEAR,PLAY,PRAY,PEAR,REAP,LEAP,PALE,REAL,YELP,APE,PAY,LAY,RAY,PAL,LAP,RYE',
+    'HUNTER:HUNTER,HURT,TURN,HUNT,RUNE,TRUE,TUNE,THEN,HER,HUT,NUT,RUN,RUT,THE,TEN,NET,HEN',
+    'CANDLE:CANDLE,LANCE,CLEAN,LACED,DANCE,CANED,LANE,LEAN,LAND,LACE,CANE,DEAL,LEAD,DEAN,CLAN,DEN,END,AND,CAN,ACE,ALE,LED,LAD',
+    'SPRING:SPRING,GRIPS,RINGS,GRINS,SPRIG,SPIN,SNIP,PINS,RING,GRIP,GRIN,SING,SIGN,RIPS,PIG,PIN,RIP,SIP,SIN,RIG,NIP',
+    'THREAD:THREAD,HATRED,DEARTH,HATED,DEATH,HEART,EARTH,TRADE,TREAD,RATED,HARD,HEAD,HEAT,HATE,DEAR,READ,DARE,RATE,TEAR,DART,HAT,RAT,TAR,ART,EAR,THE,HER,RED',
+    'SAILOR:SAILOR,SOLAR,SAIL,SOIL,RAIL,LAIR,ORAL,OILS,AIRS,SOAR,LIAR,OAR,AIR,SIR,OIL',
+    'TRAVEL:TRAVEL,ALERT,LATER,ALTER,AVERT,RAVEL,VALET,TALE,LATE,RATE,TEAR,VEAL,VALE,REAL,EARL,VAT,VET,ART,RAT,EAT,TEA,LET,ERA,EAR',
+    'DOCTOR:DOCTOR,CORD,DOOR,ROOT,ODOR,TROD,DOT,COT,ROT,COD,ROD,TOO',
+    'MONKEY:MONKEY,MONEY,MONK,OMEN,YOKE,KEY,ONE,MEN',
+    'PENCIL:PENCIL,CLIP,LINE,PINE,NICE,LICE,PILE,EPIC,PIN,PEN,NIP,LIP,ICE,LIE',
+    'SHADOW:SHADOW,SHOW,DASH,WASH,SODA,WHOA,HAD,HAS,SAW,SOW,HOW,WHO,ADO'];
+  const PZ=P.map(s=>{const[a,b]=s.split(':');return{base:a,words:b.split(',').filter(w=>[...w].every((ch,i,arr)=>arr.filter(q=>q===ch).length<=[...a].filter(q=>q===ch).length))}});
+  let pz,li,grid,placed,found,bonus,letters,wheel,path,cur,coins,t=0,state,wordsOK;
+  function layout(words){let best=null;for(let tr=0;tr<60;tr++){const ws=[words[0],...MOB.shuf(words.slice(1).filter(w=>w.length>=3)).sort((a,b)=>b.length-a.length+(Math.random()-.5)*3)];const cells=new Map(),pl=[];const key=(a,b)=>a+','+b;
+      const can=(w,r,c0,dir)=>{for(let i=0;i<w.length;i++){const rr=r+(dir?i:0),cc=c0+(dir?0:i);const k=cells.get(key(rr,cc));if(k&&k!==w[i])return false;if(!k){const n1=dir?key(rr,cc-1):key(rr-1,cc),n2=dir?key(rr,cc+1):key(rr+1,cc);if(cells.has(n1)||cells.has(n2))return false}}
+        const b=dir?key(r-1,c0):key(r,c0-1),e=dir?key(r+w.length,c0):key(r,c0+w.length);return!cells.has(b)&&!cells.has(e)};
+      const put=(w,r,c0,dir)=>{for(let i=0;i<w.length;i++)cells.set(key(r+(dir?i:0),c0+(dir?0:i)),w[i]);pl.push({w,r,c:c0,dir})};put(ws[0],0,0,0);
+      for(const w of ws.slice(1)){if(pl.length>=8)break;let done=false;for(const p of MOB.shuf(pl.slice())){for(let i=0;i<p.w.length&&!done;i++)for(let j=0;j<w.length&&!done;j++){if(p.w[i]!==w[j])continue;const dir=1-p.dir;const r=p.dir?p.r+i:p.r-j,c0=p.dir?p.c-j:p.c+i;if(can(w,r,c0,dir)){put(w,r,c0,dir);done=true}}if(done)break}}
+      let r0=1e9,r1=-1e9,c0=1e9,c1=-1e9;for(const k of cells.keys()){const[a,b]=k.split(',').map(Number);r0=Math.min(r0,a);r1=Math.max(r1,a);c0=Math.min(c0,b);c1=Math.max(c1,b)}const dim=Math.max(r1-r0+1,c1-c0+1);
+      const sc=pl.length*10-dim*2;if(dim<=10&&(!best||sc>best.sc))best={sc,pl:pl.map(p=>({...p,r:p.r-r0,c:p.c-c0})),rows:r1-r0+1,cols:c1-c0+1}}return best}
+  function load(i){li=i%PZ.length;pz=PZ[li];const L=layout(pz.words);placed=L.pl;grid={rows:L.rows,cols:L.cols};found=new Set();bonus=new Set();letters=MOB.shuf([...pz.base]);path=[];state='play';c.stat('Puzzle '+(li+1)+'/'+PZ.length+' · Coins '+coins)}
+  coins=S.get('ww_coins',20);
+  const WX=W/2,WY=500,WR=92;const lp=i=>{const a=-Math.PI/2+i*Math.PI*2/letters.length;return{x:WX+Math.cos(a)*WR*.72,y:WY+Math.sin(a)*WR*.72}};
+  function hit(p){for(let i=0;i<letters.length;i++){const q=lp(i);if(Math.hypot(p.x-q.x,p.y-q.y)<28)return i}return-1}
+  function submit(){const w=path.map(i=>letters[i]).join('');path=[];if(w.length<3)return;const g=placed.find(p=>p.w===w);
+    if(g){if(found.has(w)){FL.add('Already found',WX,370,'#aaa');return}found.add(w);beep(700,.08,'triangle',.08);setTimeout(()=>beep(1000,.08,'triangle',.08),80);for(let i=0;i<w.length;i++){const q=cellXY(g.r+(g.dir?i:0),g.c+(g.dir?0:i));FX.burst(q.x,q.y,5,'#ffd23f',2,400)}
+      if(placed.every(p=>found.has(p.w))){state='won';coins+=5;S.set('ww_coins',coins);S.set('ww_lvl',li+1);c.best(Math.max(c.best()||0,li+1));beep(1320,.25,'sine',.1)}}
+    else if(pz.words.includes(w)){if(bonus.has(w)){FL.add('Already found',WX,370,'#aaa');return}bonus.add(w);coins++;S.set('ww_coins',coins);FL.add('Bonus word! +1 coin',WX,370,'#ffd23f');beep(900,.1,'sine',.06)}
+    else{FL.add(w+'?',WX,370,'#ff8a8a');beep(200,.1,'square',.05);shake=300}c.stat('Puzzle '+(li+1)+'/'+PZ.length+' · Coins '+coins)}
+  let shake=0;
+  function hint(){if(coins<3){FL.add('Hints cost 3 coins',WX,370,'#ff8a8a');return}const left=placed.filter(p=>!found.has(p.w));if(!left.length)return;const g=left[0];g.rev=(g.rev||0)+1;coins-=3;S.set('ww_coins',coins);if(g.rev>=g.w.length){found.add(g.w);if(placed.every(p=>found.has(p.w))){state='won';S.set('ww_lvl',li+1);c.best(Math.max(c.best()||0,li+1))}}c.stat('Puzzle '+(li+1)+'/'+PZ.length+' · Coins '+coins)}
+  let CS,GX,GY;function cellXY(r,cI){return{x:GX+cI*CS+CS/2,y:GY+r*CS+CS/2}}
+  const revealed=(r,cI)=>{for(const p of placed){const i=p.dir?r-p.r:cI-p.c;const on=p.dir?cI===p.c&&i>=0&&i<p.w.length:r===p.r&&i>=0&&i<p.w.length;if(on&&(found.has(p.w)||(p.rev||0)>i))return p.w[i]}return null};
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='won'){load(li+1);return}if(Math.hypot(p.x-(WX-150),p.y-(WY+80))<26){letters=MOB.shuf(letters);return}if(Math.hypot(p.x-(WX+150),p.y-(WY+80))<26){hint();return}const i=hit(p);if(i>=0){path=[i];cur=p;beep(500,.03,'sine',.04)}},
+    move:p=>{if(!path.length)return;cur=p;const i=hit(p);if(i>=0&&!path.includes(i)){path.push(i);beep(500+path.length*80,.03,'sine',.04)}else if(i>=0&&path.length>1&&path[path.length-2]===i)path.pop()},up:()=>{if(path.length)submit();path=[]}});
+  function draw(dt){t+=dt;FX.step(dt);FL.step(dt);shake=Math.max(0,shake-dt);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3a5ab8');g.addColorStop(1,'#8a4ab8');x.fillStyle=g;x.fillRect(0,0,W,H);
+    CS=Math.min(40,Math.floor(Math.min((W-40)/grid.cols,300/grid.rows)));GX=(W-CS*grid.cols)/2;GY=60+(300-CS*grid.rows)/2;
+    const seen=new Set();for(const p of placed)for(let i=0;i<p.w.length;i++){const r=p.r+(p.dir?i:0),cI=p.c+(p.dir?0:i);const k=r+','+cI;if(seen.has(k))continue;seen.add(k);const ch=revealed(r,cI);MOB.rr(x,GX+cI*CS+2,GY+r*CS+2,CS-4,CS-4,6);x.fillStyle=ch?'#ffd23f':'rgba(255,255,255,.85)';x.fill();if(ch)MOB.txt(x,ch,GX+cI*CS+CS/2,GY+r*CS+CS/2+1,CS*.55,'#1D1A2F')}
+    MOB.txt(x,'Puzzle '+(li+1),16,24,16,'#fff','left');MOB.txt(x,'🪙 '+coins,W-16,24,16,'#ffd23f','right');MOB.txt(x,'Bonus words: '+bonus.size,W/2,24,13,'rgba(255,255,255,.8)');
+    const word=path.map(i=>letters[i]).join('');if(word){const ww=word.length*22+24,sx=shake?Math.sin(t/20)*6:0;MOB.rr(x,WX-ww/2+sx,372,ww,36,18);x.fillStyle='#fff';x.fill();MOB.txt(x,word,WX+sx,391,22,'#3a5ab8')}
+    x.fillStyle='rgba(255,255,255,.92)';x.beginPath();x.arc(WX,WY,WR,0,7);x.fill();
+    if(path.length){x.strokeStyle='#ffb020';x.lineWidth=8;x.lineCap='round';x.lineJoin='round';x.beginPath();path.forEach((i,k)=>{const q=lp(i);k?x.lineTo(q.x,q.y):x.moveTo(q.x,q.y)});if(cur)x.lineTo(cur.x,cur.y);x.stroke()}
+    letters.forEach((ch,i)=>{const q=lp(i),on=path.includes(i);x.fillStyle=on?'#ffb020':'transparent';x.beginPath();x.arc(q.x,q.y,24,0,7);x.fill();MOB.txt(x,ch,q.x,q.y+1,30,on?'#fff':'#3a5ab8')});
+    for(const[bx,lab,sub]of[[WX-150,'⇄','shuffle'],[WX+150,'💡','hint 3🪙']]){x.fillStyle='rgba(255,255,255,.2)';x.beginPath();x.arc(bx,WY+80,24,0,7);x.fill();MOB.txt(x,lab,bx,WY+80,22,'#fff');MOB.txt(x,sub,bx,WY+114,11,'rgba(255,255,255,.8)')}
+    FX.draw(x);FL.draw(x);if(state==='won')banner(x,W,H,'Puzzle solved!',li+1<PZ.length?'Tap for the next one (+5 coins)':'All 20 done! Tap to start over')}
+  load(S.get('ww_lvl',0));c.loop(draw)}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

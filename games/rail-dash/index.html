@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rail Dash | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_raildash"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Rail Dash</h1><p>Sprint down the rail yard. Swipe left and right to change tracks, up to jump barriers, down to slide under signs. Dodge the trains and grab every coin.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Rail Dash: game code ===================== */
+G.push({id:'m_raildash',levels:true,name:'Rail Dash',kind:'arcade',tint:'#ffe8c8',blurb:'Sprint down the rail yard. Swipe left and right to change tracks, up to jump barriers, down to slide under signs. Dodge the trains and grab every coin.',fmt:b=>b+' m',
+art:'<path d="M0 72L48 10H72L120 72Z" fill="#a89a88"/><path d="M28 72L55 10M92 72L65 10M60 10V72" stroke="#6a5a4a" stroke-width="2"/><rect x="66" y="20" width="22" height="30" fill="#e83a3a" stroke="#1D1A2F" stroke-width="2"/><rect x="30" y="44" width="16" height="22" rx="4" fill="#3a8aff" stroke="#1D1A2F" stroke-width="2"/><circle cx="56" cy="30" r="5" fill="#ffd23f" stroke="#1D1A2F" stroke-width="1.5"/>',
+run(root,c){const W=400,H=640,HOR=230,F=300,CH=2.6,LW=1.25,PZ=3;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts();
+  let objs,lane,lx,py,vy,roll,spd,dist,coins,state,t,spawnZ,side,magnet;
+  function reset(){objs=[];lane=0;lx=0;py=0;vy=0;roll=0;spd=c.pick(.012,.015,.018);dist=0;coins=0;state='ready';spawnZ=30;side=[];magnet=0;for(let z=4;z<80;z+=6)side.push({z,h:MOB.rnd(3,7),c:MOB.pick(['#c86a4a','#8a9ab0','#d8b070','#7a6ab0'])});upd()}
+  const upd=()=>c.stat(Math.floor(dist)+' m · 🪙 '+coins+' · Best '+(c.best()||0)+' m');
+  const P=(X,Y,z)=>({x:W/2+(X-lx*0)*F/z,y:HOR+(CH-Y)*F/z,s:F/z});
+  function spawn(z){const free=[-1,0,1];MOB.shuf(free);const n=Math.random()<.35?2:1;const d=Math.min(1,dist/2500);
+    for(let i=0;i<n;i++){const L=free[i],r=Math.random();if(r<.3+d*.15)objs.push({t:'train',lane:L,z,len:MOB.rnd(5,10),moving:Math.random()<.25+d*.2});else if(r<.65)objs.push({t:'low',lane:L,z});else objs.push({t:'high',lane:L,z})}
+    const cl=free[n];if(cl!=null){const up=Math.random()<.3;for(let k=0;k<5;k++)objs.push({t:'coin',lane:cl,z:z+k*1.2,y:up?1.2:.5})}
+    if(Math.random()<.04)objs.push({t:'magnet',lane:free[free.length-1],z:z+2})}
+  function input(d){if(state==='ready'){state='play';return}if(state==='over'){if(t-overT>600)reset();return}
+    if(d==='left'&&lane>-1){lane--;beep(500,.03,'sine',.03)}if(d==='right'&&lane<1){lane++;beep(500,.03,'sine',.03)}if(d==='up'&&py<=0.01){vy=.19;roll=0;beep(700,.05,'triangle',.04)}if(d==='down'){roll=650;if(py>0)vy=-.3;beep(300,.05,'triangle',.04)}}
+  MOB.swipe(c,cv,W,H,d=>input(d==='tap'?'up':d));MOB.keys(c,{ArrowLeft:()=>input('left'),a:()=>input('left'),ArrowRight:()=>input('right'),d:()=>input('right'),ArrowUp:()=>input('up'),w:()=>input('up'),' ':()=>input('up'),ArrowDown:()=>input('down'),s:()=>input('down')});
+  let overT=0;t=0;
+  function update(dt){t+=dt;FX.step(dt);if(state!=='play')return;const k=dt/16;spd=Math.min(.035,spd+dt*2e-7*c.pick(.8,1,1.3));const dz=spd*dt;dist+=dz*1.4;
+    lx+=(lane*LW-lx)*Math.min(1,dt/80);vy-=.011*k;py=Math.max(0,py+vy*k);if(py===0)vy=Math.max(0,vy);roll=Math.max(0,roll-dt);magnet=Math.max(0,magnet-dt);
+    for(const o of objs){o.z-=dz*(o.moving?1.8:1);}for(const s of side){s.z-=dz;if(s.z<1){s.z+=76;s.h=MOB.rnd(3,7)}}
+    spawnZ-=dz;if(spawnZ<=40){spawn(spawnZ+30);spawnZ+=MOB.rnd(9,15)*Math.max(.65,1-dist/5000)*c.pick(1.2,1,.85)}
+    const px=lane*LW;for(const o of objs){if(o.hit)continue;const ox=o.lane*LW;const near=o.t==='train'?(o.z<PZ+.3&&o.z+o.len>PZ-.3):Math.abs(o.z-PZ)<.4;
+      if(o.t==='coin'&&(magnet?Math.abs(o.z-PZ)<.6:near&&Math.abs(ox-lx)<.6&&Math.abs(o.y-(py+.6))<1)){o.hit=1;coins++;beep(1200+(coins%5)*80,.04,'square',.03);upd();continue}
+      if(o.t==='magnet'&&near&&Math.abs(ox-lx)<.6){o.hit=1;magnet=9000;beep(900,.2,'sine',.06);continue}
+      if(!near||Math.abs(ox-lx)>.55)continue;if(o.t==='low'&&py>.55)continue;if(o.t==='high'&&roll>0)continue;if(o.t==='coin'||o.t==='magnet')continue;
+      o.hit=1;state='over';overT=t;beep(90,.5,'sawtooth',.15);FX.burst(W/2,H-110,30,['#fff','#ffd23f','#ff5a3a'],6,700);c.stat('Crashed at '+Math.floor(dist)+' m · 🪙 '+coins+' · Best '+c.best(Math.floor(dist))+' m');return}
+    objs=objs.filter(o=>(o.t==='train'?o.z+o.len:o.z)>.6&&!(o.hit&&o.t!=='train'));if(Math.floor(dist)%25===0)upd()}
+  function quad(a,b,cc,d,col){x.fillStyle=col;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.lineTo(cc.x,cc.y);x.lineTo(d.x,d.y);x.closePath();x.fill()}
+  function box(X,z0,z1,w,h,top,front,sideC,y0){y0=y0||0;const zn=Math.max(.9,z0);const A=P(X-lx-w/2,y0,zn),B=P(X-lx+w/2,y0,zn),C=P(X-lx+w/2,y0+h,zn),D=P(X-lx-w/2,y0+h,zn);const A2=P(X-lx-w/2,y0,z1),B2=P(X-lx+w/2,y0,z1),C2=P(X-lx+w/2,y0+h,z1),D2=P(X-lx-w/2,y0+h,z1);
+    if(X-lx>w/2)quad(A,D,D2,A2,sideC);if(X-lx<-w/2)quad(B,C,C2,B2,sideC);quad(D,C,C2,D2,top);quad(A,B,C,D,front)}
+  function draw(){const g=x.createLinearGradient(0,0,0,HOR);g.addColorStop(0,'#6ab8ff');g.addColorStop(1,'#cfe8ff');x.fillStyle=g;x.fillRect(0,0,W,HOR);x.fillStyle='#b0a090';x.fillRect(0,HOR,W,H-HOR);
+    const g1=P(-6-lx,0,1),g2=P(6-lx,0,1),g3=P(6-lx,0,80),g4=P(-6-lx,0,80);quad(g1,g2,g3,g4,'#a89a88');
+    for(const L of[-1,0,1]){for(const s of[-.35,.35]){const a=P(L*LW+s-lx,0,1.2),b=P(L*LW+s-lx,0,80);x.strokeStyle='#6a6a70';x.lineWidth=2;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}
+      for(let z=Math.ceil(dist*0)+((-dist/1.4)%1+1)%1+1;z<60;z+=1){const a=P(L*LW-.5-lx,0,z),b=P(L*LW+.5-lx,0,z);x.strokeStyle='rgba(90,60,40,.5)';x.lineWidth=Math.max(1,3*F/z/80);x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}
+    const sd=side.slice().sort((a,b)=>b.z-a.z);for(const s of sd)for(const sx of[-4.2,4.2])box(sx+lx,s.z,s.z+5,2,s.h,'#ddd',s.c,'rgba(0,0,0,.25)');
+    const os=objs.slice().sort((a,b)=>b.z-a.z);let pd=false;const drawP=()=>{pd=true;const q=P(0,py,PZ);const s=q.s/100;const rolled=roll>0;x.save();x.translate(W/2+(lx-lx),q.y);x.scale(s,s);
+      x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(0,(py>0?py*F/PZ/s:0)+2,40,12,0,0,7);x.fill();if(rolled){x.fillStyle='#3a8aff';x.beginPath();x.arc(0,-34,34,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=5;x.stroke()}
+      else{const run=Math.sin(t/70)*(py>0?0:1);x.fillStyle='#2a2a5a';x.fillRect(-22,-60,18,60+run*6);x.fillRect(4,-60,18,60-run*6);x.fillStyle='#3a8aff';MOB.rr(x,-30,-130,60,76,14);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=5;x.stroke();x.fillStyle='#e8b890';x.beginPath();x.arc(0,-156,28,0,7);x.fill();x.stroke();x.fillStyle='#ff5a3a';x.fillRect(-30,-184,60,18);x.fillStyle='#ffd23f';x.fillRect(-26,-126,52,10)}x.restore()};
+    for(const o of os){const X=o.lane*LW;if(!pd&&(o.t==='train'?o.z:o.z)<PZ)drawP();
+      if(o.t==='train')box(X,o.z,o.z+o.len,1.1,2.4,'#b8b8c0',o.moving?'#ffb01a':'#e83a3a','#8a2a2a');
+      else if(o.t==='low'){box(X,o.z,o.z+.15,1.1,.7,'#fff','#ff5a3a','#8a2a1a');const a=P(X-lx,.45,o.z);x.fillStyle='#fff';x.fillRect(a.x-a.s*.45,a.y-a.s*.08,a.s*.9,a.s*.08)}
+      else if(o.t==='high'){box(X,o.z,o.z+.15,1.2,.3,'#ddd','#ffd23f','#8a7a1a',1.1);for(const s of[-.5,.5])box(X+s,o.z,o.z+.1,.1,1.1,'#888','#555','#333')}
+      else if(o.t==='coin'&&!o.hit){const a=P(X-lx,o.y,o.z);if(a.y>0){x.fillStyle='#ffd23f';x.beginPath();x.ellipse(a.x,a.y,a.s*.2*Math.abs(Math.sin(t/200+o.z)),a.s*.2,0,0,7);x.fill();x.strokeStyle='#b8860b';x.lineWidth=Math.max(1,a.s*.03);x.stroke()}}
+      else if(o.t==='magnet'&&!o.hit){const a=P(X-lx,.7,o.z);MOB.txt(x,'🧲',a.x,a.y,a.s*.5)}}if(!pd)drawP();
+    FX.draw(x);MOB.big(x,Math.floor(dist)+' m',W/2,40,30,'#fff','#1D1A2F');MOB.txt(x,'🪙 '+coins,W-50,40,18,'#1D1A2F');if(magnet)MOB.txt(x,'🧲 '+Math.ceil(magnet/1000),50,40,18,'#1D1A2F');
+    if(state==='ready')banner(x,W,H,'Rail Dash','Swipe ← → to switch, ↑ jump, ↓ slide');if(state==='over')banner(x,W,H,Math.floor(dist)+' m','🪙 '+coins+' · tap to run again')}
+  reset();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

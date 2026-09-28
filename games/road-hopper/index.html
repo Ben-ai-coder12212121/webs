@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Road Hopper | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_hopper"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Road Hopper</h1><p>Hop forward across endless roads, rivers and train tracks. Ride the logs, dodge the traffic, and keep moving or the hawk swoops in.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Road Hopper: game code ===================== */
+G.push({id:'m_hopper',levels:true,name:'Road Hopper',kind:'arcade',tint:'#d8f5c8',blurb:'Hop forward across endless roads, rivers and train tracks. Ride the logs, dodge the traffic, and keep moving or the hawk swoops in.',fmt:b=>b+' hops',
+art:'<rect x="0" y="0" width="120" height="24" fill="#7bd05a"/><rect x="0" y="24" width="120" height="24" fill="#555a66"/><rect x="0" y="48" width="120" height="24" fill="#4aa8e8"/><rect x="14" y="30" width="30" height="14" rx="3" fill="#ff5a5a" stroke="#1D1A2F" stroke-width="2"/><rect x="62" y="54" width="44" height="12" rx="4" fill="#8a5a2a"/><rect x="72" y="4" width="16" height="16" fill="#fff" stroke="#1D1A2F" stroke-width="2"/><rect x="84" y="8" width="5" height="4" fill="#ff9a1f"/>',
+run(root,c){const W=400,H=640,T=40,COLS=10;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts();
+  let rows,pl,camY,state,best,idle,t,deadMsg;
+  const CARC=['#ff5a5a','#3a8aff','#ffd23f','#9a5aff','#2ac87a','#ff8a3a'];
+  function mkRow(i){if(i<4)return{type:'grass',trees:i===0?[]:[0,COLS-1]};const prev=rows[i-1];const d=Math.min(1,i/150);let type;const r=Math.random();
+    if(prev&&prev.type==='river'&&Math.random()<.5)type='river';else if(prev&&prev.type==='road'&&Math.random()<.55)type='road';else type=r<.34?'grass':r<.72?'road':r<.9?'river':'rail';
+    const dir=Math.random()<.5?1:-1;if(type==='grass'){const trees=[];for(let cI=0;cI<COLS;cI++)if(Math.random()<.18+d*.1)trees.push(cI);return{type,trees,coin:Math.random()<.15?Math.random()*COLS|0:-1}}
+    if(type==='road'){const sp=MOB.rnd(1.2,2.4)*c.pick(.8,1,1.25)*(1+d*.6);const cars=[];const n=1+(Math.random()*2|0)+(d>.5?1:0);const long=Math.random()<.25;for(let k=0;k<n;k++)cars.push({x:k*(W+120)/n+MOB.rnd(0,60),w:long?96:56,c:MOB.pick(CARC)});return{type,dir,sp,cars}}
+    if(type==='river'){const sp=MOB.rnd(.8,1.7)*c.pick(.8,1,1.15);const logs=[];const n=2+(Math.random()*2|0);const lw=MOB.rnd(80,140)*c.pick(1.2,1,.85);for(let k=0;k<n;k++)logs.push({x:k*(W+lw)/n,w:lw});return{type,dir,sp,logs}}
+    return{type:'rail',dir,train:null,warn:0,cool:MOB.rnd(1500,5000)}}
+  function reset(){rows=[];for(let i=0;i<40;i++)rows.push(mkRow(i));pl={c:4,r:1,x:4*T+T/2,hop:0,fr:null,dead:false,face:'up'};camY=0;state='ready';best=0;idle=0;t=0;upd()}
+  const upd=()=>c.stat('Hops '+best+' · Best '+(c.best()||0));
+  const rowAt=r=>{while(rows.length<=r+30)rows.push(mkRow(rows.length));return rows[r]};
+  function move(d){if(state==='over'){if(t-overT>500)reset();return}if(state==='ready')state='play';if(pl.dead||pl.hop>0)return;let nc=pl.c,nr=pl.r;
+    if(d==='up'||d==='tap')nr++;else if(d==='down')nr--;else if(d==='left')nc--;else if(d==='right')nc++;pl.face=d==='tap'?'up':d;if(nr<Math.max(0,best-4)||nc<0||nc>=COLS)return;const R=rowAt(nr);if(R.type==='grass'&&R.trees.includes(nc))return;
+    pl.fr={c:pl.c,r:pl.r,x:pl.x};pl.c=nc;pl.r=nr;pl.hop=1;idle=0;beep(700,.03,'square',.03);if(nr>best){best=nr;upd()}}
+  let overT=0;function die(msg){if(pl.dead)return;pl.dead=true;deadMsg=msg;state='over';overT=t;FX.burst(pl.x,H-((pl.r*T)-camY)-T/2,26,['#fff','#ff9a1f','#ffd23f'],4,700);beep(120,.35,'sawtooth',.12);c.stat('Hops '+best+' · Best '+c.best(best))}
+  MOB.swipe(c,cv,W,H,move);MOB.keys(c,{ArrowUp:()=>move('up'),w:()=>move('up'),ArrowDown:()=>move('down'),s:()=>move('down'),ArrowLeft:()=>move('left'),a:()=>move('left'),ArrowRight:()=>move('right'),d:()=>move('right'),' ':()=>move('up')});
+  function update(dt){t+=dt;FX.step(dt);const k=dt/16;
+    for(let r=Math.max(0,Math.floor(camY/T)-2);r<camY/T+H/T+3;r++){const R=rowAt(r);if(R.type==='road')for(const cr of R.cars){cr.x+=R.dir*R.sp*k;if(R.dir>0&&cr.x>W+20)cr.x-=W+cr.w+140;if(R.dir<0&&cr.x+cr.w<-20)cr.x+=W+cr.w+140}
+      if(R.type==='river')for(const lg of R.logs){lg.x+=R.dir*R.sp*k;if(R.dir>0&&lg.x>W+10)lg.x-=W+lg.w+60;if(R.dir<0&&lg.x+lg.w<-10)lg.x+=W+lg.w+60}
+      if(R.type==='rail'){if(R.train){R.train.x+=R.dir*14*k;if((R.dir>0&&R.train.x>W+40)||(R.dir<0&&R.train.x+R.train.w<-40)){R.train=null;R.cool=MOB.rnd(2500,6000)}}else{R.cool-=dt;if(R.cool<1200)R.warn=1;if(R.cool<=0){R.warn=0;const w=520;R.train={x:R.dir>0?-w:W,w}}}}}
+    if(state!=='play')return;
+    if(pl.hop>0){pl.hop=Math.max(0,pl.hop-dt/110);const tx=pl.c*T+T/2;pl.x+=(tx-pl.x)*Math.min(1,dt/60)}
+    const R=rowAt(pl.r);const onGround=pl.hop<.35;
+    if(onGround){if(R.type==='road')for(const cr of R.cars)if(pl.x+12>cr.x&&pl.x-12<cr.x+cr.w)return die('Splat!');
+      if(R.type==='rail'&&R.train&&pl.x+12>R.train.x&&pl.x-12<R.train.x+R.train.w)return die('Train!');
+      if(R.type==='river'){let on=null;for(const lg of R.logs)if(pl.x>lg.x+4&&pl.x<lg.x+lg.w-4)on=lg;if(!on&&pl.hop===0)return die('Splash!');if(on){pl.x+=R.dir*R.sp*k;pl.c=MOB.clamp(Math.round((pl.x-T/2)/T),0,COLS-1);if(pl.x<0||pl.x>W)return die('Swept away!')}}
+      else if(pl.hop===0)pl.x+=(pl.c*T+T/2-pl.x)*.3}
+    const want=pl.r*T-T*3;camY+=(want-camY)*Math.min(1,dt/300);camY+=dt*.008*c.pick(.6,1,1.4)*(state==='play'?1:0);
+    idle+=dt;if(pl.r*T<camY-T*.5||idle>c.pick(9000,7000,5000))die('The hawk got you!')}
+  const sy=r=>H-(r*T-camY)-T;
+  function block(px,py,w,h,top,side,d){x.fillStyle=side;x.fillRect(px,py+h-d,w,d);x.fillStyle=top;x.fillRect(px,py-d,w,h)}
+  function draw(){const r0=Math.max(0,Math.floor(camY/T)-1),r1=Math.ceil((camY+H)/T)+1;
+    for(let r=r1;r>=r0;r--){const R=rowAt(r),y=sy(r);
+      if(R.type==='grass'){x.fillStyle=r%2?'#86d85e':'#7bd05a';x.fillRect(0,y,W,T);if(R.coin>=0&&r>best){x.fillStyle='#ffd23f';x.beginPath();x.arc(R.coin*T+T/2,y+T/2,8,0,7);x.fill();x.strokeStyle='#b8860b';x.lineWidth=2;x.stroke()}}
+      else if(R.type==='road'){x.fillStyle='#535865';x.fillRect(0,y,W,T);x.strokeStyle='rgba(255,255,255,.5)';x.setLineDash([16,14]);x.lineWidth=2;x.beginPath();x.moveTo(0,y+T);x.lineTo(W,y+T);x.stroke();x.setLineDash([])}
+      else if(R.type==='river'){x.fillStyle='#4aa8e8';x.fillRect(0,y,W,T);x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=2;for(let i=0;i<5;i++){const wx=((i*97+t*.03*R.dir*R.sp)%W+W)%W;x.beginPath();x.moveTo(wx,y+T/2);x.lineTo(wx+14,y+T/2);x.stroke()}}
+      else{x.fillStyle='#6a6258';x.fillRect(0,y,W,T);x.fillStyle='#5a3a24';for(let i=0;i<W;i+=16)x.fillRect(i,y+6,8,T-12);x.fillStyle='#bfc4cc';x.fillRect(0,y+10,W,3);x.fillRect(0,y+T-13,W,3);x.fillStyle=R.warn&&Math.sin(t/80)>0?'#ff3030':'#402020';x.beginPath();x.arc(8,y+8,5,0,7);x.fill()}}
+    for(let r=r1;r>=r0;r--){const R=rowAt(r),y=sy(r);
+      if(R.type==='grass')for(const tc of R.trees){block(tc*T+6,y+10,T-12,T-12,'#2e8a3a','#1e5a26',14);x.fillStyle='#6a4a2a';x.fillRect(tc*T+T/2-4,y+T-10,8,8)}
+      if(R.type==='road')for(const cr of R.cars){block(cr.x,y+8,cr.w,T-14,cr.c,'#1D1A2F',8);x.fillStyle='rgba(180,230,255,.9)';x.fillRect(cr.x+(R.dir>0?cr.w-20:8),y+2,12,T-18);x.fillStyle='#fff8a0';x.fillRect(R.dir>0?cr.x+cr.w-3:cr.x,y+4,3,6)}
+      if(R.type==='river')for(const lg of R.logs){block(lg.x,y+8,lg.w,T-14,'#9a6a3a','#5a3a1a',6);x.strokeStyle='rgba(0,0,0,.2)';for(let i=12;i<lg.w;i+=22){x.beginPath();x.moveTo(lg.x+i,y+4);x.lineTo(lg.x+i,y+T-10);x.stroke()}}
+      if(R.type==='rail'&&R.train){block(R.train.x,y+4,R.train.w,T-8,'#d83a3a','#6a1a1a',10);x.fillStyle='#ffe';for(let i=20;i<R.train.w-20;i+=44)x.fillRect(R.train.x+i,y-2,24,8)}
+      if(r===pl.r&&!(pl.dead&&deadMsg==='Splash!')){const hopY=Math.sin((1-pl.hop)*Math.PI)*(pl.hop>0?14:0);const px=pl.x-13,py=y+8-hopY;x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(pl.x,y+T-6,13,5,0,0,7);x.fill();
+        block(px,py,26,24,'#ffffff','#c8c8d0',10);x.fillStyle='#ff4a3a';x.fillRect(px+10,py-14,6,4);x.fillStyle='#ff9a1f';const fx=pl.face==='left'?px-4:pl.face==='right'?px+26:px+10;x.fillRect(fx,py+(pl.face==='down'?16:2),6,5);x.fillStyle='#1D1A2F';x.fillRect(px+6,py+2,3,3);x.fillRect(px+17,py+2,3,3)}}
+    FX.draw(x);MOB.big(x,String(best),W/2,40,40,'#fff','#1D1A2F');
+    if(state==='ready')banner(x,W,H,'Road Hopper','Tap or swipe up to hop. Swipe to turn.');if(state==='over')banner(x,W,H,deadMsg,best+' hops · tap to retry')}
+  reset();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snip &amp; Feed | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_snip"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Snip &amp; Feed</h1><p>A hungry little monster wants that candy. Swipe to cut the ropes, time the swings, pop bubbles and dodge spikes. Grab all three stars in 12 levels.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Snip & Feed: game code ===================== */
+G.push({id:'m_snip',name:'Snip & Feed',kind:'puzzle',tint:'#fff0c8',blurb:'A hungry little monster wants that candy. Swipe to cut the ropes, time the swings, pop bubbles and dodge spikes. Grab all three stars in 12 levels.',fmt:b=>b+' stars',
+art:'<path d="M60 0L52 34" stroke="#8a5a2a" stroke-width="3"/><circle cx="50" cy="40" r="10" fill="#ff5a9a" stroke="#1D1A2F" stroke-width="3"/><circle cx="84" cy="22" r="6" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2"/><ellipse cx="80" cy="62" rx="20" ry="14" fill="#6ad04a" stroke="#1D1A2F" stroke-width="3"/><ellipse cx="80" cy="60" rx="9" ry="5" fill="#1D1A2F"/>',
+run(root,c){const W=400,H=640;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts();
+  // pins:[x,y,len|0,auto radius]; stars; mon; spikes:[x,y,w]; bubbles:[x,y]
+  const LV=[
+    {pins:[[200,70]],candy:[200,200],stars:[[200,300],[200,380],[200,460]],mon:[200,575]},
+    {pins:[[100,80],[300,80]],candy:[200,210],stars:[[150,320],[250,400],[200,470]],mon:[200,575]},
+    {pins:[[70,70,190]],candy:[200,210],stars:[[280,290],[320,380],[315,470]],mon:[320,575]},
+    {pins:[[200,60]],candy:[200,190],stars:[[140,300],[90,380],[80,480]],mon:[80,575],spikes:[[150,360,250]],autos:[[90,260,110]]},
+    {pins:[[60,540]],candy:[160,560],stars:[[200,430],[200,300],[200,180]],mon:[200,80],bubbles:[[200,500]]},
+    {pins:[[60,80],[340,80],[200,40]],candy:[200,220],stars:[[120,330],[280,330],[200,450]],mon:[200,575],spikes:[[0,420,110],[290,420,110]]},
+    {pins:[[340,60,220]],candy:[180,160],stars:[[90,280],[70,400],[200,500]],mon:[300,575],autos:[[200,330,120]]},
+    {pins:[[200,60]],candy:[200,170],stars:[[200,260],[80,420],[320,420]],mon:[320,120],bubbles:[[200,330]],spikes:[[0,600,400]]},
+    {pins:[[40,300,150],[360,300,150]],candy:[200,380],stars:[[200,250],[110,470],[290,470]],mon:[200,575],spikes:[[120,120,160]]},
+    {pins:[[80,60],[320,60]],candy:[200,260],stars:[[60,380],[340,380],[200,520]],mon:[200,590],autos:[[60,330,100],[340,330,100]],spikes:[[150,430,100]]},
+    {pins:[[330,70,160]],candy:[210,150],stars:[[110,210],[70,340],[180,470]],mon:[70,500],bubbles:[[250,420]],spikes:[[200,560,200]]},
+    {pins:[[200,50],[60,200],[340,200]],candy:[200,300],stars:[[200,120],[100,460],[300,460]],mon:[200,580],bubbles:[[200,390]],spikes:[[0,300,40],[360,300,40]]}];
+  const SEG=14;let L,ropes,candy,stars,got,bub,state,li,t,mouth,slash,autos;
+  const bestKey=i=>'snip_s'+i;const total=()=>{let s=0;for(let i=0;i<LV.length;i++)s+=S.get(bestKey(i),0);return s};
+  function load(i){li=i;L=LV[i];candy={x:L.candy[0],y:L.candy[1],px:L.candy[0],py:L.candy[1]};ropes=[];for(const p of L.pins)addRope(p[0],p[1],p[2]);autos=(L.autos||[]).map(a=>({x:a[0],y:a[1],r:a[2],used:0}));
+    stars=L.stars.map(s=>({x:s[0],y:s[1],got:0}));got=0;bub=(L.bubbles||[]).map(b=>({x:b[0],y:b[1],on:0,gone:0}));state='play';mouth=0;slash=[];c.stat('Level '+(i+1)+'/'+LV.length+' · Stars '+total()+'/'+LV.length*3)}
+  function addRope(ax,ay,len){const d=Math.hypot(candy.x-ax,candy.y-ay);len=len||d;const n=Math.max(3,Math.round(len/SEG));const pts=[];for(let k=0;k<=n;k++){const f=k/n;const px=ax+(candy.x-ax)*f,py=ay+(candy.y-ay)*f+(len>d?Math.sin(f*Math.PI)*(len-d)*.5:0);pts.push({x:px,y:py,px,py})}pts[0].pin=1;ropes.push({pts,seg:len/n,cut:-1,ax,ay})}
+  function step(dt){const k=Math.min(2,dt/16);const inB=bub.find(b=>b.on&&!b.gone);const g=inB?-.16:.36;
+    const vx=(candy.x-candy.px)*(inB?.96:.995),vy=(candy.y-candy.py)*(inB?.96:.995);candy.px=candy.x;candy.py=candy.y;candy.x+=vx;candy.y+=vy+g*k*k;
+    for(const r of ropes)for(const p of r.pts){if(p.pin)continue;const pvx=(p.x-p.px)*.99,pvy=(p.y-p.py)*.99;p.px=p.x;p.py=p.y;p.x+=pvx;p.y+=pvy+.36*k*k}
+    for(let it=0;it<14;it++)for(const r of ropes){const P=r.pts;for(let j=0;j<P.length-1;j++){if(j===r.cut)continue;const a=P[j],b=P[j+1];const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,df=(d-r.seg)/d;if(df<=0)continue;
+        if(a.pin){b.x-=dx*df;b.y-=dy*df}else{a.x+=dx*df*.5;a.y+=dy*df*.5;b.x-=dx*df*.5;b.y-=dy*df*.5}}
+      const last=P[P.length-1];if(r.cut===-1){candy.x+=(last.x-candy.x)*.6;candy.y+=(last.y-candy.y)*.6}last.x=candy.x;last.y=candy.y}
+    for(const a of autos)if(!a.used&&Math.hypot(candy.x-a.x,candy.y-a.y)<a.r){a.used=1;addRope(a.x,a.y,a.r*.9);beep(700,.05,'triangle',.05)}
+    for(const s of stars)if(!s.got&&Math.hypot(candy.x-s.x,candy.y-s.y)<24){s.got=1;got++;FX.burst(s.x,s.y,16,'#ffd23f',3,500);beep(900+got*200,.08,'sine',.08)}
+    for(const b of bub)if(!b.on&&!b.gone&&Math.hypot(candy.x-b.x,candy.y-b.y)<28){b.on=1;candy.py=candy.y;candy.px=candy.x;beep(500,.1,'sine',.05)}
+    for(const b of bub)if(b.on&&!b.gone){b.x=candy.x;b.y=candy.y}
+    for(const sp of L.spikes||[])if(candy.x>sp[0]-8&&candy.x<sp[0]+sp[2]+8&&Math.abs(candy.y-sp[1])<16){lose('Ouch, spikes!');return}
+    const m=L.mon;mouth=Math.max(0,Math.min(1,1.6-Math.hypot(candy.x-m[0],candy.y-m[1])/90));if(Math.hypot(candy.x-m[0],candy.y-(m[1]-10))<34){win();return}
+    if(candy.x<-40||candy.x>W+40||candy.y>H+40||candy.y<-60)lose('The candy got away')}
+  function cutAt(a,b){for(const r of ropes){if(r.cut>=0)continue;const P=r.pts;for(let j=0;j<P.length-1;j++)if(inter(a,b,P[j],P[j+1])){r.cut=j;beep(1400,.04,'square',.04);FX.burst(P[j].x,P[j].y,5,'#c89a5a',2,300);break}}}
+  function inter(a,b,p,q){const d=(b.x-a.x)*(q.y-p.y)-(b.y-a.y)*(q.x-p.x);if(!d)return false;const u=((p.x-a.x)*(q.y-p.y)-(p.y-a.y)*(q.x-p.x))/d,v=((p.x-a.x)*(b.y-a.y)-(p.y-a.y)*(b.x-a.x))/d;return u>=0&&u<=1&&v>=0&&v<=1}
+  let msg='';function lose(m){state='lost';msg=m;beep(160,.3,'sawtooth',.08)}
+  function win(){state='won';const k=bestKey(li);if(got>S.get(k,0))S.set(k,got);c.best(total());FX.burst(L.mon[0],L.mon[1],30,['#ff5a9a','#ffd23f','#fff'],5,800);beep(660,.1,'sine',.1);setTimeout(()=>beep(990,.15,'sine',.1),120);c.stat('Level '+(li+1)+' fed! '+got+'/3 stars · Total '+total()+'/'+LV.length*3)}
+  let last=null;MOB.drag(c,cv,W,H,{down:p=>{if(p.y<50&&p.x>W-60){load(li);return}if(state==='won'){load((li+1)%LV.length);return}if(state==='lost'){load(li);return}
+      for(const b of bub)if(b.on&&!b.gone&&Math.hypot(p.x-b.x,p.y-b.y)<34){b.gone=1;beep(300,.08,'triangle',.06);FX.burst(b.x,b.y,12,'#bfe8ff',3,400);return}last=p;slash.push({x:p.x,y:p.y,t:0})},
+    move:p=>{if(!last)return;cutAt(last,p);last=p;slash.push({x:p.x,y:p.y,t:0})},up:()=>{last=null}});
+  MOB.keys(c,{r:()=>load(li)});
+  function drawRope(r){const P=r.pts;x.lineCap='round';for(let j=0;j<P.length-1;j++){if(j===r.cut)continue;x.strokeStyle=j%2?'#8a5a2a':'#c89a5a';x.lineWidth=4;x.beginPath();x.moveTo(P[j].x,P[j].y);x.lineTo(P[j+1].x,P[j+1].y);x.stroke()}x.fillStyle='#8a8a9a';x.beginPath();x.arc(r.ax,r.ay,8,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2;x.stroke()}
+  function draw(dt){t+=dt;const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#fff4d8');g.addColorStop(1,'#ffd8a8');x.fillStyle=g;x.fillRect(0,0,W,H);x.strokeStyle='rgba(180,120,60,.12)';x.lineWidth=18;for(let i=-H;i<W;i+=48){x.beginPath();x.moveTo(i,0);x.lineTo(i+H,H);x.stroke()}
+    for(const a of autos){x.setLineDash([5,6]);x.strokeStyle=a.used?'rgba(0,0,0,.1)':'rgba(40,120,200,.6)';x.lineWidth=2;x.beginPath();x.arc(a.x,a.y,a.r,0,7);x.stroke();x.setLineDash([]);x.fillStyle='#3a8ad0';x.beginPath();x.arc(a.x,a.y,7,0,7);x.fill()}
+    for(const sp of L.spikes||[]){x.fillStyle='#6a6a7a';for(let sx=sp[0];sx<sp[0]+sp[2];sx+=16){x.beginPath();x.moveTo(sx,sp[1]+8);x.lineTo(sx+8,sp[1]-10);x.lineTo(sx+16,sp[1]+8);x.fill()}x.fillStyle='#3a3a4a';x.fillRect(sp[0],sp[1]+6,sp[2],6)}
+    for(const s of stars)if(!s.got){x.save();x.translate(s.x,s.y);x.rotate(Math.sin(t/400)*.2);x.fillStyle='#ffd23f';x.strokeStyle='#b8860b';x.lineWidth=2;x.beginPath();for(let i=0;i<10;i++){const r=i%2?7:16,a=i*Math.PI/5-Math.PI/2;x.lineTo(Math.cos(a)*r,Math.sin(a)*r)}x.closePath();x.fill();x.stroke();x.restore()}
+    const m=L.mon;x.save();x.translate(m[0],m[1]);const bob=Math.sin(t/250)*2;x.fillStyle='#6ad04a';x.beginPath();x.ellipse(0,bob,34,28,0,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=3;x.stroke();x.fillStyle='#fff';x.beginPath();x.arc(-12,-12+bob,8,0,7);x.arc(12,-12+bob,8,0,7);x.fill();x.fillStyle='#1D1A2F';const lx=Math.max(-3,Math.min(3,(candy.x-m[0])/40)),ly=Math.max(-3,Math.min(3,(candy.y-m[1])/40));x.beginPath();x.arc(-12+lx,-12+bob+ly,3.5,0,7);x.arc(12+lx,-12+bob+ly,3.5,0,7);x.fill();
+    x.fillStyle='#8a1a2a';x.beginPath();x.ellipse(0,8+bob,12+mouth*6,3+mouth*12,0,0,7);x.fill();x.restore();
+    for(const r of ropes)drawRope(r);
+    if(state!=='won'){x.fillStyle='#ff5a9a';x.beginPath();x.arc(candy.x,candy.y,15,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=3;x.stroke();x.strokeStyle='#fff';x.lineWidth=4;x.beginPath();x.arc(candy.x,candy.y,8,.5,2.6);x.stroke();for(const s of[-1,1]){x.fillStyle='#ff9ac0';x.beginPath();x.moveTo(candy.x+s*14,candy.y);x.lineTo(candy.x+s*24,candy.y-8);x.lineTo(candy.x+s*24,candy.y+8);x.fill()}}
+    for(const b of bub)if(!b.gone){x.fillStyle='rgba(180,230,255,.35)';x.strokeStyle='rgba(120,190,240,.9)';x.lineWidth=2;x.beginPath();x.arc(b.x,b.y,28,0,7);x.fill();x.stroke();x.fillStyle='rgba(255,255,255,.7)';x.beginPath();x.arc(b.x-9,b.y-10,5,0,7);x.fill()}
+    for(const s of slash)s.t+=dt;while(slash.length&&slash[0].t>150)slash.shift();if(slash.length>1){x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=3;x.beginPath();slash.forEach((s,i)=>i?x.lineTo(s.x,s.y):x.moveTo(s.x,s.y));x.stroke()}
+    FX.draw(x);MOB.txt(x,'Level '+(li+1),16,26,18,'#8a4a1a','left');for(let i=0;i<3;i++)MOB.txt(x,'★',W/2-30+i*30,26,26,i<got?'#ffd23f':'rgba(0,0,0,.15)');MOB.rr(x,W-52,10,40,34,8);x.fillStyle='#fff';x.fill();MOB.txt(x,'↻',W-32,28,22,'#8a4a1a');
+    if(state==='won')banner(x,W,H,'Yum! '+'★'.repeat(got)+'☆'.repeat(3-got),li+1<LV.length?'Tap for level '+(li+2):'All levels done! Tap to replay');if(state==='lost')banner(x,W,H,msg,'Tap to try again')}
+  load(0);for(let i=0;i<LV.length;i++)if(S.get(bestKey(i),0)>0)li=Math.min(LV.length-1,i+1);load(li);
+  c.loop(dt=>{if(state==='play'){step(dt);FX.step(dt)}else FX.step(dt);draw(dt)})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

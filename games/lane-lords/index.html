@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lane Lords | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_lanelords"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Lane Lords</h1><p>A real-time card battle. Spend energy to drop squires, bowmen, brutes and fire pots into two lanes, knock down the enemy towers and take their keep before the three-minute bell.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Lane Lords: game code ===================== */
+G.push({id:'m_lanelords',levels:true,name:'Lane Lords',kind:'arcade',tint:'#e0ecff',blurb:'A real-time card battle. Spend energy to drop squires, bowmen, brutes and fire pots into two lanes, knock down the enemy towers and take their keep before the three-minute bell.',fmt:b=>b+' wins',
+art:'<rect x="0" y="0" width="120" height="72" fill="#7cc24e"/><rect x="0" y="32" width="120" height="8" fill="#4aa8e8"/><rect x="22" y="30" width="12" height="12" fill="#a87a4a"/><rect x="86" y="30" width="12" height="12" fill="#a87a4a"/><rect x="50" y="2" width="20" height="18" fill="#e83a3a" stroke="#1D1A2F" stroke-width="2"/><rect x="50" y="52" width="20" height="18" fill="#3a6ae8" stroke="#1D1A2F" stroke-width="2"/><circle cx="30" cy="54" r="5" fill="#3a6ae8" stroke="#1D1A2F" stroke-width="1.5"/><circle cx="90" cy="18" r="5" fill="#e83a3a" stroke="#1D1A2F" stroke-width="1.5"/>',
+run(root,c){const W=400,H=640,RIV=300,TOP=20,BOTA=580,HANDY=590;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts(),FL=MOB.floats();
+  const CARDS={squire:{n:'Squire',e:3,hp:600,dmg:75,rng:22,spd:.9,rate:1100,cnt:1,ic:'🛡️'},bowmen:{n:'Bowmen',e:3,hp:200,dmg:45,rng:110,spd:.9,rate:1000,cnt:2,ic:'🏹'},brute:{n:'Stone Brute',e:5,hp:1900,dmg:120,rng:22,spd:.6,rate:1500,cnt:1,bld:1,ic:'🗿',big:1},
+    imps:{n:'Imps',e:2,hp:120,dmg:50,rng:18,spd:1.5,rate:800,cnt:3,ic:'👺'},crossbow:{n:'Crossbow',e:4,hp:340,dmg:100,rng:130,spd:.85,rate:1100,cnt:1,ic:'🎯'},bones:{n:'Bone Swarm',e:3,hp:40,dmg:40,rng:16,spd:1.2,rate:900,cnt:7,ic:'💀'},
+    ironclad:{n:'Ironclad',e:4,hp:900,dmg:260,rng:22,spd:1,rate:1700,cnt:1,ic:'⚔️'},firepot:{n:'Fire Pot',e:4,spell:1,dmg:380,rad:50,ic:'🔥'}};
+  const DECK=Object.keys(CARDS);
+  let U,Tw,proj,el,eAI,hand,queue,sel,clock,state,t,crowns,aiT;
+  function tower(side,kx,ky,king){return{side,x:kx,y:ky,hp:king?2400:1400,max:king?2400:1400,king,rng:king?120:125,dmg:king?70:55,rate:900,cd:0,active:!king,r:king?24:18}}
+  function reset(){U=[];proj=[];Tw=[tower(0,90,500,0),tower(0,310,500,0),tower(0,200,555,1),tower(1,90,120,0),tower(1,310,120,0),tower(1,200,65,1)];el=5;eAI=5;const d=MOB.shuf(DECK.slice());hand=d.slice(0,4);queue=d.slice(4);sel=-1;clock=180000;state='ready';t=0;crowns=[0,0];aiT=2500;upd()}
+  const upd=()=>c.stat('Crowns '+crowns[0]+'–'+crowns[1]+' · Wins '+(c.best()||0));
+  function deploy(side,k,px,py){const C=CARDS[k];if(C.spell){FX.burst(px,py,40,['#ff6a1a','#ffd23f','#fff'],5,600);beep(90,.3,'sawtooth',.1);for(const u of U)if(u.side!==side&&Math.hypot(u.x-px,u.y-py)<C.rad)u.hp-=C.dmg;for(const tw of Tw)if(tw.side!==side&&tw.hp>0&&Math.hypot(tw.x-px,tw.y-py)<C.rad+tw.r){tw.hp-=C.dmg*.35;tw.active=true}return}
+    for(let i=0;i<C.cnt;i++){const a=i/C.cnt*6.28;U.push({side,k,x:px+(C.cnt>1?Math.cos(a)*14:0),y:py+(C.cnt>1?Math.sin(a)*14:0),hp:C.hp,max:C.hp,cd:0,tgt:null,wob:Math.random()*6})}beep(side?300:500,.05,'triangle',.05)}
+  function play(i,px,py){const k=hand[i];const C=CARDS[k];if(el<C.e)return false;if(!C.spell&&(py<RIV+20||py>BOTA))return false;el-=C.e;deploy(0,k,px,py);queue.push(k);hand[i]=queue.shift();return true}
+  function nearestEnemy(u,C){let best=null,bd=1e9;const sight=C.bld?0:160;if(!C.bld)for(const o of U){if(o.side===u.side||o.hp<=0)continue;const d=Math.hypot(o.x-u.x,o.y-u.y);if(d<sight&&d<bd){bd=d;best=o}}
+    for(const tw of Tw){if(tw.side===u.side||tw.hp<=0)continue;const lane=u.x<200?90:310;if(!tw.king&&Math.abs(tw.x-lane)>5&&Tw.find(q=>q.side===tw.side&&!q.king&&q.x===lane&&q.hp>0))continue;const d=Math.hypot(tw.x-u.x,tw.y-u.y)-tw.r;if(d<bd&&(!best||best.x==null||d<bd)){if(best&&best.k&&bd<sight)continue;bd=d;best=tw}}return best}
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='ready'){state='play';return}if(state==='over'){reset();return}
+    if(p.y>HANDY){const i=Math.floor((p.x-80)/80);if(i>=0&&i<4)sel=sel===i?-1:i;return}if(sel>=0){if(play(sel,p.x,p.y))sel=-1;else FL.add(el<CARDS[hand[sel]].e?'Not enough energy':'Place on your side',p.x,p.y,'#fff')}}});
+  function ai(dt){eAI=Math.min(10,eAI+dt/2800*(clock<60000?2:1)*c.pick(.8,1,1.2));aiT-=dt;if(aiT>0)return;aiT=MOB.rnd(900,2200);const opts=DECK.filter(k=>CARDS[k].e<=eAI);if(!opts.length||eAI<MOB.rnd(3,8))return;
+    const threats=U.filter(u=>u.side===0&&u.y<RIV+40);const k=MOB.pick(opts),C=CARDS[k];
+    if(C.spell){const tg=threats.sort((a,b)=>U.filter(o=>o.side===0&&Math.hypot(o.x-b.x,o.y-b.y)<50).length-U.filter(o=>o.side===0&&Math.hypot(o.x-a.x,o.y-a.y)<50).length)[0];if(!tg)return;eAI-=C.e;deploy(1,k,tg.x,tg.y);return}
+    eAI-=C.e;const lane=threats.length?(threats[0].x<200?90:310):MOB.pick([90,310]);deploy(1,k,lane+MOB.rnd(-20,20),threats.length?MOB.rnd(150,230):MOB.rnd(180,250))}
+  function update(dt){t+=dt;FX.step(dt);FL.step(dt);if(state!=='play')return;clock-=dt;el=Math.min(10,el+dt/2800*(clock<60000?2:1));ai(dt);
+    for(const u of U){if(u.hp<=0)continue;const C=CARDS[u.k];u.cd-=dt;let tg=u.tgt&&u.tgt.hp>0&&(u.tgt.k?Math.hypot(u.tgt.x-u.x,u.tgt.y-u.y)<200:1)?u.tgt:null;if(!tg||Math.random()<.02)tg=u.tgt=nearestEnemy(u,C);if(!tg)continue;
+      const d=Math.hypot(tg.x-u.x,tg.y-u.y)-(tg.r||6);if(d<=C.rng){if(u.cd<=0){u.cd=C.rate;if(C.rng>40)proj.push({x:u.x,y:u.y,tg,dmg:C.dmg,side:u.side,c:u.side?'#ff8a8a':'#8ab8ff'});else{tg.hp-=C.dmg;if(tg.king!==undefined)tg.active=true;beep(200+Math.random()*80,.02,'square',.02)}}}
+      else{let gx=tg.x,gy=tg.y;const cross=(u.y>RIV)!==(tg.y>RIV);if(cross&&Math.abs(u.y-RIV)>8){const bx=u.x<200?90:310;if(Math.abs(u.x-bx)>6){gx=bx;gy=RIV+(u.y>RIV?30:-30)}else{gx=bx;gy=tg.y}}const dx=gx-u.x,dy=gy-u.y,L=Math.hypot(dx,dy)||1;u.x+=dx/L*C.spd*dt/16;u.y+=dy/L*C.spd*dt/16}}
+    for(let i=0;i<U.length;i++)for(let j=i+1;j<U.length;j++){const a=U[i],b=U[j];const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),m=(CARDS[a.k].big||CARDS[b.k].big)?18:10;if(d<m&&d>0){a.x-=dx/d*(m-d)/2;a.y-=dy/d*(m-d)/2;b.x+=dx/d*(m-d)/2;b.y+=dy/d*(m-d)/2}}
+    for(const tw of Tw){if(tw.hp<=0)continue;tw.cd-=dt;if(!tw.active)continue;if(tw.cd>0)continue;let tg=null,bd=tw.rng;for(const u of U){if(u.side===tw.side||u.hp<=0)continue;const d=Math.hypot(u.x-tw.x,u.y-tw.y);if(d<bd){bd=d;tg=u}}if(tg){tw.cd=tw.rate;proj.push({x:tw.x,y:tw.y-10,tg,dmg:tw.dmg,side:tw.side,c:'#fff'})}}
+    for(const p of proj){const dx=p.tg.x-p.x,dy=p.tg.y-p.y,d=Math.hypot(dx,dy);if(d<8){p.done=1;p.tg.hp-=p.dmg;if(p.tg.king!==undefined)p.tg.active=true}else{p.x+=dx/d*6*dt/16;p.y+=dy/d*6*dt/16}if(p.tg.hp<=0)p.done=1}proj=proj.filter(p=>!p.done);
+    for(const u of U)if(u.hp<=0&&!u.dead){u.dead=1;FX.burst(u.x,u.y,8,u.side?'#ff8a8a':'#8ab8ff',2,400)}U=U.filter(u=>u.hp>0);
+    for(const tw of Tw)if(tw.hp<=0&&!tw.down){tw.down=1;crowns[1-tw.side]+=tw.king?3:1;FX.burst(tw.x,tw.y,50,['#aaa','#ffd23f','#fff'],6,900);beep(80,.6,'sawtooth',.15);FL.add(tw.side?'Tower down! 👑':'You lost a tower',W/2,RIV,'#ffd23f');Tw.filter(q=>q.side===tw.side&&q.king).forEach(q=>q.active=true);upd();if(tw.king)return end()}
+    if(clock<=0)end()}
+  function end(){crowns[0]=Math.min(3,crowns[0]);crowns[1]=Math.min(3,crowns[1]);let w=crowns[0]>crowns[1]?0:crowns[1]>crowns[0]?1:-1;if(w<0){const hp=s=>Tw.filter(q=>q.side===s).reduce((a,q)=>a+Math.max(0,q.hp)/q.max,0);w=hp(0)>=hp(1)?0:1}
+    state='over';winner=w;if(w===0){c.best((c.best()||0)+1);beep(880,.2,'sine',.1)}else beep(150,.5,'sawtooth',.1);c.stat((w===0?'Victory! ':'Defeat. ')+crowns[0]+'–'+crowns[1]+' · Wins '+(c.best()||0))}
+  let winner=0;
+  function drawTower(tw){const col=tw.side?'#e83a3a':'#3a6ae8';if(tw.hp<=0){x.fillStyle='#6a5a4a';x.beginPath();x.arc(tw.x,tw.y,tw.r,0,7);x.fill();return}x.fillStyle='#a8a098';MOB.rr(x,tw.x-tw.r,tw.y-tw.r,tw.r*2,tw.r*2,6);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2;x.stroke();x.fillStyle=col;MOB.rr(x,tw.x-tw.r+5,tw.y-tw.r+5,tw.r*2-10,tw.r*2-10,4);x.fill();MOB.txt(x,tw.king?'👑':'🏰',tw.x,tw.y,tw.king?20:16);
+    x.fillStyle='#300';x.fillRect(tw.x-22,tw.y-tw.r-10,44,5);x.fillStyle=col;x.fillRect(tw.x-22,tw.y-tw.r-10,44*tw.hp/tw.max,5)}
+  function draw(){x.fillStyle='#7cc24e';x.fillRect(0,0,W,H);for(let i=0;i<14;i++){x.fillStyle=i%2?'rgba(255,255,255,.05)':'rgba(0,0,0,.03)';x.fillRect(0,TOP+i*40,W,40)}x.fillStyle='#4aa8e8';x.fillRect(0,RIV-14,W,28);for(const bx of[90,310]){x.fillStyle='#a87a4a';x.fillRect(bx-22,RIV-18,44,36);x.strokeStyle='#6a4a2a';x.lineWidth=2;for(let k=-14;k<18;k+=8){x.beginPath();x.moveTo(bx-22,RIV+k);x.lineTo(bx+22,RIV+k);x.stroke()}}
+    for(const bx of[90,310]){x.fillStyle='rgba(200,170,120,.45)';x.fillRect(bx-12,TOP+60,24,BOTA-TOP-80)}
+    if(sel>=0&&!CARDS[hand[sel]].spell){x.fillStyle='rgba(255,255,255,.15)';x.fillRect(0,RIV+20,W,BOTA-RIV-20)}
+    for(const tw of Tw)drawTower(tw);
+    for(const u of U.slice().sort((a,b)=>a.y-b.y)){const C=CARDS[u.k],r=C.big?14:C.cnt>4?6:9,col=u.side?'#e83a3a':'#3a6ae8';x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(u.x,u.y+r*.8,r,r*.4,0,0,7);x.fill();x.fillStyle=col;x.beginPath();x.arc(u.x,u.y+Math.sin(t/120+u.wob)*1.2,r,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=1.5;x.stroke();MOB.txt(x,C.ic,u.x,u.y,r*1.2);if(u.hp<u.max){x.fillStyle='#300';x.fillRect(u.x-r,u.y-r-6,r*2,3);x.fillStyle=col;x.fillRect(u.x-r,u.y-r-6,r*2*u.hp/u.max,3)}}
+    for(const p of proj){x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,3,0,7);x.fill()}FX.draw(x);FL.draw(x);
+    const s=Math.max(0,Math.ceil(clock/1000));MOB.rr(x,W/2-44,RIV-12,88,24,12);x.fillStyle='rgba(0,0,0,.5)';x.fill();MOB.txt(x,Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+(clock<60000?' ×2':''),W/2,RIV,14,clock<60000?'#ffd23f':'#fff');
+    MOB.txt(x,'👑 '+crowns[1],W-30,20,15,'#fff');MOB.txt(x,'👑 '+crowns[0],W-30,BOTA-8,15,'#fff');
+    x.fillStyle='#2a2440';x.fillRect(0,HANDY-6,W,H-HANDY+6);const nx=queue[0];MOB.rr(x,10,HANDY+2,56,40,8);x.fillStyle='rgba(255,255,255,.1)';x.fill();MOB.txt(x,'next',38,HANDY+10,10,'#aaa');MOB.txt(x,CARDS[nx].ic,38,HANDY+28,16);
+    hand.forEach((k,i)=>{const C=CARDS[k],bx=80+i*80;MOB.rr(x,bx,HANDY-2,72,48,8);x.fillStyle=sel===i?'#ffd23f':el>=C.e?'#f5ecd8':'#7a7068';x.fill();MOB.txt(x,C.ic,bx+22,HANDY+22,22);MOB.txt(x,String(C.e),bx+58,HANDY+12,14,'#b04ae8');MOB.txt(x,C.n,bx+36,HANDY+40,9,'#1D1A2F')});
+    MOB.rr(x,10,H-8,W-20,6,3);x.fillStyle='rgba(255,255,255,.15)';x.fill();MOB.rr(x,10,H-8,(W-20)*el/10,6,3);x.fillStyle='#d05af0';x.fill();MOB.txt(x,Math.floor(el)+'',W-18,HANDY-12,12,'#d05af0');
+    if(state==='ready')banner(x,W,H,'Lane Lords','Pick a card, tap your half to deploy');if(state==='over')banner(x,W,H,winner===0?'Victory! 👑':'Defeat',crowns[0]+' – '+crowns[1]+' · tap to battle again')}
+  reset();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

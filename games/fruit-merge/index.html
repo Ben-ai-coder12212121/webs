@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fruit Merge | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_merge"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Fruit Merge</h1><p>Drop fruit into the jar. Two of the same fruit merge into a bigger one: cherries to grapes to oranges, all the way up to a giant melon. Don't let the jar overflow.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Fruit Merge: game code ===================== */
+G.push({id:'m_merge',name:'Fruit Merge',kind:'puzzle',tint:'#fff0d8',blurb:'Drop fruit into the jar. Two of the same fruit merge into a bigger one: cherries to grapes to oranges, all the way up to a giant melon. Don\'t let the jar overflow.',fmt:b=>b+' pts',
+art:'<path d="M14 10V64H106V10" fill="#fff6e0" stroke="#1D1A2F" stroke-width="3"/><circle cx="36" cy="50" r="13" fill="#ff9a1f" stroke="#1D1A2F" stroke-width="2"/><circle cx="72" cy="46" r="17" fill="#6ad04a" stroke="#1D1A2F" stroke-width="2"/><circle cx="50" cy="28" r="7" fill="#e8363a" stroke="#1D1A2F" stroke-width="2"/><circle cx="96" cy="56" r="7" fill="#e8363a" stroke="#1D1A2F" stroke-width="2"/>',
+run(root,c){const W=400,H=640,JL=24,JR=W-24,JB=H-24,JT=130,LINE=150;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts(),FL=MOB.floats();
+  const F=[{r:13,c:'#e8363a',n:'cherry'},{r:18,c:'#ff6a8a',n:'strawberry'},{r:24,c:'#8a4ac8',n:'grape'},{r:29,c:'#ffb01a',n:'lemon'},{r:35,c:'#ff8a1a',n:'orange'},{r:43,c:'#e83a2a',n:'apple'},{r:51,c:'#f0e060',n:'pear'},{r:60,c:'#ffb0a0',n:'peach'},{r:70,c:'#ffd23f',n:'pineapple'},{r:82,c:'#8ad04a',n:'melon'},{r:96,c:'#2a9a3a',n:'watermelon'}];
+  let B,next,hold,dropX,cool,score,state,overT,t=0;
+  function reset(){B=[];next=Math.random()*3|0;hold=Math.random()*3|0;dropX=W/2;cool=0;score=0;state='play';overT=0;upd()}
+  const upd=()=>c.stat('Score '+score+' · Best '+(c.best()||0));
+  function drop(){if(state!=='play'||cool>0)return;const k=hold,r=F[k].r;B.push({x:MOB.clamp(dropX,JL+r,JR-r),y:JT-10,vx:0,vy:0,k,born:t});hold=next;next=Math.random()*(score>200?5:4)|0;cool=450;beep(400,.04,'sine',.04)}
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='over'){reset();return}dropX=p.x},move:p=>{dropX=p.x},up:p=>{dropX=p.x;drop()}});MOB.keys(c,{ArrowLeft:()=>dropX-=16,ArrowRight:()=>dropX+=16,' ':drop});
+  function phys(dt){const steps=4;for(let s=0;s<steps;s++){const k=dt/16/steps;for(const b of B){b.vy+=.35*k;b.x+=b.vx*k;b.y+=b.vy*k;const r=F[b.k].r;if(b.x<JL+r){b.x=JL+r;b.vx*=-.3}if(b.x>JR-r){b.x=JR-r;b.vx*=-.3}if(b.y>JB-r){b.y=JB-r;b.vy*=-.2;b.vx*=.96}}
+      for(let it=0;it<3;it++)for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],b=B[j];if(a.dead||b.dead)continue;const ra=F[a.k].r,rb=F[b.k].r,dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||.01;if(d>=ra+rb)continue;
+        if(a.k===b.k&&a.k<F.length-1){a.dead=b.dead=1;const nk=a.k+1;B.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,vx:0,vy:-1,k:nk,born:t,pop:1});score+=(nk+1)*(nk+2)/2;FX.burst((a.x+b.x)/2,(a.y+b.y)/2,12+nk*2,[F[nk].c,'#fff'],3+nk*.4,500);beep(300+nk*90,.08,'triangle',.07);if(nk===F.length-1)FL.add('WATERMELON!',W/2,H/2,'#2a9a3a');upd();continue}
+        const nx=dx/d,ny=dy/d,ov=(ra+rb-d),ma=ra*ra,mb=rb*rb,tot=ma+mb;a.x-=nx*ov*mb/tot;a.y-=ny*ov*mb/tot;b.x+=nx*ov*ma/tot;b.y+=ny*ov*ma/tot;const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){const im=-rv*1.2/tot;a.vx-=im*nx*mb;a.vy-=im*ny*mb;b.vx+=im*nx*ma;b.vy+=im*ny*ma}}
+      B=B.filter(b=>!b.dead)}for(const b of B){b.vx*=.995;if(b.pop)b.pop=Math.max(0,b.pop-dt/200)}}
+  function update(dt){t+=dt;FX.step(dt);FL.step(dt);if(state!=='play')return;cool-=dt;phys(dt);
+    const over=B.some(b=>t-b.born>1200&&b.y-F[b.k].r<LINE&&Math.abs(b.vy)<1.5);if(over){overT+=dt;if(overT>2000){state='over';c.best(score);beep(120,.6,'sawtooth',.12);c.stat('Jar overflowed! Score '+score+' · Best '+(c.best()||0))}}else overT=0}
+  function fruit(px,py,k,s){const f=F[k],r=f.r*(s||1);x.fillStyle=f.c;x.beginPath();x.arc(px,py,r,0,7);x.fill();x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=2;x.stroke();
+    if(k===10){x.strokeStyle='#1a5a1a';x.lineWidth=4;for(let i=-2;i<=2;i++){x.beginPath();x.ellipse(px+i*r*.33,py,r*.12,r*.95,0,0,7);x.stroke()}}
+    x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(px-r*.35,py-r*.4,r*.3,r*.18,-.6,0,7);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.arc(px-r*.25,py-r*.05,Math.max(1.5,r*.08),0,7);x.arc(px+r*.25,py-r*.05,Math.max(1.5,r*.08),0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=1.5;x.beginPath();x.arc(px,py+r*.12,r*.18,.2,2.9);x.stroke();
+    if(k<3){x.strokeStyle='#3a7a2a';x.lineWidth=2;x.beginPath();x.moveTo(px,py-r);x.lineTo(px+4,py-r-8);x.stroke()}}
+  function draw(){x.fillStyle='#ffe8c0';x.fillRect(0,0,W,H);x.fillStyle='#fff6e0';x.fillRect(JL,JT,JR-JL,JB-JT);x.strokeStyle='#8a5a2a';x.lineWidth=6;x.beginPath();x.moveTo(JL-3,JT);x.lineTo(JL-3,JB+3);x.lineTo(JR+3,JB+3);x.lineTo(JR+3,JT);x.stroke();
+    x.setLineDash([8,8]);x.strokeStyle=overT>0&&Math.sin(t/80)>0?'#ff3a3a':'rgba(255,90,90,.5)';x.lineWidth=2;x.beginPath();x.moveTo(JL,LINE);x.lineTo(JR,LINE);x.stroke();x.setLineDash([]);
+    if(state==='play'){const r=F[hold].r,dx=MOB.clamp(dropX,JL+r,JR-r);x.strokeStyle='rgba(0,0,0,.12)';x.lineWidth=2;x.beginPath();x.moveTo(dx,JT);x.lineTo(dx,JB);x.stroke();if(cool<=0)fruit(dx,JT-40,hold)}
+    for(const b of B)fruit(b.x,b.y,b.k,1+(b.pop||0)*.15);FX.draw(x);FL.draw(x);
+    MOB.big(x,String(score),70,40,34,'#ff8a1a','#1D1A2F');MOB.txt(x,'Next',W-60,20,13,'#8a5a2a');fruit(W-60,52,next,.9);
+    let cx0=110;for(let k=0;k<F.length;k++){x.globalAlpha=.9;fruit(cx0,98,k,Math.min(1,9/F[k].r)*1);cx0+=22}x.globalAlpha=1;
+    if(state==='over')banner(x,W,H,'Overflow!',score+' pts · tap to play again')}
+  reset();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

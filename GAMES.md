@@ -266,3 +266,18 @@ All pages also load `css/site.css`, `js/core.js`, `js/catalog.js` and `js/app.js
 | Torch Maze | `/games/_hidden/torch-maze/` | simpledrive | none |
 | Ojello | `/games/_hidden/ojello/` | none | none |
 | Ancient Blocks | `/games/_hidden/ancient-blocks/` | none | none |
+| Bow Duel | `/games/bow-duel/` | mob | none |
+| Spring Climber | `/games/spring-climber/` | mob | none |
+| Garden Guard | `/games/garden-guard/` | mob | none |
+| Road Hopper | `/games/road-hopper/` | mob | none |
+| Lane Lords | `/games/lane-lords/` | mob | none |
+| Fruit Merge | `/games/fruit-merge/` | mob | none |
+| Pocket Pet | `/games/pocket-pet/` | mob | none |
+| Corner Pocket | `/games/corner-pocket/` | mob | none |
+| Pour Sort | `/games/pour-sort/` | mob | none |
+| Rail Dash | `/games/rail-dash/` | mob | none |
+| Arrow Rogue | `/games/arrow-rogue/` | mob | none |
+| Juice Slicer | `/games/juice-slicer/` | mob | none |
+| Snip & Feed | `/games/snip-feed/` | mob | none |
+| Spiral Drop | `/games/spiral-drop/` | mob | none |
+| Word Wheel | `/games/word-wheel/` | mob | none |

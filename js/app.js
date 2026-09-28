@@ -1,6 +1,6 @@
 /* app.js: the game player (top bar, levels, leaderboards, full screen, random button) and the homepage grid */
 const ALLG=G.slice();const PAGE=window.PAGE_GAME||null;const gameUrl=g=>(g.url||("/games/"+g.id+"/"));
-const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'mindreader'];
+const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'mindreader', 'm_bowduel', 'm_climber', 'm_garden', 'm_hopper', 'm_lanelords', 'm_merge', 'm_pet', 'm_pool', 'm_pour', 'm_raildash', 'm_rogue', 'm_slicer', 'm_snip', 'm_spiral', 'm_wordwheel'];
 const WIP=G.filter(g=>WIP_IDS.includes(g.id));
 WIP.forEach(g=>G.splice(G.indexOf(g),1));
 const stage=$('#stage'),arena=$('#arena'),statEl=$('#stat'),grid=$('#grid');
