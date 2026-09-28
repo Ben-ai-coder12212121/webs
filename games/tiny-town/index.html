@@ -14,6 +14,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
 <link rel="stylesheet" href="/css/site.css">
+<style>
+/* styles used only by this game */
+.tt-bar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.tt-next{flex:1 1 300px;background:#FFFDF6;border:3px solid #1D1A2F;border-radius:12px;padding:8px 12px;font-weight:800;font-size:15px}
+.tt-btns{display:flex;gap:8px}.tt-b{font-size:14px}
+.tt-help{position:fixed;inset:0;z-index:60;background:rgba(29,26,47,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.tt-card{background:#FFFDF6;border:3px solid #1D1A2F;border-radius:16px;box-shadow:6px 6px 0 #1D1A2F;max-width:560px;max-height:90vh;overflow:auto;padding:18px 22px;font-size:15px;line-height:1.45}
+.tt-card h3{margin:0 0 8px;font:400 26px 'Bagel Fat One',system-ui}.tt-card ol{padding-left:20px;margin:8px 0}.tt-card li{margin:5px 0}
+</style>
 </head><body class="gamepage">
 <script>window.PAGE_GAME="sim_town"</script>
 <div id="stage">
@@ -52,7 +61,24 @@
 /* ===================== Tiny Town: game code ===================== */
 G.push({id:'sim_town',name:'Tiny Town',kind:'sim',wide:true,tint:'#7FC8F8',blurb:'Build a city from an empty valley. Lay roads, zone homes, shops and factories, keep everyone powered, watered and happy, and grow from a village into a metropolis.',fmt:b=>b+' people',
 art:'<rect width="120" height="72" fill="#8fd36b"/><path d="M0 40h120M58 0v72" stroke="#5A5470" stroke-width="8"/><rect x="10" y="10" width="16" height="14" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="2"/><path d="M8 12l10-8 10 8z" fill="#F2352A" stroke="#1D1A2F" stroke-width="2"/><rect x="70" y="6" width="18" height="26" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="2"/><rect x="92" y="14" width="18" height="18" fill="#8c86a3" stroke="#1D1A2F" stroke-width="2"/><rect x="100" y="4" width="5" height="12" fill="#5A5470"/><rect x="72" y="48" width="36" height="18" fill="#2BB673" stroke="#1D1A2F" stroke-width="2"/><rect x="10" y="48" width="18" height="18" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2"/>',
-run(root,c){const W=960,H=620,TS=32,CO=30,RO=17,TB=RO*TS;const[cv,x]=mk(W,H,'width:100%;touch-action:none');root.append(cv,el('p',{class:'hint'},'Pick a tool, then tap or drag on the map. Homes, shops and factories only grow next to a road with power and water. Parks and schools make people happy, factories pollute. Taxes come in every month.'));
+run(root,c){const W=960,H=620,TS=32,CO=30,RO=17,TB=RO*TS;const[cv,x]=mk(W,H,'width:100%;touch-action:none');/* top bar: what to do next, help and restart */
+  const nextEl=el('div',{class:'tt-next'},'');const helpB=el('button',{type:'button',class:'btn tt-b'},'❓ How to play');const newB=el('button',{type:'button',class:'btn tt-b'},'↺ New town');
+  const bar=el('div',{class:'tt-bar'},nextEl,el('div',{class:'tt-btns'},helpB,newB));
+  const help=el('div',{class:'tt-help',hidden:true});help.innerHTML='<div class="tt-card"><h3>🏙️ How to play Tiny Town</h3><p><b>Goal:</b> grow from an empty valley to a Megalopolis of 8,000 people without going broke.</p><ol><li><b>Pick a tool</b> from the bar under the map (or press 1–9, 0), then tap or drag on the map to build.</li><li><b>🏠 Homes</b> must touch a <b>🛣️ road</b>. You start with one road across the map: paint homes along it.</li><li>Every building needs <b>⚡ power</b> (a power plant covers about 9 tiles) and <b>💧 water</b> (a water tower covers about 7). Pick those tools to see their coverage in colour.</li><li>People need <b>jobs</b>: zone <b>🏪 shops</b> and <b>🏭 factories</b> by roads too. Keep factories 3+ tiles from homes, because smoke makes people unhappy.</li><li><b>🌳 Parks</b>, <b>🏫 schools</b> and a <b>🏟️ stadium</b> make nearby homes happy, and happy homes grow into apartment blocks.</li><li>Taxes come in every month. Roads and buildings cost <b>upkeep</b>, so don’t overbuild power and water.</li></ol><p><b>Signs on buildings:</b> 🚧 no road · ⚡ no power · 💧 no water. Zones show a letter (R, C, I) until someone moves in.</p><p>Your town saves automatically. <b>↺ New town</b> starts over.</p><button type="button" class="btn primary tt-close">Got it, let’s build</button></div>';
+  root.append(bar,cv,help);help.querySelector('.tt-close').addEventListener('click',()=>{help.hidden=true;S.set('town_help',1)});
+  helpB.addEventListener('click',()=>{help.hidden=false});
+  let confirmT=0;newB.addEventListener('click',()=>{if(performance.now()-confirmT>3000){confirmT=performance.now();newB.textContent='Tap again to start over';setTimeout(()=>{newB.textContent='↺ New town'},3000);return}confirmT=0;newB.textContent='↺ New town';fresh();money=2500;month=1;milestone=0;pop=0;jobs=0;happy=.7;cars=[];smoke=[];last={tax:0,up:0};save();say('A fresh valley. Build homes next to the road to start.');beep(520,.08,'triangle')});
+  if(!S.get('town_help',0))c.after(()=>{help.hidden=false},200);
+  function nextStep(){let res=0,noRoad=0,plant=0,tower=0;for(const row of g)for(const q of row){if(q.t==='res')res++;if((q.t==='res'||q.t==='com'||q.t==='ind')&&q.nr)noRoad++;if(q.t==='power')plant++;if(q.t==='water')tower++}
+    if(!res)return 'Step 1: pick 🏠 Homes (2) and paint them right next to the road.';
+    if(!plant)return 'Step 2: build a ⚡ Power plant (6) near your homes. Nothing grows without power.';
+    if(!tower)return 'Step 3: build a 💧 Water tower (7) close to your homes.';
+    if(noRoad)return 'Some zones aren’t touching a road (🚧). Connect them with 🛣️ roads (1).';
+    if(pop>40&&jobs<pop*.5)return 'People need jobs: zone 🏪 Shops (3) and 🏭 Factories (4) along roads, factories away from homes.';
+    if(pop>40&&happy<.55)return 'People are unhappy: add 🌳 Parks (5) near homes and keep 🏭 factories 3+ tiles away.';
+    if(money<150)return 'Money is tight. Wait for next month’s taxes before building more.';
+    return milestone<MIL.length?'Keep growing: '+MIL[milestone][0].toLocaleString()+' people makes you a '+MIL[milestone][1]+'.':'You built a Megalopolis! Keep going for a bigger population.'}
+  c.loop(()=>{const t2=nextStep();if(nextEl.textContent!==t2)nextEl.textContent=t2});
   const ui=cookUI(cv,c);
   const TOOLS=[['road','🛣️','Road',10],['res','🏠','Homes',30],['com','🏪','Shops',40],['ind','🏭','Factory',60],['park','🌳','Park',80],['power','⚡','Power plant',600],['water','💧','Water tower',300],['school','🏫','School',700,150],['stadium','🏟️','Stadium',3000,1500],['bull','🧨','Bulldoze',5]];
   // tiles: {t:'grass'|'tree'|'river'|tool k, lv, age}
