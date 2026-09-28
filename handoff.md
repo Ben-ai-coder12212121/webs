@@ -85,6 +85,9 @@ There is no build step. Layout (details in `README.md`):
 
 Scripts are classic (non-module) scripts sharing one global scope, so a top-level name in a game page must not clash with one in `core.js`, `app.js` or a loaded lib.
 
+
+**Online play (`js/lib/online.js`):** `Online.pair({game,onStart,onMsg,onEnd})` for 1v1 games where both sides run the rules and exchange moves; `Online.party({game,max,onStart,onJoin,onLeave,onInput,onAct,onSnap,onEnd})` where the host's browser runs the game, friends send `input` (~20/s) and `act` (reliable), and the host sends each friend a snapshot with `snapTo`. Rooms and signalling go through `netlify/functions/mp.mjs` (Netlify Blobs); `tools/dev-server.mjs` runs the same handler in memory for local testing. Both helpers add their own button and handle `?room=CODE` invite links. Apex GT is the one game with computer rivals that isn't online yet (its AI cars are kinematic, not physics-driven).
+
 **Run locally:** `npx serve .` (or `npx http-server . -p 8766 -s`). Leaderboards need Netlify; everything else works.
 
 **Test:** with a server on port 8766,

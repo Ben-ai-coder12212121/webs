@@ -31,6 +31,19 @@ Every page loads, in order: `css/site.css`, `js/core.js`, `js/catalog.js`, the g
 - **Add a game:** copy a simple page such as `games/2048/index.html` to `games/<new-name>/index.html`, change `window.PAGE_GAME`, the title and description, and the game code, then add a line to `js/catalog.js` with the same `id` and `"url":"/games/<new-name>/"`.
 - **Old links keep working:** `/#<id>` links from before the split forward to the game's page, and `/games/<name>.html` redirects to `/games/<name>/` (see `_redirects`).
 
+## Online play with friends
+
+`js/lib/online.js` adds a **🌐 Play online** button to multiplayer games. One player creates a room and shares the 5-letter code or the invite link (`?room=CODE`); friends join with it. Browsers connect directly to each other (WebRTC). The Netlify function `/api/mp` only matches players up, so a match costs a handful of function calls. Some school and work networks block direct connections.
+
+- **Friend vs friend (turn-based):** Tic-Tac-Toe, Four in a Row, Chess, Checkers, Mancala, Dots & Boxes, Fleet Strike.
+- **Friend vs friend (real time):** Paddle Ball, Air Hockey, Tennis, Street Rumble, Penalty Shootout.
+- **Friends join the host's game in place of computer players:** all seven .io games (Blob Feast, Noodle, Absorb, Paper Land, Swallow, Tank Arena, Sumo Bash), Four Colors, Detourr Rally.
+- Breach 5v5 and Last Drop have their own server-browser online mode.
+
+In games where the host's browser runs the game, friends send their controls and get back what they can see about 15–30 times a second.
+
+To try online play locally, run `node tools/dev-server.mjs` (it serves the site and a local copy of the room server) and open the game in two browser tabs.
+
 ## Preview locally (free)
 
 You need [Node.js](https://nodejs.org). From the project folder:
@@ -39,7 +52,7 @@ You need [Node.js](https://nodejs.org). From the project folder:
 npx serve .
 ```
 
-Open the address it prints (usually http://localhost:3000). Use a local server rather than opening files directly: pages load shared files from `/js/` and `/css/`. Everything works locally except the leaderboards and suggestion box, which run on Netlify.
+Open the address it prints (usually http://localhost:3000). To test online play too, use `node tools/dev-server.mjs` instead. Use a local server rather than opening files directly: pages load shared files from `/js/` and `/css/`. Everything works locally except the leaderboards and suggestion box, which run on Netlify.
 
 To check every game for errors (takes about 15 minutes):
 
