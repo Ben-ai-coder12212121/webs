@@ -3,6 +3,9 @@
 [build]
   publish = "."
   command = ""
+  # Only deploy when the latest commit message contains [deploy]; every other push is skipped
+  # (exit 0 = skip build), so batching work doesn't spend deploy credits.
+  ignore = "git log -1 --pretty=%B | grep -q '\\[deploy\\]' && exit 1 || exit 0"
 
 [functions]
   directory = "netlify/functions"
