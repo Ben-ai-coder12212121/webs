@@ -628,6 +628,42 @@ function stepRangeExtras(dt){const O=RG;if(!O||!O.cans)return;const g=9.81;
   O.balloons.forEach(b=>{b.ph+=dt;b.g.position.y=b.y+Math.sin(b.ph*1.3)*.08;b.g.rotation.z=Math.sin(b.ph)*.12});
   O.tires.forEach(P=>{const h2=Math.min(dt,.02);P.tv+=(-9.81/P.L*Math.sin(P.th)-.4*P.tv)*h2;P.th+=P.tv*h2;P.piv.rotation.x=P.th});
   if(O.mover){O.moveT+=dt;O.mover.g.position.x=Math.sin(O.moveT*.45)*9}}
+/* desert easter egg: an old RV someone has turned into a chemistry lab */
+let eggFound=false;
+function eggHit(o){if(eggFound)return;eggFound=true;toast('🧪 Found the desert RV. Someone’s been doing chemistry out here…')}
+function buildRV(R2,O,x,z,rot){const g=grp(R2,x,0,z);g.rotation.y=rot;
+  const mark=m=>{m.castShadow=true;m.receiveShadow=true;m.userData.k='steelEnv';m.userData.egg=true;O.ray.push(m);return m};
+  const cream=std({color:0xe8dcc0,roughness:.75}),stripe=std({color:0x8a5a2a,roughness:.7}),dark=std({color:0x222222,roughness:.9}),rust=std({color:0x7a4a2a,roughness:1});
+  const glass=phy({color:0x4a5a60,roughness:.1,transparent:true,opacity:.55,metalness:.2});
+  // body: boxy motorhome with a sloped nose
+  const body=ext([[-3.6,.55],[3.2,.55],[3.6,.9],[3.6,2.3],[3.1,2.9],[-3.6,2.9]],2.3,cream,{bev:.08});body.position.z=-1.15;g.add(mark(body));
+  const band=new T.Mesh(new T.BoxGeometry(7.2,.22,2.34),stripe);band.position.set(-.1,1.35,0);g.add(band);
+  const band2=new T.Mesh(new T.BoxGeometry(7.2,.1,2.34),rust);band2.position.set(-.1,1.12,0);g.add(band2);
+  [[2.9,1.9,1.18,.9,.7],[2.9,1.9,-1.18,.9,.7],[.6,2.05,1.18,1.3,.55],[-1.6,2.05,1.18,1.1,.55],[-1.6,2.05,-1.18,1.1,.55]].forEach(([wx,wy,wz,ww,wh])=>{const w=new T.Mesh(new T.BoxGeometry(ww,wh,.04),glass);w.position.set(wx,wy,wz);g.add(w)});
+  const ws=new T.Mesh(new T.BoxGeometry(.04,.7,1.9),glass);ws.position.set(3.59,1.95,0);g.add(ws);
+  // open side door with a dark interior
+  const hole=new T.Mesh(new T.BoxGeometry(.7,1.7,.05),dark);hole.position.set(-.4,1.45,1.17);g.add(hole);
+  const door=new T.Mesh(new T.BoxGeometry(.7,1.7,.05),cream);door.position.set(-.05,1.45,1.5);door.rotation.y=-1.2;g.add(mark(door));
+  // wheels, bumper, roof vent
+  const tm=std({color:0x151515,roughness:.95});[[2.4,1.1],[2.4,-1.1],[-2.4,1.1],[-2.4,-1.1]].forEach(([a,b])=>g.add(cylZ(.42,.3,a,.42,b,tm,18)));
+  const bump=new T.Mesh(new T.BoxGeometry(.15,.25,2.3),std({color:0x9a9a9a,metalness:.8,roughness:.4}));bump.position.set(3.7,.7,0);g.add(bump);
+  const vent=new T.Mesh(new T.BoxGeometry(.7,.25,.7),std({color:0xcfcfcf,roughness:.6}));vent.position.set(-1.2,3.02,0);g.add(vent);
+  // a dark flat-brim hat left on the roof
+  const hatM=std({color:0x151515,roughness:.8});const brim=new T.Mesh(new T.CylinderGeometry(.34,.34,.03,20),hatM);brim.position.set(1.6,2.93,.2);g.add(brim);const crown=new T.Mesh(new T.CylinderGeometry(.19,.22,.17,20),hatM);crown.position.set(1.6,3.03,.2);g.add(crown);
+  // folding table with lab glassware
+  const tbl=grp(g,-.6,0,2.6);const top=new T.Mesh(new T.BoxGeometry(1.6,.05,.7),std({color:0x9a9a9a,metalness:.6,roughness:.4}));top.position.y=.75;tbl.add(mark(top));[[-.75,-.3],[.75,-.3],[-.75,.3],[.75,.3]].forEach(([a,b])=>{const l=new T.Mesh(new T.CylinderGeometry(.015,.015,.75,6),dark);l.position.set(a,.375,b);tbl.add(l)});
+  const labG=phy({color:0xcfe8f0,roughness:.05,transparent:true,opacity:.5});const liq=std({color:0x5ab8e8,roughness:.2,emissive:0x0a3040,emissiveIntensity:.4});
+  [[-.55,0],[-.2,.12],[.2,-.1],[.55,.05]].forEach(([a,b],i)=>{const f=new T.Mesh(i%2?new T.CylinderGeometry(.05,.13,.26,14):new T.SphereGeometry(.12,14,10),labG);f.position.set(a,.9,b);tbl.add(mark(f));const lq=new T.Mesh(i%2?new T.CylinderGeometry(.07,.12,.1,14):new T.SphereGeometry(.08,12,8),liq);lq.position.set(a,i%2?.83:.87,b);tbl.add(lq);const nk=new T.Mesh(new T.CylinderGeometry(.025,.025,.14,8),labG);nk.position.set(a,i%2?1.07:1.05,b);tbl.add(nk)});
+  const burner=new T.Mesh(new T.CylinderGeometry(.09,.1,.1,12),dark);burner.position.set(.2,.83,.25);tbl.add(burner);
+  // two yellow hazmat suits with gas masks drying on a line, plus two camp chairs
+  const suitM=std({color:0xe8c820,roughness:.7});[[1.5,3.2],[2.3,3.2]].forEach(([a,b])=>{const s2=grp(g,a,0,b);const t=new T.Mesh(new T.BoxGeometry(.5,.8,.18),suitM);t.position.y=1.6;s2.add(mark(t));[-.14,.14].forEach(o=>{const l=new T.Mesh(new T.BoxGeometry(.18,.7,.16),suitM);l.position.set(o,.9,0);s2.add(l)});const m=new T.Mesh(new T.SphereGeometry(.13,12,8),dark);m.position.set(0,2.15,.02);s2.add(m)});
+  const line=new T.Mesh(new T.CylinderGeometry(.008,.008,2.2,4),dark);line.rotation.z=PI/2;line.position.set(1.9,2.3,3.2);g.add(line);[.8,3.0].forEach(a=>{const p=new T.Mesh(new T.CylinderGeometry(.03,.03,2.3,6),rust);p.position.set(a,1.15,3.2);g.add(p)});
+  const chM=std({color:0x2a5a8a,roughness:.8});[[-2.2,2.9],[-1.6,3.5]].forEach(([a,b],i)=>{const c2=grp(g,a,0,b);c2.rotation.y=i?.6:-.3;const seat=new T.Mesh(new T.BoxGeometry(.5,.05,.45),chM);seat.position.y=.42;c2.add(seat);const back=new T.Mesh(new T.BoxGeometry(.5,.5,.05),chM);back.position.set(0,.68,-.22);back.rotation.x=-.2;c2.add(back)});
+  // a pair of trousers blown into the scrub
+  const pants=grp(g,-4.5,.05,5);pants.rotation.set(-PI/2,0,.7);const pm=std({color:0x8a7a5a,roughness:1});[-.1,.1].forEach(o=>{const l=new T.Mesh(new T.BoxGeometry(.17,.8,.05),pm);l.position.set(o,-.35,0);l.rotation.z=o*1.2;pants.add(l)});const w2=new T.Mesh(new T.BoxGeometry(.38,.2,.05),pm);w2.position.y=.1;pants.add(w2);
+  // a few blue chemical drums
+  const drum=std({color:0x2a4aa8,roughness:.6,metalness:.2});[[-3.2,1.8],[-3.5,2.5],[-2.8,2.4]].forEach(([a,b])=>{const d=new T.Mesh(new T.CylinderGeometry(.28,.28,.85,16),drum);d.position.set(a,.425,b);g.add(mark(d))});
+}
 function buildDesert(){const R2=deserW,O={ray:[],plates:[],bottles:[],melons:[],surf:[],cans:[],booms:[],balloons:[],tires:[],clays:[],canHits:0,clayHits:0,clayN:0,W:deserW,far:420,drillN:6,paper:null,moveT:0,bottleG:BOTTLE_G,bottleMats:BOTTLE_M};
   skyDome(R2,'#2f64b0','#c8d4dc',0xfff6e0);
   const sand=ctex(512,512,(x,w,h)=>{x.fillStyle='#b08c60';x.fillRect(0,0,w,h);blotch(x,w,h,80,['150,120,85','190,160,115','130,100,70'],10,70,.3);speck(x,w,h,26)},60,120,true);
@@ -652,6 +688,8 @@ function buildDesert(){const R2=deserW,O={ray:[],plates:[],bottles:[],melons:[],
   const mm=std({color:0xa8704a,roughness:1,flatShading:true});for(let i=0;i<22;i++){const x=rnd(-400,400),z=rnd(-700,-420),hh=rnd(30,90);const m=new T.Mesh(new T.CylinderGeometry(rnd(30,80),rnd(50,110),hh,7),mm);m.position.set(x,hh/2-2,z);R2.add(m)}
   const cm=std({color:0x3a6a3a,roughness:.8});for(let i=0;i<40;i++){const x=rnd(-60,60),z=rnd(-360,-8);if(Math.abs(x)<8)continue;const c2=grp(R2,x,0,z);const tr=new T.Mesh(new T.CylinderGeometry(.18,.22,rnd(1.4,3),8),cm);tr.position.y=.9;tr.castShadow=true;c2.add(tr);[-1,1].forEach(s2=>{if(Math.random()<.7){const a=new T.Mesh(new T.CylinderGeometry(.1,.12,.8,8),cm);a.position.set(s2*.3,1.2+rnd(0,.5),0);c2.add(a)}})}
   const berm=new T.Mesh(new T.BoxGeometry(60,8,6),std({map:sand,roughness:1}));berm.position.set(0,2,-330);R2.add(berm);berm.userData.k='sand';O.ray.push(berm);
+  // easter egg: a beat-up RV parked off to the left, with a chemistry set-up out front
+  buildRV(R2,O,-19,-44,.55);
   O.surf.push({x0:-200,x1:200,z0:-800,z1:10,h:0,s:'concrete'});
   O.reset=()=>resetExtras(O);RGS.desert=O;resetExtras(O)}
 function buildYard(){const R2=yardW,O={ray:[],plates:[],bottles:[],melons:[],surf:[],cans:[],booms:[],balloons:[],tires:[],clays:[],canHits:0,clayHits:0,clayN:0,W:yardW,far:90,drillN:2,paper:null,bottleG:BOTTLE_G,bottleMats:BOTTLE_M};
@@ -876,7 +914,7 @@ const drill={on:false,t:0,wait:0,hits:0,splits:[]};
 function rangeShot(){if(!RG)return;const d=W.d,n=d.pellets||1;camera.updateMatrixWorld(true);camera.getWorldPosition(_o);const hip=(1-ads)*(d.pellets?.015:.022);
   let paperHit=false;
   for(let i=0;i<n;i++){const sp=(d.pellets?d.spread*.5:0)+d.acc+hip,a=Math.random()*PI*2,r=Math.sqrt(Math.random())*sp;_d.set(Math.cos(a)*r,Math.sin(a)*r,-1).normalize().applyQuaternion(camera.quaternion);ray.set(_o,_d);
-    const hits=ray.intersectObjects(RG.ray,false);if(i<3){const e=hits.find(h=>!['paper','glass','melon'].includes(h.object.userData.k));tracer(lastMz,e?e.point:_o.clone().addScaledVector(_d,Math.min(ray.far,120)))}for(const h of hits){const k=h.object.userData.k,nrm=h.face?h.face.normal.clone().transformDirection(h.object.matrixWorld):_d.clone().negate();
+    const hits=ray.intersectObjects(RG.ray,false);if(i<3){const e=hits.find(h=>!['paper','glass','melon'].includes(h.object.userData.k));tracer(lastMz,e?e.point:_o.clone().addScaledVector(_d,Math.min(ray.far,120)))}for(const h of hits){if(h.object.userData.egg)eggHit(h.object);const k=h.object.userData.k,nrm=h.face?h.face.normal.clone().transformDirection(h.object.matrixWorld):_d.clone().negate();
       if(k==='can'||k==='boom'||k==='balloon'||k==='clay'||k==='tire'||k==='pane'){rangeTargetHit(k,h,nrm);break}
       if(k==='paper'){paperHit=true;paperHole(h);continue}
       if(k==='glass'){shatter(h.object,h.point);continue}
@@ -1027,7 +1065,7 @@ function hitZombie(z,h,dmg,dir){const part=h.object.userData.part;let m=part==='
 function zShot(){if(!ZN)return;const d=W.d,n=d.pellets||1;camera.updateMatrixWorld(true);camera.getWorldPosition(_o);const hip=(1-ads)*(d.pellets?.015:.02),list=ZN.ray.concat(Z.hit);
   for(let i=0;i<n;i++){const sp=(d.pellets?d.spread*.5:0)+d.acc+hip,a=Math.random()*PI*2,r=Math.sqrt(Math.random())*sp;_d.set(Math.cos(a)*r,Math.sin(a)*r,-1).normalize().applyQuaternion(camera.quaternion);ray.set(_o,_d);let pen=PEN[d.cal]||1;const seen=new Set(),hl=ray.intersectObjects(list,false);if(i<3){const e=hl.find(h=>!h.object.userData.zb);tracer(lastMz,e?e.point:_o.clone().addScaledVector(_d,60))}
     for(const h of hl){const z=h.object.userData.zb;if(z){if(z.dead||seen.has(z))continue;seen.add(z);hitZombie(z,h,DMG[d.cal]||30,_d.clone().setY(0).normalize());if(--pen<=0)break;continue}
-      const k=h.object.userData.k,nrm=h.face?h.face.normal.clone().transformDirection(h.object.matrixWorld):_d.clone().negate();
+      if(h.object.userData.egg)eggHit(h.object);const k=h.object.userData.k,nrm=h.face?h.face.normal.clone().transformDirection(h.object.matrixWorld):_d.clone().negate();
       if(k==='xbarrel'){zBoom(h.object,h.point);break}
       if(k==='steelEnv'){for(let j=0;j<5;j++)particle(SPARK,h.point,nrm.clone().multiplyScalar(rnd(1,3)).add(new V3(rnd(-1,1),rnd(0,1.5),rnd(-1,1))),.01,-.5,rnd(.1,.3),0xffc070,1,true,.6);clk(2600,3,.03,.25,h.distance/343)}
       else{for(let j=0;j<4;j++)particle(SMOKE,h.point,nrm.clone().multiplyScalar(rnd(.3,1.1)).add(new V3(rnd(-.3,.3),rnd(0,.5),rnd(-.3,.3))),rnd(.05,.1),2,rnd(.5,1.1),k==='wood'?0x9a7a50:0x77726a,.5);clk(800,.8,.04,.2,h.distance/343)}
