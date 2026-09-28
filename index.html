@@ -2194,7 +2194,7 @@ function Stage3D(root,c,opt){
   const input={keys:{},mdx:0,mdy:0,down:false,right:false,wheel:0,locked:false,touch:false,joy:{x:0,y:0},look:{x:0,y:0},fire:false,alt:false,tap:false};
   const size=()=>{const w=wrap.clientWidth,h=wrap.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};const ro=new ResizeObserver(size);ro.observe(wrap);size();
   const cvs=renderer.domElement;cvs.tabIndex=0;
-  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();input.keys[k]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault()});c.on(document,'keyup',e=>{input.keys[e.key.toLowerCase()]=false});
+  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();input.keys[k]=true;if(k==='q'&&opt.qAim&&!e.repeat)input.right=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault()});c.on(document,'keyup',e=>{const k=e.key.toLowerCase();input.keys[k]=false;if(k==='q'&&opt.qAim)input.right=false});
   c.on(document,'pointerlockchange',()=>{input.locked=document.pointerLockElement===cvs;wrap.classList.toggle('locked',input.locked)});
   c.on(cvs,'mousedown',e=>{if(e.button===0)input.down=true;if(e.button===2)input.right=true;input.tap=true;if(opt.lock&&!input.locked&&!wrap.classList.contains('paused')){try{const r=cvs.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(err){}}});
   c.on(window,'mouseup',e=>{if(e.button===0)input.down=false;if(e.button===2)input.right=false});c.on(cvs,'contextmenu',e=>e.preventDefault());
@@ -11375,7 +11375,7 @@ const H=(()=>{const x=el('div',{class:'tx-x'});for(let i=0;i<4;i++)x.append(el('
   const keys=el('div',{class:'tx-keys'+(ROY?' roy':'')});hud.append(storm,fl,hu,sc,dir,x,hm,bl,am,money,top,feedE,rad,cen,ban,bar,hint,inv,bh,keys,tb,mapov,ov);[ov,bh,tb,mapov].forEach(e=>{e.addEventListener('mousedown',ev=>ev.stopPropagation());e.addEventListener('pointerdown',ev=>ev.stopPropagation())});
   return{tads,keys,x,hm,hpE,arE,am,money,top,feedE,rad,cen,ban,bar,hint,fl,hu,storm,dir,sc,ov,inv,bh,mapov,tbuy,tmap,trel,tsw,tcr,rg:rad.getContext('2d')}})();
 H.bh.onclick=e=>{e.stopPropagation();toggleBuy()};H.tbuy.addEventListener('pointerdown',e=>{e.preventDefault();toggleBuy()});H.tmap.addEventListener('pointerdown',e=>{e.preventDefault();if(ROY)toggleMap();else showBoard(!boardOpen)});H.trel.addEventListener('pointerdown',e=>{e.preventDefault();doReload()});H.tsw.addEventListener('pointerdown',e=>{e.preventDefault();cycleWeapon()});H.tcr.addEventListener('pointerdown',e=>{e.preventDefault();touchCrouch=!touchCrouch;H.tcr.style.background=touchCrouch?'rgba(255,190,60,.5)':''});let touchCrouch=false,touchAds=false;H.tads.addEventListener('pointerdown',e=>{e.preventDefault();touchAds=!touchAds;H.tads.style.background=touchAds?'rgba(255,190,60,.5)':''});
-const KEYL=ROY?[['WASD','move'],['Shift','walk'],['C','crouch'],['Space','jump · leave plane'],['LMB','shoot'],['R','reload'],['E','pick up · crate'],['Q','aim down sights (hold)'],['RMB','aim (hold)'],['X','heal'],['1-4','weapons'],['M','map'],['Tab','scoreboard']]:[['WASD','move'],['Shift','walk (silent)'],['C','crouch'],['Space','jump'],['LMB','shoot'],['RMB','scope'],['R','reload'],['B','buy menu'],['1 2 3','gun pistol knife'],['Q','last weapon'],['Z X V T','grenades'],['4','next grenade'],['E','plant · defuse · take'],['G','drop'],['F','inspect'],['Tab','scoreboard']];
+const KEYL=ROY?[['WASD','move'],['Shift','walk'],['C','crouch'],['Space','jump · leave plane'],['LMB','shoot'],['R','reload'],['E','pick up · crate'],['Q','aim down sights (hold)'],['RMB','aim (hold)'],['X','heal'],['1-4','weapons'],['M','map'],['Tab','scoreboard']]:[['WASD','move'],['Shift','walk (silent)'],['C','crouch'],['Space','jump'],['LMB','shoot'],['R','reload'],['B','buy menu'],['1 2 3','gun pistol knife'],['Q / RMB','scope'],['L','last weapon'],['Z X V T','grenades'],['4','next grenade'],['E','plant · defuse · take'],['G','drop'],['F','inspect'],['Tab','scoreboard']];
 let keysMin=!!S.get('tx_keysmin',0);function renderKeys(){H.keys.innerHTML='';KEYL.forEach(([k,d])=>{const r=el('div');k.split(' ').forEach(x=>r.append(el('b',null,x)));r.append(document.createTextNode(' '+d));H.keys.append(r)});H.keys.append(el('div',{class:'k2'},(keysMin?'Controls hidden · ':'')+'H '+(keysMin?'show':'hide')+' controls · - / = sensitivity'));H.keys.classList.toggle('min',keysMin)}renderKeys();
 let sensMul=+S.get('tx_sens',1)||1;function setSens(v){sensMul=clamp(Math.round(v*20)/20,.2,4);S.set('tx_sens',sensMul);msgC('','Mouse sensitivity '+sensMul.toFixed(2)+'x',1.2)}
 let cenT=0;function msgC(t,sub,d){H.cen.innerHTML='';if(t)H.cen.append(document.createTextNode(t));if(sub)H.cen.append(el('small',null,sub));cenT=d||3}
@@ -11464,7 +11464,7 @@ const K=input.keys;
 function localInput(){const k=K;return{f:!!(k.w||k.arrowup)||input.joy.y<-.3,b:!!(k.s||k.arrowdown)||input.joy.y>.3,l:!!(k.a||k.arrowleft)||input.joy.x<-.3,r:!!(k.d||k.arrowright)||input.joy.x>.3,j:!!k[' ']||!!input.jumpBtn,c:!!(k.control||k.c)||touchCrouch,walk:!!k.shift,fire:(input.down||input.fire)&&!buyOpen,alt:!!input.right,use:!!k.e||(ROY&&!!input.alt&&input.touch),ads:ROY&&(!!k.q||!!input.right||touchAds)}}
 c.on(document,'keydown',e=>{if(state!=='play'||!me)return;const k=e.key.toLowerCase();if(k==='tab'){e.preventDefault();showBoard(true);return}if(k==='h'){keysMin=!keysMin;S.set('tx_keysmin',keysMin?1:0);renderKeys();return}if(k==='-'||k==='_'){setSens(sensMul-.1);return}if(k==='='||k==='+'){setSens(sensMul+.1);return}if(buyOpen&&/^[1-4]$/.test(k)){quickBuy(+k);return}if(k==='b'&&!ROY){toggleBuy();return}if(k==='escape'&&buyOpen){toggleBuy();return}if(k==='m'&&ROY){toggleMap();return}if(buyOpen)return;
   if(ROY){const map={1:me.inv[1],2:me.inv[4],3:me.inv[2],4:'knife'};if(map[k]!==undefined)selW(map[k])}else{if(k==='1')selW(me.inv[1]);if(k==='2')selW(me.inv[2]);if(k==='3')selW('knife');if(k==='4'&&me.inv.g&&me.inv.g.length){const g=me.inv.g;const i=g.indexOf(me.cur);selW(g[(i+1)%g.length])}if(k==='5'&&me.inv[5])selW('bomb');const gk={z:['flash'],x:['smoke'],v:['he'],t:['molotov','incgren']}[k];if(gk){const g=(me.inv.g||[]).find(w=>gk.includes(w));if(g)selW(g);else msgC('','No '+({z:'flashbang',x:'smoke',v:'HE grenade',t:'molotov'})[k]+' — buy one with B',1.4)}}
-  if(ROY&&(k==='x'||k==='5')){NETROLE==='client'?sendRel({t:'heal'}):useHeal(me)}if(k==='q'&&!ROY){{const w=me.prev&&(me.prev==='knife'||Object.values(me.inv).includes(me.prev)||(me.inv.g||[]).includes(me.prev))?me.prev:bestSlot(me);selW(w)}}
+  if(ROY&&(k==='x'||k==='5')){NETROLE==='client'?sendRel({t:'heal'}):useHeal(me)}if(k==='q'&&!ROY&&!e.repeat&&state==='play'&&me){NETROLE==='client'?sendRel({t:'scope'}):toggleScope(me)}if(k==='l'&&!ROY){{const w=me.prev&&(me.prev==='knife'||Object.values(me.inv).includes(me.prev)||(me.inv.g||[]).includes(me.prev))?me.prev:bestSlot(me);selW(w)}}
   if(k==='r')doReload();if(k==='f'&&!vmInsp)vmInsp=2.4;if(k==='g'){NETROLE==='client'?sendRel({t:'drop'}):dropCur(me)}
   if((k===' '||k==='e')&&ROY&&me.inPlane){NETROLE==='client'?sendRel({t:'jump'}):jumpOut(me)}});
 c.on(document,'keyup',e=>{if(e.key==='Tab')showBoard(false)});
@@ -12689,7 +12689,7 @@ return{T,V3,PI,rnd,clamp,lerp,pick,lin,angDiff,scene,camera,renderer,wrap,hud,in
 /* ================= NEON HARBOR: open-world crime story ================= */
 const NH_ART=['tex:asphalt','tex:sidewalk','tex:concrete','tex:brick','tex:plaster','tex:planks','tex:grass','tex:sand','tex:mud','tex:metal','tex:roof','tex:bark','img:fol_broad.png','hdr:day','glb:hydrant','glb:trashcan','glb:bench','glb:streetlamp','glb:barrier','glb:barrel','glb:crate','glb:milcrate','chr:readyplayer.me','chr:Michelle','chr:Soldier'];
 function neonHarbor(root,c){return withArt(root,c,NH_ART,()=>{
-const st3=Stage3D(root,c,{lock:true,dragLook:true,fov:70,far:1100,fireLabel:'FIRE',altLabel:'CAR',jumpLabel:'JUMP'});
+const st3=Stage3D(root,c,{qAim:true,lock:true,dragLook:true,fov:70,far:1100,fireLabel:'FIRE',altLabel:'CAR',jumpLabel:'JUMP'});
 const K=bigKit(st3,c,{id:'nh',exposure:1.05});
 const{T,V3,PI,rnd,clamp,lerp,pick,lin,angDiff,scene,camera,input,wrap,mat,T_,ctex,Merger,addBox,H,SFX,snd}=K;
 const TWO=PI*2;
@@ -13295,8 +13295,8 @@ function stepShops(dt){shopCool-=dt;const mp=mePos();for(const s of SHOPS){const
 /* ship fire after mission 6 */
 const SHIPFIRE={on:SAVED&&SAVED.m>5?1:0};
 /* ================= player update ================= */
-const KEYS_FOOT=[['W A S D','Move'],['Shift','Sprint'],['Space','Jump'],['LMB','Shoot / punch'],['RMB','Aim'],['R','Reload'],['1-8','Weapons'],['G','Grenade'],['F','Enter car'],['E','Use'],['C','Crouch'],['M','Map'],['P','Pause']];
-const KEYS_CAR=[['W S','Gas / brake'],['A D','Steer'],['Space','Handbrake'],['F','Exit car'],['LMB','Drive-by'],['N','Radio'],['Q','Horn'],['T','Side job'],['M','Map'],['P','Pause']];
+const KEYS_FOOT=[['W A S D','Move'],['Shift','Sprint'],['Space','Jump'],['LMB','Shoot / punch'],['RMB / Q','Aim'],['R','Reload'],['1-8','Weapons'],['G','Grenade'],['F','Enter car'],['E','Use'],['C','Crouch'],['M','Map'],['P','Pause']];
+const KEYS_CAR=[['W S','Gas / brake'],['A D','Steer'],['Space','Handbrake'],['F','Exit car'],['LMB','Drive-by'],['N','Radio'],['Q in car','Horn'],['T','Side job'],['M','Map'],['P','Pause']];
 function keysFor(){K.keys(ME.car?KEYS_CAR:KEYS_FOOT)}
 const scope=el('div',{class:'nh-scope'});K.hud.append(scope);const clockEl=el('div',{class:'bk-wep',style:'opacity:.75'});K.H.tr.prepend(clockEl);const areaEl=el('div',{class:'nh-area'});K.hud.append(areaEl);
 if(!document.getElementById('nh-css')){const s2=document.createElement('style');s2.id='nh-css';s2.textContent=`.nh-scope{position:absolute;inset:0;pointer-events:none;display:none;background:radial-gradient(circle at center,transparent 0 30vmin,#000 30.3vmin)}.nh-scope::before,.nh-scope::after{content:'';position:absolute;background:#000}.nh-scope::before{left:50%;top:20%;bottom:20%;width:1px}.nh-scope::after{top:50%;left:25%;right:25%;height:1px}
@@ -13451,7 +13451,7 @@ G.push({id:'neonharbor',name:'Neon Harbor',kind:'game',wide:true,big:true,major:
 /* ================= THE HOLLOW: survival horror story (The Forest style) ================= */
 const HL_ART=['tex:grass','tex:forest','tex:rock','tex:sand','tex:bark','tex:planks','tex:concrete','tex:metal','tex:tiles','tex:mud','tex:stonewall','img:fol_broad.png','img:fol_pine.png','img:fol_maple.png','img:fol_bamboo.png','hdr:forest','glb:boulder','glb:boulder2','glb:deadtrunk','glb:crate','glb:barrel','glb:firepit','glb:hatchet','chr:readyplayer.me','chr:Michelle','chr:Xbot'];
 function theHollow(root,c){return withArt(root,c,HL_ART,()=>{
-const st3=Stage3D(root,c,{lock:true,dragLook:true,fov:72,far:900,fireLabel:'USE',altLabel:'ACT',jumpLabel:'JUMP'});
+const st3=Stage3D(root,c,{qAim:true,lock:true,dragLook:true,fov:72,far:900,fireLabel:'USE',altLabel:'ACT',jumpLabel:'JUMP'});
 const K=bigKit(st3,c,{id:'hl',exposure:1,fxN:2500,smN:1800,voice:true});
 const{T,V3,PI,rnd,clamp,lerp,pick,lin,angDiff,scene,camera,input,wrap,mat,T_,ctex,Merger,addBox,H,SFX,snd}=K;
 const TWO=PI*2;scene.add(camera);wrap.classList.add('hlg');
@@ -13959,7 +13959,7 @@ function stepWorld(dt){for(const f of FIRES){if(f.fuel!=null){f.fuel-=dt;if(f.fu
   if(!INSIDE&&!P.flags.seen_cave1&&POI.cave1.distanceTo(P.pos)<30)P.flags.seen_cave1=1;if(!INSIDE&&!P.flags.seen_cave2&&POI.cave2.distanceTo(P.pos)<30)P.flags.seen_cave2=1;
   for(const it of WITEMS)if(it.m&&it.m.userData.spin)it.m.rotation.y+=dt*1.5}
 /* ================= input ================= */
-const KEYS_L=[['W A S D','Move'],['Shift','Sprint'],['Space','Jump'],['C','Crouch (sneak)'],['LMB','Swing / chop / shoot'],['RMB','Block / aim'],['E','Pick up / use'],['Tab','Backpack & crafting'],['B','Build'],['M','Map'],['J','Journal'],['F','Lighter'],['1-8','Tools'],['G','Throw molotov'],['P','Pause']];K.keys(KEYS_L);
+const KEYS_L=[['W A S D','Move'],['Shift','Sprint'],['Space','Jump'],['C','Crouch (sneak)'],['LMB','Swing / chop / shoot'],['RMB / Q','Block / aim'],['E','Pick up / use'],['Tab','Backpack & crafting'],['B','Build'],['M','Map'],['J','Journal'],['F','Lighter'],['1-8','Tools'],['G','Throw molotov'],['P','Pause']];K.keys(KEYS_L);
 let started=false;
 c.on(document,'keydown',e=>{if(!started)return;const k2=e.key.toLowerCase();if(e.repeat)return;const menuOn=K.H.menu.classList.contains('on');
   if(ENDING.on)return;if(k2==='tab'||k2==='i'){e.preventDefault();if(menuOn)K.menuOff();else invMenu('items');return}if(k2==='p'||k2==='escape'&&menuOn){if(menuOn)K.menuOff();else pauseMenu();return}if(menuOn)return;if(P.dead)return;
@@ -14044,7 +14044,7 @@ const SC_LEVELS=[
 /* ================= SILENT CONTRACT: stealth assassination sandbox ================= */
 const SC_ART=['tex:marble','tex:carpet','tex:cobble','tex:darkwood','tex:tiles','tex:plaster','tex:concrete','tex:stonewall','tex:asphalt','tex:grass','tex:planks','tex:brick','tex:metal','img:fol_broad.png','hdr:garden','hdr:roofnight','hdr:museum','glb:sofa','glb:armchair','glb:diningtable','glb:coffeetable','glb:chandelier','glb:shelf','glb:bust','glb:barstool','glb:bench','glb:crate','glb:barrel','glb:mirror','glb:teatable','chr:readyplayer.me','chr:Michelle','chr:Soldier'];
 function silentContract(root,c){return withArt(root,c,SC_ART,()=>{
-const st3=Stage3D(root,c,{lock:true,dragLook:true,fov:62,far:600,fireLabel:'USE',altLabel:'ACT',jumpLabel:'TAKEDOWN'});
+const st3=Stage3D(root,c,{qAim:true,lock:true,dragLook:true,fov:62,far:600,fireLabel:'USE',altLabel:'ACT',jumpLabel:'TAKEDOWN'});
 const K=bigKit(st3,c,{id:'sc',exposure:1.05});
 const{T,V3,PI,rnd,clamp,lerp,pick,lin,angDiff,scene,camera,input,wrap,mat,T_,ctex,Merger,addBox,H,SFX,snd}=K;const TWO=PI*2,TS=2;
 wrap.classList.add('scg');
@@ -14240,7 +14240,7 @@ function startLevel(i){const L=SC_LEVELS[i];LATER.length=0;buildLevel(L);Object.
   L.guards.forEach(g=>{if(g.post)mkNPC('guard','guard',g.post[0],g.post[1],{post:g.post});else mkNPC('guard','guard',g.route[0][0],g.route[0][1],{route:g.route.map(r=>[r[0],r[1],rnd(2,5)])})});
   L.staff.forEach(s=>{if(s.post)mkNPC(s.kind,'civ',s.post[0],s.post[1],{post:s.post});else mkNPC(s.kind,'civ',s.route[0][0],s.route[0][1],{route:s.route.map(r=>[r[0],r[1],rnd(3,7),'work'])})});
   L.guests.forEach(([x,y])=>mkNPC('guest','civ',x,y,{}));K.banner(L.name.toUpperCase(),L.place,'#ffffff',3000);started=true;K.keys(KEYS)}
-const KEYS=[['W A S D','Move'],['Shift','Run'],['C','Crouch'],['F','Takedown'],['E','Interact'],['G','Drag body'],['1-7','Items'],['LMB','Use item'],['RMB','Aim'],['Q','Instinct'],['M','Map'],['P','Pause']];
+const KEYS=[['W A S D','Move'],['Shift','Run'],['C','Crouch'],['F','Takedown'],['E','Interact'],['G','Drag body'],['1-7','Items'],['LMB','Use item'],['RMB / Q','Aim'],['V','Instinct'],['M','Map'],['P','Pause']];
 /* ---------- player update ---------- */
 let started=false,useLatch=false,tdLatch=false,fireLatch=false,shotCool=0;
 function stepPlayer(dt){const I=input,k=I.keys;if(P.dead||P.won){K.pose(P.ch,'idle',dt,0,{});return}
@@ -14264,7 +14264,7 @@ let hudT=0;function updHUD(){const tg=NPCS.filter(n=>n.role==='target');UI.tg.in
 /* ---------- input ---------- */
 c.on(document,'keydown',e=>{if(!started)return;const k2=e.key.toLowerCase();if(e.repeat)return;const on=K.H.menu.classList.contains('on');if(k2==='p'){if(on)K.menuOff();else if(LV)pauseMenu();return}if(k2==='m'&&LV){if(on)K.menuOff();else mapMenu();return}if(on||P.dead||P.won)return;
   if(k2==='c')P.crouch=!P.crouch;else if(k2==='g')toggleDrag();else if(/^[1-7]$/.test(k2)){const t=IORDER[+k2-1];if(t==='none'||P.inv[t]>0)equipItem(t)}});
-c.on(document,'keydown',e=>{if(e.key.toLowerCase()==='q')P.inst=true});c.on(document,'keyup',e=>{if(e.key.toLowerCase()==='q')P.inst=false});
+c.on(document,'keydown',e=>{if(e.key.toLowerCase()==='v')P.inst=true});c.on(document,'keyup',e=>{if(e.key.toLowerCase()==='v')P.inst=false});
 function equipItem(t){P.item=t;K.holdItem(P.ch,t==='pistol'?K.gunMesh('pistol'):t==='wrench'||t==='crowbar'?K.gunMesh('bat'):t==='wire'?K.gunMesh('wire'):null);K.SFX.ui()}
 function toggleDrag(){if(P.drag){P.drag.drag=false;P.drag=null;return}let best=null,bd=1.8;for(const n of NPCS){if(!(n.dead||n.ko)||n.hidden||n.fall)continue;const d=n.pos.distanceTo(P.pos);if(d<bd){bd=d;best=n}}if(best){P.drag=best;best.drag=true}}
 K.touchBtn('ITEM',()=>{const own=IORDER.filter(t=>t==='none'||P.inv[t]>0);equipItem(own[(own.indexOf(P.item)+1)%own.length])});K.touchBtn('AIM',v=>{input.right=v},true);K.touchBtn('DRAG',()=>toggleDrag());K.touchBtn('CROUCH',()=>{P.crouch=!P.crouch});K.touchBtn('INSTINCT',v=>{P.inst=v},true);K.touchBtn('MAP',()=>LV&&mapMenu());K.touchBtn('MENU',()=>LV&&pauseMenu());
