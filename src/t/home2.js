@@ -1,0 +1,4 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1280,height:1500}});const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/fonts\.|google|cdn/,r=>r.abort());
+const fs=require('fs');await p.route('https://detour.test/**',r=>r.fulfill({body:fs.readFileSync(__dirname+'/../srv/test.html'),contentType:'text/html'}));await p.goto('https://detour.test/');await p.waitForTimeout(800);
+await p.screenshot({path:__dirname+'/s/h1.png'});console.log(await p.$$eval('#grid .sec h3',a=>a.map(x=>x.textContent).slice(0,8).join(' | ')));await p.click('.qshuf');await p.waitForTimeout(200);console.log(await p.$$eval('.qtile b',a=>a.map(x=>x.textContent).join(', ')));console.log(errs.join('\n')||'no errors');await b.close()})();

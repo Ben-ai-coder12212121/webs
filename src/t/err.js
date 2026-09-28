@@ -1,0 +1,4 @@
+const {chromium}=require(process.env.PW);const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage();p.on('console',m=>{if(m.type()==='error')console.log('C',m.text().slice(0,400))});
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+for(const g of process.argv.slice(3)){await p.goto('file://'+process.argv[2]+'?'+g+'#'+g);await p.waitForTimeout(2500);console.log(g,':',(await p.$eval('#stage .arena',e=>e.innerText)).replace(/\s+/g,' ').slice(0,160))}await b.close()})();

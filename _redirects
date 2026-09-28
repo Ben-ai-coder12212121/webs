@@ -1,1 +1,5 @@
    https://detourr.netlify.app/* https://detourr.net/:splat 301!
+
+# internal docs and build sources are not part of the public site
+/handoff.md  /  404!
+/src/*  /  404!

@@ -1,0 +1,6 @@
+hs_speed
+hs_flight
+hs_strength
+hs_villain
+hs_havoc
+hs_ice

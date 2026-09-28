@@ -1,0 +1,3 @@
+const {chromium}=require(process.env.PW);(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1000,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/fonts\./,r=>r.abort());
+await p.goto('http://localhost:8765/test.html?w#wyr');await p.waitForTimeout(600);await p.click('.wyr button >> nth=0');await p.waitForTimeout(700);
+console.log(await p.$eval('.wyr',e=>e.innerText.replace(/\n+/g,' | ')));console.log(await p.$eval('#stage .arena',e=>[...e.querySelectorAll('.hint')][0].textContent));await p.screenshot({path:process.argv[2]});console.log(errs.join('\n')||'no errors');await b.close()})();

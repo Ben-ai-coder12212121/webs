@@ -1,0 +1,9 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:900,height:600}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=hs_villain#hs_villain');await p.waitForTimeout(2500);const all=await p.$$('.ov3 .btn');await all[all.length-1].click();await p.waitForTimeout(300);const v=await p.$('.ov3 [data-v="0"]');await v.click();await p.waitForTimeout(800);
+// aim laser at TOP of the tallest nearby building
+const info=await p.evaluate(()=>{const V=window.__VV;const P=V.P.p;let best=null;V.city.boxes.forEach(b=>{if(b.tree)return;const d=Math.hypot(b.cx-P.x,b.cz-P.z);if(d>30&&d<110&&(!best||b.h>best.h))best=b});window.__tb=best;return{h:best.h,d:Math.round(Math.hypot(best.cx-P.x,best.cz-P.z))}});console.log('target',JSON.stringify(info));
+await p.keyboard.down('f');for(let i=0;i<80;i++){await p.evaluate(()=>{const b=window.__tb;window.__VV.aimAt(b.cx,b.h0?b.h0*.85:b.h*.85,b.cz)});await p.waitForTimeout(250);const st=await p.evaluate(()=>({h:window.__tb.h,h0:window.__tb.h0,dead:!!window.__tb.dead}));if(st.h<st.h0-1){console.log('top broke:',JSON.stringify(st));break}}await p.keyboard.up('f');
+for(const t of [400,1200,2500]){await p.waitForTimeout(t===400?400:t===1200?800:1300);await p.screenshot({path:__dirname+'/s/top_'+t+'.png'})}
+console.log(JSON.stringify(await p.evaluate(()=>({h:window.__tb.h,h0:window.__tb.h0,dead:!!window.__tb.dead}))),errs.slice(0,3).join('||')||'ok');await b.close()})();

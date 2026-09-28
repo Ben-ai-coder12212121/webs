@@ -1,0 +1,30 @@
+/* ---------- live leaderboards (Netlify function at /api/lb) ---------- */
+const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','smash']),LVN2=['Easy','Normal','Hard'];let ok=null,cur=null,timer=null,pend={},shown=false;
+  const btn=$('#lbBtn'),panel=el('div',{id:'lbPanel',hidden:true}),toastEl=el('div',{id:'lbToast'});document.body.append(panel,toastEl);
+  const cid=()=>{let v=S.get('lb_id',null);if(!v||!/^[a-z0-9]{8,40}$/.test(v)){v=(Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^a-z0-9]/g,'').slice(0,24);S.set('lb_id',v)}return v};
+  const eligible=g=>!!(g&&g.fmt&&!SKIP.has(g.kind)&&!g.noLb);
+  const name=()=>S.get('lb_name','');
+  async function probe(){if(ok!==null)return ok;if(location.protocol==='file:'||/claude|localhost:0/.test(location.hostname)&&!/netlify/.test(location.hostname)&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){ok=false;return ok}try{const r=await fetch(API+'?probe=1',{cache:'no-store'});ok=r.ok&&(await r.json()).ok===true}catch(e){ok=false}return ok}
+  let tT=0;function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('on'),4200)}
+  async function send(k,g,v,lower,quiet){if(!await probe()||!name())return null;try{const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({game:k,name:name(),score:v,lower:!!lower,id:cid()})});if(!r.ok)return null;const j=await r.json();if(!quiet&&j.rank)toast('🏆 New best in '+g.name+'! You’re #'+j.rank+' of '+j.total+' on the leaderboard');if(cur&&cur.k===k&&!panel.hidden)refresh();return j}catch(e){return null}}
+  function best(g,k,v,lower){if(!eligible(g))return;lower=!!(lower||g.lower);const p=pend[k]||(pend[k]={});clearTimeout(p.t);p.t=setTimeout(()=>{delete pend[k];if(!name()){if(ok!==false&&!shown){shown=true;probe().then(o=>{if(o)toast('🏆 New best! Tap the trophy to put it on the leaderboard')})}return}send(k,g,v,lower)},2500)}
+  const ago=t=>{const s=Math.max(1,Math.round((Date.now()-t)/1000));return s<60?s+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'};
+  function keyInfo(g){const k=bestKey(g);const l=g.levels?S.get('lvl_'+g.id,1):1;return{k,label:g.levels?LVN2[l]:''}}
+  async function refresh(){if(!cur)return;const {g,k,label}=cur;try{const r=await fetch(API+'?game='+encodeURIComponent(k)+'&id='+cid(),{cache:'no-store'});const j=await r.json();if(!cur||cur.k!==k)return;render(j)}catch(e){panel.querySelector('.lbl').innerHTML='<p class="lbmuted">Couldn’t reach the leaderboard. Retrying…</p>'}}
+  function render(j){const {g,label}=cur;const L=panel.querySelector('.lbl');const fmt=v=>{try{return g.fmt(v)}catch(e){return String(v)}};
+    if(!j.top||!j.top.length){L.innerHTML='<p class="lbmuted">No scores yet. Be the first!</p>'}else L.innerHTML='<ol>'+j.top.map((e,i)=>'<li class="'+(e.me?'me':'')+'"><b>'+(i<3?['🥇','🥈','🥉'][i]:(i+1)+'.')+'</b><span class="n"></span><span class="s">'+fmt(e.s)+'</span><small>'+ago(e.t)+'</small></li>').join('')+'</ol>';
+    L.querySelectorAll('li .n').forEach((s,i)=>{s.textContent=j.top[i].n});
+    const you=panel.querySelector('.lbyou');const mine=S.get(cur.k,null);
+    if(j.you)you.innerHTML='You: <b>#'+j.you.rank+'</b> of '+j.total+' · '+fmt(j.you.s);else if(!name())you.textContent='Set a name to join the leaderboard'+(mine!=null?' with your best: '+fmt(mine):'.');else if(mine!=null)you.textContent='Your best '+fmt(mine)+' is being submitted…';else you.textContent='Play to get on the board! '+j.total+' players so far.';
+    panel.querySelector('.lblive').textContent='● Live · updated '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})}
+  function openPanel(){if(!current)return;const g=current;const ki=keyInfo(g);cur={g,...ki};
+    panel.innerHTML='<div class="lbhead"><b>🏆 '+g.name+(ki.label?' · '+ki.label:'')+'</b><button class="btn lbx" type="button" aria-label="Close">✕</button></div><div class="lblive">● Live</div><div class="lbyou"></div><div class="lbl"><p class="lbmuted">Loading…</p></div><div class="lbname"><label>Your leaderboard name <input maxlength="14" placeholder="Pick a nickname" autocomplete="off" spellcheck="false"></label><button class="btn primary lbsave" type="button">Save</button><p class="lbmuted">Nicknames only, please. It’s shown publicly next to your scores.</p></div>';
+    const inp=panel.querySelector('input');inp.value=name();['keydown','keyup','keypress'].forEach(ev=>inp.addEventListener(ev,e=>e.stopPropagation()));
+    panel.querySelector('.lbx').addEventListener('click',closePanel);panel.querySelector('.lbsave').addEventListener('click',()=>{const n=inp.value.replace(/[^A-Za-z0-9 _.\-]/g,'').trim().slice(0,14);if(n.length<2){inp.focus();toast('Names need at least 2 letters or numbers');return}const first=!name();S.set('lb_name',n);toast(first?'🏆 Welcome, '+n+'! Uploading your best scores…':'Name updated to '+n);syncAll(first?null:cur.k)});
+    panel.hidden=false;if(document.pointerLockElement)document.exitPointerLock();refresh();clearInterval(timer);timer=setInterval(()=>{if(!document.hidden)refresh()},8000)}
+  function closePanel(){panel.hidden=true;clearInterval(timer);timer=null;cur=null}
+  async function syncAll(only){const jobs=[];G.forEach(g=>{if(!eligible(g))return;const lv=g.levels?[0,1,2]:[1];lv.forEach(l=>{const k='best_'+g.id+(l!==1?'_'+l:'');if(only&&k!==only)return;const v=S.get(k,null);if(v!=null&&Number.isFinite(+v))jobs.push([k,g,+v,!!g.lower])})});
+    let i=0;const worker=async()=>{while(i<jobs.length){const j=jobs[i++];await send(j[0],j[1],j[2],j[3],true)}};await Promise.all([worker(),worker(),worker(),worker()]);if(cur)refresh()}
+  btn.addEventListener('click',()=>panel.hidden?openPanel():closePanel());
+  function open(g){closePanel();btn.hidden=true;if(!eligible(g))return;probe().then(o=>{if(o&&current===g)btn.hidden=false})}
+  return{best,open,close:()=>{closePanel();btn.hidden=true},eligible,probe}})();

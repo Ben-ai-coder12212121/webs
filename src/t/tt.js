@@ -1,0 +1,13 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:900,height:620}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\.|google/,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=hs_strength#hs_strength');await p.waitForTimeout(2500);await p.screenshot({path:__dirname+'/s/tt0.png'});
+await (await p.$('.ov3 .btn.primary')).click();await p.waitForTimeout(1500);await p.keyboard.press('g');
+const st=()=>p.evaluate(()=>{const X=window.__HX;return {p:[X.P.p.x|0,X.P.p.y|0,X.P.p.z|0],v:Math.round(Math.hypot(X.P.v.x,X.P.v.z)),hp:X.P.hp|0,blocks:X.stats.blocks,towers:X.stats.towers}});
+console.log('start',JSON.stringify(await st()));await p.evaluate(()=>{const X=window.__HX;let best=null;X.blds.forEach(B=>{if(B.fh>10&&(!best||B.fh>best.fh))best=B});X.P.p.set((best.gx0+best.fx/2)*4,0,(best.gz0+best.fz)*4+40);X.cam.yaw=0;X.cam.pitch=0});await p.waitForTimeout(500);
+console.log('tp',JSON.stringify(await st()));await p.keyboard.down('Shift');await p.keyboard.down('w');for(let i=0;i<10;i++){await p.waitForTimeout(500);console.log(' ',JSON.stringify(await st()))}console.log('sprint',JSON.stringify(await st()));await p.screenshot({path:__dirname+'/s/tt1.png'});
+await p.keyboard.up('w');await p.evaluate(()=>{const X=window.__HX;X.cam.yaw=Math.PI/2});await p.keyboard.down('w');await p.keyboard.down(' ');await p.waitForTimeout(2500);await p.keyboard.up(' ');await p.waitForTimeout(800);await p.screenshot({path:__dirname+'/s/tt2.png'});console.log('leap',JSON.stringify(await st()));await p.waitForTimeout(4000);console.log('land',JSON.stringify(await st()));await p.screenshot({path:__dirname+'/s/tt3.png'});
+await p.keyboard.up('w');await p.keyboard.up('Shift');
+for(let i=0;i<6;i++){await p.mouse.down();await p.waitForTimeout(250);await p.mouse.up();await p.waitForTimeout(250)}console.log('punch',JSON.stringify(await st()));await p.screenshot({path:__dirname+'/s/tt4.png'});
+await p.keyboard.press('e');await p.waitForTimeout(500);await p.keyboard.press('r');await p.waitForTimeout(3000);await p.screenshot({path:__dirname+'/s/tt5.png'});
+console.log('errors',errs.join('\n')||'none');await b.close()})();

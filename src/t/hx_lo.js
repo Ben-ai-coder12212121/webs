@@ -1,0 +1,16 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:560,height:420}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.addInitScript(()=>{try{localStorage.setItem('unb_hx_hq','false')}catch(e){}});const t0=Date.now();await p.goto('file://'+process.argv[2]+'?g=hs_havoc#hs_havoc');await p.waitForTimeout(2500);await (await p.$('.ov3 .btn.primary')).click();await p.waitForTimeout(1500);console.log('loaded',Date.now()-t0);
+await p.screenshot({path:__dirname+'/s/hx0.png'});
+const aimB=()=>p.evaluate(()=>{const X=window.__HX;const P=X.P.p;let best=null,bd=1e9;X.blds.forEach(B=>{const cx=(B.gx0+B.fx/2)*4,cz=(B.gz0+B.fz/2)*4;const d=Math.hypot(cx-P.x,cz-P.z);if(d<bd&&B.alive>0){bd=d;best=B}});X.aimAt((best.gx0+best.fx/2)*4,4,(best.gz0+best.fz/2)*4);return Math.round(bd)});
+console.log('dist',await aimB());await p.keyboard.down('f');for(let i=0;i<10;i++){await aimB();await p.waitForTimeout(200)}await p.keyboard.up('f');await p.screenshot({path:__dirname+'/s/hx1.png'});
+await p.keyboard.press('2');for(let i=0;i<6;i++){await aimB();await p.keyboard.down('f');await p.waitForTimeout(120);await p.keyboard.up('f');await p.waitForTimeout(700)}await p.waitForTimeout(1500);await p.screenshot({path:__dirname+'/s/hx2.png'});
+let st=await p.evaluate(()=>({s:window.__HX.stats,dA:window.__HX.dA}));console.log(JSON.stringify(st));
+await p.keyboard.press('4');await aimB();await p.keyboard.down('f');await p.waitForTimeout(900);await p.keyboard.up('f');await p.waitForTimeout(300);await p.screenshot({path:__dirname+'/s/hx3.png'});
+await p.keyboard.press('q');await p.waitForTimeout(3500);await p.screenshot({path:__dirname+'/s/hx4.png'});
+await p.keyboard.press('x');await p.waitForTimeout(5500);await p.screenshot({path:__dirname+'/s/hx5.png'});
+await p.evaluate(()=>window.__HX.heat=4.5);await p.waitForTimeout(8000);await p.screenshot({path:__dirname+'/s/hx6.png'});
+st=await p.evaluate(()=>({s:window.__HX.stats,dA:window.__HX.dA,en:window.__HX.enemies.map(e=>e.kind).join(','),hp:window.__HX.P.hp}));console.log(JSON.stringify(st));
+const fps=await p.evaluate(()=>new Promise(r=>{let n=0;const t=performance.now();function f(){n++;if(performance.now()-t<2000)requestAnimationFrame(f);else r(n/2)}requestAnimationFrame(f)}));console.log('fps(swiftshader)',fps);
+console.log(errs.slice(0,5).join(' || ')||'no errors');await b.close()})();

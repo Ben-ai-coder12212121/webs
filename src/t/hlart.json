@@ -1,0 +1,4 @@
+[{"js":"document.querySelector('.bk-menu .bk-btn.pri').click()"},{"wait":500},
+{"js":"(()=>{const N=__HL,K=N.K;window.RUN=n=>{for(let i=0;i<n;i++){while(K.DQ.cur)document.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));N.sim(1)}};N.P.god=1;N.setHour(10);RUN(20);return 1})()"},{"wait":2500},{"shot":"hlA"},
+{"js":"(()=>{const N=__HL,K=N.K;const e=N.spawnEnemy('can',N.P.pos.x+3,N.P.pos.z-5);const e2=N.spawnEnemy('pale',N.P.pos.x-2,N.P.pos.z-6);RUN(3);return N.EN.length})()"},{"wait":2500},{"shot":"hlB"},
+{"js":"(()=>{const N=__HL;N.P.pos.set(N.POI.v1.x+30,N.P.pos.y,N.POI.v1.z+30);N.setHour(17.5);RUN(20);return 1})()"},{"wait":2500},{"shot":"hlC"}]

@@ -1,0 +1,19 @@
+{
+  "name": "assetwork",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@gltf-transform/core": "^3.10.1",
+    "@gltf-transform/extensions": "^3.10.1",
+    "@gltf-transform/functions": "^3.10.1",
+    "draco3dgltf": "^1.5.7",
+    "meshoptimizer": "^0.20.0"
+  }
+}

@@ -1,0 +1,4 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1100,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/matter.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/matter-js/build/matter.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=ph_wreck#ph_wreck');await p.waitForTimeout(1200);for(let i=0;i<6;i++)await p.click('button:has-text("Lower ball")');await p.waitForTimeout(2500);await p.screenshot({path:'s/wb.png'});console.log(errs.join('|')||'no errors');await b.close()})();

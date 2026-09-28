@@ -1,0 +1,10 @@
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+keyboard.down: Unknown key: "shift"
+    at /tmp/claude-0/-home-user-webs/78446037-9543-57ee-adbb-3cfd6f0dd372/scratchpad/t/test.js:19:39 {
+  name: 'Error'
+}
+
+Node.js v22.22.2

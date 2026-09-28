@@ -1,0 +1,4 @@
+[{"js":"document.querySelector('.bk-menu .bk-btn.pri').click()"},{"wait":500},
+{"js":"(()=>{const N=__NH;window.RUN=n=>{for(let i=0;i<n;i++){while(N.K.DQ.cur)document.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));N.sim(1)}};N.INTRO&&N.INTRO.end();N.ME.god=1;N.tele(N.PL.garage.pos.x,N.PL.garage.pos.z);RUN(30);N.K.CAM.dist=1.6;return 1})()"},{"wait":2500},{"shot":"nhA"},
+{"js":"(()=>{const N=__NH;N.K.CAM.dist=6;N.tele(N.PL.bank.pos.x,N.PL.bank.pos.z);RUN(40);return 1})()"},{"wait":2500},{"shot":"nhB"},
+{"js":"(()=>{const N=__NH;N.tele(-120,-120);RUN(40);return 1})()"},{"wait":2500},{"shot":"nhC"}]

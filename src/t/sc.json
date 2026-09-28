@@ -1,0 +1,2 @@
+[{"js":"(()=>{const N=__BK,K=N.K;window.RUN2=n=>{for(let i=0;i<n;i++){while(K.DQ.cur)document.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}));N.sim(1)}};K.menuOff&&K.menuOff();N.startLevel(0);RUN2(30);return Object.keys(N.tick?N.tick():{}).length})()"},{"wait":2500},{"shot":"x1"},
+{"js":"(()=>{const N=__BK;N.startLevel(1);RUN2(30);return 1})()"},{"wait":2500},{"shot":"x2"}]

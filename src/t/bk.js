@@ -1,0 +1,10 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+const p=await b.newPage({viewport:{width:1100,height:1000}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/matter.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/matter-js/build/matter.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=ph_buddy#ph_buddy');await p.waitForTimeout(1500);
+const cv=await p.$('canvas.board');const bb=await cv.boundingBox();const at=async(fx,fy)=>p.mouse.click(bb.x+bb.width*fx,bb.y+bb.height*fy);
+await p.click('button:has-text("Hang: off")');await p.waitForTimeout(1500);for(let i=0;i<6;i++){await at(.5,.35+i*.03);await p.waitForTimeout(150)}await p.waitForTimeout(600);await p.screenshot({path:'s/bk_hang.png'});
+await p.click('button:has-text("Hang: by feet")');await p.click('button:has-text("Hang: by hands")');await p.click('button:has-text("Pin to wall")');await p.waitForTimeout(1500);for(let i=0;i<5;i++){await at(.5,.6);await p.waitForTimeout(150)}await p.screenshot({path:'s/bk_pin.png'});
+for(const t of ['Pin to wall','Trampoline','Moon gravity','Slow motion','Size:','Stubborn','Size:','Size:'])await p.click('button.btn:has-text("'+t+'")');await p.waitForTimeout(2500);await p.screenshot({path:'s/bk_misc.png'});
+console.log(errs.join('\n')||'no errors');await b.close()})();

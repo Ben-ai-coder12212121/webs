@@ -1,0 +1,16 @@
+const {chromium}=require(process.env.PW);const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+for(const lv of [2]){
+const p=await b.newPage({viewport:{width:900,height:560}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.addInitScript(m=>localStorage.setItem('unb_hs_size_lv',m),String(lv));
+await p.goto('file://'+process.argv[2]+'#hs_size');await p.waitForTimeout(2000);
+for(let k=0;k<2;k++){const bt=await p.$('.ov3 .btn.primary');if(bt){await bt.click();await p.waitForTimeout(300)}}
+const st=()=>p.evaluate(()=>({x:+__hs.P.x.toFixed(2),y:+__hs.P.y.toFixed(2),z:+__hs.P.z.toFixed(2),si:__hs.P.si,h:__hs.P.hearts,st:__hs.F.state}));
+async function step(name,tele,si,keys,cond,to){await p.evaluate(([t,si])=>{if(t){Object.assign(__hs.P,t);__hs.P.vy=0;__hs.P.hearts=5}if(si!=null){__hs.P.si=si;__hs.P.s=[.18,1,3.2][si]}},[tele,si]);for(const k of keys)await p.keyboard.down(k);const t0=Date.now();let s;while(Date.now()-t0<(to||15000)){s=await st();if(eval(cond))break;await p.waitForTimeout(150)}for(const k of keys)await p.keyboard.up(k);s=await st();console.log('L'+(lv+1),name,eval(cond)?'OK':'FAIL',JSON.stringify(s))}
+const L=[
+ async()=>{await step('normal blocked by vent',{x:0,y:0,z:11},1,['w'],'s.z>13.5',6000);await step('tiny thru vent',{x:0,y:0,z:11},0,['w'],'s.z>16.5');await step('tiny under lasers',null,0,['w'],'s.z>25.5',25000);await step('grow blocked? then giant smash',null,2,['w'],'s.z>29',15000);await step('giant jump shelf',{x:0,y:0,z:30},2,['w',' '],'s.y>2.9&&s.z>34',15000);await step('tiny through vent2 to goal',{x:0,y:3,z:37},0,['w'],"s.st!=='play'",30000)},
+ async()=>{await step('door closed',{x:0,y:0,z:9},1,['w'],'s.z>11.9',5000);await step('giant on plate',{x:3,y:.3,z:7},2,[],'false',2500);await step('door open walk',{x:0,y:0,z:9},1,['w'],'s.z>15',15000);await step('tiny fan ride',{x:0,y:0,z:18},0,[],'s.y>5.5',20000);await step('tiny off fan to ledge',null,0,['w'],'s.z>22&&s.y>=4.9',20000);await step('giant smash crack',{x:0,y:5,z:30.5},2,['w'],'s.z>34',15000);await step('normal hop stones',{x:0,y:0,z:35},1,['w',' '],'s.z>40.5',15000);await step('tiny walk under laser',{x:0,y:.6,z:41},0,['w'],'s.z>45',25000);await step('normal to goal',{x:0,y:.6,z:45},1,['w',' '],"s.st!=='play'",20000)},
+ async()=>{await step('tiny vent',{x:0,y:0,z:6},0,['w'],'s.z>10',15000);await step('giant plate',{x:-3.5,y:.3,z:14.5},2,[],'false',2500);await step('walk thru door',{x:0,y:0,z:18},1,['w'],'s.z>20.8',10000);await step('hop to fan stone',{x:0,y:.6,z:23.2},1,['w',' '],'s.z>27.8',15000);await step('tiny fan',{x:0,y:.6,z:28.8},0,[],'s.y>6.8',20000);await step('tiny onto platform',null,0,['w'],'s.z>31&&s.y>6.4',15000);await step('walk ledge',null,1,['w'],'s.z>40',20000);await step('giant crack',{x:0,y:6.5,z:46},2,['w'],'s.z>48.8',15000);await step('tiny lasers to goal',{x:0,y:6.5,z:49},0,['w'],"s.st!=='play'",40000)}];
+await L[lv]();console.log(errs.join('\n')||'no errors');await p.close()}
+await b.close()})();

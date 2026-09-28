@@ -1,0 +1,10 @@
+const {chromium}=require(process.env.PW);const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const errs=[];
+const open=async id=>{const p=await b.newPage({viewport:{width:1100,height:900}});p.on('pageerror',e=>errs.push(id+': '+e.message));await p.route('**/matter.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/matter-js/build/matter.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());await p.addInitScript(()=>localStorage.setItem('unb_buddy_coins','5000'));await p.goto('http://localhost:8765/test.html#'+id);await p.waitForTimeout(1500);return p};
+const cv=async(p,x,y)=>{const r=await p.$eval('canvas.board',c=>{const b=c.getBoundingClientRect();return{l:b.left,t:b.top,w:b.width,h:b.height}});return[r.l+x/960*r.w,r.t+y/600*r.h]};
+let p=await open('ph_buddy');
+for(const t of ['Punch','Bat','Heavy balls','Anvil','Bomb','Rocket','Lightning','Freeze ray','Punch','Flip gravity','Fireworks','Black hole']){await p.click('.tool:has-text("'+t+'")').catch(()=>{});await p.click('.tool:has-text("'+t+'")').catch(()=>{});const [a,bb]=await cv(p,480,330);await p.mouse.click(a,bb);await p.waitForTimeout(t==='Black hole'?1500:700);if(t==='Lightning')await p.screenshot({path:process.argv[2]+'_buddy1.png'})}
+await p.waitForTimeout(2500);await p.screenshot({path:process.argv[2]+'_buddy2.png'});console.log(await p.$eval('.stat',e=>e.textContent));
+p=await open('toy_screen');const tools=['Hammer','Paintball','Rapid fire','Flamethrower','Chainsaw','Termites','Stamps','Laser'];for(let i=0;i<tools.length;i++){await p.click('.tool:has-text("'+tools[i]+'")');const [a,bb]=await cv(p,150+i*95,200+(i%3)*110);await p.mouse.move(a,bb);await p.mouse.down();await p.mouse.move(a+60,bb+40,{steps:8});await p.waitForTimeout(400);await p.mouse.up()}
+await p.waitForTimeout(1500);await p.screenshot({path:process.argv[2]+'_screen.png'});console.log(await p.$eval('.stat',e=>e.textContent));
+console.log(errs.join('\n')||'no errors');await b.close()})();

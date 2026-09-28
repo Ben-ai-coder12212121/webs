@@ -1,0 +1,3 @@
+const fs=require('fs'),path=require('path');
+const CT={'.js':'application/javascript','.glb':'model/gltf-binary','.hdr':'application/octet-stream','.jpg':'image/jpeg','.png':'image/png','.html':'text/html'};
+module.exports=async function(p,html){await p.route('https://detour.test/**',r=>{const u=new URL(r.request().url());if(u.pathname.startsWith('/assets/')){const f=path.join(__dirname,'../srv',decodeURIComponent(u.pathname));if(fs.existsSync(f))return r.fulfill({body:fs.readFileSync(f),contentType:CT[path.extname(f)]||'application/octet-stream'});return r.fulfill({status:404,body:'nf'})}return r.fulfill({body:fs.readFileSync(html||__dirname+'/../srv/test.html'),contentType:'text/html'})})};

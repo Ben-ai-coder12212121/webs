@@ -1,0 +1,4 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/fonts\.|google|cdn/,r=>r.abort());
+const fs=require('fs');await p.route('https://detour.test/**',r=>r.fulfill({body:fs.readFileSync(__dirname+'/../srv/test.html'),contentType:'text/html'}));await p.goto('https://detour.test/');await p.waitForTimeout(600);await p.click('#bigBtn');await p.waitForTimeout(3500);
+console.log('game open:',await p.$eval('#stTitle',e=>e.textContent),'| share popup:',!!(await p.$('#dshare.on')),'| counter:',await p.evaluate(()=>localStorage.getItem('unb_detours')));console.log(errs.join('\n')||'no errors');await b.close()})();

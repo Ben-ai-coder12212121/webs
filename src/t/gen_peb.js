@@ -1,0 +1,7 @@
+const src=require('fs').readFileSync('solve.js','utf8');eval(src.split('JELLY_LV.forEach')[0].replace(/^const /gm,'var '));
+function solve(L,maxD){const st=pebParse(L);const key=s=>s.g.join('')+'|'+s.px+','+s.py+','+s.f+','+s.carry;const seen=new Set([key(st)]);let fr=[st];for(let d=1;d<=maxD;d++){const nf=[];for(const s of fr)for(const a of['L','R','U','D']){const n=pebStep(s,a);const k=key(n);if(seen.has(k))continue;seen.add(k);if(pebWon(n))return d;nf.push(n)}fr=nf;if(!fr.length||seen.size>400000)break}return -1}
+function gen(W,H,np,rng){const rows=[];const hgt=[];let h=1;for(let x=0;x<W;x++){if(x>1&&Math.random()<.45)h=Math.max(1,Math.min(H-3,h+(Math.random()<.5?-1:1)*(Math.random()<.3?2:1)));hgt.push(h)}
+  const g=[];for(let y=0;y<H;y++){let r='';for(let x=0;x<W;x++)r+=(y>=H-hgt[x])?'#':'.';g.push(r.split(''))}
+  const px=0,dx=W-1;g[H-hgt[px]-1][px]='P';g[H-hgt[dx]-1][dx]='D';let placed=0,t=0;while(placed<np&&t++<100){const x=1+Math.floor(Math.random()*(W-2));const y=H-hgt[x]-1;if(g[y][x]==='.'){g[y][x]='o';hgt[x]++;placed++}}return g.map(r=>r.join(''))}
+const want=[[9,5,1,8,20],[10,6,2,12,26],[11,6,2,16,34],[12,6,3,18,40],[13,7,3,22,48],[14,7,4,26,60]];const out=[];
+for(const [W,H,np,lo,hi] of want){let best=null;for(let i=0;i<4000&&!best;i++){const L=gen(W,H,np);const d=solve(L,hi);if(d<lo)continue;const noP=L.map(r=>r.replace(/o/g,'.'));if(solve(noP,hi)>0)continue;best=[L,d]}out.push(best);console.log(JSON.stringify(best))}

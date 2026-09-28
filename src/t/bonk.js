@@ -1,0 +1,9 @@
+const {chromium}=require(process.env.PW);const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const errs=[];
+const p=await b.newPage({viewport:{width:1100,height:1000}});p.setDefaultTimeout(4000);let cur='';p.on('pageerror',e=>errs.push(cur+': '+e.message));await p.route('**/matter.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/matter-js/build/matter.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('http://localhost:8765/test.html#ph_buddy');await p.waitForTimeout(1500);await p.click('text=Free play');
+const cv=async(x,y)=>{const r=await p.$eval('canvas.board',c=>{const b=c.getBoundingClientRect();return{l:b.left,t:b.top,w:b.width,h:b.height}});return[r.l+x/960*r.w,r.t+y/600*r.h]};
+const tabs=await p.$$eval('.row .btn',bs=>bs.map(b=>b.textContent).filter(t=>/\(\d+\)$/.test(t)));let n=0;const shots=['Cow','Piano','Tornado','Balloons','Bee swarm','Cartoon nuke','UFO abduction','Grow ray','Cream pie','Suction darts'];
+for(const t of tabs){await p.click('.row .btn:text-is("'+t+'")');const tools=await p.$$eval('.tool',bs=>bs.map(b=>b.title));for(const tl of tools){cur=tl;n++;await p.click('.tool[title="'+tl+'"]');const [a,bb]=await cv(480,330);await p.mouse.move(a,bb);await p.mouse.down();await p.waitForTimeout(350);await p.mouse.up();await p.waitForTimeout(tl==='Cartoon nuke'?300:900);if(shots.includes(tl))await p.screenshot({path:process.argv[2]+'_'+tl.replace(/\W/g,'')+'.png',clip:{x:0,y:60,width:1100,height:640}})}}
+await p.waitForTimeout(2000);console.log('tools fired:',n,'| coins',await p.$eval('.stat',e=>e.textContent));
+const parts=await p.evaluate(()=>1);console.log(errs.join('\n')||'no errors');await b.close()})();

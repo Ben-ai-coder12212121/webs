@@ -1,0 +1,11 @@
+const {chromium}=require(process.env.PW);const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const errs=[];
+const p=await b.newPage({viewport:{width:1100,height:1000}});p.setDefaultTimeout(4000);p.on('pageerror',e=>errs.push(e.message));await p.route('**/matter.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/matter-js/build/matter.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('http://localhost:8765/test.html#ph_buddy');await p.waitForTimeout(1800);const clip={x:100,y:150,width:900,height:560};
+const box=await p.$eval('canvas.board',c=>{const b=c.getBoundingClientRect();return{l:b.left,t:b.top,w:b.width,h:b.height}});clip.y=box.t;clip.x=box.l;clip.width=box.w;clip.height=box.h;
+await p.screenshot({path:process.argv[2]+'_fresh.png',clip});if(!(await p.$eval('body',()=>1)))return;
+const t=await p.$$eval('.btn',bs=>bs.map(b=>b.textContent));if(t.some(x=>x.includes('Free play: off')))await p.click('text=Free play');
+const use=async(tab,tool,n,wait)=>{await p.click('.row .btn:has-text("'+tab+'")');await p.click('.tool[title="'+tool+'"]');for(let i=0;i<n;i++){const tp=await p.evaluate(()=>1);await p.mouse.click(box.l+box.w*(.4+Math.random()*.2),box.t+box.h*(.45+Math.random()*.15));await p.waitForTimeout(wait||250)}};
+await use('Hands','Punch',10);await use('Hands','Bat',6,400);await use('Hands','Giant hammer',4,500);await use('Throw','Bowling ball',5,500);await use('Boom','Bomb',2,2300);await use('Elements','Flamethrower',1,2500);await use('Drop','Anvil',3,900);await use('Hands','Frying pan',8,300);
+await p.waitForTimeout(2500);await p.screenshot({path:process.argv[2]+'_worn.png',clip});
+console.log(await p.evaluate(()=>document.querySelector('canvas.board')?'ok':'x'),errs.join('\n')||'no errors');await b.close()})();

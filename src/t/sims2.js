@@ -1,0 +1,13 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1100,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));await p.route(/fonts\./,r=>r.abort());
+let cv;const at=async(X,Y,w)=>{const bb=await cv.boundingBox();await p.mouse.click(bb.x+X/960*bb.width,bb.y+Y/620*bb.height);await p.waitForTimeout(w||120)};
+const drag=async(pts)=>{const bb=await cv.boundingBox();const f=(X,Y)=>[bb.x+X/960*bb.width,bb.y+Y/620*bb.height];await p.mouse.move(...f(...pts[0]));await p.mouse.down();for(const q of pts.slice(1))await p.mouse.move(...f(...q),{steps:10});await p.mouse.up();await p.waitForTimeout(120)};
+await p.goto('file://'+process.argv[2]+'?g=sim_lemon#sim_lemon');await p.waitForTimeout(800);cv=await p.$('canvas.board');
+await p.screenshot({path:__dirname+'/s/lem_0.png'});for(const y of [190,246,302,358])await at(355,y+22);await at(355,190+22);await at(355,302+22);
+await at(770,520+32,500);await p.screenshot({path:__dirname+'/s/lem_1.png'});await at(W=860,82,100);await p.waitForTimeout(9000);await p.screenshot({path:__dirname+'/s/lem_2.png'});
+await p.goto('file://'+process.argv[2]+'?g=sim_town#sim_town');await p.waitForTimeout(800);cv=await p.$('canvas.board');
+await at(6+62+29,544+28);const T=(i,j)=>[i*32+16,j*32+16];await drag([T(2,7),T(14,7)]);await drag([T(2,9),T(14,9)]);
+await at(6+62*2+29,544+28);await drag([T(3,6),T(8,6)]);await at(6+62*3+29,544+28);await drag([T(10,10),T(13,10)]);
+await at(6+62*5+29,544+28);await at(...T(8,11));await at(6+62*6+29,544+28);await at(...T(5,11));await at(6+62*4+29,544+28);await at(...T(1,7));await at(...T(1,9));
+await p.waitForTimeout(12000);await p.screenshot({path:__dirname+'/s/town_1.png'});
+console.log(errs.join('|')||'ok');await b.close()})();

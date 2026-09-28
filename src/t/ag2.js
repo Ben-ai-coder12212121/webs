@@ -1,0 +1,12 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const p=await b.newPage({viewport:{width:1100,height:760}});p.on('pageerror',e=>console.log('ERR',e.message));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=apexgt#apexgt');await p.waitForTimeout(4000);
+await p.click('.ov3 button:has-text("Time attack")');await p.waitForTimeout(2500);
+console.log(await p.evaluate(()=>{const a=window.__ag;const m=a.me;return JSON.stringify({x:m.x,z:m.z,u:m.u,rpm:m.rpm,gear:m.gear,thr:m.thr,brk:m.brk,rev:m.rev,d:m.d,env:!!a.scene.environment,sh:a.renderer.shadowMap.enabled})}));
+await p.keyboard.down('w');await p.waitForTimeout(3000);
+console.log(await p.evaluate(()=>{const a=window.__ag;const m=a.me;return JSON.stringify({x:m.x,z:m.z,u:m.u,rpm:m.rpm,gear:m.gear,thr:m.thr,brk:m.brk,rev:m.rev,d:m.d,vx:m.vx,ax:m.ax})}));
+const fps=await p.evaluate(()=>new Promise(r=>{let n=0;const t=performance.now();const f=()=>{n++;if(performance.now()-t<2000)requestAnimationFrame(f);else r(n/2)};requestAnimationFrame(f)}));console.log('fps',fps);await p.waitForTimeout(500);await p.screenshot({path:'s/ag_noenv.png'});
+await p.evaluate(()=>{window.__ag.renderer.shadowMap.enabled=false;window.__ag.scene.traverse(o=>{if(o.material)o.material.needsUpdate=true})});await p.waitForTimeout(500);await p.screenshot({path:'s/ag_nosh.png'});
+await b.close()})();

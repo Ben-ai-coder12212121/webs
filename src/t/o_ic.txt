@@ -1,0 +1,2 @@
+{"cap":"Issue #1 · Hot StreakFires burning 8 · put out 0 · loop around them!","score":"score0","stat":"Frostline · Issue #1 · Score 0"}
+CONSOLE Failed to load resource: net::ERR_FAILED

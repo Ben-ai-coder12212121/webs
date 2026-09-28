@@ -1,0 +1,4 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1100,height:900}});p.on('pageerror',e=>console.log('ERR',e.message));await p.route(/fonts\.|google|cdn/,r=>r.abort());
+await p.goto('http://localhost:8765/test.html#esc_class');await p.waitForTimeout(700);
+console.log(await p.evaluate(()=>{const n=document.querySelector('.esc-nav.r');const cs=getComputedStyle(n);const r=n.getBoundingClientRect();const e=document.elementFromPoint(815,313);const s=document.querySelector('.esc-spot[aria-label="Door"]');return [e.className,getComputedStyle(s).zIndex,getComputedStyle(s).position,cs.position,cs.zIndex,cs.top,cs.right,JSON.stringify(r),!!document.getElementById('esc-css'),document.getElementById('esc-css').tagName]}));await p.screenshot({path:__dirname+'/s/e1a.png'});await b.close()})();

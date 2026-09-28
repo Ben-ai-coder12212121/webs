@@ -1,0 +1,11 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const p=await b.newPage({viewport:{width:1100,height:760}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));p.on('console',m=>{if(m.type()==='error'&&!/ERR_FAILED/.test(m.text()))errs.push(m.text())});
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=openroad#openroad');await p.waitForTimeout(2500);await p.screenshot({path:'s/dr_menu.png'});
+const tod=process.argv[3];if(tod)await p.click('.ov3 button:has-text("'+tod+'")');
+await p.click('.ov3 button:has-text("'+(process.argv[4]||'Cruise')+'")');await p.waitForTimeout(800);
+await p.keyboard.down('w');await p.waitForTimeout(6000);await p.screenshot({path:'s/dr_1.png'});
+await p.keyboard.down('d');await p.waitForTimeout(1500);await p.keyboard.up('d');await p.waitForTimeout(3000);await p.screenshot({path:'s/dr_2.png'});
+await p.keyboard.press('c');await p.waitForTimeout(1500);await p.screenshot({path:'s/dr_3.png'});
+console.log(await p.evaluate(()=>document.querySelector('.stat').textContent),errs.slice(0,5).join('\n')||'no errors');await b.close()})();

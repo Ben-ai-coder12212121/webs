@@ -1,0 +1,22 @@
+const shuffle=a=>a;let B,turn,cast,ep,hist,sel,moves,last,over,thinking;
+  const isW=p=>p&&p===p.toUpperCase(),col=p=>p?(isW(p)?'w':'b'):null;
+  function reset0(){B=('rnbqkbnr'+'pppppppp'+'.'.repeat(32)+'PPPPPPPP'+'RNBQKBNR').split('').map(ch=>ch==='.'?null:ch);turn='w';cast={K:1,Q:1,k:1,q:1};ep=-1;hist=[];sel=null;moves=[];last=null;over=false;upd()}
+  function attacked(sq,by){const r=sq>>3,f=sq&7;const at=(rr,ff)=>rr>=0&&rr<8&&ff>=0&&ff<8?B[rr*8+ff]:undefined;const pd=by==='w'?1:-1;for(const df of[-1,1]){const p=at(r+pd,f+df);if(p&&col(p)===by&&p.toLowerCase()==='p')return true}
+    for(const[dr,df]of[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]){const p=at(r+dr,f+df);if(p&&col(p)===by&&p.toLowerCase()==='n')return true}
+    for(const[dr,df]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){let rr=r+dr,ff=f+df,n=1;while(rr>=0&&rr<8&&ff>=0&&ff<8){const p=B[rr*8+ff];if(p){if(col(p)===by){const t=p.toLowerCase();if(t==='q'||(t==='r'&&(!dr||!df))||(t==='b'&&dr&&df)||(t==='k'&&n===1))return true}break}rr+=dr;ff+=df;n++}}return false}
+  function gen(side,capsOnly){const out=[];for(let s=0;s<64;s++){const p=B[s];if(!p||col(p)!==side)continue;const t=p.toLowerCase(),r=s>>3,f=s&7;const add=(to,extra)=>{const tp=B[to];if(tp&&col(tp)===side)return false;if(capsOnly&&!tp&&!(extra&&extra.ep))return !tp;out.push(Object.assign({f:s,t:to,cap:tp||(extra&&extra.ep?(side==='w'?'p':'P'):null)},extra||{}));return !tp};
+      if(t==='p'){const d=side==='w'?-1:1,r1=r+d;if(r1>=0&&r1<8){if(!B[r1*8+f]&&!capsOnly){out.push({f:s,t:r1*8+f,promo:r1===0||r1===7});const sr=side==='w'?6:1;if(r===sr&&!B[(r+2*d)*8+f])out.push({f:s,t:(r+2*d)*8+f,dbl:1})}for(const df of[-1,1]){const ff=f+df;if(ff<0||ff>7)continue;const to=r1*8+ff;if(B[to]&&col(B[to])!==side)out.push({f:s,t:to,cap:B[to],promo:r1===0||r1===7});else if(to===ep)out.push({f:s,t:to,ep:1,cap:side==='w'?'p':'P'})}}}
+      else if(t==='n'||t==='k'){const D=t==='n'?[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]:[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];for(const[dr,df]of D){const rr=r+dr,ff=f+df;if(rr>=0&&rr<8&&ff>=0&&ff<8)add(rr*8+ff)}
+        if(t==='k'&&!capsOnly){const o=side==='w'?'w':'b',R0=side==='w'?56:0,op=side==='w'?'b':'w';if(s===R0+4&&!attacked(s,op)){if(cast[side==='w'?'K':'k']&&!B[R0+5]&&!B[R0+6]&&B[R0+7]&&B[R0+7].toLowerCase()==='r'&&!attacked(R0+5,op)&&!attacked(R0+6,op))out.push({f:s,t:R0+6,castle:'k'});if(cast[side==='w'?'Q':'q']&&!B[R0+3]&&!B[R0+2]&&!B[R0+1]&&B[R0]&&B[R0].toLowerCase()==='r'&&!attacked(R0+3,op)&&!attacked(R0+2,op))out.push({f:s,t:R0+2,castle:'q'})}}}
+      else{const D=t==='r'?[[1,0],[-1,0],[0,1],[0,-1]]:t==='b'?[[1,1],[1,-1],[-1,1],[-1,-1]]:[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];for(const[dr,df]of D){let rr=r+dr,ff=f+df;while(rr>=0&&rr<8&&ff>=0&&ff<8){if(!add(rr*8+ff))break;rr+=dr;ff+=df}}}}return out}
+  function make(m){const st={B:B.slice(),turn,cast:Object.assign({},cast),ep,last};const p=B[m.f];B[m.t]=m.promo?(isW(p)?'Q':'q'):p;B[m.f]=null;if(m.ep)B[m.t+(isW(p)?8:-8)]=null;if(m.castle){const R0=isW(p)?56:0;if(m.castle==='k'){B[R0+5]=B[R0+7];B[R0+7]=null}else{B[R0+3]=B[R0];B[R0]=null}}
+    ep=m.dbl?(m.f+m.t)/2:-1;if(p==='K'){cast.K=cast.Q=0}if(p==='k'){cast.k=cast.q=0}[[56,'Q'],[63,'K'],[0,'q'],[7,'k']].forEach(([sq,k])=>{if(m.f===sq||m.t===sq)cast[k]=0});turn=turn==='w'?'b':'w';return st}
+  function unmake(st){B=st.B;turn=st.turn;cast=st.cast;ep=st.ep;last=st.last}
+  const kingSq=side=>B.indexOf(side==='w'?'K':'k');const inCheck=side=>attacked(kingSq(side),side==='w'?'b':'w');
+  function legal(side){return gen(side).filter(m=>{const st=make(m);const ok=!inCheck(side);unmake(st);return ok})}
+
+function load(fen){const [pos,t,cs,e]=fen.split(' ');B=[];pos.split('/').forEach(r=>{for(const ch of r){if(/\d/.test(ch))for(let i=0;i<+ch;i++)B.push(null);else B.push(ch)}});turn=t;cast={K:cs.includes('K')?1:0,Q:cs.includes('Q')?1:0,k:cs.includes('k')?1:0,q:cs.includes('q')?1:0};ep=e==='-'?-1:('abcdefgh'.indexOf(e[0])+(8-+e[1])*8)}
+function perft(d){if(d===0)return 1;let n=0;for(const m of legal(turn)){const st=make(m);n+=perft(d-1);unmake(st)}return n}
+load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -');console.log('start d3',perft(3),'exp 8902');console.log('start d4',perft(4),'exp 197281');
+load('r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -');console.log('kiwi d2',perft(2),'exp 2039');console.log('kiwi d3',perft(3),'exp 97862');
+load('8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -');console.log('p3 d4',perft(4),'exp 43238');

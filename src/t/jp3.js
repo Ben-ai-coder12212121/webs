@@ -1,0 +1,7 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1200,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));await p.route(/fonts\.|google|cdn/,r=>r.abort());
+await p.addInitScript(()=>{window.__JPGOD=1;localStorage.setItem('unb_jp_save',JSON.stringify({coins:5000}))});await p.route('https://detour.test/**',r=>r.fulfill({body:fs.readFileSync(__dirname+'/../srv/test.html'),contentType:'text/html'}));await p.goto('https://detour.test/#jetpack');await p.waitForTimeout(900);
+await p.click('text=🛒 Shop');await p.waitForTimeout(300);await p.screenshot({path:__dirname+'/s/jps.png'});const bs=await p.$$('button');for(const bt of bs){const t=await bt.textContent();if(/🪙 250|🪙 900/.test(t))await bt.click().catch(()=>{})}await p.waitForTimeout(200);
+await p.click('text=← Back');await p.click('text=▶ Play');await p.waitForTimeout(600);
+for(const v of ['bike','bird','mech','gsuit']){await p.evaluate(v=>{window.__JP().pl.veh=v},v);for(let i=0;i<14;i++){await p.keyboard.press(' ');await p.waitForTimeout(120)}await p.screenshot({path:__dirname+'/s/jpv_'+v+'.png'})}
+console.log(await p.evaluate(()=>localStorage.getItem('unb_jp_save')));console.log(errs.join('\n')||'no errors');await b.close()})();

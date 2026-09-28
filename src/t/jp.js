@@ -1,0 +1,7 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1200,height:860}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));await p.route(/fonts\.|google|cdn/,r=>r.abort());
+await p.route('https://detour.test/**',r=>r.fulfill({body:fs.readFileSync(__dirname+'/../srv/test.html'),contentType:'text/html'}));await p.goto('https://detour.test/#jetpack');await p.waitForTimeout(900);await p.screenshot({path:__dirname+'/s/jp0.png'});
+await p.click('text=▶ Play');const cv=await p.$('canvas');const bb=await cv.boundingBox();
+// pulse thrust to hover around mid-height for ~25s, logging
+for(let i=0;i<120;i++){await p.mouse.move(bb.x+bb.width/2,bb.y+bb.height/2);await p.mouse.down();await p.waitForTimeout(90);await p.mouse.up();await p.waitForTimeout(110);if(i===40)await p.screenshot({path:__dirname+'/s/jp1.png'});if(i===80)await p.screenshot({path:__dirname+'/s/jp2.png'});const ov=await p.$eval('canvas',()=>0);const st=await p.evaluate(()=>document.querySelector('#stat').textContent);if(i%20===0)console.log(i,st);if(await p.isVisible('text=▶ Again')||await p.isVisible('text=💖 Revive'))break}
+await p.waitForTimeout(3000);await p.screenshot({path:__dirname+'/s/jp3.png'});console.log('end:',await p.evaluate(()=>document.querySelector('#stat').textContent));console.log(errs.join('\n')||'no errors');await b.close()})();

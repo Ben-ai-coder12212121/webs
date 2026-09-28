@@ -1,0 +1,13 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1100,height:900}});const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.route(/fonts\.|google|cdn/,r=>r.abort());
+await p.goto('http://localhost:8799/');await p.waitForTimeout(800);await p.screenshot({path:__dirname+'/s/ui0.png',clip:{x:0,y:0,width:1100,height:520}});
+await p.click('#bigBtn');await p.waitForTimeout(700);await p.screenshot({path:__dirname+'/s/ui1.png'});await p.waitForTimeout(2600);await p.screenshot({path:__dirname+'/s/ui2.png'});
+console.log('count',await p.evaluate(()=>localStorage.getItem('unb_detours')),await p.$eval('#dshare',e=>e.textContent));
+await p.click('#back').catch(()=>{});await p.waitForTimeout(500);console.log(await p.$eval('#dcount',e=>e.textContent));
+await p.click('[data-f=ideas]');await p.waitForTimeout(600);
+await p.fill('.ideaform textarea','A zombie survival game where you build a fort at night');await p.click('.ideaform .btn.primary');await p.waitForTimeout(600);
+await p.click('.ideakind button:nth-child(2)');await p.selectOption('.ideaform select','Titan');await p.fill('.ideaform textarea','Let Titan pick up and throw buses');await p.click('.ideaform .btn.primary');await p.waitForTimeout(600);
+await p.click('.ideav');await p.waitForTimeout(400);await p.fill('.ideaform textarea','sh1t');await p.click('.ideaform .btn.primary');await p.waitForTimeout(300);
+console.log(await p.$eval('.ideamsg',e=>e.textContent),await p.$$eval('.idea',a=>a.map(x=>x.textContent).join(' | ')));
+await p.evaluate(()=>scrollTo(0,document.querySelector('.ideasec').offsetTop-20));await p.screenshot({path:__dirname+'/s/ui3.png'});
+console.log(errs.join('\n')||'ok');await b.close()})();

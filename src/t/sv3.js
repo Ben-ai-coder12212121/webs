@@ -1,0 +1,4 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',proxy:{server:process.env.HTTPS_PROXY},args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-certificate-errors']});const cx=await b.newContext({viewport:{width:900,height:560},ignoreHTTPSErrors:true});const p=await cx.newPage();
+const fails=[];p.on('requestfailed',r=>fails.push(r.url().slice(0,90)+' '+r.failure().errorText));
+await p.setContent('<body style="margin:0"><iframe style="border:0;width:900px;height:560px" src="https://maps.google.com/maps?q=&layer=c&cbll=40.7580,-73.9855&cbp=11,0,0,0,0&output=svembed"></iframe></body>');await p.waitForTimeout(20000);await p.screenshot({path:__dirname+'/s/sv3.png'});console.log(fails.slice(0,8).join('\n'));await b.close()})();

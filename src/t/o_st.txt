@@ -1,0 +1,2 @@
+{"cap":"Issue #1 · Scrap HeapWave 1/3 · robots left 6","score":"score0","stat":"Titan · Issue #1 · Score 0"}
+CONSOLE Failed to load resource: net::ERR_FAILED

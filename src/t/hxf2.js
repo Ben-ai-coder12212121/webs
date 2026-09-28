@@ -1,0 +1,5 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:900,height:600}});
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=hs_havoc#hs_havoc');await p.waitForTimeout(2500);await (await p.$('.ov3 .btn.primary')).click();await p.waitForTimeout(1500);
+await p.keyboard.down(' ');await p.waitForTimeout(2500);await p.keyboard.up(' ');await p.keyboard.down('w');for(let i=0;i<8;i++){await p.waitForTimeout(300);await p.screenshot({path:__dirname+'/s/fl_'+i+'.png'});console.log(JSON.stringify(await p.evaluate(()=>{const X=window.__HX;return{P:[X.P.p.x,X.P.p.y,X.P.p.z,X.P.v.x,X.P.v.y,X.P.v.z].map(v=>+v.toFixed(1)),cam:X.camPos().map(v=>+v.toFixed(1))}})))}await b.close()})();

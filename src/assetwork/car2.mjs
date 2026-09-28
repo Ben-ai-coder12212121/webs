@@ -1,0 +1,6 @@
+import {NodeIO} from '@gltf-transform/core';import {dedup,prune} from '@gltf-transform/functions';import {MeshoptSimplifier as MS} from 'meshoptimizer';import fs from 'fs';
+await MS.ready;const io=new NodeIO();const doc=await io.read('out/models/car.glb');const tgt={Body_Color:10000,metal_chrome:1200,Glass_Gray:1600,Taillight_Glass:900,plastic_gray:1200,metal_gray:900,Tires:500};
+let tris=0;for(const m of doc.getRoot().listMeshes())for(const p of m.listPrimitives()){const ix=p.getIndices(),pos=p.getAttribute('POSITION');const n=ix.getCount()/3,t=tgt[p.getMaterial().getName()]||n;
+ if(t<n){const pa=new Float32Array(pos.getArray());const map=new Map(),canon=new Uint32Array(pos.getCount());for(let i=0;i<pos.getCount();i++){const k=Math.round(pa[i*3]*2000)+','+Math.round(pa[i*3+1]*2000)+','+Math.round(pa[i*3+2]*2000);if(!map.has(k))map.set(k,i);canon[i]=map.get(k)}
+  const src=new Uint32Array(ix.getArray()).map(i=>canon[i]);const [out,err]=MS.simplify(src,pa,3,t*3,0.08,[]);ix.setArray(new Uint32Array(out));console.log(p.getMaterial().getName(),n,'->',out.length/3,err.toFixed(3))}tris+=ix.getCount()/3}
+await doc.transform(prune(),dedup());await io.write('out/models/car.glb',doc);console.log('tris',tris,(fs.statSync('out/models/car.glb').size/1e6).toFixed(2)+'MB')

@@ -1,0 +1,20 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:760,height:560}});const errs=[];p.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n').slice(1,3).join('|')));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\.|google/,r=>r.abort());
+await p.goto('file://'+process.argv[2]+'?g=hs_kaiju#hs_kaiju');await p.waitForTimeout(2500);
+const bs=await p.$$('.ov3 .btn');for(const x of bs){if(/free roam/i.test(await x.textContent())){await x.click();break}}await p.waitForTimeout(1500);
+await p.keyboard.press('g');
+const st=()=>p.evaluate(()=>{const X=window.__HX;return {p:[X.P.p.x|0,X.P.p.y|0,X.P.p.z|0],hp:X.P.hp|0,en:X.KZ.en|0,blocks:X.stats.blocks,towers:X.stats.towers,en2:X.enemies.filter(e=>!e.dead).map(e=>e.kind+(e.kind==='mecha'?':'+e.st+':'+Math.round(e.hp):'')).join(','),held:X.KZ.held&&X.KZ.held.k,t:X.KZ.t.toFixed(1)}});
+const fps=await p.evaluate(()=>new Promise(r=>{let n=0;const t0=performance.now();const f=()=>{n++;if(performance.now()-t0<2000)requestAnimationFrame(f);else r(n/2)};requestAnimationFrame(f)}));console.log('fps',fps);
+await p.evaluate(()=>{const X=window.__HX;let best=null;X.blds.forEach(B=>{if(!best||B.fh>best.fh)best=B});const cx=(best.gx0+best.fx/2)*4,cz=(best.gz0+best.fz/2)*4;X.P.p.set(cx,0,cz+best.fz*2+26);X.cam.yaw=0;X.cam.pitch=-.1;X.KZ.yaw=Math.PI;X.KZ.en=100});
+const hold=async(k,ms)=>{await p.keyboard.down(k);await p.waitForTimeout(ms);await p.keyboard.up(k)};
+await p.waitForTimeout(1500);console.log('pre',JSON.stringify(await st()));
+await p.keyboard.down('r');await p.waitForTimeout(5000);await p.screenshot({path:__dirname+'/s/kb1.png'});await p.waitForTimeout(3000);await p.keyboard.up('r');console.log('breath',JSON.stringify(await st()));
+await p.waitForTimeout(2000);await p.screenshot({path:__dirname+'/s/kb2.png'});
+await hold('w',3000);await p.keyboard.press('e');await p.waitForTimeout(1500);console.log('grab',JSON.stringify(await st()));await p.screenshot({path:__dirname+'/s/kb3.png'});await p.keyboard.press('e');await p.waitForTimeout(3000);await p.screenshot({path:__dirname+'/s/kb4.png'});
+await p.evaluate(()=>{window.__HX.KZ.en=100});await p.keyboard.press('x');await p.waitForTimeout(6000);await p.screenshot({path:__dirname+'/s/kb5.png'});console.log('pulse',JSON.stringify(await st()));
+await p.evaluate(()=>{window.__HX.KZ.bossT=0});await p.waitForTimeout(25000);await p.screenshot({path:__dirname+'/s/kb6.png'});console.log('mecha',JSON.stringify(await st()));
+for(let i=0;i<10;i++){await p.evaluate(()=>{const X=window.__HX;const m=X.enemies.find(e=>e.kind==='mecha');if(m)X.aimAt(m.p.x,m.p.y,m.p.z)});await p.mouse.down();await p.waitForTimeout(150);await p.mouse.up();await p.waitForTimeout(1500)}
+await p.screenshot({path:__dirname+'/s/kb7.png'});console.log('fight',JSON.stringify(await st()));
+await p.evaluate(()=>{const m=window.__HX.enemies.find(e=>e.kind==='mecha');if(m)m.hp=5});await p.mouse.down();await p.waitForTimeout(150);await p.mouse.up();await p.waitForTimeout(12000);await p.screenshot({path:__dirname+'/s/kb8.png'});console.log('end',JSON.stringify(await st()));
+console.log('errors',errs.slice(0,5).join('\n')||'none');await b.close()})();

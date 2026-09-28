@@ -1,0 +1,4 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const [pre,from,to,out]=process.argv.slice(2);const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1500,height:900}});
+let h='<body style="margin:0;background:#000;display:grid;grid-template-columns:repeat(3,500px)">';for(let i=+from;i<=+to;i++){const f=__dirname+'/s/'+pre+i+'.png';if(!fs.existsSync(f))continue;h+=`<div style="width:500px;height:300px;overflow:hidden;position:relative"><img src="data:image/png;base64,${fs.readFileSync(f).toString('base64')}" style="position:absolute;left:-150px;top:-90px;width:1200px;transform:scale(.55);transform-origin:150px 90px"><b style="position:absolute;left:4px;top:2px;color:#ff0">${i}</b></div>`}
+await p.setContent(h);await p.screenshot({path:__dirname+'/s/'+out});await b.close()})();

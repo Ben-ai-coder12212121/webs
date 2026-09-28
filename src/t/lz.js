@@ -1,0 +1,13 @@
+const {chromium}=require('/opt/node22/lib/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});const p=await b.newPage({viewport:{width:1280,height:720}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.route('**/three.min.js',r=>r.fulfill({body:fs.readFileSync(__dirname+'/node_modules/three/build/three.min.js'),contentType:'application/javascript'}));await p.route(/fonts\./,r=>r.abort());
+const S=n=>p.screenshot({path:__dirname+'/s/'+n+'.png'});
+await p.goto('file://'+process.argv[2]+'?g=hs_havoc#hs_havoc');await p.waitForTimeout(2500);
+await p.click('#fs');await p.waitForTimeout(800);console.log('fs:',await p.evaluate(()=>!!document.fullscreenElement),await p.evaluate(()=>{const r=document.querySelector('.g3').getBoundingClientRect();return [r.width,r.height,innerWidth,innerHeight].map(Math.round).join(',')}));
+await (await p.$('.ov3 .btn.primary')).click();await p.waitForTimeout(1500);
+const info=await p.evaluate(()=>{const X=window.__HX;let best=null;X.blds.forEach(B=>{if(!best||B.fh>best.fh)best=B});const cx=(best.gx0+best.fx/2)*4,cz=(best.gz0+best.fz/2)*4;const kx=Math.round((cx+168)/48);const lx=-168+kx*48;X.P.p.set(lx,0,cz+2);X.best=best;return X.best.hp.reduce((a,v)=>a+(v>0),0)});
+await p.evaluate(()=>{const X=window.__HX,B=X.best;X.aimAt((B.gx0+B.fx/2)*4,6,(B.gz0+B.fz/2)*4)});await p.keyboard.down('f');await p.waitForTimeout(1500);await S('lz_1');
+for(let i=0;i<6;i++){await p.evaluate(i=>{const X=window.__HX,B=X.best;X.aimAt((B.gx0+B.fx/2)*4+(i-3)*2,4+i*2,(B.gz0+B.fz/2)*4)},i);await p.waitForTimeout(600)}await S('lz_2');await p.keyboard.up('f');
+const after=await p.evaluate(()=>window.__HX.best.hp.reduce((a,v)=>a+(v>0),0));console.log('blocks',info,'->',after);
+await p.goto('file://'+process.argv[2]+'?g=cook_pizza#cook_pizza');await p.waitForTimeout(800);await p.click('#fs');await p.waitForTimeout(800);await S('fs_pizza');console.log(await p.evaluate(()=>{const c=document.querySelector('canvas.board').getBoundingClientRect();return [c.width,c.height].map(Math.round).join(',')}));
+console.log(errs.join('|')||'ok');await b.close()})();
