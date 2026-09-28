@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Street Rumble: game code ===================== */
 const FR_CSS=`.fr{position:relative;width:min(100%,calc((100vh - 170px)*1.7778));margin:0 auto;aspect-ratio:16/9;border:4px solid #1D1A2F;border-radius:14px;overflow:hidden;box-shadow:6px 6px 0 #1D1A2F;touch-action:none;user-select:none;-webkit-user-select:none;background:#111}
@@ -223,7 +224,7 @@ let state='menu',theme=THEMES[0],mode='cpu',F1=null,F2=null,round=1,timer=99,tAc
 const keys={};c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(state==='fight'&&[' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(!keys[k])keys[k]=1;if(k==='escape'&&state==='fight'){state='paused';pauseMenu()}});c.on(document,'keyup',e=>{keys[e.key.toLowerCase()]=0});
 const KM1={u:'w',d:'s',l:'a',r:'d',lp:'j',hp:'k',lk:'u',hk:'i',s1:'l',s2:'o',su:' '},KM2={u:'arrowup',d:'arrowdown',l:'arrowleft',r:'arrowright',lp:'1',hp:'2',lk:'4',hk:'5',s1:'3',s2:'6',su:'0'},KM2b={lp:',',hp:'.',lk:';',hk:"'",s1:'/',s2:']',su:'\\'};
 const touch={u:0,d:0,l:0,r:0,lp:0,hp:0,lk:0,hk:0,s1:0,s2:0,su:0};
-function readInput(F){if(F.ctrl==='cpu')return F.ai.inp||{};const m=F.side===0?KM1:KM2,m2=F.side===0?null:KM2b;const o={};for(const k in m)o[k]=!!(keys[m[k]]||(m2&&m2[k]&&keys[m2[k]])||(F.side===0&&mode!=='2p'?0:0));if(F.side===0){for(const k in touch)o[k]=o[k]||!!touch[k];if(mode!=='2p'){o.u=o.u||!!keys.arrowup;o.d=o.d||!!keys.arrowdown;o.l=o.l||!!keys.arrowleft;o.r=o.r||!!keys.arrowright}}return o}
+function readInput(F){if(F.ctrl==='cpu')return F.ai.inp||{};if(F.ctrl==='net')return netInp||{};const m=F.side===0?KM1:KM2,m2=F.side===0?null:KM2b;const o={};for(const k in m)o[k]=!!(keys[m[k]]||(m2&&m2[k]&&keys[m2[k]])||(F.side===0&&mode!=='2p'?0:0));if(F.side===0){for(const k in touch)o[k]=o[k]||!!touch[k];if(mode!=='2p'){o.u=o.u||!!keys.arrowup;o.d=o.d||!!keys.arrowdown;o.l=o.l||!!keys.arrowleft;o.r=o.r||!!keys.arrowright}}return o}
 /* ---------------- touch controls ---------------- */
 const tc=el('div',{class:'fr-tc'}),pad=el('div',{class:'fr-pad'},el('i')),bts=el('div',{class:'fr-bt'});tc.append(pad,bts);wrap.append(tc);
 [['lp','PUNCH'],['hp','HEAVY P'],['s1','SPECIAL','s'],['lk','KICK'],['hk','HEAVY K'],['s2','RISE','s'],['su','SUPER','su']].forEach(([k,t,cl])=>{const b=el('button',{type:'button',class:cl||''},t);if(k==='su')b.style.gridColumn='3';b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();touch[k]=1});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>touch[k]=0));bts.append(b)});
@@ -403,7 +404,23 @@ function charSelect(){state='menu';ov.classList.add('on');ov.innerHTML='';const 
 /* ---------------- loop ---------------- */
 grain=document.createElement('canvas');grain.width=W+50;grain.height=H+50;{const g=grain.getContext('2d'),id=g.createImageData(W+50,H+50);for(let i=0;i<id.data.length;i+=4){const v=Math.random()*255;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255}g.putImageData(id,0,0)}
 let acc=0;
-c.loop(ms=>{frame++;pauseB.style.display=state==='fight'?'':'none';if(!F1){x.setTransform(DPR,0,0,DPR,0,0);x.fillStyle='#111';x.fillRect(0,0,W,H);return}
+/* online: the host's browser runs the fight; the friend's keys drive player 2 and their screen is redrawn from the host's state */
+let GUEST=false,netInp=null,netPick=null,sendT=0;
+const NET=()=>on&&on.active;
+const sideRef=(k,v)=>v&&typeof v==='object'&&v.side!=null&&v.ch?{__F:v.side}:v;
+const packState=()=>JSON.stringify({state,th:theme.id,mode,F1,F2,round,timer,ann,annT,hitStop,shake,camX,sparks,projs,texts,slow,roundOver,winner,superF,superBy,frame},(k,v)=>{if(k==='ch')return ROSTER.indexOf(v);if(k==='ai'||k==='buf')return undefined;if(k==='o'||k==='winner'||k==='superBy')return sideRef(k,v);return v});
+function applyState(str){const o=JSON.parse(str);const fixF=F=>{if(F)F.ch=ROSTER[F.ch];return F};F1=fixF(o.F1);F2=fixF(o.F2);const ref=v=>v&&v.__F!=null?(v.__F?F2:F1):v;
+  state=o.state==='fight'||o.state==='paused'?'netfight':o.state;theme=THEMES.find(t=>t.id===o.th)||theme;if(!stageC[theme.id])mkStage(theme.id);round=o.round;timer=o.timer;ann=o.ann;annT=o.annT;hitStop=o.hitStop;shake=o.shake;camX=o.camX;sparks=o.sparks;projs=o.projs.map(q=>Object.assign(q,{o:ref(q.o)}));texts=o.texts;slow=o.slow;roundOver=o.roundOver;winner=ref(o.winner);superF=o.superF;superBy=ref(o.superBy);frame=o.frame}
+const on=Online.party({game:'rumble',max:2,title:'You fight as player 1, your friend as player 2. Best of 3 rounds.',
+  onStart:role=>{GUEST=role==='guest';if(GUEST){ov.classList.remove('on');on.act({pick:sel.p1})}},
+  onJoin:()=>{},onLeave:()=>{netInp=null;if(F2&&F2.ctrl==='net'){F2.ctrl='cpu';F2.ai=F2.ai||{inp:{}}}},
+  onInput:(peer,i)=>{netInp=i},onAct:(peer,a)=>{if(a.pick!=null){netPick=a.pick;arcade=null;const me=ROSTER[sel.p1];startFight(me,ROSTER[a.pick]||ROSTER[sel.p2],'net');F2.ctrl='net'}if(a.again&&state==='over'){startFight(F1.ch,F2.ch,'net');F2.ctrl='net'}},
+  onSnap:sn=>{try{applyState(sn)}catch(e){}if(state==='over'&&!ov.classList.contains('on')){const mine=F2&&F2.wins>=2;ov.innerHTML='';ov.append(el('h2',null,mine?'YOU WIN':'YOU LOSE'),el('h3',null,F1.name+' '+F1.wins+' – '+F2.wins+' '+F2.name));const b=el('button',{type:'button',class:'fr-b'},'REMATCH');b.onclick=e=>{e.stopPropagation();ov.classList.remove('on');on.act({again:1})};ov.append(b);ov.classList.add('on')}if(state!=='over'&&ov.classList.contains('on'))ov.classList.remove('on')},
+  onEnd:()=>{if(GUEST){GUEST=false;F1=F2=null;state='menu';themeMenu()}else if(F2&&F2.ctrl==='net'){F2.ctrl='cpu';F2.ai=F2.ai||{inp:{}}}}});
+root.append(el('div',{class:'row'},on.button));
+c.loop(ms=>{if(GUEST){pauseB.style.display='none';const o=readInput({side:0,ctrl:'p1'});on.input(o);if(F1&&F2)draw();else{x.setTransform(DPR,0,0,DPR,0,0);x.fillStyle='#111';x.fillRect(0,0,W,H)}c.stat('Street Rumble · online');return}
+  if(NET()&&F1&&F2){sendT-=ms;if(sendT<=0){sendT=50;const pk=packState();on.friends.forEach(f=>on.snapTo(f,pk))}}
+  frame++;pauseB.style.display=state==='fight'?'':'none';if(!F1){x.setTransform(DPR,0,0,DPR,0,0);x.fillStyle='#111';x.fillRect(0,0,W,H);return}
   if(state==='fight'){acc+=Math.min(50,ms);const stepMs=slow>0?1000/60*2.5:1000/60;while(acc>=stepMs){acc-=stepMs;tick()}}else if(state==='over'){acc+=ms;while(acc>=1000/60){acc-=1000/60;F1.t++;F2.t++;[F1,F2].forEach(F=>{if(F.st==='win')F.pose=mixP(F.pose,P('win',{fs:2.95+Math.sin(F.t*.15)*.1}),.2)})}}
   draw();c.stat(F1&&F2?F1.name+' '+F1.wins+' – '+F2.wins+' '+F2.name:'')});
 function tick(){if(slow>0)slow--;if(annT>0)annT-=1/60;texts=texts.filter(t=>(t.l-=1/60)>0);sparks=sparks.filter(s=>{s.l-=1/60;if(!s.ring){s.x+=s.vx;s.y+=s.vy;s.vy+=.3}return s.l>0});if(shake>0)shake*=.85;if(shake<.3)shake=0;
