@@ -20,6 +20,7 @@ _Last updated: 2026-09-28._
 
 1. **Don't deploy every change.** Commit and push as usual; that keeps the work safe, because the cloud workspace is temporary. Netlify **skips** any push whose latest commit message lacks `[deploy]`. This is set by the `ignore =` rule in `netlify.toml`.
    - When the owner says **"deploy"**, make one commit whose message contains `[deploy]`; an empty commit is fine. Push it, then check the live site with `curl -sL https://detourr.net/ | grep <something new>`.
+   - **Previews:** the `preview` branch always builds (branch deploys are free on Netlify; production deploys cost 15 credits each) at **https://preview--detourr.netlify.app**. Push work there when the owner wants to try it: `git push origin HEAD:preview` (merge the live branch into `preview` first so it's up to date). When the owner says "deploy", merge `preview` into the live branch with a `[deploy]` commit.
 2. **New games go to the "🚧 In progress" section, not the main listings.** They must not be picked by the random button. Move a game out only when the owner says so, by editing `WIP_IDS` near the end of `src/heroes/build.py`.
    - Currently in progress: `neonharbor`, `hollow`, `contract`, `moonblade`, `ironpalm`, `spellbound`.
 3. **Q is an aim button in every shooter.** The owner plays on a laptop without a mouse. Any new shooter needs Q = aim / ADS.
