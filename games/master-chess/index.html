@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Master Chess: game code ===================== */
 G.push({id:'chess',name:'Master Chess',kind:'board',levels:true,tint:'#e8c48a',blurb:'Full-rules chess against the computer: castling, en passant, promotion, check and mate.',fmt:b=>b+' wins',
@@ -57,7 +58,7 @@ run(root,c){
   const GLY={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙',k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
   let B,turn,cast,ep,hist,sel=null,moves=[],last=null,over=false,thinking=false,wins=S.get('chess_w',0);
   const isW=p=>p&&p===p.toUpperCase(),col=p=>p?(isW(p)?'w':'b'):null;
-  function reset(){B=('rnbqkbnr'+'pppppppp'+'.'.repeat(32)+'PPPPPPPP'+'RNBQKBNR').split('').map(ch=>ch==='.'?null:ch);turn='w';cast={K:1,Q:1,k:1,q:1};ep=-1;hist=[];sel=null;moves=[];last=null;over=false;upd()}
+  function reset(fromNet){B=('rnbqkbnr'+'pppppppp'+'.'.repeat(32)+'PPPPPPPP'+'RNBQKBNR').split('').map(ch=>ch==='.'?null:ch);turn='w';cast={K:1,Q:1,k:1,q:1};ep=-1;hist=[];sel=null;moves=[];last=null;over=false;upd();if(on&&on.active&&fromNet!==true&&typeof fromNet!=='undefined')on.send({t:'reset'})}
   function attacked(sq,by){const r=sq>>3,f=sq&7;const at=(rr,ff)=>rr>=0&&rr<8&&ff>=0&&ff<8?B[rr*8+ff]:undefined;const pd=by==='w'?1:-1;for(const df of[-1,1]){const p=at(r+pd,f+df);if(p&&col(p)===by&&p.toLowerCase()==='p')return true}
     for(const[dr,df]of[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]){const p=at(r+dr,f+df);if(p&&col(p)===by&&p.toLowerCase()==='n')return true}
     for(const[dr,df]of[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){let rr=r+dr,ff=f+df,n=1;while(rr>=0&&rr<8&&ff>=0&&ff<8){const p=B[rr*8+ff];if(p){if(col(p)===by){const t=p.toLowerCase();if(t==='q'||(t==='r'&&(!dr||!df))||(t==='b'&&dr&&df)||(t==='k'&&n===1))return true}break}rr+=dr;ff+=df;n++}}return false}
@@ -76,14 +77,20 @@ run(root,c){
   function quiesce(a,b,side,q){const stand=evalB()*(side==='w'?1:-1);if(stand>=b||q===0)return stand;if(stand>a)a=stand;const ms=gen(side,true).filter(m=>m.cap);for(const m of ms){const st=make(m);if(inCheck(side)){unmake(st);continue}const v=-quiesce(-b,-a,side==='w'?'b':'w',q-1);unmake(st);if(v>=b)return v;if(v>a)a=v}return a}
   function aiMove(){const side='b';const ms=legal(side);if(!ms.length)return;const depth=c.pick(1,2,3);let best=null,bv=-1e9;shuffle(ms);nodes=0;for(const m of ms){const st=make(m);const v=-search(depth-1,-1e9,-bv,'w')+(c.level===0?Math.random()*60:c.level===1?Math.random()*12:0);unmake(st);if(v>bv){bv=v;best=m}}play(best)}
   function play(m){hist.push(make(m));last=[m.f,m.t];beep(m.cap?300:500,.06,'triangle',.05);upd()}
-  function upd(){const ms=legal(turn);let t='';if(!ms.length){over=true;if(inCheck(turn)){t=turn==='w'?'Checkmate. The computer wins.':'Checkmate! You win!';if(turn==='b'){wins++;S.set('chess_w',wins);c.best(wins)}}else t='Stalemate. It’s a draw.'}else t=(turn==='w'?'Your move (white)':'Computer is thinking…')+(inCheck(turn)?' · CHECK!':'');status.textContent=t;c.stat('Chess · wins '+wins);draw();if(!over&&turn==='b'){thinking=true;setTimeout(()=>{if(!alive)return;aiMove();thinking=false},250)}}
-  function draw(){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const s=r*8+f;x.fillStyle=(r+f)%2?'#b07a44':'#f0dcb4';x.fillRect(f*Q,r*Q,Q,Q);if(last&&(last[0]===s||last[1]===s)){x.fillStyle='rgba(255,210,63,.45)';x.fillRect(f*Q,r*Q,Q,Q)}if(sel===s){x.fillStyle='rgba(110,231,183,.55)';x.fillRect(f*Q,r*Q,Q,Q)}}
-    const ks=kingSq(turn);if(inCheck(turn)){x.fillStyle='rgba(242,53,42,.5)';x.fillRect((ks&7)*Q,(ks>>3)*Q,Q,Q)}
-    moves.forEach(m=>{const r=m.t>>3,f=m.t&7;x.fillStyle='rgba(29,26,47,.28)';x.beginPath();x.arc(f*Q+Q/2,r*Q+Q/2,B[m.t]?Q*.45:Q*.15,0,7);B[m.t]?(x.lineWidth=5,x.strokeStyle='rgba(29,26,47,.35)',x.stroke()):x.fill()});
-    x.textAlign='center';x.textBaseline='middle';x.font=(Q*.8)+'px serif';for(let s=0;s<64;s++){const p=B[s];if(!p)continue;const px=(s&7)*Q+Q/2,py=(s>>3)*Q+Q/2+4;const g=GLY[p.toLowerCase()];x.fillStyle=isW(p)?'#fffdf6':'#1D1A2F';x.strokeStyle=isW(p)?'#1D1A2F':'#fffdf6';x.lineWidth=2;x.strokeText(g,px,py);x.fillText(g,px,py)}
-    x.font='600 11px Figtree, sans-serif';x.fillStyle='rgba(29,26,47,.6)';for(let i=0;i<8;i++){x.fillText('abcdefgh'[i],i*Q+Q-8,SZ-8);x.fillText(String(8-i),8,i*Q+10)}}
-  let alive=true;c.on(cv,'pointerdown',e=>{if(over||turn!=='w'||thinking)return;const p=canvasPos(cv,e);const s=Math.floor(p.y/Q)*8+Math.floor(p.x/Q);const m=moves.find(q=>q.t===s);if(sel!=null&&m){sel=null;moves=[];play(m);return}if(B[s]&&col(B[s])==='w'){sel=s;moves=legal('w').filter(q=>q.f===s)}else{sel=null;moves=[]}draw()});
-  nb.addEventListener('click',reset);ub.addEventListener('click',()=>{if(thinking||hist.length<2)return;unmake(hist.pop());unmake(hist.pop());sel=null;moves=[];over=false;upd()});
+  function upd(){const ms=legal(turn);let t='';if(!ms.length){over=true;if(inCheck(turn)){if(on&&on.active)t=turn===mySide()?'Checkmate. '+on.friend+' wins.':'Checkmate! You win!';else{t=turn==='w'?'Checkmate. The computer wins.':'Checkmate! You win!';if(turn==='b'){wins++;S.set('chess_w',wins);c.best(wins)}}}else t='Stalemate. It’s a draw.'}else t=(on&&on.active?(turn===mySide()?'Your move ('+(turn==='w'?'white':'black')+')':'Waiting for '+on.friend+'…'):turn==='w'?'Your move (white)':'Computer is thinking…')+(inCheck(turn)?' · CHECK!':'');status.textContent=t;c.stat('Chess · wins '+wins);draw();if(!over&&turn==='b'&&!(on&&on.active)){thinking=true;setTimeout(()=>{if(!alive)return;aiMove();thinking=false},250)}}
+  /* the black player (online guest) sees the board from their side */
+  const FL=()=>on&&on.active&&on.role==="guest",VW=s=>FL()?63-s:s,SX=s=>(VW(s)&7)*Q,SY=s=>(VW(s)>>3)*Q;
+  function draw(){for(let s=0;s<64;s++){const r=s>>3,f=s&7;x.fillStyle=(r+f)%2?'#b07a44':'#f0dcb4';x.fillRect(SX(s),SY(s),Q,Q);if(last&&(last[0]===s||last[1]===s)){x.fillStyle='rgba(255,210,63,.45)';x.fillRect(SX(s),SY(s),Q,Q)}if(sel===s){x.fillStyle='rgba(110,231,183,.55)';x.fillRect(SX(s),SY(s),Q,Q)}}
+    const ks=kingSq(turn);if(inCheck(turn)){x.fillStyle='rgba(242,53,42,.5)';x.fillRect(SX(ks),SY(ks),Q,Q)}
+    moves.forEach(m=>{x.fillStyle='rgba(29,26,47,.28)';x.beginPath();x.arc(SX(m.t)+Q/2,SY(m.t)+Q/2,B[m.t]?Q*.45:Q*.15,0,7);B[m.t]?(x.lineWidth=5,x.strokeStyle='rgba(29,26,47,.35)',x.stroke()):x.fill()});
+    x.textAlign='center';x.textBaseline='middle';x.font=(Q*.8)+'px serif';for(let s=0;s<64;s++){const p=B[s];if(!p)continue;const px=SX(s)+Q/2,py=SY(s)+Q/2+4;const g=GLY[p.toLowerCase()];x.fillStyle=isW(p)?'#fffdf6':'#1D1A2F';x.strokeStyle=isW(p)?'#1D1A2F':'#fffdf6';x.lineWidth=2;x.strokeText(g,px,py);x.fillText(g,px,py)}
+    x.font='600 11px Figtree, sans-serif';x.fillStyle='rgba(29,26,47,.6)';for(let i=0;i<8;i++){x.fillText((FL()?'hgfedcba':'abcdefgh')[i],i*Q+Q-8,SZ-8);x.fillText(String(FL()?i+1:8-i),8,i*Q+10)}}
+  /* online: host plays white, the friend plays black; moves are sent as from/to squares */
+  const mySide=()=>on&&on.active?(on.role==='host'?'w':'b'):'w';
+  const on=Online.pair({game:'chess',onStart:()=>{reset()},onMsg:m=>{if(m.t==='mv'&&!over&&turn!==mySide()){const mv=legal(turn).find(q=>q.f===m.f&&q.t===m.to);if(mv)play(mv)}if(m.t==='reset')reset(true)},onEnd:t=>{reset();status.textContent=t+' Back to playing the computer.'}});
+  row.append(on.button);
+  let alive=true;c.on(cv,'pointerdown',e=>{const me2=mySide();if(over||turn!==me2||thinking)return;const p=canvasPos(cv,e);const s=VW(Math.floor(p.y/Q)*8+Math.floor(p.x/Q));const m=moves.find(q=>q.t===s);if(sel!=null&&m){sel=null;moves=[];play(m);if(on.active)on.send({t:'mv',f:m.f,to:m.t});return}if(B[s]&&col(B[s])===me2){sel=s;moves=legal(me2).filter(q=>q.f===s)}else{sel=null;moves=[]}draw()});
+  nb.addEventListener('click',()=>reset(false));ub.addEventListener('click',()=>{if(on.active||thinking||hist.length<2)return;unmake(hist.pop());unmake(hist.pop());sel=null;moves=[];over=false;upd()});
   reset();return()=>{alive=false}}});
 </script>
 <script src="/js/app.js"></script>

@@ -47,6 +47,7 @@
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
 <script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
 <script>
 /* ===================== Four in a Row: game code ===================== */
 G.push({id:'c4',levels:true,name:'Four in a Row',kind:'board',tint:'#2d6fd6',blurb:'Drop discs, get four in a row before the computer.',fmt:b=>b+' wins',
@@ -63,10 +64,17 @@ run(root,c){
     let best=pool[0],bs=-1e9;for(const q of pool){const s=-Math.abs(3-q)*2+Math.random()*3;if(s>bs){bs=s;best=q}}return best}
   function draw(){cells.forEach((d,i)=>d.className=b[i]||'')}
   function st(){c.stat('W '+tally.w+' · L '+tally.l);S.set('c4_tally',tally);c.best(tally.w)}
-  function human(q){if(over||lock||b[q])return;drop(b,q,'r');beep(400,.05);draw();if(wins(b,'r')){over=true;tally.w++;msg.textContent='Four in a row. You win!';beep(880,.3,'triangle');st();return}if(!open(b).length){over=true;msg.textContent='Board full. Draw.';return}
+  /* online: host is red and goes first, the friend is yellow */
+  let turn='r';const mine=()=>on.role==='guest'?'y':'r',theirs=()=>mine()==='r'?'y':'r';
+  const on=Online.pair({game:'c4',onStart:(role,name)=>{reset();msg.textContent='Online vs '+name+'. '+(role==='host'?'You are red: your move.':'You are yellow: red goes first.')},
+    onMsg:m=>{if(m.t==='mv'&&!over&&turn===theirs()&&!b[m.q]){drop(b,m.q,theirs());turn=mine();beep(300,.05);draw();netCheck(theirs())}if(m.t==='reset')reset(true)},
+    onEnd:t=>{reset();msg.textContent=t+' Back to playing the computer.'}});
+  function netCheck(p){if(wins(b,p)){over=true;msg.textContent=p===mine()?'Four in a row. You win! New game for a rematch.':on.friend+' connected four.';beep(p===mine()?880:150,.3,'triangle');return true}if(!open(b).length){over=true;msg.textContent='Board full. Draw.';return true}msg.textContent=turn===mine()?'Your move.':'Waiting for '+on.friend+'…';return false}
+  function human(q){if(on.active){if(over||b[q]||turn!==mine())return;drop(b,q,mine());turn=theirs();beep(400,.05);draw();on.send({t:'mv',q});netCheck(mine());return}
+    if(over||lock||b[q])return;drop(b,q,'r');beep(400,.05);draw();if(wins(b,'r')){over=true;tally.w++;msg.textContent='Four in a row. You win!';beep(880,.3,'triangle');st();return}if(!open(b).length){over=true;msg.textContent='Board full. Draw.';return}
     lock=true;c.after(()=>{drop(b,ai(),'y');beep(300,.05);draw();lock=false;if(wins(b,'y')){over=true;tally.l++;msg.textContent='The computer connected four.';beep(150,.3,'sawtooth');st()}else if(!open(b).length){over=true;msg.textContent='Board full. Draw.'}},350)}
-  function reset(){b=Array(Wc*Hc).fill('');over=false;lock=false;draw();msg.textContent='You are red. Tap a column to drop a disc.'}
-  root.append(grid,msg,el('button',{class:'btn',type:'button',onclick:reset},'New game'));reset();st();
+  function reset(fromNet){b=Array(Wc*Hc).fill('');over=false;lock=false;turn='r';draw();msg.textContent=on&&on.active?(mine()==='r'?'Your move.':'Waiting for '+on.friend+'…'):'You are red. Tap a column to drop a disc.';if(on&&on.active&&fromNet!==true)on.send({t:'reset'})}
+  root.append(grid,msg,el('div',{class:'row'},el('button',{class:'btn',type:'button',onclick:()=>reset()},'New game'),on.button));reset();st();
 }});
 </script>
 <script src="/js/app.js"></script>
