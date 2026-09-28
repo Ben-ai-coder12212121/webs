@@ -150,7 +150,7 @@ All pages also load `css/site.css`, `js/core.js`, `js/catalog.js` and `js/app.js
 | Million vs Billion | `/games/million-vs-billion/` | info info2 | none |
 | How Old Is It? | `/games/how-old-is-it/` | info info2 | none |
 | Solitaire | `/games/solitaire/` | none | none |
-| Battleship | `/games/battleship/` | none | none |
+| Fleet Strike | `/games/fleet-strike/` | none | none |
 | Mancala | `/games/mancala/` | none | none |
 | Dots & Boxes | `/games/dots-boxes/` | none | none |
 | Country Shapes | `/games/country-shapes/` | geo | map libraries (CDN), geo/states.json, geo/world.json |

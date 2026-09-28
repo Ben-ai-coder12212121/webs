@@ -5,10 +5,13 @@
 /src/*  /  404!
 /GAMES.md  /  404!
 /README.md  /  404!
+/TRADEMARK-CHANGES.md  /  404!
 /tools/*  /  404!
 
 # ---- game page aliases (generated) ----
 # short names
+/games/battleship/  /games/fleet-strike/  301!
+/games/battleship/*  /games/fleet-strike/  301!
 /games/overlord.html  /games/overlord/  301!
 /games/havoc.html  /games/havoc-unleashed/  301!
 /games/havoc/  /games/havoc-unleashed/  301!
@@ -160,7 +163,8 @@
 /games/million-vs-billion.html  /games/million-vs-billion/  301!
 /games/how-old-is-it.html  /games/how-old-is-it/  301!
 /games/solitaire.html  /games/solitaire/  301!
-/games/battleship.html  /games/battleship/  301!
+/games/fleet-strike.html  /games/fleet-strike/  301!
+/games/battleship.html  /games/fleet-strike/  301!
 /games/mancala.html  /games/mancala/  301!
 /games/dots-boxes.html  /games/dots-boxes/  301!
 /games/country-shapes.html  /games/country-shapes/  301!
