@@ -442,3 +442,10 @@ a.tile{text-decoration:none;color:inherit;text-align:left;font:inherit}
 .filters .fmore{display:none}
 .filters.open .fmore{display:inline-flex}
 .filters .moretog{font-weight:800}
+/* hero: never wider than the window; one column once the two columns get cramped */
+.wrap{overflow-x:clip}
+.hero>*{min-width:0}
+.qcap{margin:2px 0 -4px;font-weight:700;font-size:14px;text-align:center;max-width:36ch}
+.qtime{grid-template-columns:repeat(3,auto)}
+@media (max-width:1000px){.hero{grid-template-columns:1fr;text-align:center;justify-items:center}.hero p{margin-inline:auto}.dwide{display:none}.dnarrow{display:flex}}
+@media (max-width:560px){.qtime{grid-template-columns:repeat(3,1fr)}.qtime button{padding:8px 6px;font-size:14px}}
