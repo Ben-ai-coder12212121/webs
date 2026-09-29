@@ -40,11 +40,41 @@ export function view(data, id) {
 
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
-export default async (req) => {
-  const store = getStore({ name: "leaderboards", consistency: "strong" });
+// newest high scores across every game, for the homepage feed
+const RECENT = "recent", RECENT_MAX = 30;
+export function pushRecent(data, ent) {
+  const e = data && Array.isArray(data.e) ? data.e.filter(x => !(x.k === ent.k && x.id === ent.id)) : [];
+  e.unshift(ent);
+  e.sort((a, b) => b.t - a.t);
+  if (e.length > RECENT_MAX) e.length = RECENT_MAX;
+  return { e };
+}
+export const recentView = data => ({ recent: (data && Array.isArray(data.e) ? data.e : []).map(x => ({ k: x.k, n: x.n, s: x.s, t: x.t })) });
+
+// the first time the feed is read, fill it from the boards that already exist
+async function backfill(store) {
+  let keys = [];
+  try { const l = await store.list({ prefix: "best_" }); keys = (l.blobs || []).map(b => b.key).filter(validGame); } catch { return { e: [] }; }
+  let all = [];
+  for (const k of keys) {
+    const d = await store.get(k, { type: "json" });
+    if (d && Array.isArray(d.e)) d.e.slice(0, 3).forEach(x => all.push({ k, id: x.id, n: x.n, s: x.s, t: x.t }));
+  }
+  all.sort((a, b) => b.t - a.t);
+  const data = { e: all.slice(0, RECENT_MAX) };
+  await store.setJSON(RECENT, data);
+  return data;
+}
+
+export async function handle(req, store) {
   const url = new URL(req.url);
   if (req.method === "GET") {
     if (url.searchParams.get("probe")) return json({ ok: true });
+    if (url.searchParams.get("recent")) {
+      let data = await store.get(RECENT, { type: "json" });
+      if (!data) data = await backfill(store);
+      return json(recentView(data));
+    }
     const game = url.searchParams.get("game"), id = url.searchParams.get("id");
     if (!validGame(game)) return json({ error: "bad game" }, 400);
     const data = await store.get(game, { type: "json" });
@@ -59,9 +89,19 @@ export default async (req) => {
     const r = record(cur, { name, score, id: b.id, lower: !!b.lower });
     if (r.limited) return json({ error: "slow down" }, 429);
     await store.setJSON(b.game, r.data);
+    if (r.improved) {
+      try {
+        let rec = await store.get(RECENT, { type: "json" });
+        if (!rec) rec = await backfill(store);
+        const ent = r.data.e.find(x => x.id === b.id);
+        await store.setJSON(RECENT, pushRecent(rec, { k: b.game, id: b.id, n: ent.n, s: ent.s, t: ent.t }));
+      } catch {}
+    }
     return json({ rank: r.rank, total: r.data.e.length, improved: r.improved, name });
   }
   return json({ error: "method" }, 405);
-};
+}
+
+export default async (req) => handle(req, getStore({ name: "leaderboards", consistency: "strong" }));
 
 export const config = { path: "/api/lb" };

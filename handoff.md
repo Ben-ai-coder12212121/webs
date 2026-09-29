@@ -58,6 +58,9 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **Absorb rebuilt** as the screen-only game the owner wanted (not agar.io): your ball sits at the pointer (arrow keys/WASD also work), balls fly across from the edges, absorb smaller (blue) ones, avoid bigger (red) ones. Reaching radius 46 levels up (shrink back, faster balls). Scores in points (`fmt` `b+' pts'`), kind moved from `io` to `arcade`, no online mode.
+- **Homepage "Latest high scores" feed:** `netlify/functions/lb.mjs` now keeps a `recent` blob (the newest 30 improved bests on any board, filled from existing boards the first time) served at `GET /api/lb?recent=1`. `recentBoard()` in `app.js` shows 5 of them next to "Today's top". Why: the owner set a high score and expected it on the homepage, but "Today's top" only shows the daily-challenge game.
+- `tools/dev-server.mjs` now runs `/api/lb` locally (in memory), so leaderboards can be tested offline.
 - **Dark site theme** (the owner found the yellow too bright in class): page background `#121019`, dark cards, light text, violet `#7a68e8` for selected chips, `theme-color` `#121019`.
   - Tokens at the end of `css/site.css`: `--bg`, `--paper`, `--ink` (text), `--line` (borders and shadows), `--onbg`/`--onfg` (selected chips), `--tx` (text on light boxes).
   - Inside `#arena` / `.arena` the original light palette is restored, so games keep their own colours. Plain text on the arena is light, and every rule with a light background got `color:var(--tx)` so it keeps dark text.
