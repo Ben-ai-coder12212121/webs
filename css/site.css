@@ -34,10 +34,12 @@ button{font:inherit;color:inherit}
 .hero small{color:var(--muted);font-weight:600}
 .press{display:flex;flex-direction:column;align-items:center;gap:14px}
 #rndMode button{font-size:13px}
-.big{width:min(290px,72vw);background:none;border:0;padding:0;cursor:pointer;filter:drop-shadow(0 10px 0 #1D1A2F);transform:translateY(-6px) rotate(-2deg);transition:transform .08s,filter .08s}
+.big{width:min(290px,72vw);background:none;border:0;padding:0;cursor:pointer;transform:translateY(-6px) rotate(-2deg);transition:transform .08s;-webkit-tap-highlight-color:transparent}
+/* the sign's shadow is drawn inside the SVG (.bigsh): a CSS drop-shadow on a rotating element left a seam in Safari after hover */
+.big .bigsh{fill:#1D1A2F;transition:transform .08s}
 .big svg{display:block;width:100%;height:auto}
 .big:hover{transform:translateY(-9px) rotate(-3deg)}
-.big:active,.big.down{transform:translateY(4px) rotate(-3deg);filter:drop-shadow(0 2px 0 #1D1A2F)}
+.big:active,.big.down{transform:translateY(4px) rotate(-3deg)}.big:active .bigsh,.big.down .bigsh{transform:translateY(2px)}
 .big.squish{animation:squish .3s cubic-bezier(.3,1.6,.5,1)}
 @keyframes squish{0%{transform:translateY(-6px) rotate(-3deg)}25%{transform:translateY(6px) rotate(-3deg) scale(1.1,.8);filter:drop-shadow(0 1px 0 #1D1A2F)}55%{transform:translateY(-12px) rotate(-5deg) scale(.94,1.08)}80%{transform:translateY(-4px) rotate(-2deg) scale(1.02,.98)}100%{transform:translateY(-6px) rotate(-3deg)}}
 .dcount{font-weight:800;font-size:14px}
@@ -482,8 +484,7 @@ html:not([data-theme=light]) .lbyou{background:#2a2540;border-color:var(--line)}
 html:not([data-theme=light]) .perks li,html:not([data-theme=light]) .daily .dc{background:var(--paper);color:var(--tx)}
 html:not([data-theme=light]) [data-f=foryou]{background:#2a2540}
 html:not([data-theme=light]) [data-f=ideas]{background:#2e2716}
-html:not([data-theme=light]) .big{filter:drop-shadow(0 10px 0 #000)}
-html:not([data-theme=light]) .big:active,html:not([data-theme=light]) .big.down{filter:drop-shadow(0 2px 0 #000)}
+html:not([data-theme=light]) .big .bigsh{fill:#000}
 /* dark theme: game boxes given a light background inline keep dark text (matches the browser's serialised style attribute) */
 .arena [style*="background: rgb(255, 253, 246)"],.arena [style*="background: rgb(255, 255, 255)"],.arena [style*="background: var(--pink)"],.arena [style*="background: var(--orange)"],.arena [style*="background: var(--paper)"],.arena [style*="background: var(--sun"],.arena [style*="background: var(--sky)"],.arena [style*="background: var(--mint)"],.arena [style*="background: var(--lilac)"],.arena [style*="background: rgb(127, 200, 248)"],.arena [style*="background: rgb(255, 210, 63)"],.arena [style*="background: rgb(255, 159, 67)"],.arena [style*="background: rgb(110, 231, 183)"],.arena [style*="background: rgba(255, 253, 246"],.arena [style*="background: rgba(127, 200, 248"],.arena [style*="background: rgba(255, 159, 67"]{color:#1D1A2F}
 /* hint lines coloured with the dark ink inline sit straight on the dark page */
@@ -491,3 +492,47 @@ html:not([data-theme=light]) .arena p.hint[style*="color: var(--ink)"]{color:#e9
 .daily .recent .rlist{display:grid;gap:2px;margin-top:2px}.daily .recent .rlist a{color:inherit;text-decoration:none;font-weight:600}.daily .recent .rlist a:hover{text-decoration:underline}.daily .recent .rlist small{opacity:.65}
 html:not([data-theme=light]) .daily .dc.done{background:#15301f}
 .daily .recent .rlist b{display:inline;font-size:inherit}
+/* mobile: no double-tap zoom on buttons, no zoom when focusing a text box, no text blow-up on rotate */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (pointer:coarse){input,select,textarea{font-size:16px!important}}
+/* the "turn your phone sideways" tip is a small bar at the bottom, not a full-screen block */
+.rotq{inset:auto 10px calc(10px + env(safe-area-inset-bottom,0px)) 10px;flex-direction:row;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(29,26,47,.96);justify-content:flex-start;text-align:left;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.rotq .ph{font-size:0;animation:none}.rotq .ph .ico{width:26px;height:26px;animation:rotph 1.6s ease-in-out infinite}
+.rotq p{flex:1;font-size:14px;max-width:none}.rotq .btn{padding:6px 10px;font-size:13px}.rotq .lnk{opacity:.8;display:grid;place-items:center;width:32px;height:32px}.rotq .lnk .ico{width:18px;height:18px}
+/* ===== phones ===== */
+.sbmore{display:none}
+.rotq p b{font:inherit;font-weight:800}
+@media (max-width:640px){
+  /* top bars: icons only, one row */
+  .bar .btn .t,.sbar .btn .t{display:none}
+  .bar .btn,.sbar .btn{padding:7px 10px}
+  .wordmark{font-size:32px}.logo svg{width:44px;height:44px}
+  #stage:not(.fs) .sbar{flex-wrap:nowrap}
+  #stage:not(.fs) .sbar:not(.open) .sbopt{display:none!important}
+  #stage:not(.fs) .sbar.open{flex-wrap:wrap}
+  #stage:not(.fs) .sbmore{display:inline-flex;order:5}
+  .sbar h3{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:18px}
+  .sbar .stat{max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+  /* homepage: smaller sign and hero, one swipeable row of filters, two cards per row */
+  .big{width:min(190px,52vw)}
+  .hero:not(a){padding-block:12px 20px;gap:14px}
+  .hero h1{font-size:clamp(34px,11vw,52px)}
+  .filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-inline:-16px;padding-inline:16px}
+  .filters::-webkit-scrollbar{display:none}
+  .filters>*{flex:0 0 auto}
+  .filters h2{font-size:24px}
+  .filters .search{min-width:150px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tile{box-shadow:3px 3px 0 var(--line);border-width:2px}
+  .tile .art{height:78px;border-bottom-width:2px}
+  .tile .art svg{max-height:70px}
+  .tile .txt{padding:8px 10px 10px}
+  .tile b{font-size:17px}
+  .tile .txt>span:not(.why){display:none}
+  .tile .meta{font-size:9px;letter-spacing:.03em;flex-wrap:wrap;gap:2px}
+  /* end-of-round strip: one small line */
+  .endstrip{font-size:13px;padding:6px 8px;gap:6px;flex-wrap:nowrap;border-width:2px}
+  .endstrip .btn{padding:5px 8px;font-size:12px}
+  .endstrip .btn .t{display:none}
+}
+.rotq .btn{color:#1D1A2F}

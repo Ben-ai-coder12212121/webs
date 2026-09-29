@@ -724,9 +724,9 @@ run(root,c){const r=stillshot(root,c);ssFullHint(root,c);return r}});
 function ssFullHint(root,c){const inFs=()=>!!(document.fullscreenElement||document.webkitFullscreenElement||document.querySelector('#stage.pfs'));
   const bar=el('div',{class:'ss-fsq'},el('span',null,'⛶ Stillshot is made for full screen. It won’t fit properly in a window.'));
   const go=el('button',{type:'button',class:'ss-fsgo'},'Go full screen');const no=el('button',{type:'button',class:'ss-fsx','aria-label':'Dismiss'},'✕');bar.append(go,no);
-  let dismissed=false;const sync=()=>{bar.hidden=dismissed||inFs()};
+  let dismissed=S.get('ssFsHintOff',false);const sync=()=>{bar.hidden=dismissed||inFs()};c.after(()=>{dismissed=true;sync()},9000);
   go.addEventListener('click',e=>{e.stopPropagation();try{fsEnter()}catch(er){const b=document.getElementById('fs');if(b)b.click()}setTimeout(sync,300)});
-  no.addEventListener('click',e=>{e.stopPropagation();dismissed=true;sync()});
+  no.addEventListener('click',e=>{e.stopPropagation();dismissed=true;S.set('ssFsHintOff',true);sync()});
   c.after(()=>{const g3=root.querySelector('.g3')||root;g3.append(bar);sync()},300);
   c.on(document,'fullscreenchange',()=>setTimeout(sync,80));c.on(document,'webkitfullscreenchange',()=>setTimeout(sync,80));c.on(window,'resize',sync)}
 </script>
