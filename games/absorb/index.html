@@ -59,13 +59,14 @@ run(root,c){
   const LVUP=46,START_R=11;let me,balls,parts,score,lvl,state,spawnT,flashT,lvT,px=W/2,py=H/2,keys={},moved=false;
   const stars=[...Array(70)].map(()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*1.6+.3,v:Math.random()*.4+.1}));
   function reset(){me={x:px,y:py,r:START_R,safe:0};balls=[];parts=[];score=0;lvl=1;spawnT=0;flashT=0;lvT=0;state='ready';c.stat('Best '+(c.best()||0)+' pts')}
-  function go(){if(state==='ready')state='run';else if(state==='over'){reset();state='run'}}
+  function go(){if(state==='ready'){state='run';me.safe=1;seed(34)}else if(state==='over'){reset();state='run';me.safe=1;seed(34)}}
   const speedK=()=>1+(lvl-1)*.14;
-  function spawn(){const side=Math.random()*4|0;const big=Math.random()<Math.min(.6,.32+lvl*.03);
+  function spawn(){const side=Math.random()*4|0;const big=Math.random()<Math.min(.66,.44+lvl*.03);
     const f=big?1.08+Math.pow(Math.random(),1.4)*Math.min(2.6,1.6+lvl*.12):.3+Math.random()*.62;const r=clamp(me.r*f,4,150);
-    const sp=(55+Math.random()*120)*speedK()*(big?.9:1.1);let bx,by,ang;
+    const sp=(70+Math.random()*150)*speedK()*(big?.9:1.1);let bx,by,ang;
     if(side===0){bx=-r;by=Math.random()*H;ang=0}else if(side===1){bx=W+r;by=Math.random()*H;ang=Math.PI}else if(side===2){bx=Math.random()*W;by=-r;ang=Math.PI/2}else{bx=Math.random()*W;by=H+r;ang=-Math.PI/2}
     ang+=(Math.random()-.5)*.9;balls.push({x:bx,y:by,r,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,wob:Math.random()*6})}
+  function seed(n){for(let i=0;i<n;i++){spawn();const b=balls[balls.length-1];const t=.15+Math.random()*.7;b.x+=b.vx*(W/Math.max(60,Math.hypot(b.vx,b.vy)))*t;b.y+=b.vy*(H/Math.max(60,Math.hypot(b.vx,b.vy)))*t;if(Math.hypot(b.x-me.x,b.y-me.y)<b.r+me.r+120)balls.pop()}}
   function burst(bx,by,col,n,sp){for(let i=0;i<n;i++){const a=Math.random()*6.283,v=Math.random()*sp;parts.push({x:bx,y:by,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:.5+Math.random()*.4,col})}}
   function update(dt){const s=dt/1000;stars.forEach(t=>{t.x-=t.v*dt*.03;if(t.x<0)t.x=W});
     const kx=(keys.arrowright||keys.d?1:0)-(keys.arrowleft||keys.a?1:0),ky=(keys.arrowdown||keys.s?1:0)-(keys.arrowup||keys.w?1:0);if(kx||ky){px=clamp(px+kx*420*s,0,W);py=clamp(py+ky*420*s,0,H)}
@@ -74,13 +75,13 @@ run(root,c){
     if(flashT>0)flashT-=s;if(lvT>0)lvT-=s;
     for(const b of balls){b.x+=b.vx*s;b.y+=b.vy*s;b.wob+=s*3}balls=balls.filter(b=>b.x>-b.r-60&&b.x<W+b.r+60&&b.y>-b.r-60&&b.y<H+b.r+60);
     if(state!=='run')return;
-    spawnT-=s;if(spawnT<=0&&balls.length<18+lvl*2){spawn();spawnT=Math.max(.16,.62/speedK())*(.6+Math.random()*.8)}
+    spawnT-=s;if(spawnT<=0&&balls.length<46+lvl*4){spawn();spawnT=Math.max(.04,.11/speedK())*(.6+Math.random()*.8)}
     if(me.safe>0)me.safe-=s;
     for(const b of balls){if(b.dead)continue;const d=Math.hypot(b.x-me.x,b.y-me.y);if(d>me.r+b.r*.82)continue;
       if(b.r<me.r){b.dead=true;me.r=Math.sqrt(me.r*me.r+b.r*b.r*.42);const pts=Math.max(1,Math.round(b.r/2))*lvl;score+=pts;burst(b.x,b.y,'#7FC8F8',10,160);beep(420+Math.min(700,me.r*12),.05,'sine',.05)}
       else if(me.safe<=0){state='over';burst(me.x,me.y,'#6EE7B7',40,260);beep(110,.45,'sawtooth',.09);flashT=.35;c.stat('Level '+lvl+' · '+score+' pts · Best '+c.best(score)+' pts');return}}
     balls=balls.filter(b=>!b.dead);
-    if(me.r>=LVUP){lvl++;lvT=1.6;me.safe=1.2;me.r=START_R;score+=50*(lvl-1);balls.forEach(b=>burst(b.x,b.y,b.r<LVUP?'#7FC8F8':'#F2352A',6,120));balls=[];spawnT=.8;beep(660,.12,'triangle',.07);setTimeout(()=>beep(990,.18,'triangle',.07),120)}
+    if(me.r>=LVUP){lvl++;lvT=1.6;me.safe=1.2;me.r=START_R;score+=50*(lvl-1);balls.forEach(b=>burst(b.x,b.y,b.r<LVUP?'#7FC8F8':'#F2352A',6,120));balls=[];seed(30+lvl*2);spawnT=.5;beep(660,.12,'triangle',.07);setTimeout(()=>beep(990,.18,'triangle',.07),120)}
     c.stat('Level '+lvl+' · '+score+' pts')}
   function ball(bx,by,r,col,glow){const g=x.createRadialGradient(bx-r*.35,by-r*.35,r*.1,bx,by,r);g.addColorStop(0,'#ffffff');g.addColorStop(.25,col);g.addColorStop(1,glow);x.fillStyle=g;x.beginPath();x.arc(bx,by,r,0,6.283);x.fill()}
   function draw(){x.fillStyle='#0d0a22';x.fillRect(0,0,W,H);x.fillStyle='rgba(255,253,246,.55)';stars.forEach(t=>x.fillRect(t.x,t.y,t.s,t.s));
