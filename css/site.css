@@ -459,32 +459,32 @@ a.tile{text-decoration:none;color:inherit;text-align:left;font:inherit}
 .lbm{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);font:900 12px/1 var(--mono,monospace);font-style:normal;color:var(--ink)}
 .lbm1{background:#FFD23F;color:var(--tx)}.lbm2{background:#d8d4e4;color:var(--tx)}.lbm3{background:#e8a06a;color:var(--tx)}
 
-/* ===== dark site theme: the site chrome is dark so it doesn't glare in a classroom.
+/* ===== dark site theme (default). The Dark/Light button sets <html data-theme="light"> to go back to the original yellow look.
    Game areas (#arena and the random plate) restore the original light palette so every game looks as designed. ===== */
-:root{
+:root:not([data-theme=light]){
   --bg:#121019; --paper:#1d1a27; --ink:#e9e6f2; --muted:#a39db8; --line:#3a3450;
   --onbg:#7a68e8; --onfg:#fff; --sun2:#2a2540; --tx:#e9e6f2; color-scheme:dark;
 }
 #arena,.arena,#rndPlate,.big{
   --ink:#1D1A2F; --paper:#FFFDF6; --muted:#5A5470; --line:#1D1A2F; --onbg:#1D1A2F; --onfg:#FFD23F; --sun2:#FFE27A; --tx:#1D1A2F; color-scheme:light;
 }
-.arena{color:#e9e6f2}
-#arena,.arena{--muted:#8f89a8}
-html{background:#121019}
+html:not([data-theme=light]) .arena{color:#e9e6f2}
+html:not([data-theme=light]) #arena,html:not([data-theme=light]) .arena{--muted:#8f89a8}
+html:not([data-theme=light]){background:#121019}
 /* dark theme: chrome pieces that used fixed light colours */
-body:not(.x){background:var(--bg)}
-.wordmark,.seo .brand{color:var(--ink)}
-.allgames,.ideaform,.idea{background:var(--paper);border-color:var(--line);color:var(--tx)}
-.rcard b{background:var(--paper);color:var(--ink);border-top-color:var(--line)}
-.tile.top{border-color:#8a6d1a;background:#231f14;box-shadow:0 0 0 3px #6b5418,5px 5px 0 3px #000}
-#lbPanel{background:var(--paper);border-color:var(--line);box-shadow:6px 6px 0 #000;color:var(--ink)}
-.lbyou{background:#2a2540;border-color:var(--line)}
-.perks li,.daily .dc{background:var(--paper);color:var(--tx)}
-[data-f=foryou]{background:#2a2540}
-[data-f=ideas]{background:#2e2716}
-.big{filter:drop-shadow(0 10px 0 #000)}
-.big:active,.big.down{filter:drop-shadow(0 2px 0 #000)}
+html:not([data-theme=light]) body{background:var(--bg)}
+html:not([data-theme=light]) .wordmark,html:not([data-theme=light]) .seo .brand{color:var(--ink)}
+html:not([data-theme=light]) .allgames,html:not([data-theme=light]) .ideaform,html:not([data-theme=light]) .idea{background:var(--paper);border-color:var(--line);color:var(--tx)}
+html:not([data-theme=light]) .rcard b{background:var(--paper);color:var(--ink);border-top-color:var(--line)}
+html:not([data-theme=light]) .tile.top{border-color:#8a6d1a;background:#231f14;box-shadow:0 0 0 3px #6b5418,5px 5px 0 3px #000}
+html:not([data-theme=light]) #lbPanel{background:var(--paper);border-color:var(--line);box-shadow:6px 6px 0 #000;color:var(--ink)}
+html:not([data-theme=light]) .lbyou{background:#2a2540;border-color:var(--line)}
+html:not([data-theme=light]) .perks li,html:not([data-theme=light]) .daily .dc{background:var(--paper);color:var(--tx)}
+html:not([data-theme=light]) [data-f=foryou]{background:#2a2540}
+html:not([data-theme=light]) [data-f=ideas]{background:#2e2716}
+html:not([data-theme=light]) .big{filter:drop-shadow(0 10px 0 #000)}
+html:not([data-theme=light]) .big:active,html:not([data-theme=light]) .big.down{filter:drop-shadow(0 2px 0 #000)}
 /* dark theme: game boxes given a light background inline keep dark text (matches the browser's serialised style attribute) */
 .arena [style*="background: rgb(255, 253, 246)"],.arena [style*="background: rgb(255, 255, 255)"],.arena [style*="background: var(--pink)"],.arena [style*="background: var(--orange)"],.arena [style*="background: var(--paper)"],.arena [style*="background: var(--sun"],.arena [style*="background: var(--sky)"],.arena [style*="background: var(--mint)"],.arena [style*="background: var(--lilac)"],.arena [style*="background: rgb(127, 200, 248)"],.arena [style*="background: rgb(255, 210, 63)"],.arena [style*="background: rgb(255, 159, 67)"],.arena [style*="background: rgb(110, 231, 183)"],.arena [style*="background: rgba(255, 253, 246"],.arena [style*="background: rgba(127, 200, 248"],.arena [style*="background: rgba(255, 159, 67"]{color:#1D1A2F}
 /* hint lines coloured with the dark ink inline sit straight on the dark page */
-.arena p.hint[style*="color: var(--ink)"]{color:#e9e6f2!important}
+html:not([data-theme=light]) .arena p.hint[style*="color: var(--ink)"]{color:#e9e6f2!important}

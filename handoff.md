@@ -62,6 +62,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
   - Tokens at the end of `css/site.css`: `--bg`, `--paper`, `--ink` (text), `--line` (borders and shadows), `--onbg`/`--onfg` (selected chips), `--tx` (text on light boxes).
   - Inside `#arena` / `.arena` the original light palette is restored, so games keep their own colours. Plain text on the arena is light, and every rule with a light background got `color:var(--tx)` so it keeps dark text.
   - New pages from `tools/new-game.cjs` use the dark `theme-color`.
+  - **Dark/Light toggle** next to each Sound button (added by the snippet at the end of `js/app.js`). It stores `S.set('theme','light'|'dark')` (localStorage `unb_theme`). A one-line script right after `<meta charset>` in every page (and in the `new-game.cjs` template) sets `<html data-theme="light">` before first paint. The dark CSS is scoped with `:root:not([data-theme=light])` / `html:not([data-theme=light])`.
 - **Stillshot made distinct from SUPERHOT** (so it can't be mistaken for a copy):
   - Enemies are now "Tickers": navy clockwork guards with brass joints, a glowing clock face and a wind-up key. They burst into gears, not red glass. Rooms have a warm sepia "paused photo" palette, and the UI accent is amber.
   - Taglines reworded; the "leap into their body" move is now **Swap** (trade places and take their weapon); the flashing replay words are gone (plain "REPLAY").

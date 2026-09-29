@@ -289,3 +289,12 @@ $('#imgCredits').addEventListener('click',()=>{const L=$('#imgList');if(!L.hidde
 renderGrid();try{renderDaily()}catch(e){}
 /* each game has its own page; old /#id links from before the split are sent there */
 if(PAGE){const g=ALLG.find(x=>x.id===PAGE);if(g)openGame(g)}else{const h=(location.hash||'').slice(1);const old=h&&ALLG.find(g=>g.id===h);if(old)location.replace(gameUrl(old));addEventListener('hashchange',()=>{const g=ALLG.find(x=>x.id===location.hash.slice(1));if(g)location.replace(gameUrl(g))})}
+/* Dark / Light toggle: dark is the default; the choice is saved per device (the head script applies it before first paint).
+   One button sits next to each Sound button (homepage bar and game bar); buttons inside the hidden placeholder block are skipped. */
+(function(){const light=()=>document.documentElement.dataset.theme==='light',btns=[];
+  const draw=()=>{const l=light();btns.forEach(b=>{b.innerHTML=ico(l?'moon':'sun')+'<span class="t"> '+(l?'Dark':'Light')+'</span>';b.title=l?'Switch to dark mode':'Switch to light mode';b.setAttribute('aria-label',b.title)});
+    const m=document.querySelector('meta[name=theme-color]');if(m)m.content=l?'#FFD23F':'#121019'};
+  ['mute','muteHome'].forEach(id=>{const a=document.getElementById(id);if(!a||!a.parentNode||a.closest('[aria-hidden=true]'))return;
+    const b=document.createElement('button');b.type='button';b.className='btn themeBtn';b.id='theme_'+id;
+    b.addEventListener('click',e=>{e.stopPropagation();const l=!light();if(l)document.documentElement.dataset.theme='light';else delete document.documentElement.dataset.theme;S.set('theme',l?'light':'dark');draw()});
+    if(a.parentNode.classList.contains('bar')){const g=document.createElement('span');g.style.cssText='display:flex;gap:8px;align-items:center';a.parentNode.insertBefore(g,a);g.append(b,a)}else a.parentNode.insertBefore(b,a);btns.push(b)});draw()})();

@@ -27,6 +27,7 @@ const gtag = tpl.match(/<!-- Google tag[\s\S]*?<\/script>\s*<script>[\s\S]*?<\/s
 const fonts = '<link rel="stylesheet" href="/css/fonts.css">';
 const body = tpl.slice(tpl.indexOf('<div id="stage">'), tpl.indexOf('<div class="seo">'));
 const head = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<script>try{if(localStorage.getItem("unb_theme")==="\\"light\\"")document.documentElement.dataset.theme="light"}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(g.name)}${wip ? ' | Detourr' : ': Play Free Online, No Download | Detourr'}</title>
 ${wip ? '<meta name="robots" content="noindex">' : `<meta name="description" content="${esc(g.blurb)}">\n<link rel="canonical" href="https://detourr.net${url}">`}
