@@ -58,6 +58,16 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **Mobile pass and sign fix:**
+  - The homepage sign's shadow is now drawn inside the SVG (`.bigsh`). The old CSS `drop-shadow` on a rotating button left a seam in Safari after hover.
+  - No random zooming: `touch-action:manipulation` on `html` (no double-tap zoom), 16px text boxes on touch screens (iOS zooms into smaller ones), and `text-size-adjust:100%`.
+  - Phones (≤640px):
+    - Top-bar buttons are icon-only (the Sound and "Another detourr" buttons now have icons, with text in `.t`).
+    - The game bar is one row. The less-used settings (difficulty, graphics, full screen, theme, sound) have class `.sbopt` and sit behind a "⋯" button (`.sbmore`).
+    - The homepage has a smaller sign, one swipeable row of filters, and two compact cards per row.
+    - The end-of-round strip is smaller and never shows for a score of 0.
+  - The "turn your phone sideways" overlay is now a small bottom tip that hides itself after 9s. Closing it keeps it off (`S rotTipOff`).
+  - Stillshot's "go full screen" bar hides itself after 9s, and closing it keeps it off (`S ssFsHintOff`).
 - **Absorb rebuilt** as the screen-only game the owner wanted (not agar.io): your ball sits at the pointer (arrow keys/WASD also work), balls fly across from the edges, absorb smaller (blue) ones, avoid bigger (red) ones. Reaching radius 46 levels up (shrink back, faster balls). Scores in points (`fmt` `b+' pts'`), kind moved from `io` to `arcade`, no online mode.
 - **Homepage "Latest high scores" feed:** `netlify/functions/lb.mjs` now keeps a `recent` blob (the newest 30 improved bests on any board, filled from existing boards the first time) served at `GET /api/lb?recent=1`. `recentBoard()` in `app.js` shows 5 of them next to "Today's top". Why: the owner set a high score and expected it on the homepage, but "Today's top" only shows the daily-challenge game.
 - `tools/dev-server.mjs` now runs `/api/lb` locally (in memory), so leaderboards can be tested offline.

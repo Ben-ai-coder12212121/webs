@@ -80,15 +80,15 @@ function fsEnter(){const rf=stage.requestFullscreen||stage.webkitRequestFullscre
 function fsExit(){if(stage.classList.contains('pfs')){stage.classList.remove('pfs');fsFit();return}try{(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}}
 fsBtn.addEventListener('click',()=>{if(fsEl())fsExit();else fsEnter()});
 const rotq=el('div',{class:'rotq'});
-rotq.innerHTML='<div class="ph">'+ico('phone')+'</div><b>Turn your phone sideways</b><p>This game plays best in full screen, landscape.</p>';
+rotq.innerHTML='<div class="ph">'+ico('phone')+'</div><p><b>Tip:</b> this game is easier with your phone sideways.</p>';
 const rqGo=el('button',{class:'btn',type:'button',html:ico('expand')+' Full screen'});
-const rqNo=el('button',{class:'lnk',type:'button'},'Keep playing like this');
+const rqNo=el('button',{class:'lnk',type:'button','aria-label':'Close tip',html:ico('x')});
 rotq.append(rqGo,rqNo);
 document.body.append(rotq);
 rqGo.addEventListener('click',()=>{rotq.classList.remove('on');fsEnter()});
-rqNo.addEventListener('click',()=>{rotq.classList.remove('on');rotSkip=true});
+rqNo.addEventListener('click',()=>{rotq.classList.remove('on');rotSkip=true;S.set('rotTipOff',true)});
 let rotSkip=false;
-function rotCheck(){if(!coarse||stage.hidden||rotSkip){rotq.classList.remove('on');return}const portrait=window.innerHeight>window.innerWidth;const wide=current&&(current.wide||arena.querySelector('.g3'));rotq.classList.toggle('on',!!(portrait&&wide&&!fsEl()));if(!portrait)rotq.classList.remove('on')}
+function rotCheck(){if(!coarse||stage.hidden||rotSkip||S.get('rotTipOff',false)){rotq.classList.remove('on');return}const portrait=window.innerHeight>window.innerWidth;const wide=current&&(current.wide||arena.querySelector('.g3'));const show=!!(portrait&&wide&&!fsEl());if(show&&!rotq.classList.contains('on')){clearTimeout(rotCheck.t);rotCheck.t=setTimeout(()=>rotq.classList.remove('on'),9000)}rotq.classList.toggle('on',show);if(!portrait)rotq.classList.remove('on')}
 window.addEventListener('resize',()=>setTimeout(rotCheck,120));
 window.addEventListener('orientationchange',()=>setTimeout(()=>{rotCheck();if(fsEl())fsFit()},300));
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>setTimeout(fsFit,60)));
@@ -183,8 +183,8 @@ function renderBadges(box){const now=badgeState(),n=BADGES.filter(b=>now[b[0]]).
   const ul=el('ul');BADGES.forEach(([k,ic,nm,how])=>ul.append(el('li',{class:now[k]?'on':''},el('span',{class:'icw',html:ico(ic)}),el('b',null,nm),el('small',null,how))));det.append(ul);box.append(det)}
 /* end of a round: when a game reports a score, offer a challenge link and the next detourr (hidden again on the next tap) */
 const strip=el('div',{class:'endstrip',hidden:true,role:'status'});let stripT=0;
-function endStrip(g,v){if(!current||current!==g||!g.fmt||document.pointerLockElement)return;clearTimeout(stripT);strip.hidden=true;stripT=setTimeout(()=>{if(current!==g)return;let f='';try{f=g.fmt(v)}catch(e){f=String(v)}const b=S.get(bestKey(g),null);let bf='';try{bf=b!=null?g.fmt(b):''}catch(e){}
-  strip.innerHTML='';strip.append(el('span',null,el('b',null,f),bf&&bf!==f?' · best '+bf:' · new best!'));const sh=el('button',{class:'btn',type:'button'},'');sh.innerHTML=ico('share')+' Challenge a friend';sh.addEventListener('click',e=>{e.stopPropagation();LB.share(g)});const nx=el('button',{class:'btn primary',type:'button',html:ico('dice')+' Next detourr'});nx.addEventListener('click',e=>{e.stopPropagation();strip.hidden=true;surprise()});const x=el('button',{class:'btn',type:'button','aria-label':'Close',html:ico('x')});x.addEventListener('click',e=>{e.stopPropagation();strip.hidden=true});
+function endStrip(g,v){if(!current||current!==g||!g.fmt||document.pointerLockElement||+v===0)return;clearTimeout(stripT);strip.hidden=true;stripT=setTimeout(()=>{if(current!==g)return;let f='';try{f=g.fmt(v)}catch(e){f=String(v)}const b=S.get(bestKey(g),null);let bf='';try{bf=b!=null?g.fmt(b):''}catch(e){}
+  strip.innerHTML='';strip.append(el('span',null,el('b',null,f),bf&&bf!==f?' · best '+bf:' · new best!'));const sh=el('button',{class:'btn',type:'button'},'');sh.innerHTML=ico('share')+'<span class="t"> Challenge a friend</span>';sh.title='Challenge a friend';sh.addEventListener('click',e=>{e.stopPropagation();LB.share(g)});const nx=el('button',{class:'btn primary',type:'button',html:ico('dice')+' Next<span class="t"> detourr</span>'});nx.addEventListener('click',e=>{e.stopPropagation();strip.hidden=true;surprise()});const x=el('button',{class:'btn',type:'button','aria-label':'Close',html:ico('x')});x.addEventListener('click',e=>{e.stopPropagation();strip.hidden=true});
   strip.append(sh,nx,x);strip.hidden=false;clearTimeout(strip.t);strip.t=setTimeout(()=>strip.hidden=true,9000)},1300)}
 if(stage)stage.append(strip);document.addEventListener('pointerdown',e=>{if(!strip.hidden&&!strip.contains(e.target))strip.hidden=true},true);
 /* "Can you beat my score?": links carry ?beat=<score>; the game page shows the target */
@@ -307,3 +307,11 @@ if(PAGE){const g=ALLG.find(x=>x.id===PAGE);if(g)openGame(g)}else{const h=(locati
     const b=document.createElement('button');b.type='button';b.className='btn themeBtn';b.id='theme_'+id;
     b.addEventListener('click',e=>{e.stopPropagation();const l=!light();if(l)document.documentElement.dataset.theme='light';else delete document.documentElement.dataset.theme;S.set('theme',l?'light':'dark');draw()});
     if(a.parentNode.classList.contains('bar')){const g=document.createElement('span');g.style.cssText='display:flex;gap:8px;align-items:center';a.parentNode.insertBefore(g,a);g.append(b,a)}else a.parentNode.insertBefore(b,a);btns.push(b)});draw()})();
+/* phones: the game bar is one row (back, random, title, score, leaderboard, gear); the gear opens the less-used settings */
+(function(){const bar=document.querySelector('#stage .sbar');if(!bar)return;
+  const again=document.getElementById('again');if(again&&!again.querySelector('.ico')){again.innerHTML=ico('dice')+'<span class="t"> Another detourr</span>';again.title='Another detourr'}
+  const opts=[document.getElementById('lvl'),document.getElementById('fs'),document.getElementById('mute'),bar.querySelector('.themeBtn'),bar.querySelector('button[title="3D graphics quality"]')];
+  opts.forEach(e=>{if(e)e.classList.add('sbopt')});
+  const more=el('button',{type:'button',class:'btn sbmore',title:'More settings','aria-label':'More settings','aria-expanded':'false',html:ico('dots')});
+  more.addEventListener('click',e=>{e.stopPropagation();const o=bar.classList.toggle('open');more.setAttribute('aria-expanded',o?'true':'false')});
+  bar.append(more)})();
