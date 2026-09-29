@@ -1,0 +1,89 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corner Pocket | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_pool"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Corner Pocket</h1><p>8-ball pool against the computer. Drag back from the cue ball to aim and set power, release to shoot. Sink your group, then the 8.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Corner Pocket: game code ===================== */
+G.push({id:'m_pool',levels:true,name:'Corner Pocket',kind:'sports',tint:'#c8f0d8',blurb:'8-ball pool against the computer. Drag back from the cue ball to aim and set power, release to shoot. Sink your group, then the 8.',fmt:b=>b+' wins',
+art:'<rect x="4" y="4" width="112" height="64" rx="8" fill="#1f8a4a" stroke="#6a3a1a" stroke-width="6"/><circle cx="36" cy="36" r="7" fill="#fff" stroke="#1D1A2F" stroke-width="1.5"/><circle cx="74" cy="30" r="7" fill="#ffd23f" stroke="#1D1A2F" stroke-width="1.5"/><circle cx="86" cy="40" r="7" fill="#1D1A2F"/><circle cx="74" cy="46" r="7" fill="#e83a3a" stroke="#1D1A2F" stroke-width="1.5"/><path d="M8 58L30 40" stroke="#c89a5a" stroke-width="4"/>',
+run(root,c){const W=400,H=640,L=34,T=64,R2=W-34,B=H-30,BR=10,PR=18;const {cv,x}=MOB.canvas(root,W,H);
+  const COL=['#fff','#ffd23f','#2a6ae8','#e83a3a','#8a3ac8','#ff8a1a','#2a9a4a','#8a1a1a','#1D1A2F'];
+  const pockets=[[L,T],[R2,T],[L-2,(T+B)/2],[R2+2,(T+B)/2],[L,B],[R2,B]];
+  let balls,turn,groups,state,aim,msg,firstHit,pottedThis,moving,cpuT,wins,foul,t=0;
+  function rack(){balls=[{n:0,x:W/2,y:B-120,vx:0,vy:0,in:0}];const order=[1,9,2,10,8,3,11,4,12,5,13,6,14,7,15];let k=0;const top=T+130;
+    for(let row=0;row<5;row++)for(let i=0;i<=row;i++){const n=order[k++];balls.push({n,x:W/2+(i-row/2)*BR*2.05,y:top+(4-row)*BR*1.8,vx:0,vy:0,in:0})}
+    turn=0;groups=[null,null];state='aim';msg='Your break';foul=0;cpuT=0;upd()}
+  wins=0;const upd=()=>c.stat((turn===0?'Your shot':'Computer\'s shot')+(groups[0]?' · You: '+(groups[0]==='s'?'solids (1–7)':'stripes (9–15)'):'')+' · Wins '+(c.best()||0));
+  const grp=n=>n===8?'8':n<8?'s':'t';
+  function shoot(b,vx,vy){b.vx=vx;b.vy=vy;moving=true;firstHit=null;pottedThis=[];state='roll';beep(300,.06,'triangle',.08)}
+  function physics(dt){const steps=Math.ceil(dt/4);for(let s=0;s<steps;s++){const f=dt/steps/16;
+      for(const b of balls){if(b.in)continue;b.x+=b.vx*f;b.y+=b.vy*f;const sp=Math.hypot(b.vx,b.vy);if(sp>0){const d=Math.max(0,sp-.018*f*3)/sp;b.vx*=d;b.vy*=d}if(sp<.03){b.vx=0;b.vy=0}
+        let inP=false;for(const p of pockets)if(Math.hypot(b.x-p[0],b.y-p[1])<PR){b.in=1;b.vx=b.vy=0;pottedThis.push(b.n);inP=true;beep(180,.12,'sine',.1);break}if(inP)continue;
+        const nearP=pockets.some(p=>Math.hypot(b.x-p[0],b.y-p[1])<PR+10);if(!nearP){if(b.x<L+BR){b.x=L+BR;b.vx=-b.vx*.8}if(b.x>R2-BR){b.x=R2-BR;b.vx=-b.vx*.8}if(b.y<T+BR){b.y=T+BR;b.vy=-b.vy*.8}if(b.y>B-BR){b.y=B-BR;b.vy=-b.vy*.8}}}
+      for(let i=0;i<balls.length;i++)for(let j=i+1;j<balls.length;j++){const a=balls[i],b=balls[j];if(a.in||b.in)continue;const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);if(d<BR*2&&d>0){const nx=dx/d,ny=dy/d,ov=BR*2-d;a.x-=nx*ov/2;a.y-=ny*ov/2;b.x+=nx*ov/2;b.y+=ny*ov/2;
+          const rv=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rv<0){const im=-rv*.97;a.vx-=im*nx;a.vy-=im*ny;b.vx+=im*nx;b.vy+=im*ny;if(Math.abs(rv)>.3)beep(800+Math.random()*200,.02,'square',Math.min(.06,Math.abs(rv)*.01));if(firstHit==null&&(a.n===0||b.n===0))firstHit=a.n===0?b.n:a.n}}}}
+    moving=balls.some(b=>!b.in&&(b.vx||b.vy))}
+  function left(p){const g=groups[p];if(!g)return 7;return balls.filter(b=>!b.in&&grp(b.n)===g).length}
+  function settle(){const me=turn,cue=balls[0];let keep=false;foul=0;const pot=pottedThis.filter(n=>n>0);
+    if(cue.in)foul='Scratch!';else if(firstHit==null)foul='No ball hit';else if(groups[me]&&grp(firstHit)!==groups[me]&&!(grp(firstHit)==='8'&&left(me)===0))foul='Wrong ball first';
+    if(pot.includes(8)){const ok=!foul&&groups[me]&&left(me)===0;end(ok?me:1-me,ok?'Sank the 8!':'8-ball too early!');return}
+    if(!groups[me]&&pot.length&&!foul){const g=grp(pot[0]);groups[me]=g;groups[1-me]=g==='s'?'t':'s'}
+    if(!foul&&pot.some(n=>groups[me]&&grp(n)===groups[me]))keep=true;
+    if(cue.in){cue.in=0;cue.x=W/2;cue.y=B-120;cue.vx=cue.vy=0;for(const b of balls)if(b!==cue&&!b.in&&Math.hypot(b.x-cue.x,b.y-cue.y)<BR*2.2)cue.x+=BR*3}
+    if(!keep)turn=1-me;msg=foul?foul+' '+(turn===0?'Your shot':'Computer\'s shot'):turn===me?(me===0?'Nice! Shoot again':'Computer goes again'):(turn===0?'Your shot':'Computer\'s shot');state='aim';cpuT=900;upd()}
+  function end(w,m){state='over';msg=m;if(w===0){wins=(c.best()||0)+1;c.best(wins);beep(880,.2,'sine',.1)}else beep(150,.4,'sawtooth',.1);c.stat((w===0?'You win! ':'Computer wins. ')+m+' · Wins '+(c.best()||0))}
+  function clear(ax,ay,bx,by,skip){for(const b of balls){if(b.in||skip.includes(b))continue;const dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy;let u=((b.x-ax)*dx+(b.y-ay)*dy)/L2;if(u<0||u>1)continue;if(Math.hypot(ax+dx*u-b.x,ay+dy*u-b.y)<BR*2)return false}return true}
+  function cpu(){const cue=balls[0];const g=groups[1];const targets=balls.filter(b=>!b.in&&b.n&&(g?(left(1)===0?b.n===8:grp(b.n)===g):b.n!==8));let best=null;
+    for(const b of targets)for(const p of pockets){const dx=p[0]-b.x,dy=p[1]-b.y,d=Math.hypot(dx,dy);const gx=b.x-dx/d*BR*2,gy=b.y-dy/d*BR*2;const ax=gx-cue.x,ay=gy-cue.y,ad=Math.hypot(ax,ay);const cut=(ax*dx+ay*dy)/(ad*d);if(cut<.3)continue;
+      if(!clear(cue.x,cue.y,gx,gy,[cue,b])||!clear(b.x,b.y,p[0],p[1],[b]))continue;const sc=cut*2-d/400-ad/600;if(!best||sc>best.sc)best={sc,ax,ay,ad,d}}
+    let vx,vy,pw;if(best){const n=Math.hypot(best.ax,best.ay);pw=Math.min(15,4+(best.ad+best.d)/55);const err=c.pick(.09,.045,.018)*(Math.random()-.5)*2;const a=Math.atan2(best.ay,best.ax)+err;vx=Math.cos(a)*pw;vy=Math.sin(a)*pw}
+    else{const b=targets.sort((a,b)=>Math.hypot(a.x-cue.x,a.y-cue.y)-Math.hypot(b.x-cue.x,b.y-cue.y))[0]||balls.find(b=>!b.in&&b.n);const a=Math.atan2(b.y-cue.y,b.x-cue.x)+(Math.random()-.5)*.1;vx=Math.cos(a)*9;vy=Math.sin(a)*9}shoot(cue,vx,vy)}
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='over'){rack();return}if(state!=='aim'||turn!==0)return;aim={sx:p.x,sy:p.y,x:p.x,y:p.y}},move:p=>{if(aim){aim.x=p.x;aim.y=p.y}},
+    up:()=>{if(!aim)return;const cue=balls[0];const dx=aim.sx-aim.x,dy=aim.sy-aim.y,d=Math.hypot(dx,dy);aim=null;if(d<10)return;const pw=Math.min(16,d/9);shoot(cue,dx/d*pw,dy/d*pw)}});
+  function update(dt){t+=dt;if(state==='roll'){physics(dt);if(!moving)settle()}else if(state==='aim'&&turn===1){cpuT-=dt;if(cpuT<=0)cpu()}}
+  function ball(b){if(b.in)return;x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.arc(b.x+2,b.y+3,BR,0,7);x.fill();const col=COL[b.n>8?b.n-8:b.n];
+    if(b.n>8){x.fillStyle='#fff';x.beginPath();x.arc(b.x,b.y,BR,0,7);x.fill();x.save();x.beginPath();x.arc(b.x,b.y,BR,0,7);x.clip();x.fillStyle=col;x.fillRect(b.x-BR,b.y-5,BR*2,10);x.restore()}else{x.fillStyle=col;x.beginPath();x.arc(b.x,b.y,BR,0,7);x.fill()}
+    x.strokeStyle='rgba(0,0,0,.4)';x.lineWidth=1;x.stroke();if(b.n){x.fillStyle='#fff';x.beginPath();x.arc(b.x,b.y,4.5,0,7);x.fill();MOB.txt(x,String(b.n),b.x,b.y+.5,7,'#1D1A2F')}x.fillStyle='rgba(255,255,255,.5)';x.beginPath();x.arc(b.x-3,b.y-4,2.5,0,7);x.fill()}
+  function draw(){x.fillStyle='#2a1a10';x.fillRect(0,0,W,H);MOB.rr(x,L-22,T-22,R2-L+44,B-T+44,18);x.fillStyle='#6a3a1a';x.fill();x.fillStyle='#1f8a4a';x.fillRect(L,T,R2-L,B-T);const rg=x.createRadialGradient(W/2,(T+B)/2,50,W/2,(T+B)/2,360);rg.addColorStop(0,'rgba(255,255,255,.08)');rg.addColorStop(1,'rgba(0,0,0,.25)');x.fillStyle=rg;x.fillRect(L,T,R2-L,B-T);
+    x.strokeStyle='rgba(255,255,255,.15)';x.beginPath();x.moveTo(L,B-120);x.lineTo(R2,B-120);x.stroke();for(const p of pockets){x.fillStyle='#0a0a0a';x.beginPath();x.arc(p[0],p[1],PR,0,7);x.fill()}
+    for(const b of balls)ball(b);const cue=balls[0];
+    if(aim&&state==='aim'){const dx=aim.sx-aim.x,dy=aim.sy-aim.y,d=Math.hypot(dx,dy);if(d>10){const nx=dx/d,ny=dy/d;let ex=cue.x,ey=cue.y,hit=null;for(let s=0;s<700;s+=2){ex=cue.x+nx*s;ey=cue.y+ny*s;if(ex<L+BR||ex>R2-BR||ey<T+BR||ey>B-BR)break;hit=balls.find(b=>b.n&&!b.in&&Math.hypot(b.x-ex,b.y-ey)<BR*2);if(hit)break}
+      x.setLineDash([6,6]);x.strokeStyle='rgba(255,255,255,.8)';x.lineWidth=2;x.beginPath();x.moveTo(cue.x,cue.y);x.lineTo(ex,ey);x.stroke();x.setLineDash([]);x.beginPath();x.arc(ex,ey,BR,0,7);x.stroke();if(hit){const hx=hit.x-ex,hy=hit.y-ey,hd=Math.hypot(hx,hy);x.beginPath();x.moveTo(hit.x,hit.y);x.lineTo(hit.x+hx/hd*60,hit.y+hy/hd*60);x.stroke()}
+      const pw=Math.min(16,d/9);x.strokeStyle='#c89a5a';x.lineWidth=6;x.lineCap='round';x.beginPath();x.moveTo(cue.x-nx*(16+pw*5),cue.y-ny*(16+pw*5));x.lineTo(cue.x-nx*(200+pw*5),cue.y-ny*(200+pw*5));x.stroke();
+      MOB.rr(x,20,T-30,W-40,10,5);x.fillStyle="rgba(255,255,255,.2)";x.fill();MOB.rr(x,20,T-30,(W-40)*pw/16,10,5);x.fillStyle=pw>12?'#ff5a3a':'#ffd23f';x.fill()}}
+    MOB.txt(x,msg,W/2,18,15,'#fff');const tray=(p,y)=>{const g=groups[p];MOB.txt(x,p===0?'You':'CPU',10,y,13,turn===p?'#ffd23f':'#aaa','left');if(!g)return;let i=0;for(const b of balls)if(grp(b.n)===g){ball({n:b.n,x:52+i*22,y,in:0});if(b.in){x.fillStyle='rgba(0,0,0,.6)';x.beginPath();x.arc(52+i*22,y,BR,0,7);x.fill()}i++}};tray(0,42);tray(1,H-12);
+    if(turn===1&&state==='aim')MOB.txt(x,'Computer is lining up…',W/2,(T+B)/2,16,'rgba(255,255,255,.7)');if(state==='over')banner(x,W,H,msg,'Tap for a new game')}
+  rack();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

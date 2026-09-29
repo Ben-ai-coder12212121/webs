@@ -1,0 +1,73 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pizza Heist | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="pizzaheist"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Pizza Heist</h1><p>3D third-person stealth. You’re a raccoon. The mall food court has pizza. Don’t get seen.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Pizza Heist: game code ===================== */
+function heroRaccoon(T){const g=humanoid(T,{skin:0x8c86a3,shirt:0x3a3552,pants:0x2a2640,eye:0xffffff});const h=g.userData.head;part(T,bx(T,.52,.12,.02),M(T,0x1D1A2F),0,.05,.26,h);part(T,new T.ConeGeometry(.1,.2,4),M(T,0x8c86a3),-.18,.32,0,h);part(T,new T.ConeGeometry(.1,.2,4),M(T,0x8c86a3),.18,.32,0,h);const tail=new T.Group();for(let k=0;k<5;k++)part(T,cy(T,.16,.16,.18),M(T,k%2?0x1D1A2F:0xb9b4c9),0,-k*.17,0,tail);tail.position.set(0,1,-.35);tail.rotation.x=-1;g.add(tail);g.userData.anim=()=>{tail.rotation.z=Math.sin(performance.now()/250)*.3};return g}
+function mallCop(T,bot){if(bot){const g=new T.Group();part(T,cy(T,.45,.5,1.3,16),M(T,0xd8d4e4),0,.9,0,g);const head=part(T,sp(T,.4),M(T,0xd8d4e4),0,1.75,0,g);part(T,bx(T,.5,.12,.1),M(T,0xF2352A,{emissive:0xF2352A}),0,1.78,.36,g);g.userData.head=head;return g}const g=humanoid(T,{skin:0xf1c7a0,shirt:0x6b7280,pants:0x1D1A2F,hair:0x6b3f14});part(T,bx(T,.56,.1,.56),M(T,0x1D1A2F),0,2.14,.02,g);part(T,bx(T,.14,.14,.04),M(T,0xFFD23F),-.2,1.35,.21,g);return g}
+const MALL={wall:(x,w,h)=>{x.fillStyle='#e8e2f0';x.fillRect(0,0,w,h);x.fillStyle='#FF8FB1';x.fillRect(0,h*.62,w,10);x.fillStyle='#b9a7ff';x.fillRect(0,h*.62+14,w,6);x.fillStyle='rgba(29,26,47,.08)';for(let i=0;i<w;i+=64)x.fillRect(i,0,2,h)},wall2:TX.panel('#FFD23F','#c9a020'),floor:TX.tiles('#f4f0ea','#d9d2c4',3),ceil:TX.tiles('#fbfaf6','#efece4',2),sky:0x1d1a2f,fogNear:20,fogFar:70,amb:.7,hemi:0xffffff,ground:0x806870,sun:.2,lampCol:0xfff0d0};
+G.push({id:'pizzaheist',name:'Pizza Heist',kind:'shooter',levels:true,wide:true,tint:'#FF8FB1',blurb:'3D third-person stealth. You’re a raccoon. The mall food court has pizza. Don’t get seen.',fmt:b=>b+' pts',
+art:'<rect width="120" height="72" fill="#e8e2f0"/><rect y="52" width="120" height="20" fill="#d9d2c4"/><path d="M70 20L100 10L96 44Z" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2.5"/><circle cx="88" cy="22" r="3" fill="#F2352A"/><circle cx="94" cy="32" r="3" fill="#F2352A"/><g transform="translate(40 40)"><rect x="-10" y="-10" width="20" height="18" rx="5" fill="#8c86a3" stroke="#1D1A2F" stroke-width="2.5"/><rect x="-10" y="-5" width="20" height="5" fill="#1D1A2F"/><circle cx="-4" cy="-3" r="1.8" fill="#fff"/><circle cx="4" cy="-3" r="1.8" fill="#fff"/></g><path d="M8 72L30 40L56 72Z" fill="#FFD23F" opacity=".35"/>',
+run(root,c){
+  const pizza=T=>{const g=new T.Group();part(T,bx(T,.9,.12,.9),M(T,0xe8e2f0),0,0,0,g);const s=part(T,cy(T,.38,.38,.05,3),M(T,0xFFD23F),0,.1,0,g);part(T,sp(T,.07),M(T,0xF2352A),.1,.14,.05,g);part(T,sp(T,.07),M(T,0xF2352A),-.08,.14,-.06,g);return g};
+  const G2=guardAI({view:10,walk:1.7,spot:'!! You’ve been spotted !!',forget:4});
+  const withCone=b=>T=>{const g=b(T);const cg=visionCone(T);g.add(cg);g.userData.coneG=cg;return g};
+  return runShooter(root,c,{id:'pizzaheist',short:'Pizza Heist',view:'tps',hero:heroRaccoon,camDist:4.2,tag:'A Detourr original · 3D stealth',title:'Pizza Heist',hitColor:[0xFFD23F,0xb9b4c9],killColors:[0xb9b4c9,0x7FC8F8],killWord:'guards napping',deathStyle:'fall',deathTitle:'Caught!',deathLine:'Mall security escorts you back to the dumpster. Try a sneakier route.',
+    intro:['You are <b>Bandit</b>, a raccoon of refined taste. The Sunnyvale Mall food court throws out perfectly good pizza every night, but tonight security locked it all up.','Sneak past the guards, grab the pizza boxes, and escape. Guards see in a yellow cone and turn red when they spot you. A well-aimed trash toss knocks them out for a while. The more you’re seen, the harder it gets.'],
+    player:{hp:60,speed:5.2},hpLabel:'NERVE',
+    weapons:[{name:'Trash Toss',rate:.9,dmg:1,stun:c.pick(9,7,5),proj:{speed:18,grav:6,color:0x8c86a3,size:.18},model:T=>{const g=new T.Group();part(T,cy(T,.1,.12,.25,10),M(T,0xc9c3d6),0,0,-.25,g);return g},sound:()=>noise(.08,'lowpass',700,.15)},
+      {name:'Stink Bomb',rate:1.4,dmg:1,stun:c.pick(10,8,6),ammo:4,proj:{speed:14,grav:7,splash:4,color:0x9acd32,size:.2},model:T=>{const g=new T.Group();part(T,sp(T,.13),M(T,0x9acd32),0,0,-.25,g);return g},sound:()=>noise(.3,'lowpass',400,.2)}],
+    splashColors:[0x9acd32,0x6b8e23],
+    enemies:{q:{name:'Mall Cop',hp:9999,speed:3.6,kind:'melee',dmg:34,cooldown:1.2,score:0,height:2.1,build:withCone(T=>mallCop(T)),ai:G2,sight:24},
+      w:{name:'Security Bot',hp:9999,speed:4.3,kind:'melee',dmg:30,cooldown:1,score:0,height:2.2,build:withCone(T=>mallCop(T,true)),ai:guardAI({view:12,walk:2.3,spot:'SECURITY BOT: INTRUDER!',forget:5}),sight:26}},
+    boss:{ch:'q'},collectName:'Pizza',collectModel:pizza,exitLine:'Pizza secured! Get back to the dumpster exit.',
+    levels:[
+      {name:'The Food Court',goal:'Steal 4 pizza boxes',objective:'collect',need:4,theme:MALL,brief:['Two guards patrol the food court. Stay out of their yellow vision cones.','Tables (brown blocks) give you something to hide behind.'],talk:[['Bandit','“Smells like… opportunity.”']],after:'Four boxes! But the real prize, a whole stack of deep-dish, is in the kitchen.',
+        map:['######################','#P...=.....*...=.....#','#....=..q......=..*..#','#..==....==..==......#','#.......L......q.....#','#.*..==....==....==..#','#..........L.........#','#..==....==...==..*..#','#.....q.....=........#','#E...........=...h...#','######################']},
+      {name:'The Kitchen',goal:'Steal 5 pizza boxes',objective:'collect',need:5,theme:Object.assign({},MALL,{wall:TX.tiles('#ffffff','#dde8e4',6),floor:TX.tiles('#c9c3b3','#b0a898',4)}),brief:['The kitchen is tighter, with more guards and a Security Bot that walks faster and sees farther.','Knock guards out with trash when you need to, but it doesn’t last long.'],talk:[['Security Bot','“SCANNING… SCANNING… PIZZA LEVELS NOMINAL.”']],after:'Five boxes of deep-dish. One last target: the manager’s office safe, where the legendary Golden Crust pizza is kept.',
+        map:['######################','#P....#....*...#..*..#','#.==..#.==..w..#..==.#','#.....#........D.....#','#..q..#..==..q.#.*...#','#.....k........#.....#','###D########.#####.###','#.....*.#.......q....#','#.==....#..==.....==.#','#....w..D.....*......#','#E......#.....h......#','######################']},
+      {name:'The Manager’s Office',goal:'Steal 6 slices of the Golden Crust',objective:'collect',need:6,theme:Object.assign({},MALL,{wall:TX.panel('#5a3a2a','#3a2418'),floor:TX.carpet('#2d4fb3','#243f90'),lampCol:0xffd080}),brief:['The most guarded room in the mall. Three guards and two bots.','Plan your route and use your stink bombs wisely.'],talk:[['Bandit','“Legends speak of a crust so golden…”']],
+        map:['########################','#P.....#......*.......*#','#.==...#..w.......==...#','#......#.....==........#','#.q....D...........q...#','#......#..==....*......#','####.#########.#########','#..*.....q.........*...#','#.==..==.....==...==...#','#.......w..........*...#','#E.........h...........#','########################']}],
+    winTitle:'The Great Pizza Heist!',epilogue:'Back at the dumpster, Bandit lays out the feast: food court slices, kitchen deep-dish, and the legendary Golden Crust. Every raccoon in the county shows up. It is the greatest night in raccoon history.',
+    onTick:(dt,api)=>{},clearLine:''})
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

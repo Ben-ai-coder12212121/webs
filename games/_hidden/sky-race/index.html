@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sky Race | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="skyrace"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Sky Race</h1><p>A quick air race against three rival planes. Fly through the gold rings for speed boosts and dodge the storm clouds.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/simpledrive.js"></script>
+<script>
+/* ===================== Sky Race: game code ===================== */
+G.push({id:'skyrace',name:'Sky Race',kind:'casual',levels:true,tint:'#7FC8F8',blurb:'A quick air race against three rival planes. Fly through the gold rings for speed boosts and dodge the storm clouds.',fmt:b=>b+' wins',
+art:'<rect width="120" height="72" fill="#7FC8F8"/><ellipse cx="80" cy="20" rx="14" ry="6" fill="#fff"/><circle cx="96" cy="44" r="10" fill="none" stroke="#FFD23F" stroke-width="3"/><g transform="translate(30 36)"><path d="M0 0h26l6 4-6 4H0z" fill="#F2352A" stroke="#1D1A2F" stroke-width="2"/><path d="M10 0l-4-10h6l6 10z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2"/></g>',
+run(root,c){const W=820,H=460,LEN=9000;const[cv,x]=mk(W,H,'width:100%');root.append(cv);const keys=holdPad(root,[['u','▲ Climb']]);root.append(el('p',{class:'hint'},'Hold click, Space or the Climb button to climb, let go to dive. Rings give a speed boost and storm clouds slow you down. First to the finish line wins!'));
+  const COL=['#F2352A','#2d6fd6','#2BB673','#FFD23F'];let planes,rings,clouds,cam,state='ready',hold=false,t=0,wins=S.get('sr_w',0),order=[];
+  function reset(){planes=COL.map((col,i)=>({x:0,y:120+i*60,vy:0,sp:0,col,ai:i>0,boost:0,skill:c.pick(.9,.97,1.03)*(.96+Math.random()*.08),done:null,tgtY:200}));rings=[];clouds=[];for(let xx=600;xx<LEN;xx+=300+Math.random()*250)rings.push({x:xx,y:80+Math.random()*(H-160)});for(let xx=900;xx<LEN;xx+=500+Math.random()*400)clouds.push({x:xx,y:60+Math.random()*(H-120),r:40+Math.random()*30});cam=0;t=-3;order=[];state='count'}
+  function fly(p,up,dt){const base=320*(p.ai?p.skill:1);p.sp+=((base+(p.boost>0?180:0))-p.sp)*Math.min(1,dt*1.5);p.boost-=dt;p.vy+=(up?-900:600)*dt;p.vy=clamp(p.vy,-320,320);p.y=clamp(p.y+p.vy*dt,24,H-24);if(p.y>=H-24||p.y<=24)p.vy*=.3;p.x+=p.sp*dt;
+    rings.forEach(r=>{if(Math.abs(r.x-p.x)<14&&Math.abs(r.y-p.y)<32){if(!r.hit)r.hit=new Set();if(!r.hit.has(p)){r.hit.add(p);p.boost=1;if(!p.ai)beep(1000,.08,'triangle',.05)}}});clouds.forEach(cl=>{if(Math.hypot(cl.x-p.x,cl.y-p.y)<cl.r)p.sp*=Math.pow(.25,dt)});
+    if(p.x>=LEN&&p.done==null){p.done=t;order.push(p);if(!p.ai){state='done';const pos=order.indexOf(p)+1;if(pos===1){wins++;S.set('sr_w',wins);c.best(wins)}}}}
+  function step(dt){if(state==='count'){t+=dt;if(t>=0)state='play';return}if(state!=='play'&&state!=='done')return;t+=dt;planes.forEach(p=>{if(p.done!=null&&p.x>LEN+400)return;let up=false;if(!p.ai)up=hold||keys.u;else{const nr=rings.find(r=>r.x>p.x+40);const ncl=clouds.find(cl=>cl.x>p.x&&cl.x-p.x<300);let ty=nr?nr.y:H/2;if(ncl&&Math.abs(ncl.y-ty)<ncl.r+20)ty=ncl.y>H/2?ncl.y-ncl.r-40:ncl.y+ncl.r+40;up=p.y+p.vy*.25>ty}fly(p,up,dt)});const me=planes[0];cam=me.x-200;c.stat('Sky Race · wins '+wins)}
+  function draw(){const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#4a8fd6');g.addColorStop(1,'#cfe8ff');x.fillStyle=g;x.fillRect(0,0,W,H);x.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<8;i++){const bx=((i*150-cam*.2)%1200+1200)%1200-100;x.beginPath();x.ellipse(bx,60+i*40%200,50,14,0,0,7);x.fill()}
+    const sx=v=>v-cam;x.fillStyle='#2BB673';x.fillRect(0,H-14,W,14);const fx=sx(LEN);for(let j=0;j<H;j+=20){x.fillStyle=(j/20)%2?'#fff':'#1D1A2F';x.fillRect(fx,j,10,20)}
+    clouds.forEach(cl=>{const px=sx(cl.x);if(px<-100||px>W+100)return;x.fillStyle='rgba(58,53,82,.75)';[[0,0],[-cl.r*.5,6],[cl.r*.5,6]].forEach(([a,b])=>{x.beginPath();x.arc(px+a,cl.y+b,cl.r*.6,0,7);x.fill()});x.fillStyle='#FFD23F';x.font='20px sans-serif';x.fillText('⚡',px-8,cl.y+26)});
+    rings.forEach(r=>{const px=sx(r.x);if(px<-50||px>W+50)return;x.strokeStyle=r.hit&&r.hit.has(planes[0])?'rgba(255,210,63,.3)':'#FFD23F';x.lineWidth=5;x.beginPath();x.ellipse(px,r.y,10,32,0,0,7);x.stroke()});
+    planes.slice().reverse().forEach(p=>{const px=sx(p.x);if(px<-60||px>W+60)return;x.save();x.translate(px,p.y);x.rotate(clamp(p.vy/700,-.5,.5));x.fillStyle=p.col;x.strokeStyle='#1D1A2F';x.lineWidth=2.5;x.beginPath();x.moveTo(-22,-6);x.lineTo(16,-6);x.lineTo(26,0);x.lineTo(16,6);x.lineTo(-22,6);x.closePath();x.fill();x.stroke();x.beginPath();x.moveTo(-4,-6);x.lineTo(-12,-20);x.lineTo(2,-20);x.lineTo(8,-6);x.fill();x.stroke();x.beginPath();x.moveTo(-22,-6);x.lineTo(-28,-16);x.lineTo(-18,-6);x.fill();x.stroke();if(p.boost>0){x.fillStyle='rgba(255,159,67,.8)';x.beginPath();x.moveTo(-22,-4);x.lineTo(-40-Math.random()*10,0);x.lineTo(-22,4);x.fill()}x.restore()});
+    const me=planes[0];const pos=planes.slice().sort((a,b)=>(a.done??1e9)-(b.done??1e9)||b.x-a.x).indexOf(me)+1;x.fillStyle='#1D1A2F';x.font='800 18px "JetBrains Mono"';x.textAlign='left';x.fillText('P'+pos+'/4 · '+Math.max(0,Math.floor((LEN-me.x)/10))+' m to go',14,28);x.fillStyle='rgba(29,26,47,.2)';x.fillRect(W-230,16,210,10);planes.forEach(p=>{x.fillStyle=p.col;x.fillRect(W-230+Math.min(1,p.x/LEN)*206,14,5,14)});
+    if(state==='count'&&t<0){x.fillStyle='#fff';x.font='64px "Bagel Fat One", sans-serif';x.textAlign='center';x.fillText(Math.ceil(-t),W/2,H/2)}if(state==='ready')banner(x,W,H,'Sky Race','Tap to start');if(state==='done'){const p2=order.indexOf(me)+1;banner(x,W,H,['','🏆 1st place!','2nd place','3rd place','4th place'][p2],'Tap to race again')}}
+  c.on(cv,'pointerdown',e=>{e.preventDefault();if(state==='ready'||state==='done'){reset();return}hold=true});c.on(window,'pointerup',()=>hold=false);c.on(document,'keydown',e=>{if(e.key===' '){e.preventDefault();if(state==='ready'||state==='done')reset();hold=true}});c.on(document,'keyup',e=>{if(e.key===' ')hold=false});
+  planes=[];rings=[];clouds=[];cam=0;reset();state='ready';c.loop(dt=>{step(Math.min(.03,dt/1000));draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

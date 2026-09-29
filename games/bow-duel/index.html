@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bow Duel | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_bowduel"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Bow Duel</h1><p>A turn-based archery duel across the valley. Drag back to aim, mind the wind, and go for the headshot before the other archer finds their range.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Bow Duel: game code ===================== */
+G.push({id:'m_bowduel',levels:true,name:'Bow Duel',kind:'arcade',tint:'#fde8d8',blurb:'A turn-based archery duel across the valley. Drag back to aim, mind the wind, and go for the headshot before the other archer finds their range.',fmt:b=>b+' wins',
+art:'<rect x="0" y="50" width="120" height="22" fill="#6ab04a"/><circle cx="18" cy="36" r="6" fill="#ffd8a8" stroke="#1D1A2F" stroke-width="2"/><rect x="13" y="42" width="10" height="10" fill="#3a8aff"/><circle cx="102" cy="36" r="6" fill="#ffd8a8" stroke="#1D1A2F" stroke-width="2"/><rect x="97" y="42" width="10" height="10" fill="#e83a3a"/><path d="M26 34Q60 0 94 30" stroke="#1D1A2F" stroke-width="2" stroke-dasharray="4 4" fill="none"/>',
+run(root,c){const W=720,H=420,WW=1500,GY=330;const {cv,x}=MOB.canvas(root,W,H);cv.style.width='min(100%,calc(70vh*1.714))';const FX=MOB.parts(),FL=MOB.floats();
+  let A,turn,arrow,aim,cam,wind,state,t,streak,stuck,aiT,hint;
+  const ground=gx=>GY+Math.sin(gx/140)*18+Math.sin(gx/53)*6;
+  function newRound(){const d=MOB.rnd(700,1000);const p0=MOB.rnd(120,200);A=[{x:p0,y:ground(p0),hp:100,col:'#3a8aff',face:1},{x:p0+d,y:ground(p0+d),hp:100,col:'#e83a3a',face:-1}];turn=0;arrow=null;stuck=[];newWind();state='aim';cam=0;hint=null;aiT=0;upd()}
+  function newWind(){wind=MOB.rnd(-1,1)*c.pick(.03,.05,.07)}
+  const upd=()=>c.stat('You '+Math.max(0,Math.round(A[0].hp))+' HP · CPU '+Math.max(0,Math.round(A[1].hp))+' HP · Wins '+(c.best()||0));
+  const head=a=>({x:a.x,y:a.y-58}),body=a=>({x:a.x,y:a.y-30});
+  function shoot(who,ang,pw){const a=A[who],h=head(a);arrow={x:h.x+a.face*14,y:h.y+10,vx:Math.cos(ang)*pw,vy:Math.sin(ang)*pw,who,trail:[]};state='fly';beep(600,.06,'triangle',.06)}
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='over'){newRound();return}if(state!=='aim'||turn!==0)return;aim={sx:p.x,sy:p.y,x:p.x,y:p.y}},move:p=>{if(aim){aim.x=p.x;aim.y=p.y}},
+    up:()=>{if(!aim)return;const dx=aim.sx-aim.x,dy=aim.sy-aim.y,d=Math.hypot(dx,dy);aim=null;if(d<15)return;const pw=Math.min(24,d/7);shoot(0,Math.atan2(dy,dx),pw);hint={ang:Math.atan2(dy,dx),pw}}});
+  function aiShoot(){const me=A[1],tg=A[0];let best=null;for(let k=0;k<400;k++){const a2=Math.PI+MOB.rnd(.15,1.25);const pw=MOB.rnd(10,24);const r=sim(me,a2,pw,tg);if(!best||r<best.r)best={r,a:a2,pw}}
+    const err=c.pick(.09,.05,.025)*(Math.random()-.5)*2;shoot(1,best.a+err,best.pw*(1+err*.5))}
+  function sim(me,ang,pw,tg){const h=head(me);let px=h.x+me.face*14,py=h.y+10,vx=Math.cos(ang)*pw,vy=Math.sin(ang)*pw;const th=head(tg);let bd=1e9;for(let i=0;i<400;i++){vx+=wind;vy+=.35;px+=vx;py+=vy;const d=Math.hypot(px-th.x,py-(th.y+15));if(d<bd)bd=d;if(py>ground(px)||px<0||px>WW)break}return bd}
+  function update(dt){t+=dt;FX.step(dt);FL.step(dt);
+    if(state==='aim'&&turn===1){aiT+=dt;if(aiT>1200){aiT=0;aiShoot()}}
+    if(state==='fly'){const steps=Math.max(1,Math.round(dt/16));for(let s=0;s<steps;s++){const ar=arrow;ar.vx+=wind;ar.vy+=.35;ar.x+=ar.vx;ar.y+=ar.vy;ar.trail.push({x:ar.x,y:ar.y});if(ar.trail.length>30)ar.trail.shift();
+        const tg=A[1-ar.who],hd=head(tg),bd=body(tg);let dmg=0;if(Math.hypot(ar.x-hd.x,ar.y-hd.y)<13){dmg=MOB.rnd(42,55);FL.add('HEADSHOT!',hd.x-cam,hd.y-30,'#ffd23f')}else if(Math.abs(ar.x-bd.x)<12&&ar.y>bd.y-20&&ar.y<tg.y){dmg=MOB.rnd(18,28)}else if(Math.abs(ar.x-tg.x)<10&&ar.y>tg.y-4&&ar.y<tg.y+2){dmg=10}
+        if(dmg){tg.hp-=dmg;stuck.push({who:1-ar.who,dx:ar.x-tg.x,dy:ar.y-tg.y,a:Math.atan2(ar.vy,ar.vx)});FX.burst(ar.x,ar.y,16,'#c81a1a',3,500);beep(dmg>40?1200:300,.1,'square',.08);FL.add('-'+Math.round(dmg),tg.x-cam,tg.y-80,'#ff4a4a');return endShot()}
+        if(ar.y>ground(ar.x)||ar.x<-50||ar.x>WW+50||ar.y>H+100){if(ar.y>ground(ar.x))stuck.push({gx:ar.x,gy:ground(ar.x),a:Math.atan2(ar.vy,ar.vx)});beep(150,.04,'triangle',.04);return endShot()}}}
+    const want=state==='fly'?arrow.x-W/2:A[turn].x-(turn===0?160:W-160);cam+=(MOB.clamp(want,0,WW-W)-cam)*Math.min(1,dt/(state==='fly'?80:300))}
+  function endShot(){state='wait';upd();c.after(()=>{if(A[0].hp<=0||A[1].hp<=0){state='over';const won=A[1].hp<=0;if(won){streak=(c.best()||0)+1;c.best(streak);beep(880,.2,'sine',.1)}else beep(120,.5,'sawtooth',.1);c.stat((won?'You win! ':'You lost. ')+'Wins '+(c.best()||0));return}turn=1-turn;arrow=null;if(Math.random()<.4)newWind();state='aim';aiT=0},700)}
+  function archer(a,i){const X=a.x-cam,Y=a.y;x.save();x.translate(X,Y);x.scale(a.face,1);const dead=a.hp<=0;if(dead){x.rotate(-1.3);x.translate(-10,10)}
+    x.strokeStyle='#1D1A2F';x.lineWidth=5;x.lineCap='round';x.beginPath();x.moveTo(-6,0);x.lineTo(-3,-22);x.moveTo(6,0);x.lineTo(3,-22);x.stroke();x.fillStyle=a.col;MOB.rr(x,-11,-46,22,26,6);x.fill();x.lineWidth=2.5;x.stroke();
+    x.fillStyle='#ffd8a8';x.beginPath();x.arc(0,-58,12,0,7);x.fill();x.stroke();x.fillStyle='#1D1A2F';x.beginPath();x.arc(5,-60,2,0,7);x.fill();x.fillStyle=a.col;x.beginPath();x.arc(0,-62,12,Math.PI,0);x.fill();
+    let ang=-.4;if(i===0&&aim){ang=Math.atan2(aim.sy-aim.y,aim.sx-aim.x)}else if(turn===i&&state==='aim'&&i===1)ang=-.5;const la=a.face>0?ang:Math.PI-ang;
+    x.save();x.translate(4,-40);x.rotate(la);x.strokeStyle='#8a5a2a';x.lineWidth=3;x.beginPath();x.arc(14,0,20,-1.2,1.2);x.stroke();x.strokeStyle='#ddd';x.lineWidth=1;x.beginPath();x.moveTo(14+Math.cos(-1.2)*20,Math.sin(-1.2)*20);x.lineTo(aim&&i===0?0:8,0);x.lineTo(14+Math.cos(1.2)*20,Math.sin(1.2)*20);x.stroke();x.restore();x.restore();
+    for(const s of stuck)if(s.who===i){x.save();x.translate(a.x+s.dx-cam,a.y+s.dy);x.rotate(s.a);x.strokeStyle='#5a3a1a';x.lineWidth=2;x.beginPath();x.moveTo(-18,0);x.lineTo(0,0);x.stroke();x.restore()}
+    const bx=X-24;x.fillStyle='rgba(0,0,0,.4)';x.fillRect(bx,Y-96,48,6);x.fillStyle=a.hp>40?'#4ae06a':'#ff5a3a';x.fillRect(bx,Y-96,48*Math.max(0,a.hp)/100,6)}
+  function draw(){const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#ffb88a');g.addColorStop(1,'#ffe8c8');x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle='#e8a070';x.beginPath();x.moveTo(0,H);for(let gx=0;gx<=W;gx+=20)x.lineTo(gx,230+Math.sin((gx+cam*.3)/90)*30);x.lineTo(W,H);x.fill();
+    x.fillStyle='#6ab04a';x.beginPath();x.moveTo(0,H);for(let sx=0;sx<=W;sx+=8)x.lineTo(sx,ground(sx+cam));x.lineTo(W,H);x.fill();x.fillStyle='#4a8a3a';x.beginPath();x.moveTo(0,H);for(let sx=0;sx<=W;sx+=8)x.lineTo(sx,ground(sx+cam)+14);x.lineTo(W,H);x.fill();
+    for(const s of stuck)if(s.gx!=null){x.save();x.translate(s.gx-cam,s.gy);x.rotate(s.a);x.strokeStyle='#5a3a1a';x.lineWidth=2;x.beginPath();x.moveTo(-20,0);x.lineTo(0,0);x.stroke();x.restore()}
+    A.forEach(archer);
+    if(aim&&state==='aim'){const dx=aim.sx-aim.x,dy=aim.sy-aim.y,d=Math.hypot(dx,dy);if(d>15){const pw=Math.min(24,d/7),ang=Math.atan2(dy,dx);const h=head(A[0]);let px=h.x+14,py=h.y+10,vx=Math.cos(ang)*pw,vy=Math.sin(ang)*pw;x.fillStyle='rgba(29,26,47,.5)';for(let i=0;i<14;i++){for(let j=0;j<2;j++){vx+=wind;vy+=.35;px+=vx;py+=vy}x.beginPath();x.arc(px-cam,py,3,0,7);x.fill()}
+      MOB.txt(x,Math.round(pw/24*100)+'%',A[0].x-cam,A[0].y-110,14,'#1D1A2F');MOB.txt(x,Math.round(-ang*180/Math.PI)+'°',A[0].x-cam,A[0].y-128,14,'#1D1A2F')}}
+    if(hint&&state==='aim'&&turn===0&&!aim){MOB.txt(x,'last: '+Math.round(hint.pw/24*100)+'% · '+Math.round(-hint.ang*180/Math.PI)+'°',A[0].x-cam,A[0].y-110,12,'rgba(29,26,47,.6)')}
+    if(arrow){x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=2;x.beginPath();arrow.trail.forEach((p,i)=>i?x.lineTo(p.x-cam,p.y):x.moveTo(p.x-cam,p.y));x.stroke();x.save();x.translate(arrow.x-cam,arrow.y);x.rotate(Math.atan2(arrow.vy,arrow.vx));x.strokeStyle='#5a3a1a';x.lineWidth=3;x.beginPath();x.moveTo(-22,0);x.lineTo(6,0);x.stroke();x.fillStyle='#ccc';x.beginPath();x.moveTo(12,0);x.lineTo(4,-5);x.lineTo(4,5);x.fill();x.restore()}
+    FX.draw(x);FL.draw(x);MOB.rr(x,W/2-80,12,160,34,17);x.fillStyle='rgba(255,255,255,.7)';x.fill();MOB.txt(x,'Wind '+(wind>0?'→':'←')+' '+Math.round(Math.abs(wind)*100),W/2,29,15,'#1D1A2F');
+    MOB.txt(x,state==='aim'?(turn===0?'Your turn: drag back and release':'Opponent is aiming…'):'',W/2,62,14,'#1D1A2F');
+    if(state==='over')banner(x,W,H,A[1].hp<=0?'Victory!':'Defeated','Tap for another duel')}
+  newRound();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

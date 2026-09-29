@@ -2,7 +2,7 @@
 
 Read this first when picking the project up in a new session. It covers what the project is, where things stand, how to build, test and ship, and the rules the owner has set.
 
-_Last updated: 2026-09-28._
+_Last updated: 2026-09-28 (site split into one page per game)._
 
 ---
 
@@ -12,15 +12,16 @@ _Last updated: 2026-09-28._
 
 - **Live site:** https://detourr.net (Netlify; `detourr.netlify.app` redirects there).
 - **Repo / branch:** `ben-ai-coder12212121/webs`, branch **`claude/website-sync-claude-code-ctibq1`**. Netlify deploys from this branch.
-- **Site format:** the whole site is one static `index.html` (HTML, CSS and JS inline), built from the sources in `src/`.
-- **Other generated files:** per-game SEO pages in `games/<id>/`, plus `sitemap.xml` and `robots.txt`.
+- **Site format (since 2026-09-28):** one page per game at `games/<name>/index.html`, with shared code in `js/` and `css/`, and a homepage (`index.html`) that links to them. No build step: edit the files directly. `README.md` has the full layout; `GAMES.md` lists each game's libraries and external files.
+- **The old single-file build in `src/` is archived.** `src/make_site.sh` refuses to run, because it would overwrite the new `index.html`.
 - **Game art:** served from `/assets` (see section 5).
 
 ## 2. Rules from the owner (follow these)
 
-1. **Don't deploy every change.** Commit and push as usual; that keeps the work safe, because the cloud workspace is temporary. Netlify **skips** any push whose latest commit message lacks `[deploy]`. This is set by the `ignore =` rule in `netlify.toml`.
+1. **Don't deploy every change, and never push to the live branch unless the owner says "deploy".** Work goes on the `preview` branch (free). Commit and push as usual; that keeps the work safe, because the cloud workspace is temporary. Netlify **skips** any push whose latest commit message lacks `[deploy]`. This is set by the `ignore =` rule in `netlify.toml`.
    - When the owner says **"deploy"**, make one commit whose message contains `[deploy]`; an empty commit is fine. Push it, then check the live site with `curl -sL https://detourr.net/ | grep <something new>`.
-2. **New games go to the "🚧 In progress" section, not the main listings.** They must not be picked by the random button. Move a game out only when the owner says so, by editing `WIP_IDS` near the end of `src/heroes/build.py`.
+   - **Previews:** the `preview` branch always builds (branch deploys are free on Netlify; production deploys cost 15 credits each) at **https://preview--detourr.netlify.app**. Push work there when the owner wants to try it: `git push origin HEAD:preview` (merge the live branch into `preview` first so it's up to date). When the owner says "deploy", merge `preview` into the live branch with a `[deploy]` commit.
+2. **New games go to the "🚧 In progress" section, not the main listings.** They must not be picked by the random button. Move a game out only when the owner says so, by editing `WIP_IDS` near the top of `js/app.js`.
    - Currently in progress: `neonharbor`, `hollow`, `contract`, `moonblade`, `ironpalm`, `spellbound`.
 3. **Q is an aim button in every shooter.** The owner plays on a laptop without a mouse. Any new shooter needs Q = aim / ADS.
    - For games built on `Stage3D`, pass `qAim:true`.
@@ -71,62 +72,34 @@ _Last updated: 2026-09-28._
   - Scenes with many skinned characters are heavy. They're fine on real GPUs, but software rendering takes about 1 s per frame.
 - **Spellbound Academy looks realistic**, not stylised like Wizard101.
 
-## 4. Build, run and test
+## 4. Edit, run and test
 
-All sources live in **`src/`**.
+There is no build step. Layout (details in `README.md`):
 
-```sh
-sh src/make_site.sh
+- `games/<name>/index.html`: one page per game. The game's own code is in the `<script>` marked `===== <name>: game code =====`, and styles only it uses are in its `<style>`. `window.PAGE_GAME` holds the game id.
+- `js/core.js`: shared helpers (`el`, `S`, `beep`, `Stage3D`, `with3D`, `load3D` …). `G.push` is overridden here: a game's full definition replaces its catalog entry, and the catalog's listing details win.
+- `js/catalog.js`: every game's listing (name, blurb, art, kind, `fmt`, `url`). Homepage and random button use it.
+- `js/lib/*.js`: code shared by several games, named after the old source file (`bk.js` = bigKit for the six story games, `havoc.js` = Havoc and Overlord, `tx1.js` = Breach and Last Drop, `gunsim.js` = Gun Sim and Dead Zone …). A page loads only the libs it needs.
+- `js/app.js`: game player and homepage grid. `WIP_IDS`, `PC_ONLY`, `HIDDEN` and the top section's `TOP` list are here. Grid tiles are real links to `/games/<name>/`; old `/#<id>` links forward to the page.
+- `games/_hidden/`: games removed from the site (3D shooters being reworked). Not listed, `noindex`, blocked in `robots.txt`.
+
+Scripts are classic (non-module) scripts sharing one global scope, so a top-level name in a game page must not clash with one in `core.js`, `app.js` or a loaded lib.
+
+
+**Online play (`js/lib/online.js`):** `Online.pair({game,onStart,onMsg,onEnd})` for 1v1 games where both sides run the rules and exchange moves; `Online.party({game,max,onStart,onJoin,onLeave,onInput,onAct,onSnap,onEnd})` where the host's browser runs the game, friends send `input` (~20/s) and `act` (reliable), and the host sends each friend a snapshot with `snapTo`. Rooms and signalling go through `netlify/functions/mp.mjs` (Netlify Blobs); `tools/dev-server.mjs` runs the same handler in memory for local testing. Both helpers add their own button and handle `?room=CODE` invite links. Apex GT is the one game with computer rivals that isn't online yet (its AI cars are kinematic, not physics-driven).
+
+**Run locally:** `npx serve .` (or `npx http-server . -p 8766 -s`). Leaderboards need Netlify; everything else works.
+
+**Test:** with a server on port 8766,
 ```
+PW=/opt/node22/lib/node_modules/playwright CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome node tools/test-games.cjs http://localhost:8766 [ids…]
+```
+It opens every game page and prints `ALL CLEAN`. Run `npm i` in `src/t` first to serve three.js and Matter.js locally (faster). The old flow tests in `src/t/` target the archived single-file build and need porting before reuse; the debug hooks (`window.__NH`, `__BK`, …) are still in the game code.
 
-This does four things:
-
-1. Builds a test build at `src/srv/test.html` (with debug hooks).
-2. Extracts game metadata (`src/heroes/gen_meta.js`).
-3. Builds the real `index.html` at the repo root.
-4. Generates the `games/` SEO pages, `sitemap.xml` and `robots.txt`.
-
-It needs `python3`, `node` and Playwright at `/opt/node22/lib/node_modules/playwright`.
-
-**Sources (`src/heroes/`):**
-
-- `orig.html`: the base site, with the grid, filters, `Stage3D`, `with3D`, `load3D` and site CSS.
-- `build.py`: concatenates the game JS files (the list is near the top) into `orig.html`, then applies patches with `rep(...)`. This file holds the WIP section, the random-button logic and so on.
-- `*.js`: one file (or a few) per game family.
-  - `bk.js` is "bigKit", the engine for the big story games.
-  - `crime.js`, `hollow.js`, `contract.js`, `blade.js`, `palm.js` and `wizard.js` are the six in-progress games.
-  - `tx1–6.js` are Breach 5v5 and Last Drop.
-  - `gunsim.js` is Gun Sim and Dead Zone.
-- The folders `nh/`, `hl/`, `sc/`, `bl/`, `ip/` and `wz/` hold the part-files the six big games were first written in.
-  - **The concatenated `.js` files in `src/heroes/` are the ones used now. Edit those.**
-
-**Tests (`src/t/`):**
-
-- **Setup:** run `npm i` in `src/t` (installs three@0.128, matter-js, d3-geo and topojson).
-- **`all.js`:** full regression. Every game id in `ids.txt` must open with no errors. It takes about 20 minutes. Run it as:
-  ```
-  npx http-server src/srv -p 8765 -s &
-  cd src/t && PW=/opt/node22/lib/node_modules/playwright node all.js
-  ```
-  It should print `ALL CLEAN`.
-- **Flow tests** play each big game to the end through hooks. They are:
-  - Neon Harbor: `nhflow.js`
-  - The Hollow: `hlflow.js`
-  - Silent Contract: `scflow.js`
-  - Moonblade: `mbflow.js`
-  - Iron Palm: `ipflow.js`
-  - Spellbound Academy: `wzflow.js` and `wzduel.js`
-  - Each game exposes a debug hook with `sim(n)` and `tick()`: `window.__NH`, `__HL`, `__SC`, `__MB`, `__IP` and `__WZ`. `window.__BK` points to the one currently running.
-- **`art.js`:** screenshot helper. Set `GAME=<id>` and `STEPS='[{"js":"…"},{"wait":2000},{"shot":"name"}]'`.
-- **`route.js`:** test routing. It serves `https://detour.test/` from `srv/test.html` and `/assets/*` from `srv/assets`, which is a symlink to the repo's `assets/`.
-- **Headless-testing tips.**
-  - Software rendering is very slow. For long real-time flows, set `K.scene.visible=false` so frames stay cheap.
-  - When screenshotting, clip the page to the `.g3` box's rectangle. Screenshotting the `.g3` element itself times out waiting for it to be stable.
-- **Lint:**
-  ```
-  cat src/heroes/bk.js src/heroes/<game>.js > x.js && npx eslint x.js
-  ```
-  The only expected errors are site globals: `el`, `S`, `muted`, `ac`, `with3D`, `Stage3D`, `G`, `load3D`, `unlockAudio` and `THREE`.
+**Lint:**
+```
+cat js/core.js js/lib/bk.js > x.js && sed -n '/game code =====/,/<\/script>/p' games/neon-harbor/index.html | sed '1d;$d' >> x.js && npx eslint x.js
+```
 
 ## 5. Art pipeline (`assets/`, about 50 MB)
 
@@ -141,7 +114,7 @@ It needs `python3`, `node` and Playwright at `/opt/node22/lib/node_modules/playw
 - `assets/lib/loaders.js`: three r128 `GLTFLoader`, `RGBELoader` and `SkeletonUtils`.
 - `assets/CREDITS.txt`: attribution.
 
-**Kit API (in `bk.js`):**
+**Kit API (in `js/lib/bk.js`):**
 
 - **`withArt(root, c, ['tex:asphalt','hdr:day','glb:bench','chr:Soldier', …], start)`:** preloads the listed assets behind the loading card.
 - **Materials and lighting:**
@@ -166,9 +139,9 @@ It needs `python3`, `node` and Playwright at `/opt/node22/lib/node_modules/playw
 - **Asset paths:** `ARTX` loads from **`/assets/`**, which is absolute so the SEO pages under `/games/<id>/` also work.
 - **Name clashes with site globals.** The site already defines `ART`, which is why the kit uses `ARTX`. Short CSS classes can also collide with site rules; that is how `.hl` broke The Hollow's layout. Prefix new classes.
 - **`src/package.json` sets `"type":"commonjs"`.** The repo root is `"type":"module"`, and the build and test scripts use `require`.
-- **Games marked PC-only** live in the `PC_ONLY` list in `orig.html`. The six in-progress games are on it.
+- **Games marked PC-only** live in the `PC_ONLY` list in `js/app.js`. The six in-progress games are on it.
 - **Headless tests use swiftshader.** Screenshots there look fine, but timings are about 50× slower than a real GPU.
-- **Breach's scope** is toggled by a key or mousedown handler in `tx6.js`, not by `input.right`.
+- **Breach's scope** is toggled by a key or mousedown handler in the Breach code (now in `js/lib/tx1.js` or `games/breach-5v5/`), not by `input.right`.
 
 ## 7. Suggested next steps
 

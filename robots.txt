@@ -2,5 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /tiktok-ads/
 Disallow: /netlify/
+Disallow: /games/_hidden/
+Disallow: /tools/
 
-Sitemap: https://detourr.netlify.app/sitemap.xml
+Sitemap: https://detourr.net/sitemap.xml

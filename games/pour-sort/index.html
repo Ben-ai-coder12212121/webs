@@ -1,0 +1,68 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pour Sort | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_pour"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Pour Sort</h1><p>Tap a tube, then another, to pour. You can only pour onto the same colour or into an empty tube. Sort every colour into its own tube. Endless levels.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Pour Sort: game code ===================== */
+G.push({id:'m_pour',name:'Pour Sort',kind:'puzzle',tint:'#e0f4ff',blurb:'Tap a tube, then another, to pour. You can only pour onto the same colour or into an empty tube. Sort every colour into its own tube. Endless levels.',fmt:b=>'level '+b,
+art:'<rect x="18" y="8" width="18" height="58" rx="8" fill="#fff" stroke="#1D1A2F" stroke-width="3"/><rect x="21" y="44" width="12" height="19" fill="#ff5a5a"/><rect x="21" y="30" width="12" height="14" fill="#3a8aff"/><rect x="51" y="8" width="18" height="58" rx="8" fill="#fff" stroke="#1D1A2F" stroke-width="3"/><rect x="54" y="30" width="12" height="33" fill="#3a8aff"/><rect x="84" y="8" width="18" height="58" rx="8" fill="#fff" stroke="#1D1A2F" stroke-width="3"/><rect x="87" y="44" width="12" height="19" fill="#ff5a5a"/>',
+run(root,c){const W=400,H=640,CAP=4;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts();
+  const COLS=['#ff4a4a','#3a8aff','#ffd23f','#2ac86a','#b04ae8','#ff8a1a','#ff6ac8','#2ad0d0','#8a5a2a','#9aa0b0','#1a3a8a','#a8e040'];
+  let start,tubes,sel,level,hist,state,pour,t=0,extra;
+  function gen(){const n=Math.min(12,3+Math.floor((level-1)/2));let tries=0;do{const all=[];for(let i=0;i<n;i++)for(let k=0;k<CAP;k++)all.push(i);MOB.shuf(all);tubes=[];for(let i=0;i<n;i++)tubes.push(all.slice(i*CAP,i*CAP+CAP));tubes.push([],[]);tries++}while(tubes.some(tb=>tb.length&&tb.every(v=>v===tb[0]))&&tries<50);
+    start=JSON.stringify(tubes);sel=-1;hist=[];state='play';extra=0;pour=null;upd()}
+  const upd=()=>c.stat('Level '+level+' · Moves '+hist.length+' · Best level '+(c.best()||0));
+  const topRun=tb=>{if(!tb.length)return 0;let k=1;while(k<tb.length&&tb[tb.length-1-k]===tb[tb.length-1])k++;return k};
+  function layout(){const n=tubes.length,per=n>7?Math.ceil(n/2):n,rows=n>7?2:1;const tw=Math.min(56,(W-20)/per-10);return tubes.map((_,i)=>{const r=Math.floor(i/per),k=i%per,cnt=r===rows-1?n-per*(rows-1):per;return{x:W/2+(k-(cnt-1)/2)*(tw+12),y:rows===1?300:200+r*230,w:tw,h:190}})}
+  function tryPour(a,b){const A=tubes[a],B=tubes[b];if(!A.length||B.length>=CAP)return false;const col=A[A.length-1];if(B.length&&B[B.length-1]!==col)return false;const k=Math.min(topRun(A),CAP-B.length);hist.push(JSON.stringify(tubes));for(let i=0;i<k;i++)B.push(A.pop());pour={a,b,col,t:0};beep(400,.12,'sine',.06);upd();
+    if(tubes.every(tb=>!tb.length||(tb.length===CAP&&tb.every(v=>v===tb[0])))){state='won';c.best(level);S.set('pour_lvl',level+1);setTimeout(()=>{beep(880,.1,'sine',.1);beep(1320,.2,'sine',.08)},200);const L=layout();L.forEach(l=>FX.burst(l.x,l.y,10,COLS,4,800))}
+    else{const L=layout();const tb=tubes[b];if(tb.length===CAP&&tb.every(v=>v===tb[0])){FX.burst(L[b].x,L[b].y-L[b].h/2,16,COLS[tb[0]],3,600);beep(1100,.1,'triangle',.06)}}return true}
+  function tap(p){if(state==='won'){level++;gen();return}const L=layout();
+    if(p.y>H-70){if(p.x<W/3){if(hist.length){tubes=JSON.parse(hist.pop());sel=-1;upd()}}else if(p.x<2*W/3){tubes=JSON.parse(start);hist=[];sel=-1;extra=0;upd()}else if(extra<1){tubes.push([]);extra++;sel=-1}return}
+    const i=L.findIndex(l=>Math.abs(p.x-l.x)<l.w/2+6&&p.y>l.y-l.h/2-30&&p.y<l.y+l.h/2+10);if(i<0){sel=-1;return}
+    if(sel<0){if(tubes[i].length){sel=i;beep(600,.03,'sine',.03)}}else if(sel===i)sel=-1;else{if(!tryPour(sel,i))beep(180,.06,'square',.04);sel=-1}}
+  MOB.drag(c,cv,W,H,{down:tap});
+  function draw(dt){t+=dt;FX.step(dt);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a2a4a');g.addColorStop(1,'#3a2a5a');x.fillStyle=g;x.fillRect(0,0,W,H);
+    MOB.big(x,'Level '+level,W/2,44,30,'#fff');const L=layout();if(pour)pour.t+=dt;
+    tubes.forEach((tb,i)=>{const l=L[i],lift=i===sel?-22:0,lx=l.x-l.w/2,ly=l.y-l.h/2+lift,seg=(l.h-14)/CAP;
+      x.save();MOB.rr(x,lx,ly,l.w,l.h,l.w/2);x.clip();x.fillStyle='rgba(255,255,255,.08)';x.fillRect(lx,ly,l.w,l.h);
+      tb.forEach((v,k)=>{x.fillStyle=COLS[v];x.fillRect(lx,ly+l.h-4-(k+1)*seg,l.w,seg+1);if(k===tb.length-1){x.fillStyle='rgba(255,255,255,.25)';x.fillRect(lx,ly+l.h-4-(k+1)*seg,l.w,3)}});
+      x.fillStyle='rgba(255,255,255,.18)';x.fillRect(lx+5,ly+8,5,l.h-20);x.restore();MOB.rr(x,lx,ly,l.w,l.h,l.w/2);x.strokeStyle=i===sel?'#ffd23f':'rgba(255,255,255,.75)';x.lineWidth=3;x.stroke();
+      if(tb.length===CAP&&tb.every(v=>v===tb[0])){MOB.txt(x,'✓',l.x,ly-12,18,'#6aff9a')}});
+    if(pour&&pour.t<350){const a=L[pour.a],b=L[pour.b];x.strokeStyle=COLS[pour.col];x.lineWidth=6;x.beginPath();x.moveTo(a.x,a.y-a.h/2-10);x.quadraticCurveTo((a.x+b.x)/2,Math.min(a.y,b.y)-a.h/2-60,b.x,b.y-b.h/2);x.stroke()}
+    const btn=(bx,lab,on)=>{MOB.rr(x,bx-56,H-60,112,44,22);x.fillStyle=on?'rgba(255,255,255,.18)':'rgba(255,255,255,.06)';x.fill();MOB.txt(x,lab,bx,H-38,15,on?'#fff':'rgba(255,255,255,.35)')};btn(W/6,'↶ Undo',hist.length>0);btn(W/2,'↻ Restart',true);btn(5*W/6,'+ Tube',extra<1);
+    FX.draw(x);if(state==='won')banner(x,W,H,'Sorted!','Tap for level '+(level+1))}
+  level=S.get('pour_lvl',1);gen();c.loop(draw)}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

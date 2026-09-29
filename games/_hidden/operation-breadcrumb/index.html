@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operation Breadcrumb | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="breadcrumb"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Operation Breadcrumb</h1><p>3D first-person. A secret-agent duck infiltrates an evil bread factory full of toaster robots.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Operation Breadcrumb: game code ===================== */
+const INDUS={wall:TX.metal,wall2:TX.hazard,floor:TX.noise('#6b6875','#3a3552',2500),sky:0x14121f,fog:0x1a1726,fogNear:18,fogFar:60,amb:.6,hemi:0xffd9a8,ground:0x2a2640,sun:.3,lampCol:0xffa24a,ceil:TX.metal};
+G.push({id:'breadcrumb',name:'Operation Breadcrumb',kind:'shooter',levels:true,wide:true,tint:'#FF9F43',blurb:'3D first-person. A secret-agent duck infiltrates an evil bread factory full of toaster robots.',fmt:b=>b+' pts',
+art:'<rect width="120" height="72" fill="#3a3552"/><rect x="0" y="50" width="120" height="22" fill="#6b6875"/><g transform="translate(78 30)"><rect x="-14" y="-12" width="28" height="22" rx="5" fill="#c9c3d6" stroke="#1D1A2F" stroke-width="2.5"/><rect x="-8" y="-18" width="6" height="8" fill="#e0b86b" stroke="#1D1A2F" stroke-width="1.5"/><rect x="2" y="-18" width="6" height="8" fill="#e0b86b" stroke="#1D1A2F" stroke-width="1.5"/><circle cx="-5" cy="0" r="2.5" fill="#F2352A"/><circle cx="5" cy="0" r="2.5" fill="#F2352A"/></g><path d="M20 72l6-20h18l6 20z" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2.5"/><circle cx="46" cy="44" r="3" fill="#FFD23F"/><circle cx="56" cy="38" r="2" fill="#FFD23F"/>',
+run(root,c){
+  const toaster=T=>{const g=new T.Group();const body=part(T,bx(T,1,.8,.7),M(T,0xc9c3d6),0,1.2,0,g);part(T,bx(T,.25,.45,.12),M(T,0xe0b86b),-.2,1.65,0,g);part(T,bx(T,.25,.45,.12),M(T,0xe0b86b),.2,1.65,0,g);part(T,sp(T,.09),M(T,0xF2352A,{emissive:0xaa0000}),-.2,1.25,.36,g);part(T,sp(T,.09),M(T,0xF2352A,{emissive:0xaa0000}),.2,1.25,.36,g);const legL=part(T,bx(T,.14,.8,.14),M(T,0x5a5470),-.3,.4,0,g),legR=part(T,bx(T,.14,.8,.14),M(T,0x5a5470),.3,.4,0,g);[legL,legR].forEach(l=>{l.geometry=l.geometry.clone();l.geometry.translate(0,-.4,0);l.position.y=.8});g.userData.legs=[legL,legR];part(T,bx(T,.2,.12,.2),M(T,0x1D1A2F),.62,1.3,0,g);return g};
+  const baguette=T=>{const g=new T.Group();const b=part(T,cy(T,.32,.34,2.4,12),M(T,0xd9a066),0,1.3,0,g);for(let k=0;k<4;k++)part(T,bx(T,.5,.05,.08),M(T,0xb87e45),0,.6+k*.4,.3,g).rotation.z=.4;part(T,cy(T,.36,.3,.12,12),M(T,0x1D1A2F),0,2.52,0,g);part(T,sp(T,.07),M(T,0x1D1A2F),-.12,2.1,.3,g);part(T,sp(T,.07),M(T,0x1D1A2F),.12,2.1,.3,g);part(T,bx(T,.3,.05,.05),M(T,0x1D1A2F),0,1.9,.32,g).rotation.z=-.2;const aL=part(T,cy(T,.05,.05,.6),M(T,0xb87e45),-.4,1.3,0,g),aR=part(T,cy(T,.05,.05,.6),M(T,0xb87e45),.4,1.3,0,g);aL.rotation.z=.8;aR.rotation.z=-.8;return g};
+  const muffin=T=>{const g=new T.Group();part(T,cy(T,.4,.3,.4,14),M(T,0xFF8FB1),0,0,0,g);const top=part(T,sp(T,.45),M(T,0x8a5a2b),0,.25,0,g);top.scale.y=.7;for(let k=0;k<5;k++)part(T,sp(T,.06),M(T,0x2d6fd6),Math.cos(k)*.25,.45,Math.sin(k)*.25,g);const pr=new T.Group();part(T,bx(T,1.2,.03,.12),M(T,0x1D1A2F),0,0,0,pr);pr.position.y=.62;g.add(pr);g.userData.spin=pr;part(T,sp(T,.08),M(T,0xF2352A,{emissive:0xaa0000}),0,.05,.38,g);return g};
+  return runShooter(root,c,{id:'breadcrumb',short:'Operation Breadcrumb',view:'fps',tag:'A Detourr original · 3D FPS',title:'Operation Breadcrumb',hitColor:[0xFFD23F,0xe0b86b],killColors:[0xe0b86b,0xFFD23F,0xc9c3d6,0x8a5a2b],killWord:'bots scrapped',splashColors:[0xFFFDF6,0xFFD23F],
+    intro:['Agent Mallard, Duck Intelligence Agency. Our feathered informants report that <b>Baron von Toast</b> has built a machine that will turn every loaf in the world permanently stale. No more crusts for ducks at the pond. Ever.','Infiltrate his bread factory, fight through his toaster army, and shut the machine down. You’ll be armed with the finest seed-based weaponry the Agency has.'],
+    player:{hp:100,speed:6.4},
+    weapons:[{name:'Seed Blaster',auto:true,rate:.1,dmg:15,spread:.03,tracer:0xFFD23F,impact:0xFFD23F,model:gunModel(0x2BB673,0xFFD23F,{tank:0xFFD23F}),sound:()=>{noise(.05,'highpass',3000,.12);beep(1400,.02,'square',.02)}},
+      {name:'Quack Cannon',rate:.9,dmg:13,pellets:9,spread:.14,ammo:24,tracer:0x7FC8F8,kick:.2,model:gunModel(0xFF9F43,0x1D1A2F,{len:.6,bore:.09,blen:.3}),sound:()=>{sweep(700,200,.18,'sawtooth',.1);noise(.15,'lowpass',1200,.3)}},
+      {name:'Egg Launcher',rate:1,dmg:75,ammo:10,proj:{speed:19,grav:7,splash:4.2,color:0xFFFDF6,size:.22},kick:.2,model:gunModel(0x7FC8F8,0xFFFDF6,{drum:0xFFFDF6,bore:.1}),sound:()=>{beep(300,.12,'triangle',.08);noise(.1,'lowpass',600,.2)}}],
+    enemies:{
+      t:{name:'Toaster Bot',hp:50,speed:2.3,kind:'ranged',range:20,cooldown:1.7,score:150,height:1.9,drop:.28,proj:{speed:14,color:0xFF9F43,dmg:10,size:.14},build:toaster,animSpeed:12},
+      b:{name:'Baguette Guard',hp:60,speed:3.4,kind:'melee',dmg:14,cooldown:1,score:120,height:2.6,drop:.2,build:baguette,hop:true,attackSound:()=>noise(.1,'lowpass',400,.3)},
+      f:{name:'Muffin Drone',hp:26,speed:4.3,kind:'ranged',range:14,cooldown:1.3,score:130,height:2.6,hover:2.2,radius:.45,proj:{speed:16,color:0x2d6fd6,dmg:7,size:.1},build:muffin},
+      V:{name:'Baron von Toast',hp:1600,speed:1.5,kind:'ranged',range:32,cooldown:1,score:3500,height:2.2,radius:1,proj:{speed:16,color:0xF2352A,dmg:14,size:.25},build:T=>{const g=toaster(T);g.scale.setScalar(2.3);part(T,cy(T,.3,.3,.35,12),M(T,0x1D1A2F),0,2.1,0,g);part(T,cy(T,.45,.45,.04,16),M(T,0x1D1A2F),0,1.95,0,g);return g}}},
+    boss:{ch:'V',deathLine:'Baron von Toast is… toast. The stale-ray fizzles out.',special:(e,dt,api,{dist,dx,dz})=>{e.spT=(e.spT||3)-dt;if(e.spT<=0){e.spT=c.pick(3.6,2.8,2);for(let k=-3;k<=3;k++)api.enemyShoot(e,e.d.proj,dx,dz,dist,k*.14);api.say('“TASTE MY CRUMBS!”',1200)}const fr=e.hp/e.max;if(fr<.7&&e.phase<1||fr<.35&&e.phase<2){e.phase++;api.say('The Baron launches muffin drones!',1600);for(let k=0;k<4;k++){const s=api.spawn('f',e.x+Math.cos(k*1.6)*3,e.z+Math.sin(k*1.6)*3);s.seen=true}}}},
+    levels:[
+      {name:'The Loading Dock',goal:'Sneak through the dock and find the way in',objective:'exit',theme:Object.assign({},INDUS,{ceil:null,outside:TX.noise('#4a4858','#2a2838',1500),sky:0x10132a,fog:0x10132a}),brief:['Night. The factory loading dock is guarded by toaster bots. They shoot hot crumbs, so use the crates for cover.','Find the service entrance (the glowing green pad).'],talk:[['HQ','“Agent Mallard, radio check. Remember: we need that factory bread-free by dawn.”'],['You','“Quack. I mean, copy.”']],after:'Inside, the air smells like burnt toast and evil. A map on the wall points to the conveyor hall.',
+        map:['######################','#P...=....#....t.....#','#....=....#..=....=..#','#..=......#..=..t.=..#','#..=..t..............#','#.........#####..#####','###..######.......f..#','#.....t..=.......=...#','#.=..........b...=...#','#.=...b..=...........#','#.....a..=....t...h.E#','######################']},
+      {name:'Conveyor Hall',goal:'Grab the keycard and open the proofing room',objective:'exit',theme:INDUS,brief:['Conveyor belts carry millions of loaves toward the stale-ray. Baguette guards patrol here and they charge fast.','A keycard is stashed somewhere in the hall. You need it for the heavy doors.'],talk:[['HQ','“Those baguettes are 40% crust, 60% attitude. Don’t let them corner you.”']],after:'Behind the doors: the proofing room, where the Baron keeps his dough reserves.',
+        map:['########################','#P......L.....#........#','#.====.=====..#..====..#','#............b#....t...#','#.====.=====..#..====..#','#k...t........D........#','#######.#######.########','#..f....#h.....#...b...#','#.=.=.=.#..t...#.=.=.=.#','#.......#..L...#.......#','#.=.=.=.D......D.=.=.t.#','#....b..#...a..#.......#','###########E############']},
+      {name:'The Proofing Room',goal:'Survive the dough guard',objective:'waves',waves:[[['t',4],['b',3]],[['f',5],['b',3]],[['t',5],['f',4],['b',3]],[['t',6],['f',6],['b',4]]],theme:Object.assign({},INDUS,{wall:TX.bricks('#e0b86b','#b87e45'),floor:TX.tiles('#e8c48a','#d9a066',4),lampCol:0xffb86b}),brief:['Alarms are blaring. The Baron is sending everything he has into the proofing room.','Four waves. Keep moving, and use the Egg Launcher on groups.'],talk:[['Baron von Toast','“A DUCK? In MY factory? Release the muffins!”']],after:'Silence, then the elevator dings. It only goes one way: up to the Baron’s tower.',
+        map:['####################','#S......L.......S..#','#..=..........=....#','#......=...=.......#','#S.................#','#.......h...a......#','#..=.....P.....=...#','#S.................#','#......=...=......S#','#S......L..........#','#########E##########']},
+      {name:'The Baron’s Tower',goal:'Defeat Baron von Toast',objective:'boss',theme:Object.assign({},INDUS,{wall:TX.panel('#3a3552','#F2352A'),wall2:TX.hazard,sky:0x0a0812,lampCol:0xff5a3a}),brief:['The stale-ray hums at the top of the tower. The Baron himself is a two-ton toaster mech.','He fires spreads of crumbs and calls in drones when damaged. Strafe, and use the pillars.'],talk:[['Baron von Toast','“Every loaf… STALE! Every crust… MINE!”'],['You','“Not while I’ve got feathers.”']],
+        map:['####################','#h.......L........a#','#..%%..........%%..#','#..%%.....B....%%..#','#..................#','#......%....%......#','#..................#','#..%%..........%%..#','#..%%.....P....%%..#','#a.......E........h#','####################']}],
+    winTitle:'Mission accomplished, Agent Mallard!',epilogue:'The stale-ray explodes into a shower of breadcrumbs. Ducks at every pond in the country look up to the sky and quack in joy. The Agency awards you the Golden Crust medal.'})
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

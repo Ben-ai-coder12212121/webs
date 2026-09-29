@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gnome Patrol | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="gnome"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Gnome Patrol</h1><p>3D third-person horror-comedy. Garden gnomes only move when your flashlight isn’t on them.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Gnome Patrol: game code ===================== */
+function freezeAI(e,dt,api,{dist,see}){const P=api.P;const fwd=P.yaw;const toE=Math.atan2(-(e.x-P.x),-(e.z-P.z));let da=toE-fwd;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;const lit=see&&dist<24&&Math.abs(da)<.42;e.frozenNow=lit;if(lit){e.seen=true;if(!e.wasLit){beep(1200,.03,'sine',.03)}e.wasLit=true;return true}e.wasLit=false;return false}
+function heroKid(T){const g=humanoid(T,{skin:0xc68642,shirt:0x2BB673,pants:0x2d4fb3,hair:0x1D1A2F});part(T,cy(T,.18,.18,.6,12),M(T,0x7FC8F8),0,1.25,-.3,g);return g}
+G.push({id:'gnome',name:'Gnome Patrol',kind:'shooter',levels:true,wide:true,tint:'#101a2c',blurb:'3D third-person horror-comedy. Garden gnomes only move when your flashlight isn’t on them.',fmt:b=>b+' pts',
+art:'<rect width="120" height="72" fill="#0a0c1c"/><path d="M40 72L90 20L120 40L120 72Z" fill="#fff4d6" opacity=".25"/><g transform="translate(88 44)"><path d="M-10 0L0 -26L10 0Z" fill="#F2352A" stroke="#1D1A2F" stroke-width="2"/><circle cy="4" r="9" fill="#f1c7a0" stroke="#1D1A2F" stroke-width="2"/><path d="M-9 8Q0 26 9 8Z" fill="#fff" stroke="#1D1A2F" stroke-width="2"/><circle cx="-3" cy="2" r="1.8" fill="#1D1A2F"/><circle cx="3" cy="2" r="1.8" fill="#1D1A2F"/></g><circle cx="20" cy="14" r="5" fill="#fff4d6"/>',
+run(root,c){
+  const gnome=(T,s)=>{const g=new T.Group();part(T,cy(T,.35,.45,.8,14),M(T,pick([0x2d6fd6,0x2BB673,0xB9A7FF])),0,.5,0,g);part(T,sp(T,.3),M(T,0xf1c7a0),0,1.1,0,g);const beard=part(T,new T.ConeGeometry(.3,.6,12),M(T,0xffffff),0,.8,.12,g);beard.rotation.x=Math.PI;part(T,new T.ConeGeometry(.32,.8,12),M(T,0xF2352A),0,1.6,0,g);part(T,sp(T,.1),M(T,0xff9f9f),0,1.08,.28,g);const e1=part(T,sp(T,.05),M(T,0x1D1A2F,{emissive:0x000000}),-.1,1.18,.26,g),e2=part(T,sp(T,.05),M(T,0x1D1A2F),.1,1.18,.26,g);g.userData.eyes=[e1,e2];if(s)g.scale.setScalar(s);return g};
+  const shroom=T=>{const g=new T.Group();part(T,cy(T,.2,.25,.8,12),M(T,0xf4f0ea),0,.4,0,g);const cap=part(T,sp(T,.6),M(T,0x8a2be2,{emissive:0x3a1060}),0,.95,0,g);cap.scale.y=.6;for(let k=0;k<6;k++)part(T,sp(T,.08),M(T,0xffffff),Math.cos(k)*.4,1.15,Math.sin(k)*.4,g);return g};
+  return runShooter(root,c,{id:'gnome',short:'Gnome Patrol',view:'tps',hero:heroKid,flashlight:true,camDist:4,tag:'A Detourr original · 3D third-person',title:'Gnome Patrol',hitColor:[0x7FC8F8,0xffffff],killColors:[0x7FC8F8,0xF2352A,0xffffff],killWord:'gnomes soaked',
+    intro:['Grandma always said: “Never turn your back on the garden gnomes.” You thought she was joking. Then she went to bed, and the gnomes started moving.','They only move when nobody is looking at them. Your flashlight freezes them in place. Your water blaster knocks them back to being lawn decor. Protect Grandma’s house until sunrise.'],
+    player:{hp:100,speed:5.8},
+    weapons:[{name:'Super Soaker',auto:true,rate:.09,dmg:12,spread:.03,tracer:0x7FC8F8,impact:0x7FC8F8,model:gunModel(0x2BB673,0x7FC8F8,{tank:0x7FC8F8}),sound:()=>noise(.05,'bandpass',2200,.12)},
+      {name:'Hose Blast',rate:.8,dmg:13,pellets:8,spread:.14,ammo:24,tracer:0xbfe6ff,kick:.2,model:gunModel(0xF2352A,0x7FC8F8,{len:.5,bore:.09}),sound:()=>noise(.25,'lowpass',1500,.35)},
+      {name:'Water Balloons',rate:.8,dmg:70,ammo:12,proj:{speed:16,grav:8,splash:3.8,color:0x7FC8F8,size:.22},model:T=>{const g=new T.Group();part(T,sp(T,.14),M(T,0x2d6fd6),0,0,-.25,g);return g},sound:()=>noise(.1,'lowpass',700,.2)}],
+    splashColors:[0x7FC8F8,0xbfe6ff,0xffffff],
+    enemies:{
+      g:{name:'Garden Gnome',hp:48,speed:6.5,kind:'melee',dmg:14,cooldown:1,score:120,height:1.9,radius:.45,drop:.2,build:T=>gnome(T),ai:(e,dt,api,info)=>{const f=freezeAI(e,dt,api,info);(e.m.userData.eyes||[]).forEach(o=>o.material.emissive.setHex(f?0x000000:0xff2020));return f},attackSound:()=>sweep(900,300,.12,'square',.05)},
+      p:{name:'Spore Shroom',hp:40,speed:0,kind:'ranged',range:18,cooldown:1.8,score:140,height:1.4,radius:.6,proj:{speed:11,color:0xb070ff,dmg:9,size:.22},build:shroom,sight:22},
+      Q:{name:'The Gnome King',hp:1400,speed:3.2,kind:'melee',dmg:26,reach:2.4,cooldown:1.1,score:3500,height:2,radius:1,build:T=>{const g=gnome(T,2.4);part(T,cy(T,.25,.3,.2,5),M(T,0xFFD23F),0,1.95,0,g);return g},ai:(e,dt,api,info)=>{const f=freezeAI(e,dt,api,info);if(f){e.slowT=(e.slowT||0)+dt;if(e.slowT<1.5)return true}else e.slowT=0;return false}}},
+    boss:{ch:'Q',deathLine:'The Gnome King topples over and shatters into harmless garden ceramic.',special:(e,dt,api)=>{const fr=e.hp/e.max;if(fr<.66&&e.phase<1||fr<.33&&e.phase<2){e.phase++;api.say('The King summons his court!',1600);for(let k=0;k<4;k++){const s=api.spawn('g',e.x+Math.cos(k*1.6)*4,e.z+Math.sin(k*1.6)*4);s.seen=true}}}},
+    levels:[
+      {name:'Grandma’s Garden',goal:'Find Grandma’s 5 lost cats',objective:'collect',need:5,theme:GARDEN,brief:['Grandma’s cats got loose in the hedge maze. The gnomes are out there too.','Point your light at any gnome to freeze it, then soak it. Never turn your back on one.'],talk:[['Grandma (from the window)','“Sweetie? Bring my kitties in, it’s cold!”'],['You','“On it, Grandma. Please stay inside.”']],after:'All five cats are safe. Something in the greenhouse knocked over a flowerpot.',
+        map:['######################','#P...g....#...*....g.#','#.####.##.#.####.##..#','#.#..*.#..#....#..#..#','#.#.g..#.......#.g#..#','#...##...####.....*..#','###.#..g.#..#.##.###.#','#...#.##.#*.#..#...#.#','#.*.#.#..#..#..g.#.#.#','#.###.#..#.#.p.....#.#','#...h.#.g......a.#...#','######################'],collectModel:null},
+      {name:'The Greenhouse',goal:'Clear the greenhouse',objective:'clear',theme:Object.assign({},GARDEN,{wall:(x,w,h)=>{x.fillStyle='#1f3a2a';x.fillRect(0,0,w,h);x.strokeStyle='#8fd0a0';x.lineWidth=3;for(let i=0;i<=w;i+=64)x.strokeRect(i,0,64,h/2),x.strokeRect(i,h/2,64,h/2)},amb:.18}),brief:['The greenhouse is full of spore shrooms that spit purple goo, and gnomes hiding between the planters.','Clear everything out.'],after:'Deep under the greenhouse, a tunnel leads to a glowing grotto.',
+        map:['####################','#P.....=....=...p..#','#..==..=.g..=......#','#..........g....==.#','#.p..==..........g.#','#........h...==....#','#.g..==.....a......#','#..........g....p..#','#.==..p.......==...#','#......g...........#','#########E##########']},
+      {name:'The Gnome Grotto',goal:'Stop the Gnome King',objective:'boss',theme:Object.assign({},GARDEN,{wall:TX.bricks('#4a3a5a','#2a2038'),floor:TX.noise('#2a2a3a','#4a3a5a',2000),amb:.2,lampCol:0x9a6bff}),brief:['The Gnome King is huge, and your light only slows him down for a moment.','Keep him in your beam, back up, and soak him. He calls his court when he’s hurt.'],talk:[['The Gnome King','“You cannot watch us ALL, child.”']],
+        map:['####################','#h........L.......a#','#..%%..........%%..#','#..%%.....B....%%..#','#..................#','#.....=......=.....#','#..................#','#..%%..........%%..#','#..%%....P.....%%..#','#a.......E........h#','####################']}],
+    collectName:'Cat',collectColor:0xFF9F43,exitLine:'All the cats are safe! Head for the back porch (green light).',
+    winTitle:'Sunrise!',epilogue:'The first rays of sun hit the garden and every gnome freezes for good. Grandma comes out in her slippers with hot cocoa. “See? I told you about the gnomes.”'})
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

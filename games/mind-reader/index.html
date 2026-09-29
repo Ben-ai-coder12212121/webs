@@ -1,0 +1,114 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mind Reader | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="mindreader"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Mind Reader</h1><p>Think of a famous person, an animal or an everyday thing. The crystal ball asks yes-or-no questions and tries to read your mind. Stump it and it learns your answer.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Mind Reader: game code ===================== */
+G.push({id:'mindreader',name:'Mind Reader',kind:'weird',tint:'#3a2a6a',lower:true,blurb:'Think of a famous person, an animal or an everyday thing. The crystal ball asks yes-or-no questions and tries to read your mind. Stump it and it learns your answer.',fmt:b=>b+' questions',
+art:'<rect width="120" height="72" fill="#3a2a6a"/><circle cx="60" cy="34" r="22" fill="#B9A7FF" stroke="#1D1A2F" stroke-width="3"/><circle cx="52" cy="27" r="6" fill="#fff" opacity=".6"/><path d="M42 58h36l-5-8H47z" fill="#FFD23F" stroke="#1D1A2F" stroke-width="3"/><text x="60" y="41" font-size="16" text-anchor="middle" fill="#3a2a6a">?</text><g fill="#FFD23F"><circle cx="20" cy="16" r="2"/><circle cx="100" cy="20" r="2.5"/><circle cx="92" cy="56" r="1.8"/></g>',
+run(root,c){
+  root.append(el('style',null,".mr-card{width:min(560px,100%);background:linear-gradient(180deg,#2a1f55,#1D1A2F);color:#fff;border:3px solid #1D1A2F;border-radius:22px;box-shadow:6px 6px 0 #1D1A2F;padding:22px 20px;text-align:center}.mr-orb{font-size:72px;line-height:1;filter:drop-shadow(0 0 18px #B9A7FF)}.mr-orb.think span{display:inline-block;animation:mrp .6s ease}@keyframes mrp{0%{transform:scale(.85) rotate(-8deg)}60%{transform:scale(1.08) rotate(4deg)}100%{transform:none}}.mr-qn{margin:8px 0 2px;color:#FFD23F;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:13px}.mr-q{font:400 26px/1.25 'Bagel Fat One',system-ui;min-height:66px;margin:6px 0 14px}.mr-name{display:block;font-size:34px;color:#FFD23F;margin-bottom:6px}.mr-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.mr-btns .btn{min-width:96px}.mr-card .btn:not(.primary){color:#1D1A2F}.mr-foot{display:flex;gap:8px;justify-content:center;margin-top:14px}.mr-foot .btn{font-size:13px;opacity:.85}.mr-in{flex:1 1 220px;border:3px solid #1D1A2F;border-radius:12px;padding:10px 12px;font:700 17px Figtree,system-ui}"));
+  /* questions: code -> text */
+  const Q={p:'Is it a real person?',a:'Is it an animal?',t:'Is it an object or a thing (not alive)?',
+    f:'Is this person female?',alive:'Are they alive today?',usa:'Are they American?',uk:'Are they British?',eu:'Are they from mainland Europe?',asia:'Are they from Asia?',afr:'Are they from Africa?',lat:'Are they from Latin America or the Caribbean?',
+    old:'Were they born before 1900?',anc:'Did they live more than 1,500 years ago?',mus:'Are they known for music?',sing:'Are they a singer?',rap:'Are they a rapper?',act:'Are they an actor or actress?',ath:'Are they an athlete?',socc:'Do they play soccer (football)?',bball:'Do they play basketball?',tennis:'Do they play tennis?',
+    sci:'Are they a scientist?',inv:'Are they known as an inventor?',lead:'Were they a political leader (president, prime minister, king, queen or emperor)?',uspres:'Were they a US president?',roy:'Are they royalty?',war:'Are they known for leading armies?',wri:'Are they known as a writer?',art:'Are they a painter or artist?',
+    biz:'Are they a business leader or billionaire?',net:'Did they get famous on the internet?',tv:'Are they known as a TV host?',expl:'Are they known as an explorer or pioneer of travel?',space:'Have they been to space?',nob:'Did they win a Nobel Prize?',
+    mam:'Is it a mammal?',bird:'Is it a bird?',fish:'Is it a fish?',rep:'Is it a reptile or an amphibian?',bug:'Is it an insect, spider or other bug?',pet:'Do people keep it as a pet?',farm:'Is it a farm animal?',wild:'Does it live in the wild?',ext:'Is it extinct?',
+    sea:'Does it live in water, or is it used on water?',fly:'Can it fly?',big:'Is it bigger than an adult person?',small:'Is it smaller than a cat?',meat:'Does it eat other animals?',danger:'Can it be dangerous to people?',wafr:'Does it live wild in Africa?',
+    stripe:'Does it have stripes?',spot:'Does it have spots?',night:'Is it mostly active at night?',legs4:'Does it walk on four legs?',horn:'Does it have horns, antlers or tusks?',fur:'Does it have fur?',cold:'Does it live somewhere cold and icy?',
+    elec:'Does it use electricity or batteries?',screen:'Does it have a screen?',kit:'Would you find it in a kitchen?',food:'Can you eat or drink it?',sweet:'Is it sweet?',fruit:'Is it a fruit or a vegetable?',drink:'Is it a drink?',wear:'Do you wear it?',toy:'Is it a toy or used for playing?',
+    furn:'Is it furniture or something in a living room or bedroom?',instr:'Is it a musical instrument?',wheel:'Does it have wheels?',veh:'Is it a vehicle?',metal:'Is it mostly made of metal?',wood:'Is it usually made of wood?',out:'Is it mostly used outdoors?',sport:'Is it used in a sport?',round:'Is it round?',school:'Would you use it at school or in an office?',tool:'Is it a tool?'};
+  const KB=[
+    ['Albert Einstein','p eu old sci nob'],['Isaac Newton','p uk old sci inv'],['Marie Curie','p f eu old sci nob'],['Leonardo da Vinci','p eu old art inv sci'],['Pablo Picasso','p eu old art'],['Vincent van Gogh','p eu old art'],['William Shakespeare','p uk old wri'],
+    ['Cleopatra','p f afr anc lead roy'],['Julius Caesar','p eu anc lead war'],['Napoleon Bonaparte','p eu old lead war roy'],['Abraham Lincoln','p usa old lead uspres'],['George Washington','p usa old lead uspres war'],['Barack Obama','p alive usa lead uspres nob wri'],
+    ['Donald Trump','p alive usa lead uspres biz tv'],['Joe Biden','p alive usa lead uspres'],['Queen Elizabeth II','p f uk roy lead'],['King Charles III','p alive uk roy lead'],['Nelson Mandela','p afr lead nob'],['Mahatma Gandhi','p asia old lead'],
+    ['Martin Luther King Jr.','p usa nob'],['Winston Churchill','p uk old lead nob wri war'],['Genghis Khan','p asia old lead war roy'],['Christopher Columbus','p eu old expl'],['Neil Armstrong','p usa space expl'],['Amelia Earhart','p f usa expl'],['Marco Polo','p eu old expl wri'],
+    ['Thomas Edison','p usa old inv biz'],['Nikola Tesla','p eu old inv sci'],['Steve Jobs','p usa biz inv'],['Elon Musk','p alive usa biz inv'],['Bill Gates','p alive usa biz'],['Mark Zuckerberg','p alive usa biz'],['Jeff Bezos','p alive usa biz space'],
+    ['Taylor Swift','p alive f usa mus sing'],['Beyoncé','p alive f usa mus sing act'],['Michael Jackson','p usa mus sing'],['Elvis Presley','p usa mus sing act'],['Ed Sheeran','p alive uk mus sing'],['Adele','p alive f uk mus sing'],['Billie Eilish','p alive f usa mus sing'],
+    ['Ariana Grande','p alive f usa mus sing act'],['Lady Gaga','p alive f usa mus sing act'],['Drake','p alive mus rap sing'],['Eminem','p alive usa mus rap'],['Snoop Dogg','p alive usa mus rap'],['Bad Bunny','p alive lat mus rap sing'],['Shakira','p alive f lat mus sing'],
+    ['Rihanna','p alive f lat mus sing biz'],['Wolfgang Amadeus Mozart','p eu old mus'],['Ludwig van Beethoven','p eu old mus'],['Lionel Messi','p alive lat ath socc'],['Cristiano Ronaldo','p alive eu ath socc'],['Pelé','p lat ath socc'],['Neymar','p alive lat ath socc'],
+    ['Kylian Mbappé','p alive eu ath socc'],['LeBron James','p alive usa ath bball'],['Michael Jordan','p alive usa ath bball biz'],['Stephen Curry','p alive usa ath bball'],['Serena Williams','p alive f usa ath tennis'],['Roger Federer','p alive eu ath tennis'],
+    ['Usain Bolt','p alive lat ath'],['Muhammad Ali','p usa ath'],['Tom Brady','p alive usa ath'],['Simone Biles','p alive f usa ath'],['Michael Phelps','p alive usa ath'],['Tiger Woods','p alive usa ath'],['Leonardo DiCaprio','p alive usa act'],
+    ['Tom Hanks','p alive usa act'],['Dwayne Johnson','p alive usa act ath'],['Zendaya','p alive f usa act sing'],['Will Smith','p alive usa act rap'],['Jackie Chan','p alive asia act'],['Keanu Reeves','p alive act'],['Oprah Winfrey','p alive f usa tv biz'],
+    ['MrBeast','p alive usa net biz'],['PewDiePie','p alive eu net'],['Walt Disney','p usa biz art'],['J.K. Rowling','p alive f uk wri'],['Stephen Hawking','p uk sci wri'],['Charles Darwin','p uk old sci wri'],['Galileo Galilei','p eu old sci inv'],
+    ['Frida Kahlo','p f lat art'],['Anne Frank','p f eu wri'],['Confucius','p asia anc wri'],['Aristotle','p eu anc sci wri'],['Tutankhamun','p afr anc roy lead'],['Harriet Tubman','p f usa old'],['Rosa Parks','p f usa'],['Malala Yousafzai','p alive f asia nob wri'],
+    ['Greta Thunberg','p alive f eu'],['Kim Kardashian','p alive f usa tv biz'],['Gordon Ramsay','p alive uk tv'],
+    ['Dog','a mam pet legs4 fur meat'],['Cat','a mam pet legs4 fur meat night'],['Hamster','a mam pet legs4 fur small night'],['Rabbit','a mam pet farm legs4 fur small'],['Goldfish','a fish pet sea small'],['Parrot','a bird pet fly wild'],['Horse','a mam farm pet legs4 big fur'],
+    ['Cow','a mam farm legs4 big fur horn'],['Pig','a mam farm legs4'],['Sheep','a mam farm legs4 fur'],['Goat','a mam farm legs4 fur horn'],['Chicken','a bird farm'],['Duck','a bird farm fly sea wild'],['Lion','a mam wild wafr meat danger legs4 fur big'],
+    ['Tiger','a mam wild meat danger legs4 fur stripe big'],['Zebra','a mam wild wafr legs4 stripe fur big'],['Giraffe','a mam wild wafr legs4 spot big'],['Elephant','a mam wild wafr legs4 big danger horn'],['Cheetah','a mam wild wafr meat legs4 spot fur danger'],
+    ['Leopard','a mam wild wafr meat legs4 spot fur danger night'],['Hippo','a mam wild wafr legs4 big danger sea'],['Rhino','a mam wild wafr legs4 big horn danger'],['Gorilla','a mam wild wafr big fur'],['Monkey','a mam wild fur'],['Kangaroo','a mam wild fur'],
+    ['Koala','a mam wild fur night'],['Panda','a mam wild fur legs4 big'],['Polar bear','a mam wild meat danger legs4 fur big cold sea'],['Brown bear','a mam wild meat danger legs4 fur big'],['Wolf','a mam wild meat danger legs4 fur night cold'],['Fox','a mam wild meat legs4 fur night'],
+    ['Deer','a mam wild legs4 fur horn'],['Moose','a mam wild legs4 fur horn big cold'],['Bat','a mam wild fly night small fur'],['Mouse','a mam wild pet small fur legs4 night'],['Squirrel','a mam wild small fur legs4'],['Hedgehog','a mam wild pet small legs4 night'],
+    ['Raccoon','a mam wild legs4 fur night stripe'],['Skunk','a mam wild legs4 fur stripe night'],['Sloth','a mam wild fur'],['Camel','a mam farm legs4 big fur'],['Penguin','a bird wild sea cold meat'],['Eagle','a bird wild fly meat'],['Owl','a bird wild fly meat night'],
+    ['Flamingo','a bird wild fly sea'],['Ostrich','a bird wild wafr big'],['Peacock','a bird wild spot'],['Dolphin','a mam wild sea meat'],['Whale','a mam wild sea big'],['Shark','a fish wild sea meat danger big'],['Octopus','a wild sea meat'],['Jellyfish','a wild sea danger'],
+    ['Crab','a wild sea meat small'],['Seal','a mam wild sea meat cold fur'],['Clownfish','a fish wild sea small stripe pet'],['Snake','a rep wild meat danger pet'],['Crocodile','a rep wild sea meat danger big wafr legs4'],['Turtle','a rep wild pet sea legs4'],
+    ['Frog','a rep wild sea small legs4 meat'],['Chameleon','a rep wild pet small legs4'],['Bee','a bug wild fly small stripe danger'],['Butterfly','a bug wild fly small'],['Ant','a bug wild small'],['Spider','a bug wild small meat'],['Mosquito','a bug wild fly small danger night'],
+    ['Ladybug','a bug wild fly small spot'],['Scorpion','a bug wild small meat danger'],['Snail','a wild small'],['T-Rex','a rep ext meat danger big'],['Woolly mammoth','a mam ext big fur horn cold legs4'],['Dodo','a bird ext'],
+    ['Smartphone','t elec screen school small'],['Laptop','t elec screen school'],['Television','t elec screen furn'],['Refrigerator','t elec kit big metal'],['Microwave','t elec kit metal'],['Toaster','t elec kit metal'],['Blender','t elec kit'],['Kettle','t elec kit metal'],
+    ['Spoon','t kit metal small'],['Fork','t kit metal small'],['Frying pan','t kit metal tool round'],['Car','t veh wheel metal out big'],['Bicycle','t veh wheel metal out sport'],['Airplane','t veh wheel metal out big fly'],['Helicopter','t veh metal out big fly'],
+    ['Boat','t veh out big sea'],['Train','t veh wheel metal out big elec'],['Skateboard','t wheel out sport toy wood'],['Rocket','t veh metal big fly'],['Drone','t elec fly toy out'],['Kite','t toy out fly'],['Soccer ball','t sport round toy out'],['Basketball','t sport round toy'],
+    ['Tennis racket','t sport out'],['Baseball bat','t sport wood out'],['Chess set','t toy wood'],['Building bricks','t toy small'],['Teddy bear','t toy'],['Jigsaw puzzle','t toy'],['Video game console','t elec toy'],['Guitar','t instr wood'],['Piano','t instr furn big wood'],
+    ['Drum','t instr round'],['Violin','t instr wood'],['Trumpet','t instr metal'],['Chair','t furn wood'],['Bed','t furn big'],['Sofa','t furn big'],['Table','t furn wood'],['Lamp','t elec furn'],['Clock','t round elec school'],['Pencil','t school wood small'],
+    ['Book','t school'],['Backpack','t school wear'],['Scissors','t school metal tool small'],['Calculator','t elec school screen small'],['Hammer','t tool metal wood'],['Screwdriver','t tool metal small'],['Umbrella','t out'],['Hat','t wear'],['Shoe','t wear'],
+    ['Sunglasses','t wear small out'],['Wristwatch','t wear elec round small metal'],['T-shirt','t wear'],['Pizza','t food round'],['Apple','t food fruit round sweet small'],['Banana','t food fruit sweet'],['Carrot','t food fruit'],['Chocolate','t food sweet'],
+    ['Ice cream','t food sweet cold'],['Bread','t food kit'],['Egg','t food kit small round'],['Cheese','t food kit'],['Hamburger','t food round'],['Milk','t food drink kit'],['Coffee','t food drink kit'],['Orange juice','t food drink sweet kit'],
+    ['Candle','t furn small'],['Key','t metal small tool'],['Coin','t metal round small'],['Light bulb','t elec round small'],['Mirror','t furn'],['Toothbrush','t small'],['Tent','t out big']];
+  const learned=S.get('mind_learn',[]);
+  const ents=()=>KB.map(([n,a])=>({n,a:new Set(a.split(' '))})).concat(learned.map(l=>({n:l.n,a:new Set(l.a),learned:true})));
+  const PY={y:.94,py:.72,dk:.5,pn:.28,n:.06};
+  let E,w,asked,hist,excl,state,guessE=null,guesses=0;
+  const card=el('div',{class:'mr-card'});const orb=el('div',{class:'mr-orb'},el('span',null,'🔮'));const qn=el('div',{class:'mr-qn'});const qt=el('div',{class:'mr-q'});const btns=el('div',{class:'mr-btns'});const foot=el('div',{class:'mr-foot'});
+  card.append(orb,qn,qt,btns,foot);root.append(card,el('p',{class:'hint'},'Think of a famous real person, an animal or an everyday thing. Answer honestly, and “Don’t know” is fine.'));
+  const B=(t,cls,fn)=>{const b=el('button',{type:'button',class:'btn '+(cls||'')},t);b.addEventListener('click',fn);return b};
+  function newGame(){E=ents();w=E.map(()=>1);asked=[];hist=[];excl=new Set();guesses=0;guessE=null;state='ask';next()}
+  function post(){let s=0;const p=w.map((v,i)=>excl.has(i)?0:v);p.forEach(v=>s+=v);return p.map(v=>s?v/s:0)}
+  function pick(){const p=post();let best=null,bs=-1;for(const q in Q){if(asked.includes(q))continue;let pt=0;E.forEach((e,i)=>{if(e.a.has(q))pt+=p[i]});if(pt<.001||pt>.999)continue;const H=-(pt*Math.log2(pt)+(1-pt)*Math.log2(1-pt));if(H>bs){bs=H;best=q}}return best}
+  function top(){const p=post();let bi=-1,bp=0;p.forEach((v,i)=>{if(v>bp){bp=v;bi=i}});return{i:bi,p:bp}}
+  function answer(q,k){hist.push({q,k,w:w.slice()});asked.push(q);E.forEach((e,i)=>{w[i]*=e.a.has(q)?PY[k]:1-PY[k]});beep(420+asked.length*18,.05,'triangle',.04);next()}
+  function next(){btns.innerHTML='';foot.innerHTML='';orb.classList.remove('think');void orb.offsetWidth;orb.classList.add('think');const tp=top();const q=pick();
+    if(tp.i>=0&&((tp.p>.82&&asked.length>=6)||!q||asked.length>=22)){return guess(tp.i)}
+    qn.textContent='Question '+(asked.length+1);qt.textContent=Q[q];
+    [['Yes','y','primary'],['Probably','py'],['Don’t know','dk'],['Probably not','pn'],['No','n','primary']].forEach(([t,k,cls])=>btns.append(B(t,cls,()=>answer(q,k))));
+    if(hist.length)foot.append(B('↶ Back','',()=>{const h=hist.pop();asked.pop();w=h.w;next()}));foot.append(B('Start over','',newGame))}
+  function guess(i){guessE=i;guesses++;state='guess';const e=E[i];qn.textContent='I think it’s…';qt.innerHTML='';qt.append(el('b',{class:'mr-name'},e.n),el('div',null,'Am I right?'));beep(660,.12,'triangle',.06);c.after(()=>beep(880,.16,'triangle',.06),120);
+    btns.append(B('Yes! 🎉','primary',()=>win(e)),B('No','',()=>{excl.add(i);if(guesses>=3||asked.length>=26)giveUp();else next()}))}
+  function win(e){state='won';const n=asked.length;c.best(n,true);qn.textContent='Read your mind!';qt.innerHTML='';qt.append(el('b',{class:'mr-name'},e.n),el('div',null,'Got it in '+n+' question'+(n===1?'':'s')+'.'));btns.innerHTML='';btns.append(B('Play again','primary',newGame));[523,659,784,1046].forEach((f,k)=>c.after(()=>beep(f,.15,'triangle',.06),k*100))}
+  function giveUp(){state='learn';qn.textContent='You win this time!';qt.innerHTML='';qt.append(el('div',null,'Who were you thinking of? Tell me and I’ll remember for next time.'));btns.innerHTML='';
+    const inp=el('input',{class:'mr-in',maxlength:'40',placeholder:'Type the name…'});['keydown','keyup','keypress'].forEach(ev=>inp.addEventListener(ev,e=>e.stopPropagation()));
+    const save=()=>{const n=inp.value.trim().replace(/[<>]/g,'').slice(0,40);if(n.length<2){inp.focus();return}const yes=hist.filter(h=>h.k==='y'||h.k==='py').map(h=>h.q);const L=S.get('mind_learn',[]).filter(l=>l.n.toLowerCase()!==n.toLowerCase());L.push({n,a:yes});S.set('mind_learn',L.slice(-200));learned.splice(0,learned.length,...S.get('mind_learn',[]));
+      qt.innerHTML='';qt.append(el('div',null,'Thanks! I’ll remember '+n+'.'));btns.innerHTML='';btns.append(B('Play again','primary',newGame))};
+    btns.append(inp,B('Teach me','primary',save),B('Skip','',newGame))}
+  newGame();c.stat('Mind Reader · '+(KB.length+learned.length)+' things I know')}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

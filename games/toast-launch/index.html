@@ -2,43 +2,91 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Toast Launch: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="Fire a slice of toast out of a toaster. Bounce it as far as it will go.">
-<link rel="canonical" href="https://detourr.netlify.app/games/toast-launch/">
+<link rel="canonical" href="https://detourr.net/games/toast-launch/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="Toast Launch: play free on Detourr"><meta property="og:description" content="Fire a slice of toast out of a toaster. Bounce it as far as it will go.">
-<meta property="og:url" content="https://detourr.netlify.app/games/toast-launch/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/toast-launch/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Toast Launch", "description": "Fire a slice of toast out of a toaster. Bounce it as far as it will go.", "url": "https://detourr.netlify.app/games/toast-launch/", "genre": "Weird", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
-<style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Toast Launch", "description": "Fire a slice of toast out of a toaster. Bounce it as far as it will go.", "url": "https://detourr.net/games/toast-launch/", "genre": "Weird", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="toast"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#toast" style="background:var(--sun2)" aria-label="Play Toast Launch"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="16" y="36" width="44" height="28" rx="6" fill="#c9c3d6" stroke="#1D1A2F" stroke-width="3"/><rect x="24" y="30" width="12" height="8" fill="#1D1A2F"/><rect x="72" y="10" width="26" height="26" rx="6" fill="#e0b86b" stroke="#1D1A2F" stroke-width="3" transform="rotate(20 85 23)"/><circle cx="82" cy="21" r="2" fill="#1D1A2F"/><circle cx="89" cy="23" r="2" fill="#1D1A2F"/><path d="M40 30Q55 12 70 20" fill="none" stroke="#1D1A2F" stroke-width="2" stroke-dasharray="3 3"/></svg></a>
+<main class="card"><a class="hero" href="/games/toast-launch/" style="background:var(--sun2)" aria-label="Play Toast Launch"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="16" y="36" width="44" height="28" rx="6" fill="#c9c3d6" stroke="#1D1A2F" stroke-width="3"/><rect x="24" y="30" width="12" height="8" fill="#1D1A2F"/><rect x="72" y="10" width="26" height="26" rx="6" fill="#e0b86b" stroke="#1D1A2F" stroke-width="3" transform="rotate(20 85 23)"/><circle cx="82" cy="21" r="2" fill="#1D1A2F"/><circle cx="89" cy="23" r="2" fill="#1D1A2F"/><path d="M40 30Q55 12 70 20" fill="none" stroke="#1D1A2F" stroke-width="2" stroke-dasharray="3 3"/></svg></a>
 <div class="body"><span class="chip">Weird</span><h1>Toast Launch</h1>
 <p>Fire a slice of toast out of a toaster. Bounce it as far as it will go.</p>
-<a class="play" href="/#toast">▶ Play Toast Launch free</a>
+<a class="play" href="/games/toast-launch/">▶ Play Toast Launch free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li><li>Easy, Normal and Hard difficulty</li><li>Live leaderboard: beat other players’ high scores</li></ul>
 <p>Toast Launch is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Weird games</h2><div class="grid"><a class="rg" href="/games/goose-heist/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><ellipse cx="54" cy="46" rx="22" ry="13" fill="#fff" stroke="#1D1A2F" stroke-width="3"/><path d="M68 40Q74 20 78 14" fill="none" stroke="#1D1A2F" stroke-width="10" stroke-linecap="round"/><path d="M68 40Q74 20 78 14" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/><path d="M80 12l12 3-12 4z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2"/><rect x="88" y="44" width="18" height="10" rx="3" fill="#e0b86b" stroke="#1D1A2F" stroke-width="2"/></svg></span><b>Goose Heist</b></a><a class="rg" href="/games/dots-boxes/"><span class="ra" style="background:#FF8FB1"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#FFFDF6"/><g fill="#1D1A2F"><circle cx="30" cy="16" r="3"/><circle cx="60" cy="16" r="3"/><circle cx="90" cy="16" r="3"/><circle cx="30" cy="46" r="3"/><circle cx="60" cy="46" r="3"/><circle cx="90" cy="46" r="3"/></g><rect x="30" y="16" width="30" height="30" fill="#FF8FB1" opacity=".6"/><g stroke="#2d6fd6" stroke-width="4"><path d="M30 16h30M30 16v30M60 16v30M30 46h30"/></g><path d="M60 16h30" stroke="#F2352A" stroke-width="4"/></svg></span><b>Dots &amp; Boxes</b></a><a class="rg" href="/games/lemonade-tycoon/"><span class="ra" style="background:#FFE27A"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#8fd3ff"/><rect y="52" width="120" height="20" fill="#d8d1c6"/><rect x="34" y="30" width="52" height="26" fill="#FFE27A" stroke="#1D1A2F" stroke-width="2.5"/><path d="M28 30l6-14h52l6 14z" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="2.5"/><path d="M40 16l-2 14M52 16v14M64 16v14M76 16l2 14" stroke="#fff" stroke-width="4"/><rect x="50" y="36" width="10" height="14" rx="2" fill="#fff8b0" stroke="#1D1A2F" stroke-width="2"/><circle cx="100" cy="14" r="8" fill="#FFD23F"/></svg></span><b>Lemonade Tycoon</b></a><a class="rg" href="/games/skyfront-1943/"><span class="ra" style="background:#ffb02e"><svg viewBox="0 0 120 72" aria-hidden="true"><defs><linearGradient id="skg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3a78"/><stop offset="1" stop-color="#f08a4a"/></linearGradient></defs><rect width="120" height="72" fill="url(#skg)"/><path d="M0 60l30-8 30 6 30-10 30 6v18H0z" fill="#3a4a3a"/><g transform="translate(40 36) rotate(8)"><path d="M-16 0q2-3 8-3h16q6 0 8 3q-2 2-8 2h-16q-6 0-8-2z" fill="#6a7a4a"/><path d="M-4-2l-4-13h5l8 13zM-4 2l-4 12h5l8-12z" fill="#5a6a3a"/><circle cx="-5" cy="-8" r="2" fill="#1a3a8a"/><circle cx="-5" cy="-8" r="1" fill="#c8201a"/></g><g transform="translate(92 22) rotate(-160)"><path d="M-12 0q2-2 6-2h12q5 0 6 2q-1 2-6 2h-12q-5 0-6-2z" fill="#3a3a3a"/><path d="M-3-1l-3-10h4l6 10zM-3 1l-3 9h4l6-9z" fill="#333"/></g><path d="M50 34L86 24" stroke="#ffd070" stroke-width="1.2" stroke-dasharray="4 3"/><circle cx="92" cy="22" r="6" fill="#ff8a2a" opacity=".5"/></svg></span><b>Skyfront 1943</b></a><a class="rg" href="/games/neon-ribbons/"><span class="ra" style="background:#1D1A2F"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#1D1A2F"/><path d="M10 50C30 10 50 70 70 30s30 10 40-10" fill="none" stroke="#FF8FB1" stroke-width="4" stroke-linecap="round"/><path d="M10 56C30 18 50 74 70 38s30 10 40-10" fill="none" stroke="#7FC8F8" stroke-width="3" stroke-linecap="round"/></svg></span><b>Neon Ribbons</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Toast Launch: game code ===================== */
+G.push({id:'toast',name:'Toast Launch',kind:'weird',levels:true,wide:true,tint:'var(--sun2)',blurb:'Fire a slice of toast out of a toaster. Bounce it as far as it will go.',fmt:b=>b+' ft',
+art:'<rect x="16" y="36" width="44" height="28" rx="6" fill="#c9c3d6" stroke="#1D1A2F" stroke-width="3"/><rect x="24" y="30" width="12" height="8" fill="#1D1A2F"/><rect x="72" y="10" width="26" height="26" rx="6" fill="#e0b86b" stroke="#1D1A2F" stroke-width="3" transform="rotate(20 85 23)"/><circle cx="82" cy="21" r="2" fill="#1D1A2F"/><circle cx="89" cy="23" r="2" fill="#1D1A2F"/><path d="M40 30Q55 12 70 20" fill="none" stroke="#1D1A2F" stroke-width="2" stroke-dasharray="3 3"/>',
+run(root,c){
+  const W=800,H=400,GY=350,TX=70;const[cv,x]=mk(W,H,'width:100%');
+  let phase='angle',ang=.7,pw=0,ts,cam=0,objs=[],t=0,dist=0,msg='',msgT=0;const best0=()=>c.best()||0;
+  const mSp=c.pick(.0016,.0026,.0038);
+  function gen(){objs=[];for(let X=700;X<120000;X+=260+rand(520)){const r=Math.random();const type=r<.3?'tramp':r<.47?'butter':r<.66?'jam':r<.86?'bird':'fan';objs.push({x:X,type,y:type==='bird'?110+rand(170):GY,hit:false,ph:Math.random()*6})}}
+  function reset(){phase='angle';ts={x:TX,y:GY-44,vx:0,vy:0,rot:0,rv:0};cam=0;dist=0;gen();c.stat('Best '+best0()+' ft')}
+  function click(){if(phase==='angle'){phase='power';beep(500,.05)}else if(phase==='power'){const s=.35+pw*1.15;ts.vx=Math.cos(ang)*s;ts.vy=-Math.sin(ang)*s;ts.rv=.004+pw*.01;phase='fly';noise(.15,'lowpass',500,.3);beep(900,.2,'triangle',.08)}else if(phase==='done')reset()}
+  function boost(m,vx,vy){msg=m;msgT=900;ts.vx=Math.max(ts.vx,0)+vx;if(vy)ts.vy=vy;beep(700+Math.random()*300,.1,'triangle',.07)}
+  function update(dt){t+=dt;msgT-=dt;if(phase==='angle')ang=(Math.sin(t*mSp)*.5+.5)*1.25+.15;if(phase==='power')pw=Math.abs(Math.sin(t*mSp*1.4));if(phase!=='fly')return;
+    for(let k=0;k<3;k++){const d=dt/3;ts.vy+=.0011*d;ts.x+=ts.vx*d;ts.y+=ts.vy*d;ts.rot+=ts.rv*d*(ts.vx>0?1:-1);
+      for(const o of objs){if(o.hit||Math.abs(o.x-ts.x)>34)continue;
+        if(o.type==='bird'&&Math.abs(o.y-ts.y)<32){o.hit=true;boost('Bird bounce!',.18,-.75)}
+        else if(ts.y>GY-26){if(o.type==='tramp'){o.hit=true;boost('Trampoline!',.08,-Math.max(.85,Math.abs(ts.vy)+.35))}else if(o.type==='butter'){o.hit=true;ts.vx*=1.5;ts.vy=-.35;msg='Butter slide!';msgT=900;beep(400,.15,'sine',.08)}else if(o.type==='jam'){o.hit=true;ts.vx*=.3;ts.vy=0;msg='Stuck in jam…';msgT=900;beep(150,.2,'sawtooth',.06)}else if(o.type==='fan'){o.hit=true;boost('Fan blast!',.12,-1.1)}}}
+      if(ts.y>GY-12){ts.y=GY-12;if(ts.vy>.12){ts.vy=-ts.vy*.42;ts.vx*=.82;noise(.05,'lowpass',400,.2)}else{ts.vy=0;ts.vx*=Math.pow(.996,d);ts.rv*=.9}}}
+    cam=Math.max(0,ts.x-260);dist=Math.max(0,Math.floor((ts.x-TX)/10));c.stat(dist+' ft · Best '+best0()+' ft');
+    if(ts.y>=GY-12.5&&Math.abs(ts.vx)<.015){phase='done';const b=c.best(dist);c.stat(dist+' ft · Best '+b+' ft');msg=dist>=b?'New record!':'Landed.';msgT=99999;beep(dist>=b?880:400,.2,'triangle')}}
+  function draw(){const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#8fd0ff');g.addColorStop(1,'#e6f5ff');x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle='#b9e0a6';x.beginPath();x.moveTo(0,GY);for(let i=0;i<=W;i+=20)x.lineTo(i,GY-60-Math.sin((i+cam*.3)/120)*30);x.lineTo(W,GY);x.fill();
+    x.fillStyle='#6fbf5a';x.fillRect(0,GY,W,H-GY);x.strokeStyle='#1D1A2F';x.lineWidth=3;x.beginPath();x.moveTo(0,GY);x.lineTo(W,GY);x.stroke();
+    x.fillStyle='#1D1A2F';x.font='600 12px JetBrains Mono, monospace';x.textAlign='center';for(let f=Math.floor(cam/1000)*100;f<(cam+W)/10+100;f+=100){const px=TX+f*10-cam;x.fillRect(px,GY,2,10);x.fillText(f+' ft',px,GY+26)}
+    const bx=TX+best0()*10-cam;if(best0()>0&&bx>0&&bx<W){x.strokeStyle='#F2352A';x.beginPath();x.moveTo(bx,GY);x.lineTo(bx,GY-70);x.stroke();x.fillStyle='#F2352A';x.fillRect(bx,GY-70,34,16);x.fillStyle='#fff';x.font='700 10px Figtree';x.fillText('BEST',bx+17,GY-58)}
+    for(const o of objs){const px=o.x-cam;if(px<-60||px>W+60)continue;x.strokeStyle='#1D1A2F';x.lineWidth=2.5;
+      if(o.type==='tramp'){x.fillStyle='#2d6fd6';x.fillRect(px-30,GY-14,60,7);x.strokeRect(px-30,GY-14,60,7);x.beginPath();x.moveTo(px-26,GY-7);x.lineTo(px-30,GY);x.moveTo(px+26,GY-7);x.lineTo(px+30,GY);x.stroke()}
+      else if(o.type==='butter'){x.fillStyle='#ffe98a';x.fillRect(px-18,GY-10,36,10);x.strokeRect(px-18,GY-10,36,10)}
+      else if(o.type==='jam'){x.fillStyle='#b0164a';x.beginPath();x.ellipse(px,GY-2,28,6,0,0,7);x.fill();x.stroke()}
+      else if(o.type==='fan'){x.fillStyle='#c9c3d6';x.fillRect(px-14,GY-18,28,18);x.strokeRect(px-14,GY-18,28,18);x.beginPath();x.moveTo(px-8,GY-24);x.lineTo(px-8,GY-40);x.moveTo(px,GY-26);x.lineTo(px,GY-46);x.moveTo(px+8,GY-24);x.lineTo(px+8,GY-40);x.stroke()}
+      else if(!o.hit){const fy=o.y+Math.sin(t/300+o.ph)*6;x.fillStyle='#F2352A';x.beginPath();x.ellipse(px,fy,14,10,0,0,7);x.fill();x.stroke();x.fillStyle='#FF9F43';x.beginPath();x.moveTo(px+12,fy-2);x.lineTo(px+20,fy);x.lineTo(px+12,fy+3);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.arc(px+6,fy-3,1.8,0,7);x.fill()}}
+    const tx0=TX-cam;if(tx0>-80){x.fillStyle='#c9c3d6';x.strokeStyle='#1D1A2F';x.lineWidth=3;rr(x,tx0-40,GY-44,80,44,10);x.fill();x.stroke();x.fillStyle='#1D1A2F';x.fillRect(tx0-24,GY-48,14,6);x.fillRect(tx0+8,GY-48,14,6);x.fillRect(tx0+40,GY-30,8,6)}
+    x.save();x.translate(ts.x-cam,ts.y);x.rotate(ts.rot);x.fillStyle='#e0b86b';x.strokeStyle='#8a5a2b';x.lineWidth=5;rr(x,-17,-17,34,34,9);x.fill();x.stroke();x.fillStyle='#1D1A2F';x.beginPath();x.arc(-6,-3,2.6,0,7);x.arc(6,-3,2.6,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2;x.beginPath();x.arc(0,3,6,.2,Math.PI-.2);x.stroke();x.restore();
+    if(phase==='angle'){x.strokeStyle='#1D1A2F';x.setLineDash([6,6]);x.lineWidth=3;x.beginPath();x.moveTo(ts.x-cam,ts.y);x.lineTo(ts.x-cam+Math.cos(ang)*120,ts.y-Math.sin(ang)*120);x.stroke();x.setLineDash([])}
+    if(phase==='power'){x.fillStyle='#fff';x.strokeStyle='#1D1A2F';x.lineWidth=3;x.fillRect(150,40,24,200);x.strokeRect(150,40,24,200);x.fillStyle=pw>.85?'#F2352A':'#FF9F43';x.fillRect(150,240-pw*200,24,pw*200)}
+    x.fillStyle='#1D1A2F';x.textAlign='center';x.font='26px "Bagel Fat One", sans-serif';if(phase==='angle')x.fillText('Click to set the angle',W/2,60);if(phase==='power')x.fillText('Click to set the power',W/2,60);if(phase==='fly'||phase==='done')x.fillText(dist+' ft',W/2,60);
+    if(msgT>0){x.fillStyle='#F2352A';x.font='22px "Bagel Fat One", sans-serif';x.fillText(msg,W/2,96)}if(phase==='done'){x.fillStyle='#5A5470';x.font='600 16px Figtree';x.fillText('Click to launch another slice',W/2,124)}}
+  c.on(cv,'pointerdown',e=>{e.preventDefault();click()});c.on(document,'keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();click()}});
+  reset();root.append(cv,el('p',{class:'hint'},'Trampolines, birds and fans launch you. Butter makes you slide. Jam is a trap.'));c.loop(dt=>{update(dt);draw()});
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

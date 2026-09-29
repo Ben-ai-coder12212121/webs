@@ -1,0 +1,3 @@
+/* lib/io2.js: code shared by several games (from src/heroes/io2.js) */
+function ioDir(c,cv,W,H){const ptr=ioPointer(c,cv,W,H);const keys={};c.on(document,'keydown',e=>{keys[e.key.toLowerCase()]=true});c.on(document,'keyup',e=>{keys[e.key.toLowerCase()]=false});
+  return{ptr,keys,dir(){const kx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),ky=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);if(kx||ky){const l=Math.hypot(kx,ky);return{x:kx/l,y:ky/l,m:1}}if(!ptr.moved)return{x:0,y:0,m:0};const dx=ptr.x-W/2,dy=ptr.y-H/2,l=Math.hypot(dx,dy);return l<8?{x:0,y:0,m:0}:{x:dx/l,y:dy/l,m:Math.min(1,l/120)}}}}

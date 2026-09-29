@@ -2,43 +2,86 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Paddle Ball: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="The classic. First to 7 beats the computer.">
-<link rel="canonical" href="https://detourr.netlify.app/games/paddle-ball/">
+<link rel="canonical" href="https://detourr.net/games/paddle-ball/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="Paddle Ball: play free on Detourr"><meta property="og:description" content="The classic. First to 7 beats the computer.">
-<meta property="og:url" content="https://detourr.netlify.app/games/paddle-ball/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/paddle-ball/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Paddle Ball", "description": "The classic. First to 7 beats the computer.", "url": "https://detourr.netlify.app/games/paddle-ball/", "genre": "Arcade & Quick", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
-<style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Paddle Ball", "description": "The classic. First to 7 beats the computer.", "url": "https://detourr.net/games/paddle-ball/", "genre": "Arcade & Quick", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="pong"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#pong" style="background:#3a3552" aria-label="Play Paddle Ball"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="14" y="16" width="7" height="26" rx="2" fill="#FFD23F"/><rect x="99" y="30" width="7" height="26" rx="2" fill="#FFD23F"/><circle cx="58" cy="30" r="5" fill="#FFFDF6"/><path d="M60 4V68" stroke="#FFFDF6" stroke-width="2" stroke-dasharray="4 5"/></svg></a>
+<main class="card"><a class="hero" href="/games/paddle-ball/" style="background:#3a3552" aria-label="Play Paddle Ball"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="14" y="16" width="7" height="26" rx="2" fill="#FFD23F"/><rect x="99" y="30" width="7" height="26" rx="2" fill="#FFD23F"/><circle cx="58" cy="30" r="5" fill="#FFFDF6"/><path d="M60 4V68" stroke="#FFFDF6" stroke-width="2" stroke-dasharray="4 5"/></svg></a>
 <div class="body"><span class="chip">Arcade &amp; Quick</span><h1>Paddle Ball</h1>
 <p>The classic. First to 7 beats the computer.</p>
-<a class="play" href="/#pong">▶ Play Paddle Ball free</a>
+<a class="play" href="/games/paddle-ball/">▶ Play Paddle Ball free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li><li>Easy, Normal and Hard difficulty</li><li>Live leaderboard: beat other players’ high scores</li></ul>
 <p>Paddle Ball is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Arcade &amp; Quick games</h2><div class="grid"><a class="rg" href="/games/snake/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M12 48H44V22H76V38" fill="none" stroke="#1D1A2F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><circle cx="96" cy="38" r="7" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Snake</b></a><a class="rg" href="/games/memory-match/"><span class="ra" style="background:var(--lilac)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="22" y="12" width="34" height="46" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3" transform="rotate(-8 39 35)"/><rect x="64" y="12" width="34" height="46" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3" transform="rotate(8 81 35)"/><text x="39" y="42" font-size="20" text-anchor="middle" fill="#F2352A" transform="rotate(-8 39 35)">♥</text><text x="81" y="42" font-size="20" text-anchor="middle" fill="#F2352A" transform="rotate(8 81 35)">♥</text></svg></span><b>Memory Match</b></a><a class="rg" href="/games/reaction-time/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="38" r="22" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="4"/><path d="M60 38V24M60 38L70 44" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><rect x="54" y="6" width="12" height="7" rx="2" fill="#1D1A2F"/></svg></span><b>Reaction Time</b></a><a class="rg" href="/games/tic-tac-toe/"><span class="ra" style="background:var(--pink)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"><path d="M46 8V64M74 8V64M24 28H96M24 46H96"/></g><path d="M29 12L41 24M41 12L29 24" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="37" r="7" fill="none" stroke="#2d6fd6" stroke-width="5"/><path d="M79 51L91 63M91 51L79 63" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/></svg></span><b>Tic-Tac-Toe</b></a><a class="rg" href="/games/flap/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="80" y="0" width="18" height="24" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="3"/><rect x="80" y="48" width="18" height="24" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="3"/><circle cx="44" cy="36" r="12" fill="#FFD23F" stroke="#1D1A2F" stroke-width="3"/><circle cx="48" cy="32" r="2.5" fill="#1D1A2F"/><path d="M55 37l8 2-8 3z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2"/></svg></span><b>Flap</b></a><a class="rg" href="/games/bonk-a-mole/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><ellipse cx="60" cy="58" rx="36" ry="9" fill="#3b2a1f"/><path d="M40 58V38a20 20 0 0 1 40 0v20z" fill="#9b6b43" stroke="#1D1A2F" stroke-width="3"/><circle cx="53" cy="38" r="3" fill="#1D1A2F"/><circle cx="67" cy="38" r="3" fill="#1D1A2F"/><ellipse cx="60" cy="46" rx="5" ry="3.5" fill="#FF8FB1"/></svg></span><b>Bonk-a-Mole</b></a><a class="rg" href="/games/speed-typing/"><span class="ra" style="background:var(--paper)"><svg viewBox="0 0 120 72" aria-hidden="true"><g fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"><rect x="14" y="14" width="18" height="16" rx="3"/><rect x="36" y="14" width="18" height="16" rx="3"/><rect x="58" y="14" width="18" height="16" rx="3"/><rect x="80" y="14" width="18" height="16" rx="3"/><rect x="24" y="34" width="18" height="16" rx="3"/><rect x="46" y="34" width="18" height="16" rx="3"/><rect x="68" y="34" width="18" height="16" rx="3"/><rect x="30" y="54" width="60" height="10" rx="3"/></g></svg></span><b>Speed Typing</b></a><a class="rg" href="/games/echo/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M60 36V6A30 30 0 0 0 30 36z" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36V6A30 30 0 0 1 90 36z" fill="#2d6fd6" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H30A30 30 0 0 0 60 66z" fill="#2BB673" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H90A30 30 0 0 1 60 66z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Echo</b></a><a class="rg" href="/games/brick-smash/"><span class="ra" style="background:var(--pink)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="2.5"><rect x="12" y="8" width="22" height="10" fill="#F2352A"/><rect x="37" y="8" width="22" height="10" fill="#FF9F43"/><rect x="62" y="8" width="22" height="10" fill="#FFD23F"/><rect x="87" y="8" width="22" height="10" fill="#6EE7B7"/><rect x="24" y="21" width="22" height="10" fill="#7FC8F8"/><rect x="74" y="21" width="22" height="10" fill="#B9A7FF"/><rect x="40" y="58" width="36" height="7" rx="3" fill="#1D1A2F"/></g><circle cx="64" cy="46" r="5" fill="#1D1A2F"/></svg></span><b>Brick Smash</b></a><a class="rg" href="/games/hype-check/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="8" y="10" width="50" height="52" rx="6" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="50" height="52" rx="6" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/><text x="33" y="42" font-family="monospace" font-weight="700" font-size="13" text-anchor="middle" fill="#1D1A2F">12.4M</text><text x="87" y="44" font-family="sans-serif" font-weight="800" font-size="24" text-anchor="middle" fill="#1D1A2F">?</text></svg></span><b>Hype Check</b></a><a class="rg" href="/games/swallow/"><span class="ra" style="background:#1D1A2F"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#8c86a3"/><rect x="10" y="8" width="24" height="20" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2"/><rect x="84" y="40" width="26" height="24" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="2"/><ellipse cx="58" cy="40" rx="22" ry="18" fill="#1D1A2F" stroke="#2BB673" stroke-width="4"/><rect x="50" y="30" width="10" height="7" fill="#7FC8F8" stroke="#1D1A2F" transform="rotate(30 55 33)"/></svg></span><b>Swallow</b></a><a class="rg" href="/games/where-am-i/"><span class="ra" style="background:#7FC8F8"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#7FC8F8"/><rect y="44" width="120" height="28" fill="#8c9a6a"/><path d="M40 72L56 44h8l16 28z" fill="#5A5470"/><path d="M60 50v6M60 62v8" stroke="#FFD23F" stroke-width="2.5"/><rect x="8" y="22" width="18" height="22" fill="#e8e1d0" stroke="#1D1A2F" stroke-width="2"/><rect x="92" y="16" width="20" height="28" fill="#f2c6a8" stroke="#1D1A2F" stroke-width="2"/><rect x="74" y="6" width="42" height="30" rx="4" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="2.5"/><path d="M80 28q6-14 12-4t12-8" fill="none" stroke="#2BB673" stroke-width="3"/><path d="M95 20a5 5 0 1 1 10 0c0 5-5 9-5 9s-5-4-5-9z" fill="#F2352A" stroke="#1D1A2F" stroke-width="1.5"/><text x="30" y="20" font-size="16" font-weight="900" fill="#1D1A2F" font-family="Arial Black,Arial">?</text></svg></span><b>Where Am I?</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/online.js"></script>
+<script>
+/* ===================== Paddle Ball: game code ===================== */
+G.push({id:'pong',levels:true,name:'Paddle Ball',kind:'game',wide:true,tint:'#3a3552',blurb:'The classic. First to 7 beats the computer.',fmt:b=>b+' wins',
+art:'<rect x="14" y="16" width="7" height="26" rx="2" fill="#FFD23F"/><rect x="99" y="30" width="7" height="26" rx="2" fill="#FFD23F"/><circle cx="58" cy="30" r="5" fill="#FFFDF6"/><path d="M60 4V68" stroke="#FFFDF6" stroke-width="2" stroke-dasharray="4 5"/>',
+run(root,c){
+  const W=600,H=400,PH=80;const[cv,x]=mk(W,H,'width:min(100%,640px)');let p,q,b,sc,state,held={u:0,d:0},wins=S.get('pong_wins',0);
+  function serve(dir){b={x:W/2,y:H/2,vx:.3*dir,vy:(Math.random()-.5)*.3}}
+  function st(){c.stat(NET()?(GUEST?on.friendName+' '+sc[0]+' – '+sc[1]+' You':'You '+sc[0]+' – '+sc[1]+' '+(on.friends[0]||{}).name):'You '+sc[0]+' – '+sc[1]+' CPU · Wins '+wins)}
+  /* online: the host plays the left paddle and runs the ball; the friend plays the right paddle */
+  let GUEST=false,snap=null,netQ=null,sendT=0;const NET=()=>on&&on.active;
+  const on=Online.party({game:'pong',max:2,title:'You on the left, your friend on the right. First to 7.',
+    onStart:role=>{GUEST=role==='guest';on.friendName=role==='guest'?'Host':'';reset()},onJoin:()=>{reset()},onLeave:()=>{netQ=null},
+    onInput:(peer,i)=>{if(Number.isFinite(i.y))netQ=i.y},onAct:(peer,a)=>{if(a.go)go()},onSnap:sn=>{snap=sn},onEnd:()=>{GUEST=false;netQ=null;reset()}});
+  root.append(el('div',{class:'row'},on.button));
+  function reset(){p=q=H/2;sc=[0,0];state='ready';serve(1);st()}
+  function go(){if(state==='ready')state='run';else if(state==='over'){reset();state='run'}}
+  function point(w){sc[w]++;beep(w?150:880,.2,w?'sawtooth':'triangle');if(sc[w]>=7){state='over';if(!w&&!NET()){wins++;S.set('pong_wins',wins);c.best(wins)}}else serve(w?1:-1);st()}
+  function update(dt){if(GUEST){q=clamp(q+(held.d-held.u)*.5*dt,PH/2,H-PH/2);on.input({y:Math.round(q)});if(snap){p=snap.p;b=snap.b;sc=snap.sc;state=snap.st;st()}return}
+    p=clamp(p+(held.d-held.u)*.5*dt,PH/2,H-PH/2);if(NET()&&netQ!=null)q=clamp(netQ,PH/2,H-PH/2);else{const tgt=b.vx>0?b.y:H/2;const cs=c.pick(.16,.26,.38);q=clamp(q+clamp(tgt-q,-cs*dt,cs*dt),PH/2,H-PH/2)}
+    if(NET()){sendT-=dt;if(sendT<=0){sendT=33;on.friends.forEach(f=>on.snapTo(f,{p:Math.round(p),b:{x:Math.round(b.x),y:Math.round(b.y),vx:b.vx,vy:b.vy},sc,st:state}))}}if(state!=='run')return;
+    b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.y<8){b.y=8;b.vy=Math.abs(b.vy)}if(b.y>H-8){b.y=H-8;b.vy=-Math.abs(b.vy)}
+    if(b.vx<0&&b.x-8<34&&b.x>14&&Math.abs(b.y-p)<PH/2+8){b.vx=Math.min(.8,Math.abs(b.vx)*1.07);b.vy=(b.y-p)/(PH/2)*.35;beep(440,.04,'square',.05)}
+    if(b.vx>0&&b.x+8>W-34&&b.x<W-14&&Math.abs(b.y-q)<PH/2+8){b.vx=-Math.min(.8,Math.abs(b.vx)*1.07);b.vy=(b.y-q)/(PH/2)*.35;beep(330,.04,'square',.05)}
+    if(b.x<-20)point(1);else if(b.x>W+20)point(0)}
+  function draw(){x.fillStyle='#1D1A2F';x.fillRect(0,0,W,H);x.strokeStyle='rgba(255,253,246,.3)';x.setLineDash([8,10]);x.lineWidth=3;x.beginPath();x.moveTo(W/2,0);x.lineTo(W/2,H);x.stroke();x.setLineDash([]);
+    x.fillStyle='rgba(255,253,246,.25)';x.font='64px "Bagel Fat One", sans-serif';x.textAlign='center';x.fillText(sc[0],W/2-70,80);x.fillText(sc[1],W/2+70,80);
+    x.fillStyle='#FFD23F';rr(x,20,p-PH/2,12,PH,4);x.fill();rr(x,W-32,q-PH/2,12,PH,4);x.fill();x.fillStyle='#FFFDF6';x.beginPath();x.arc(b.x,b.y,8,0,7);x.fill();
+    if(NET()){x.fillStyle='rgba(255,253,246,.7)';x.font='800 13px Figtree, sans-serif';x.fillText(GUEST?'Host':'You',60,H-12);x.fillText(GUEST?'You':(on.friends[0]||{name:'Friend'}).name,W-60,H-12)}
+    if(state==='ready')banner(x,W,H,'Paddle Ball',NET()?'Click to serve. First to 7.':'Mouse, finger or ↑↓ to move. Click to serve.');if(state==='over'){const myS=GUEST?sc[1]:sc[0],thS=GUEST?sc[0]:sc[1];banner(x,W,H,myS>thS?'You win!':NET()?'Your friend wins':'CPU wins','Click to play again')}}
+  c.on(cv,'pointermove',e=>{if(GUEST)q=canvasPos(cv,e).y;else p=canvasPos(cv,e).y});c.on(cv,'pointerdown',e=>{e.preventDefault();if(GUEST){q=canvasPos(cv,e).y;on.act({go:1});return}p=canvasPos(cv,e).y;go()});
+  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')held.u=1;if(k==='arrowdown'||k==='s')held.d=1;if(k===' '){GUEST?on.act({go:1}):go()}});
+  c.on(document,'keyup',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')held.u=0;if(k==='arrowdown'||k==='s')held.d=0});
+  reset();root.append(cv);c.loop(dt=>{update(dt);draw()});
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

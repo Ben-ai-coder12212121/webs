@@ -1,0 +1,74 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vacuum Wars | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="vacuum"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Vacuum Wars</h1><p>3D third-person. A cat in a tiny mech suit defends the house from rogue robot vacuums.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Vacuum Wars: game code ===================== */
+function heroCat(T){const g=humanoid(T,{skin:0xFF9F43,shirt:0x8c96a8,pants:0x5a6474,eye:0x2BB673});const h=g.userData.head;part(T,new T.ConeGeometry(.12,.22,4),M(T,0xFF9F43),-.16,.34,0,h);part(T,new T.ConeGeometry(.12,.22,4),M(T,0xFF9F43),.16,.34,0,h);const tail=part(T,cy(T,.05,.05,.8),M(T,0xFF9F43),0,1,-.35,g);tail.rotation.x=-.8;g.userData.anim=(P,dt)=>{tail.rotation.z=Math.sin(performance.now()/300)*.4};part(T,bx(T,.8,.3,.5),M(T,0x5a6474),0,1.55,-.1,g);return g}
+const HOUSE={wall:(x,w,h)=>{x.fillStyle='#f3e2c7';x.fillRect(0,0,w,h);for(let i=0;i<w;i+=32){x.fillStyle='rgba(242,120,90,.25)';x.fillRect(i,0,12,h)}x.fillStyle='#b07a3f';x.fillRect(0,h*.86,w,h*.14)},floor:TX.planks('#c98f55','#b87e45'),sky:0x2a2640,fogNear:25,fogFar:80,amb:.9,hemi:0xfff4e0,ground:0x806850,sun:.35,ceil:TX.tiles('#fffaf0','#f5eedd',2)};
+G.push({id:'vacuum',name:'Vacuum Wars',kind:'shooter',levels:true,wide:true,tint:'#B9A7FF',blurb:'3D third-person. A cat in a tiny mech suit defends the house from rogue robot vacuums.',fmt:b=>b+' pts',
+art:'<rect width="120" height="72" fill="#f3e2c7"/><rect y="50" width="120" height="22" fill="#c98f55"/><ellipse cx="80" cy="54" rx="22" ry="7" fill="#3a3552" stroke="#1D1A2F" stroke-width="2.5"/><circle cx="80" cy="50" r="3" fill="#F2352A"/><g transform="translate(36 30)"><rect x="-10" y="0" width="20" height="18" rx="3" fill="#8c96a8" stroke="#1D1A2F" stroke-width="2.5"/><rect x="-8" y="-14" width="16" height="14" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2.5"/><path d="M-8 -14l3-6 3 6M2 -14l3-6 3 6" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2"/><circle cx="-3" cy="-8" r="1.8" fill="#2BB673"/><circle cx="3" cy="-8" r="1.8" fill="#2BB673"/></g><path d="M48 36L66 50" stroke="#F2352A" stroke-width="2.5"/>',
+run(root,c){
+  const vac=(T,s)=>{const g=new T.Group();part(T,cy(T,.55,.6,.3,24),M(T,0x3a3552),0,.18,0,g);part(T,cy(T,.4,.4,.05,24),M(T,0x6b7280),0,.35,0,g);part(T,sp(T,.08),M(T,0xF2352A,{emissive:0xff0000}),0,.38,.3,g);const br=new T.Group();part(T,bx(T,.9,.05,.08),M(T,0xFFD23F),0,0,0,br);part(T,bx(T,.08,.05,.9),M(T,0xFFD23F),0,0,0,br);br.position.set(0,.05,.45);g.add(br);g.userData.spin=br;if(s)g.scale.setScalar(s);return g};
+  const duster=T=>{const g=new T.Group();part(T,sp(T,.35),M(T,0xd8d4e4),0,0,0,g);for(let k=0;k<10;k++){const f=part(T,cy(T,.04,.12,.6,6),M(T,pick([0xFF8FB1,0xB9A7FF,0xFFD23F])),Math.cos(k*.63)*.3,.3,Math.sin(k*.63)*.3,g);f.rotation.set(Math.sin(k*.63)*.6,0,-Math.cos(k*.63)*.6)}part(T,sp(T,.08),M(T,0x2d6fd6,{emissive:0x2d6fd6}),0,0,.34,g);const pr=new T.Group();part(T,bx(T,1,.03,.1),M(T,0x1D1A2F),0,0,0,pr);pr.position.y=-.4;g.add(pr);g.userData.spin=pr;return g};
+  const mop=T=>{const g=new T.Group();part(T,cy(T,.07,.07,2.4),M(T,0xb07a3f),0,1.6,0,g);const head=part(T,cy(T,.2,.6,.9,14),M(T,0xe8e2f0),0,.45,0,g);part(T,sp(T,.1),M(T,0xF2352A,{emissive:0xaa0000}),-.15,2.6,.1,g);part(T,sp(T,.1),M(T,0xF2352A,{emissive:0xaa0000}),.15,2.6,.1,g);return g};
+  return runShooter(root,c,{id:'vacuum',short:'Vacuum Wars',view:'tps',hero:heroCat,camDist:4.6,camHeight:2.2,tag:'A Detourr original · 3D third-person shooter',title:'Vacuum Wars',hitColor:[0xFFD23F,0x6b7280],killColors:[0x3a3552,0x6b7280,0xFFD23F,0xF2352A],killWord:'robots unplugged',
+    intro:['You are <b>Captain Whiskers</b>, a very serious house cat. The humans left on vacation and put the smart-home in “deep clean” mode. The vacuums got a software update. Now they want to suck up everything, cats included.','Luckily you’ve been secretly building a mech suit out of a toaster and a Roomba charger. Time to defend the house.'],
+    player:{hp:110,speed:6.2},hpLabel:'HP',
+    weapons:[{name:'Laser Pointer',auto:true,rate:.09,dmg:13,spread:.01,tracer:0xF2352A,impact:0xF2352A,model:T=>{const g=new T.Group();part(T,cy(T,.05,.05,.5,10),M(T,0x6b7280),0,0,-.2,g).rotation.x=Math.PI/2;part(T,sp(T,.05),M(T,0xF2352A,{emissive:0xff0000}),0,0,-.46,g);return g},sound:()=>beep(1800+Math.random()*200,.03,'sine',.03)},
+      {name:'Yarn Shotgun',rate:.85,dmg:12,pellets:9,spread:.14,ammo:26,tracer:0xFF8FB1,kick:.2,model:gunModel(0xFF8FB1,0xB9A7FF,{len:.5,bore:.08}),sound:()=>{noise(.18,'lowpass',1400,.4);sweep(300,90,.12,'square',.05)}},
+      {name:'Hairball Cannon',rate:1,dmg:80,ammo:10,proj:{speed:18,grav:5,splash:4,color:0x8a5a2b,size:.25},model:gunModel(0x2BB673,0x8a5a2b,{drum:0x8a5a2b,bore:.1}),sound:()=>{sweep(180,60,.3,'sawtooth',.08);noise(.2,'lowpass',500,.2)}}],
+    enemies:{
+      r:{name:'Robo Vacuum',hp:40,speed:3.6,kind:'melee',dmg:11,cooldown:.9,score:100,height:.6,radius:.6,drop:.2,build:T=>vac(T),attackSound:()=>noise(.2,'bandpass',900,.2)},
+      d:{name:'Duster Drone',hp:34,speed:3,kind:'ranged',range:18,cooldown:1.5,score:140,height:2.5,hover:2,radius:.5,proj:{speed:14,color:0xb9b4c9,dmg:9,size:.2},build:duster},
+      x:{name:'Mop Bot',hp:170,speed:2,kind:'melee',dmg:22,reach:1.9,cooldown:1.3,score:320,height:2.8,radius:.8,drop:.6,build:mop,anim:e=>{e.m.rotation.z=Math.sin(e.t*5)*.12}},
+      K:{name:'King Roomba',hp:1500,speed:2.2,kind:'ranged',range:30,cooldown:1.1,score:3500,height:1.2,radius:1.4,proj:{speed:15,color:0x8a5a2b,dmg:12,size:.3},build:T=>{const g=vac(T,3.2);part(T,cy(T,.5,.6,.5,5),M(T,0xFFD23F),0,1.4,0,g);return g}}},
+    boss:{ch:'K',deathLine:'King Roomba powers down. His battery indicator blinks red, then goes dark.',special:(e,dt,api,{dist,dx,dz})=>{e.spT=(e.spT||3)-dt;if(e.spT<=0){e.spT=c.pick(3.5,2.6,1.9);for(let k=0;k<12;k++)api.enemyShoot(e,e.d.proj,Math.cos(k*.52),Math.sin(k*.52),1,0);api.say('DUST STORM!',1000)}const fr=e.hp/e.max;if(fr<.7&&e.phase<1||fr<.4&&e.phase<2){e.phase++;api.say('King Roomba deploys his minions!',1600);for(let k=0;k<5;k++){const s=api.spawn('r',e.x+Math.cos(k*1.2)*3,e.z+Math.sin(k*1.2)*3);s.seen=true}}}},
+    levels:[
+      {name:'The Kitchen',goal:'Unplug every vacuum in the kitchen',objective:'clear',theme:Object.assign({},HOUSE,{floor:TX.tiles('#ffffff','#d9e4ee',4),wall:TX.tiles('#e6f2ef','#cfe2dd',6)}),brief:['The vacuums ambushed your food bowl. That’s personal.','Clear the kitchen. The counters (brown blocks) are good cover.'],talk:[['Captain Whiskers','“Nobody touches the kibble.”']],after:'You find a note on the fridge: “ROBOT UPDATE INSTALLED: CLEAN EVERYTHING.” The living room hums ominously.',
+        map:['##################','#P......=.....r..#','#..===..=..d.....#','#...............r#','#..r....===......#','#......=...=..d..#','#.x....=...=.....#','#h..........a..r.#','######E###########']},
+      {name:'The Living Room',goal:'Hold the couch fort',objective:'waves',waves:[[['r',6]],[['r',5],['d',3]],[['r',6],['d',3],['x',1]],[['x',2],['d',5],['r',6]]],theme:Object.assign({},HOUSE,{floor:TX.carpet('#6b8fc4','#5a7ab0')}),brief:['You built a fort out of couch cushions. The vacuums are coming through every doorway.','Four waves. The Hairball Cannon is great against groups of vacuums.'],talk:[['Duster Drone','“BEEP. DUST DETECTED. CAT DETECTED. SAME THING.”']],after:'The last vacuum sputters out. A loud whirring comes from the garage: the charging dock of King Roomba himself.',
+        map:['####################','#S........S.......S#','#..................#','#..===........===..#','#.......==.........#','#S......P........S.#','#.......==.........#','#..===..h..a..===..#','#S........S.......S#','#########E##########']},
+      {name:'The Garage',goal:'Defeat King Roomba',objective:'boss',theme:Object.assign({},HOUSE,{wall:TX.bricks('#b8b0a0','#8c8478'),floor:TX.noise('#8a8a94','#5a5a64',2500),ceil:TX.metal,lampCol:0xffe0a0}),brief:['King Roomba is the size of a car. He fires dust storms in every direction and calls in minions.','Watch his pattern: the dust storm fires in a ring, so get close or hide behind shelves.'],talk:[['King Roomba','“I WILL CLEAN THIS HOUSE… OF CATS!”'],['Captain Whiskers','“I’ve knocked bigger things off a table.”']],
+        map:['####################','#h.......L.......a.#','#..==..........==..#','#......B...........#','#..................#','#...==........==...#','#..................#','#........P.........#','#a.......E........h#','####################']}],
+    winTitle:'The house is safe!',epilogue:'The humans come home to a spotless house, a pile of defeated robots, and a cat sleeping in a mech suit. They decide not to ask questions. Captain Whiskers gets an extra can of tuna.'})
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arrow Rogue | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_rogue"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Arrow Rogue</h1><p>Drag to move, let go to fire. Your archer shoots automatically whenever standing still. Clear room after room, pick a new skill each level, and survive the bosses.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Arrow Rogue: game code ===================== */
+G.push({id:'m_rogue',levels:true,name:'Arrow Rogue',kind:'arcade',tint:'#e8e0d0',blurb:'Drag to move, let go to fire. Your archer shoots automatically whenever standing still. Clear room after room, pick a new skill each level, and survive the bosses.',fmt:b=>'room '+b,
+art:'<rect x="0" y="0" width="120" height="72" fill="#c8b890"/><circle cx="40" cy="50" r="10" fill="#3a8aff" stroke="#1D1A2F" stroke-width="2.5"/><path d="M50 44L86 24" stroke="#1D1A2F" stroke-width="2.5"/><path d="M86 24l-8 1 4 6z" fill="#1D1A2F"/><circle cx="94" cy="18" r="10" fill="#9a4ae8" stroke="#1D1A2F" stroke-width="2.5"/>',
+run(root,c){const W=400,H=640,AT=70,AB=610,AL=16,AR=W-16;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts(),FL=MOB.floats();
+  const SK={multi:['Multishot','+1 arrow'],diag:['Diagonal','+2 angled arrows'],speed:['Quick Draw','+30% fire rate'],dmg:['Sharp Tips','+30% damage'],pierce:['Pierce','Arrows pass through'],bounce:['Ricochet','Arrows bounce off walls'],hp:['Vitality','+40 max HP, heal'],heal:['Bandage','Heal 60 HP'],move:['Swift Boots','+15% move speed'],fire:['Flame Arrows','Burn over time']};
+  let hero,en,arrows,eb,room,state,t,joy,pick,skills,xpT,door,spawnT;
+  function reset(){hero={x:W/2,y:AB-60,hp:120,max:120,cd:0,rate:520,dmg:18,spd:2.8,inv:0,lvl:1,xp:0};skills={};en=[];arrows=[];eb=[];room=0;state='ready';joy=null;pick=null;nextRoom();upd()}
+  const upd=()=>c.stat('Room '+room+' · Level '+hero.lvl+' · Best '+(c.best()||0));
+  function nextRoom(){room++;hero.x=W/2;hero.y=AB-50;en=[];arrows=[];eb=[];door=0;const boss=room%10===0;const n=boss?1:Math.min(9,2+Math.floor(room*.6));const mult=c.pick(.8,1,1.25)*(1+room*.09);
+    for(let i=0;i<n;i++){const k=boss?'boss':MOB.pick(room<3?['slime','bat']:['slime','bat','mage','charger']);const B={slime:{hp:40,r:14,spd:.7,c:'#6ad04a'},bat:{hp:28,r:11,spd:1.6,c:'#8a6ab8'},mage:{hp:36,r:13,spd:.4,c:'#e84a8a',shoot:1},charger:{hp:60,r:16,spd:.5,c:'#e8963a',charge:1},boss:{hp:900,r:34,spd:.6,c:'#b8323a',shoot:1,charge:1}}[k];
+      en.push({k,x:MOB.rnd(50,W-50),y:MOB.rnd(AT+40,AT+260),hp:B.hp*mult,max:B.hp*mult,r:B.r,spd:B.spd,c:B.c,shoot:B.shoot,charge:B.charge,cd:MOB.rnd(900,2200),st:0,burn:0,vx:0,vy:0})}upd()}
+  function levelUp(){hero.lvl++;const keys=MOB.shuf(Object.keys(SK)).slice(0,3);pick=keys;state='pick';beep(880,.15,'sine',.08)}
+  function apply(k){skills[k]=(skills[k]||0)+1;if(k==='speed')hero.rate*=.7;if(k==='dmg')hero.dmg*=1.3;if(k==='hp'){hero.max+=40;hero.hp=hero.max}if(k==='heal')hero.hp=Math.min(hero.max,hero.hp+60);if(k==='move')hero.spd*=1.15;pick=null;state='play';upd()}
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='ready'){state='play';return}if(state==='over'){if(t-overT>600)reset();return}if(state==='pick'){const i=Math.floor((p.y-220)/90);if(i>=0&&i<3&&p.y>220)apply(pick[i]);return}joy={sx:p.x,sy:p.y,x:p.x,y:p.y}},move:p=>{if(joy){joy.x=p.x;joy.y=p.y}},up:()=>{joy=null}});
+  const keys={};c.on(document,'keydown',e=>{keys[e.key.toLowerCase()]=1;if(state==='ready')state='play'});c.on(document,'keyup',e=>{keys[e.key.toLowerCase()]=0});
+  let overT=0;t=0;
+  function fire(){const tg=en.filter(e=>e.hp>0).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];if(!tg)return;const a=Math.atan2(tg.y-hero.y,tg.x-hero.x);const shots=[];const m=1+(skills.multi||0);
+    for(let i=0;i<m;i++)shots.push({a,off:(i-(m-1)/2)*10});for(let i=0;i<(skills.diag||0);i++){shots.push({a:a-.45*(i+1),off:0});shots.push({a:a+.45*(i+1),off:0})}
+    for(const s of shots){const px=-Math.sin(s.a)*s.off,py=Math.cos(s.a)*s.off;arrows.push({x:hero.x+px,y:hero.y+py,vx:Math.cos(s.a)*9,vy:Math.sin(s.a)*9,b:skills.bounce||0,p:skills.pierce?3:0,hit:new Set()})}beep(1000,.02,'triangle',.02)}
+  function update(dt){t+=dt;FX.step(dt);FL.step(dt);if(state!=='play')return;const k=dt/16;
+    let mx=0,my=0;if(joy){const dx=joy.x-joy.sx,dy=joy.y-joy.sy,d=Math.hypot(dx,dy);if(d>6){mx=dx/Math.max(d,40);my=dy/Math.max(d,40)}}mx+=(keys.arrowright||keys.d?1:0)-(keys.arrowleft||keys.a?1:0);my+=(keys.arrowdown||keys.s?1:0)-(keys.arrowup||keys.w?1:0);const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
+    hero.x=MOB.clamp(hero.x+mx*hero.spd*k,AL+14,AR-14);hero.y=MOB.clamp(hero.y+my*hero.spd*k,AT+14,AB-14);hero.inv=Math.max(0,hero.inv-dt);hero.cd-=dt;if(ml<.1&&hero.cd<=0&&en.length){hero.cd=hero.rate;fire()}
+    if(door&&hero.y<AT+24&&Math.abs(hero.x-W/2)<40){if(room>(c.best()||0))c.best(room);nextRoom();return}
+    for(const a of arrows){a.x+=a.vx*k;a.y+=a.vy*k;if(a.x<AL||a.x>AR){if(a.b>0){a.b--;a.vx*=-1}else a.dead=1}if(a.y<AT||a.y>AB){if(a.b>0){a.b--;a.vy*=-1}else a.dead=1}
+      for(const e of en){if(e.hp<=0||a.hit.has(e))continue;if(Math.hypot(a.x-e.x,a.y-e.y)<e.r+4){a.hit.add(e);e.hp-=hero.dmg;if(skills.fire)e.burn=2000;FX.burst(a.x,a.y,4,e.c,2,300);if(a.p>0)a.p--;else a.dead=1;break}}}arrows=arrows.filter(a=>!a.dead);
+    for(const e of en){if(e.hp<=0)continue;if(e.burn>0){e.burn-=dt;e.hp-=hero.dmg*.2*skills.fire*dt/1000;if(Math.random()<.2)FX.burst(e.x,e.y,1,'#ff8a1a',1,300)}e.cd-=dt;const dx=hero.x-e.x,dy=hero.y-e.y,d=Math.hypot(dx,dy)||1;
+      if(e.st>0){e.st-=dt;e.x+=e.vx*k;e.y+=e.vy*k}else{const sp=e.k==='bat'?e.spd*(1+Math.sin(t/200+e.max)*.5):e.spd;e.x+=dx/d*sp*k+(e.k==='bat'?Math.cos(t/150+e.max)*1.2*k:0);e.y+=dy/d*sp*k}
+      e.x=MOB.clamp(e.x,AL+e.r,AR-e.r);e.y=MOB.clamp(e.y,AT+e.r,AB-e.r);
+      if(e.cd<=0){if(e.shoot){e.cd=e.k==='boss'?1300:2200;const n=e.k==='boss'?(Math.random()<.5?12:5):1;for(let i=0;i<n;i++){const a=n>5?i/n*6.283:Math.atan2(dy,dx)+(i-(n-1)/2)*.25;eb.push({x:e.x,y:e.y,vx:Math.cos(a)*3.2,vy:Math.sin(a)*3.2})}}
+        else if(e.charge&&d<260){e.cd=2600;e.st=500;e.vx=dx/d*7;e.vy=dy/d*7}else e.cd=1000}
+      if(d<e.r+12&&hero.inv<=0){hurt(e.k==='boss'?25:12)}}
+    for(const b of eb){b.x+=b.vx*k;b.y+=b.vy*k;if(Math.hypot(b.x-hero.x,b.y-hero.y)<14&&hero.inv<=0){b.dead=1;hurt(14)}if(b.x<AL||b.x>AR||b.y<AT||b.y>AB)b.dead=1}eb=eb.filter(b=>!b.dead);
+    for(const e of en)if(e.hp<=0&&!e.dead){e.dead=1;FX.burst(e.x,e.y,18,[e.c,'#fff'],3,500);beep(300,.05,'square',.04);hero.xp+=e.k==='boss'?60:10;FL.add('+'+(e.k==='boss'?60:10)+' xp',e.x,e.y,'#ffd23f')}en=en.filter(e=>!e.dead);
+    if(!en.length&&!door){door=1;eb=[];beep(660,.15,'sine',.06);if(hero.xp>=hero.lvl*30){hero.xp-=hero.lvl*30;levelUp()}}}
+  function hurt(n){hero.hp-=n*c.pick(.75,1,1.25);hero.inv=800;beep(150,.1,'sawtooth',.08);FX.burst(hero.x,hero.y,10,'#ff4a4a',3,400);if(hero.hp<=0){state='over';overT=t;c.best(room-1);c.stat('Fell in room '+room+' · Best '+(c.best()||0));beep(80,.6,'sawtooth',.12)}}
+  function draw(){x.fillStyle='#2a2420';x.fillRect(0,0,W,H);x.fillStyle='#c8b890';x.fillRect(AL,AT,AR-AL,AB-AT);x.strokeStyle='rgba(0,0,0,.08)';for(let i=AT;i<AB;i+=40)for(let j=AL;j<AR;j+=40){x.strokeRect(j+((i/40)%2)*20,i,40,40)}
+    x.fillStyle=door?'#3a2a1a':'#6a5a4a';x.fillRect(W/2-36,AT-18,72,24);if(door){MOB.txt(x,'▲',W/2,AT+14+Math.sin(t/200)*3,18,'#ffd23f')}
+    for(const e of en){x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(e.x,e.y+e.r*.8,e.r,e.r*.35,0,0,7);x.fill();x.fillStyle=e.st>0?'#fff':e.c;x.beginPath();if(e.k==='slime')x.ellipse(e.x,e.y+2,e.r*1.1,e.r*.85+Math.sin(t/150+e.max)*2,0,0,7);else x.arc(e.x,e.y,e.r,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2;x.stroke();
+      if(e.k==='bat'){for(const s of[-1,1]){x.beginPath();x.moveTo(e.x+s*8,e.y);x.lineTo(e.x+s*22,e.y-8+Math.sin(t/60)*6);x.lineTo(e.x+s*14,e.y+4);x.fillStyle=e.c;x.fill();x.stroke()}}
+      x.fillStyle='#fff';x.beginPath();x.arc(e.x-e.r*.3,e.y-e.r*.2,e.r*.22,0,7);x.arc(e.x+e.r*.3,e.y-e.r*.2,e.r*.22,0,7);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.arc(e.x-e.r*.3,e.y-e.r*.15,e.r*.1,0,7);x.arc(e.x+e.r*.3,e.y-e.r*.15,e.r*.1,0,7);x.fill();
+      if(e.hp<e.max){x.fillStyle='#300';x.fillRect(e.x-e.r,e.y-e.r-9,e.r*2,4);x.fillStyle='#ff5a5a';x.fillRect(e.x-e.r,e.y-e.r-9,e.r*2*e.hp/e.max,4)}}
+    for(const b of eb){x.fillStyle='#ff4a8a';x.beginPath();x.arc(b.x,b.y,6,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(b.x,b.y,2.5,0,7);x.fill()}
+    for(const a of arrows){const an=Math.atan2(a.vy,a.vx);x.save();x.translate(a.x,a.y);x.rotate(an);x.strokeStyle='#5a3a1a';x.lineWidth=2.5;x.beginPath();x.moveTo(-12,0);x.lineTo(6,0);x.stroke();x.fillStyle=skills.fire?'#ff6a1a':'#ddd';x.beginPath();x.moveTo(10,0);x.lineTo(3,-4);x.lineTo(3,4);x.fill();x.restore()}
+    if(!(hero.inv>0&&Math.floor(t/80)%2)){x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(hero.x,hero.y+12,13,5,0,0,7);x.fill();x.fillStyle='#3a8aff';x.beginPath();x.arc(hero.x,hero.y,13,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2.5;x.stroke();x.fillStyle='#2a6a2a';x.beginPath();x.moveTo(hero.x-12,hero.y-6);x.lineTo(hero.x,hero.y-22);x.lineTo(hero.x+12,hero.y-6);x.fill();x.stroke()}
+    x.fillStyle='#300';x.fillRect(hero.x-18,hero.y+18,36,4);x.fillStyle='#4ae06a';x.fillRect(hero.x-18,hero.y+18,36*Math.max(0,hero.hp)/hero.max,4);
+    if(joy){x.strokeStyle='rgba(255,255,255,.4)';x.lineWidth=3;x.beginPath();x.arc(joy.sx,joy.sy,40,0,7);x.stroke();const dx=joy.x-joy.sx,dy=joy.y-joy.sy,d=Math.min(40,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);x.fillStyle='rgba(255,255,255,.5)';x.beginPath();x.arc(joy.sx+Math.cos(a)*d,joy.sy+Math.sin(a)*d,16,0,7);x.fill()}
+    FX.draw(x);FL.draw(x);MOB.txt(x,'Room '+room+(room%10===0?' · BOSS':''),16,24,17,'#fff','left');MOB.txt(x,'Lv '+hero.lvl,W-16,24,17,'#ffd23f','right');MOB.rr(x,16,42,W-32,8,4);x.fillStyle='rgba(255,255,255,.15)';x.fill();MOB.rr(x,16,42,(W-32)*Math.min(1,hero.xp/(hero.lvl*30)),8,4);x.fillStyle='#ffd23f';x.fill();
+    if(state==='pick'){x.fillStyle='rgba(0,0,0,.7)';x.fillRect(0,0,W,H);MOB.big(x,'Level up!',W/2,170,40);pick.forEach((k,i)=>{MOB.rr(x,40,226+i*90,W-80,76,16);x.fillStyle='#f5ecd8';x.fill();MOB.txt(x,SK[k][0]+(skills[k]?' '+'I'.repeat(skills[k]+1):''),W/2,252+i*90,20,'#1D1A2F');MOB.txt(x,SK[k][1],W/2,280+i*90,14,'#6a5a4a','center','600 ')})}
+    if(state==='ready')banner(x,W,H,'Arrow Rogue','Drag to move · stand still to shoot');if(state==='over')banner(x,W,H,'Defeated','Room '+room+' · tap to try again')}
+  reset();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

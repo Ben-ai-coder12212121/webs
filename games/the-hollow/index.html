@@ -1,0 +1,51 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Hollow | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-6D1DVZMJG8');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="hollow"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>The Hollow</h1><p>A survival horror story in the spirit of wilderness survival games. Your plane crashed and your daughter was taken. Chop trees, build shelters and cabins, craft weapons, hunt and forage, survive the cannibals and night mutants, and follow her trail through three cave systems to the hidden lab.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/bk.js"></script>
+<script src="/js/lib/hollow.js"></script>
+<script>
+/* ===================== The Hollow: game code ===================== */
+G.push({id:'hollow',name:'The Hollow',kind:'game',wide:true,big:true,major:true,tags:['survival','horror','crafting','story'],tint:'#2a3a2a',
+  blurb:'A survival horror story in the spirit of wilderness survival games. Your plane crashed and your daughter was taken. Chop trees, build shelters and cabins, craft weapons, hunt and forage, survive the cannibals and night mutants, and follow her trail through three cave systems to the hidden lab.',fmt:b=>b>=10?'Escaped!':'Chapter '+b+'/10',
+  art:'<defs><linearGradient id="hlS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a2230"/><stop offset="1" stop-color="#3a4a3a"/></linearGradient></defs><rect width="120" height="72" fill="url(#hlS)"/><circle cx="92" cy="16" r="7" fill="#e8e8d8" opacity=".8"/><g fill="#12201a"><path d="M8 72L18 30 28 72z"/><path d="M22 72L34 20 46 72z"/><path d="M74 72L86 24 98 72z"/><path d="M92 72L104 34 116 72z"/></g><path d="M50 64h20l-4-6h-12z" fill="#3a2a1a"/><path d="M56 58l4-10 4 10z" fill="#ffb040"/><path d="M58 57l2-6 2 6z" fill="#fff0a0"/><circle cx="60" cy="54" r="14" fill="#ffa040" opacity=".15"/><g fill="#d8c8b0"><circle cx="30" cy="48" r="1.4"/><circle cx="33" cy="48" r="1.4"/></g>',
+  run(root,c){return theHollow(root,c)}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

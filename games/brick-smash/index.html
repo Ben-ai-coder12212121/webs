@@ -2,43 +2,80 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Brick Smash: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="Bounce the ball, smash every brick.">
-<link rel="canonical" href="https://detourr.netlify.app/games/brick-smash/">
+<link rel="canonical" href="https://detourr.net/games/brick-smash/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="Brick Smash: play free on Detourr"><meta property="og:description" content="Bounce the ball, smash every brick.">
-<meta property="og:url" content="https://detourr.netlify.app/games/brick-smash/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/brick-smash/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Brick Smash", "description": "Bounce the ball, smash every brick.", "url": "https://detourr.netlify.app/games/brick-smash/", "genre": "Arcade & Quick", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
-<style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Brick Smash", "description": "Bounce the ball, smash every brick.", "url": "https://detourr.net/games/brick-smash/", "genre": "Arcade & Quick", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="breakout"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#breakout" style="background:var(--pink)" aria-label="Play Brick Smash"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="2.5"><rect x="12" y="8" width="22" height="10" fill="#F2352A"/><rect x="37" y="8" width="22" height="10" fill="#FF9F43"/><rect x="62" y="8" width="22" height="10" fill="#FFD23F"/><rect x="87" y="8" width="22" height="10" fill="#6EE7B7"/><rect x="24" y="21" width="22" height="10" fill="#7FC8F8"/><rect x="74" y="21" width="22" height="10" fill="#B9A7FF"/><rect x="40" y="58" width="36" height="7" rx="3" fill="#1D1A2F"/></g><circle cx="64" cy="46" r="5" fill="#1D1A2F"/></svg></a>
+<main class="card"><a class="hero" href="/games/brick-smash/" style="background:var(--pink)" aria-label="Play Brick Smash"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="2.5"><rect x="12" y="8" width="22" height="10" fill="#F2352A"/><rect x="37" y="8" width="22" height="10" fill="#FF9F43"/><rect x="62" y="8" width="22" height="10" fill="#FFD23F"/><rect x="87" y="8" width="22" height="10" fill="#6EE7B7"/><rect x="24" y="21" width="22" height="10" fill="#7FC8F8"/><rect x="74" y="21" width="22" height="10" fill="#B9A7FF"/><rect x="40" y="58" width="36" height="7" rx="3" fill="#1D1A2F"/></g><circle cx="64" cy="46" r="5" fill="#1D1A2F"/></svg></a>
 <div class="body"><span class="chip">Arcade &amp; Quick</span><h1>Brick Smash</h1>
 <p>Bounce the ball, smash every brick.</p>
-<a class="play" href="/#breakout">▶ Play Brick Smash free</a>
+<a class="play" href="/games/brick-smash/">▶ Play Brick Smash free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li><li>Easy, Normal and Hard difficulty</li><li>Live leaderboard: beat other players’ high scores</li></ul>
 <p>Brick Smash is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Arcade &amp; Quick games</h2><div class="grid"><a class="rg" href="/games/snake/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M12 48H44V22H76V38" fill="none" stroke="#1D1A2F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><circle cx="96" cy="38" r="7" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Snake</b></a><a class="rg" href="/games/memory-match/"><span class="ra" style="background:var(--lilac)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="22" y="12" width="34" height="46" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3" transform="rotate(-8 39 35)"/><rect x="64" y="12" width="34" height="46" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3" transform="rotate(8 81 35)"/><text x="39" y="42" font-size="20" text-anchor="middle" fill="#F2352A" transform="rotate(-8 39 35)">♥</text><text x="81" y="42" font-size="20" text-anchor="middle" fill="#F2352A" transform="rotate(8 81 35)">♥</text></svg></span><b>Memory Match</b></a><a class="rg" href="/games/reaction-time/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="38" r="22" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="4"/><path d="M60 38V24M60 38L70 44" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><rect x="54" y="6" width="12" height="7" rx="2" fill="#1D1A2F"/></svg></span><b>Reaction Time</b></a><a class="rg" href="/games/tic-tac-toe/"><span class="ra" style="background:var(--pink)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"><path d="M46 8V64M74 8V64M24 28H96M24 46H96"/></g><path d="M29 12L41 24M41 12L29 24" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="37" r="7" fill="none" stroke="#2d6fd6" stroke-width="5"/><path d="M79 51L91 63M91 51L79 63" stroke="#F2352A" stroke-width="5" stroke-linecap="round"/></svg></span><b>Tic-Tac-Toe</b></a><a class="rg" href="/games/flap/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="80" y="0" width="18" height="24" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="3"/><rect x="80" y="48" width="18" height="24" fill="#6EE7B7" stroke="#1D1A2F" stroke-width="3"/><circle cx="44" cy="36" r="12" fill="#FFD23F" stroke="#1D1A2F" stroke-width="3"/><circle cx="48" cy="32" r="2.5" fill="#1D1A2F"/><path d="M55 37l8 2-8 3z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2"/></svg></span><b>Flap</b></a><a class="rg" href="/games/bonk-a-mole/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><ellipse cx="60" cy="58" rx="36" ry="9" fill="#3b2a1f"/><path d="M40 58V38a20 20 0 0 1 40 0v20z" fill="#9b6b43" stroke="#1D1A2F" stroke-width="3"/><circle cx="53" cy="38" r="3" fill="#1D1A2F"/><circle cx="67" cy="38" r="3" fill="#1D1A2F"/><ellipse cx="60" cy="46" rx="5" ry="3.5" fill="#FF8FB1"/></svg></span><b>Bonk-a-Mole</b></a><a class="rg" href="/games/speed-typing/"><span class="ra" style="background:var(--paper)"><svg viewBox="0 0 120 72" aria-hidden="true"><g fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"><rect x="14" y="14" width="18" height="16" rx="3"/><rect x="36" y="14" width="18" height="16" rx="3"/><rect x="58" y="14" width="18" height="16" rx="3"/><rect x="80" y="14" width="18" height="16" rx="3"/><rect x="24" y="34" width="18" height="16" rx="3"/><rect x="46" y="34" width="18" height="16" rx="3"/><rect x="68" y="34" width="18" height="16" rx="3"/><rect x="30" y="54" width="60" height="10" rx="3"/></g></svg></span><b>Speed Typing</b></a><a class="rg" href="/games/echo/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M60 36V6A30 30 0 0 0 30 36z" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36V6A30 30 0 0 1 90 36z" fill="#2d6fd6" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H30A30 30 0 0 0 60 66z" fill="#2BB673" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H90A30 30 0 0 1 60 66z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Echo</b></a><a class="rg" href="/games/hype-check/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="8" y="10" width="50" height="52" rx="6" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="50" height="52" rx="6" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/><text x="33" y="42" font-family="monospace" font-weight="700" font-size="13" text-anchor="middle" fill="#1D1A2F">12.4M</text><text x="87" y="44" font-family="sans-serif" font-weight="800" font-size="24" text-anchor="middle" fill="#1D1A2F">?</text></svg></span><b>Hype Check</b></a><a class="rg" href="/games/paddle-ball/"><span class="ra" style="background:#3a3552"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="14" y="16" width="7" height="26" rx="2" fill="#FFD23F"/><rect x="99" y="30" width="7" height="26" rx="2" fill="#FFD23F"/><circle cx="58" cy="30" r="5" fill="#FFFDF6"/><path d="M60 4V68" stroke="#FFFDF6" stroke-width="2" stroke-dasharray="4 5"/></svg></span><b>Paddle Ball</b></a><a class="rg" href="/games/virus-attack/"><span class="ra" style="background:#6EE7B7"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#e6fff4"/><g stroke="#1D1A2F" stroke-width="2"><circle cx="40" cy="36" r="13" fill="#6EE7B7"/><circle cx="80" cy="28" r="9" fill="#F2352A"/><circle cx="74" cy="54" r="7" fill="#B9A7FF"/></g><g stroke="#1D1A2F" stroke-width="2"><path d="M40 20v-6M40 52v6M24 36h-6M56 36h6M29 25l-4-4M51 47l4 4M51 25l4-4M29 47l-4 4"/></g><circle cx="36" cy="33" r="2" fill="#1D1A2F"/><circle cx="44" cy="33" r="2" fill="#1D1A2F"/></svg></span><b>Virus Attack</b></a><a class="rg" href="/games/crash-dummy/"><span class="ra" style="background:#FF8FB1"><svg viewBox="0 0 120 72" aria-hidden="true"><rect width="120" height="72" fill="#FF8FB1"/><rect y="62" width="120" height="10" fill="#8a5a2b"/><g stroke="#1D1A2F" stroke-width="2.5"><circle cx="40" cy="20" r="8" fill="#FFD23F"/><rect x="34" y="28" width="12" height="18" rx="3" fill="#FFD23F"/><path d="M34 32l-12-8M46 32l12-10M37 46l-6 14M43 46l8 12" stroke="#FFD23F" stroke-width="6" stroke-linecap="round"/><path d="M34 32l-12-8M46 32l12-10M37 46l-6 14M43 46l8 12" fill="none"/></g><path d="M36 17l3 3M39 17l-3 3M42 17l3 3M45 17l-3 3" stroke="#1D1A2F" stroke-width="1.5"/><path d="M84 62v-14h12v14" fill="#9fd6ff" stroke="#1D1A2F" stroke-width="2.5"/><path d="M98 38q-6 12 0 24h10q6-12 0-24z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="2.5"/><text x="86" y="30" font-family="Arial Black" font-size="11" fill="#FFD23F" stroke="#1D1A2F" stroke-width="1">CRASH</text></svg></span><b>Crash Dummy</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== Brick Smash: game code ===================== */
+G.push({id:'breakout',levels:true,name:'Brick Smash',kind:'game',tint:'var(--pink)',blurb:'Bounce the ball, smash every brick.',fmt:b=>b+' pts',
+art:'<g stroke="#1D1A2F" stroke-width="2.5"><rect x="12" y="8" width="22" height="10" fill="#F2352A"/><rect x="37" y="8" width="22" height="10" fill="#FF9F43"/><rect x="62" y="8" width="22" height="10" fill="#FFD23F"/><rect x="87" y="8" width="22" height="10" fill="#6EE7B7"/><rect x="24" y="21" width="22" height="10" fill="#7FC8F8"/><rect x="74" y="21" width="22" height="10" fill="#B9A7FF"/><rect x="40" y="58" width="36" height="7" rx="3" fill="#1D1A2F"/></g><circle cx="64" cy="46" r="5" fill="#1D1A2F"/>',
+run(root,c){
+  const W=480,H=560;const cv=el('canvas',{class:'board',width:W,height:H,style:'width:min(100%,calc(66vh*.857))'});const x=cv.getContext('2d');
+  const COLS=['#F2352A','#FF9F43','#FFD23F','#6EE7B7','#7FC8F8','#B9A7FF'];let pad,ball,bricks,lives,score,level,state,sp,held={l:0,r:0};
+  function build(){bricks=[];const cols=8,bw=(W-40)/cols;for(let r=0;r<6;r++)for(let q=0;q<cols;q++)bricks.push({x:20+q*bw+2,y:60+r*24,w:bw-4,h:20,c:COLS[r],alive:true})}
+  function serve(){ball={x:pad.x,y:pad.y-12,vx:0,vy:0,r:8,stuck:true}}
+  function reset(){pad={x:W/2,w:c.pick(125,90,64),y:H-34};lives=c.pick(5,3,2);score=0;level=1;sp=c.pick(.27,.33,.4);build();serve();state='play';upd()}
+  function upd(){c.stat('Score '+score+' · Lives '+'●'.repeat(Math.max(0,lives))+' · Lv '+level)}
+  function launch(){if(state==='over'){reset();return}if(ball.stuck){ball.stuck=false;const a=(Math.random()-.5)*.8;ball.vx=sp*Math.sin(a);ball.vy=-sp*Math.cos(a)}}
+  function step(dt){pad.x+=(held.r-held.l)*.55*dt;pad.x=Math.max(pad.w/2,Math.min(W-pad.w/2,pad.x));if(ball.stuck){ball.x=pad.x;ball.y=pad.y-12;return}
+    const n=4;for(let s=0;s<n;s++){const d=dt/n;ball.x+=ball.vx*d;ball.y+=ball.vy*d;const r=ball.r;
+      if(ball.x<r){ball.x=r;ball.vx=Math.abs(ball.vx)}if(ball.x>W-r){ball.x=W-r;ball.vx=-Math.abs(ball.vx)}if(ball.y<r){ball.y=r;ball.vy=Math.abs(ball.vy)}
+      if(ball.vy>0&&ball.y+r>=pad.y&&ball.y-r<=pad.y+12&&ball.x>=pad.x-pad.w/2-r&&ball.x<=pad.x+pad.w/2+r){const a=Math.max(-1,Math.min(1,(ball.x-pad.x)/(pad.w/2)))*1.05;ball.vx=sp*Math.sin(a);ball.vy=-sp*Math.cos(a);ball.y=pad.y-r;beep(420,.04,'square',.04)}
+      for(const b of bricks){if(!b.alive)continue;if(ball.x+r>b.x&&ball.x-r<b.x+b.w&&ball.y+r>b.y&&ball.y-r<b.y+b.h){const ox=Math.min(ball.x+r-b.x,b.x+b.w-(ball.x-r)),oy=Math.min(ball.y+r-b.y,b.y+b.h-(ball.y-r));if(ox<oy)ball.vx=-ball.vx;else ball.vy=-ball.vy;b.alive=false;score+=10;beep(700+Math.random()*300,.04,'triangle',.05);upd();break}}
+      if(ball.y>H+20){lives--;beep(130,.35,'sawtooth');upd();if(lives<=0){state='over';c.stat('Final '+score+' · Best '+c.best(score))}else serve();return}}
+    if(bricks.every(b=>!b.alive)){level++;sp+=.05;build();serve();beep(880,.3,'triangle');upd()}}
+  function draw(){x.fillStyle='#FFFDF6';x.fillRect(0,0,W,H);x.strokeStyle='#1D1A2F';x.lineWidth=2.5;
+    for(const b of bricks)if(b.alive){x.fillStyle=b.c;x.fillRect(b.x,b.y,b.w,b.h);x.strokeRect(b.x,b.y,b.w,b.h)}
+    x.fillStyle='#1D1A2F';rr(x,pad.x-pad.w/2,pad.y,pad.w,12,6);x.fill();x.beginPath();x.arc(ball.x,ball.y,ball.r,0,7);x.fill();
+    if(state==='play'&&ball.stuck){x.fillStyle='#5A5470';x.textAlign='center';x.font='600 17px Figtree, sans-serif';x.fillText('Click, tap or press space to launch',W/2,H/2+60)}
+    if(state==='over')banner(x,W,H,'Game over','Score '+score+' · tap to play again')}
+  c.on(cv,'pointermove',e=>{pad.x=canvasPos(cv,e).x});c.on(cv,'pointerdown',e=>{e.preventDefault();pad.x=canvasPos(cv,e).x;launch()});
+  c.on(document,'keydown',e=>{const k=e.key.toLowerCase();if(k==='arrowleft'||k==='a')held.l=1;if(k==='arrowright'||k==='d')held.r=1;if(k===' '){e.preventDefault();launch()}});
+  c.on(document,'keyup',e=>{const k=e.key.toLowerCase();if(k==='arrowleft'||k==='a')held.l=0;if(k==='arrowright'||k==='d')held.r=0});
+  reset();root.append(cv,el('p',{class:'hint'},'Move with your mouse, finger, or arrow keys. Where the ball hits the paddle sets its angle.'));c.loop(dt=>{if(state==='play')step(dt);draw()});
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

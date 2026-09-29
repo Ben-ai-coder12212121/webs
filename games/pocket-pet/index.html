@@ -1,0 +1,100 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pocket Pet | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_pet"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Pocket Pet</h1><p>Adopt a squishy little blob. Feed it, bathe it, tuck it in and play catch to earn coins for snacks and new colours. It remembers you, and gets hungry while you're away.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Pocket Pet: game code ===================== */
+G.push({id:'m_pet',name:'Pocket Pet',kind:'chill',tint:'#ffe8f4',blurb:'Adopt a squishy little blob. Feed it, bathe it, tuck it in and play catch to earn coins for snacks and new colours. It remembers you, and gets hungry while you\'re away.',fmt:b=>'level '+b,noLb:true,
+art:'<ellipse cx="60" cy="46" rx="30" ry="24" fill="#ff8ac8" stroke="#1D1A2F" stroke-width="3"/><circle cx="50" cy="40" r="5" fill="#1D1A2F"/><circle cx="70" cy="40" r="5" fill="#1D1A2F"/><path d="M52 52q8 7 16 0" stroke="#1D1A2F" stroke-width="3" fill="none"/><circle cx="96" cy="16" r="8" fill="#ffd23f" stroke="#1D1A2F" stroke-width="2"/>',
+run(root,c){const W=400,H=640;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts(),FL=MOB.floats();
+  const COLS=[['Bubblegum','#ff8ac8',0],['Mint','#6ae0b0',30],['Sky','#6ab8ff',30],['Sunny','#ffd23f',40],['Grape','#a86ae8',50],['Tangerine','#ff9a3a',60],['Midnight','#3a3a6a',80]];
+  const FOOD=[['🍎','Apple',5,18],['🍙','Rice ball',8,28],['🍕','Pizza',14,45],['🍰','Cake',20,35,1]];
+  const def={hunger:80,energy:80,fun:70,clean:80,coins:20,xp:0,lvl:1,col:0,owned:[0],sleep:0,at:Date.now(),name:'Mochi'};
+  let P=Object.assign({},def,S.get('pet_state',{}));
+  // time away: stats drop while you're gone (gently, and never below 10 so the pet is never lost)
+  {const away=Math.min(36,(Date.now()-P.at)/3600000);if(away>.05){P.hunger=Math.max(10,P.hunger-away*6);P.fun=Math.max(10,P.fun-away*5);P.clean=Math.max(10,P.clean-away*3);P.energy=P.sleep?Math.min(100,P.energy+away*20):Math.max(10,P.energy-away*3)}}
+  const save=()=>{P.at=Date.now();S.set('pet_state',P)};let mode='home',drag=null,t=0,blink=0,mood='',scrub=0,bubbles=[],game=null,panel=null,say='',sayT=0;
+  const upd=()=>c.stat(P.name+' · Level '+P.lvl+' · 🪙 '+P.coins);
+  function xp(n){P.xp+=n;const need=P.lvl*30;if(P.xp>=need){P.xp-=need;P.lvl++;c.best(P.lvl);FL.add('Level up! '+P.lvl,W/2,200,'#ffd23f');beep(880,.15,'sine',.1);setTimeout(()=>beep(1320,.2,'sine',.1),150);P.coins+=10}save();upd()}
+  function talk(s){say=s;sayT=2200}
+  const PX=W/2,PY=330;
+  const BTN=[['🍽️','Feed'],['🛁','Bath'],['💤','Sleep'],['⚽','Play'],['🎨','Colour']];
+  function btnAt(p){if(p.y<H-80)return-1;return Math.floor(p.x/(W/5))}
+  MOB.drag(c,cv,W,H,{down:p=>{
+      if(mode==='game'){game.tap(p);return}
+      if(panel){const i=Math.floor((p.y-200)/64);if(p.y>200&&i>=0&&i<panel.items.length)panel.pick(i);else panel=null;return}
+      const b=btnAt(p);if(b>=0){act(b);return}
+      if(mode==='feed'&&p.y>H-170&&p.y<H-90){const i=Math.floor(p.x/(W/4));if(FOOD[i])drag={i,x:p.x,y:p.y}}
+      if(mode==='bath')scrub=1;if(mode==='home'&&Math.hypot(p.x-PX,p.y-PY)<80){P.fun=Math.min(100,P.fun+2);talk(MOB.pick(['Hehe!','That tickles!','♥','Again!']));beep(900,.06,'sine',.06);FX.burst(p.x,p.y,6,'#ff6aa0',2,500);save()}},
+    move:p=>{if(mode==='game'){game.tap(p);return}if(drag){drag.x=p.x;drag.y=p.y}if(mode==='bath'&&scrub&&Math.hypot(p.x-PX,p.y-PY)<100){P.clean=Math.min(100,P.clean+.6);if(Math.random()<.3)bubbles.push({x:p.x+MOB.rnd(-10,10),y:p.y,t:0});if(P.clean>=100&&!P.cleanDone){P.cleanDone=1;xp(4);talk('Squeaky clean!')}}},
+    up:p=>{scrub=0;if(drag){const f=FOOD[drag.i];if(Math.hypot(p.x-PX,p.y-PY)<90){if(P.coins<f[2]){talk('Need '+f[2]+' coins');}else if(P.hunger>=98){talk('I\'m full!')}else{P.coins-=f[2];P.hunger=Math.min(100,P.hunger+f[3]);if(f[4])P.fun=Math.min(100,P.fun+10);xp(3);chew=700;beep(300,.08,'square',.05);talk(MOB.pick(['Yum!','Nom nom','Tasty!']));FX.burst(PX,PY+20,10,'#ffe0a0',2,500)}}drag=null;save();upd()}}});
+  let chew=0;
+  function act(b){if(P.sleep&&b!==2){talk('Zzz… (tap Sleep to wake)');return}panel=null;
+    if(b===0)mode=mode==='feed'?'home':'feed';else if(b===1){mode=mode==='bath'?'home':'bath';P.cleanDone=0}
+    else if(b===2){P.sleep=!P.sleep;mode='home';talk(P.sleep?'':'Good morning!');save()}
+    else if(b===3){if(P.energy<15){talk('Too sleepy to play…');return}startGame()}
+    else if(b===4){panel={items:COLS.map((cc,i)=>cc[0]+(P.owned.includes(i)?(P.col===i?'  ✓':''):'   🪙'+cc[2])),pick:i=>{if(P.owned.includes(i)){P.col=i}else if(P.coins>=COLS[i][2]){P.coins-=COLS[i][2];P.owned.push(i);P.col=i;beep(1000,.1,'sine',.08)}else{talk('Not enough coins')}panel=null;save();upd()}}}}
+  function startGame(){mode='game';let score=0,time=20000,items=[],spawn=0,bx=W/2;game={tap(p){bx=p.x},move(p){bx=p.x},step(dt){time-=dt;spawn-=dt;if(spawn<=0){spawn=MOB.rnd(350,700);items.push({x:MOB.rnd(30,W-30),y:-20,v:MOB.rnd(2.5,4.5),bad:Math.random()<.18})}
+      for(const it of items){it.y+=it.v*dt/16;if(!it.got&&it.y>H-170&&it.y<H-120&&Math.abs(it.x-bx)<46){it.got=1;if(it.bad){score=Math.max(0,score-2);beep(150,.1,'square',.05)}else{score++;beep(700+score*10,.04,'triangle',.05);FX.burst(it.x,it.y,6,'#ffd23f',2,300)}}}items=items.filter(i=>!i.got&&i.y<H);
+      if(time<=0){mode='home';game=null;const coins=score*2;P.coins+=coins;P.fun=Math.min(100,P.fun+25);P.energy=Math.max(0,P.energy-15);xp(Math.min(15,score));talk('+'+coins+' coins! That was fun!');save();upd()}},
+    draw(){x.fillStyle='#bfe8ff';x.fillRect(0,0,W,H);for(const it of items)MOB.txt(x,it.bad?'🌧️':'⭐',it.x,it.y,30);drawPet(bx,H-150,.55);MOB.big(x,String(score),W/2,50,40,'#fff','#1D1A2F');MOB.txt(x,Math.ceil(time/1000)+'s',W-30,30,18,'#1D1A2F');MOB.txt(x,'Drag to catch stars, dodge rain',W/2,90,14,'#1D1A2F')}};}
+  function drawPet(px,py,s){const col=COLS[P.col][1];const sq=1+Math.sin(t/400)*.03+(chew>0?Math.sin(t/60)*.05:0);x.save();x.translate(px,py);x.scale(s*(1/sq),s*sq);
+    x.fillStyle='rgba(0,0,0,.12)';x.beginPath();x.ellipse(0,78,80,14,0,0,7);x.fill();x.fillStyle=col;x.beginPath();x.moveTo(-90,70);x.bezierCurveTo(-100,-60,100,-60,90,70);x.closePath();x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=4;x.stroke();
+    x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.ellipse(-40,-10,18,10,-.6,0,7);x.fill();
+    const sad=P.hunger<30||P.fun<30||P.clean<30;if(P.sleep&&mode!=='game'){x.strokeStyle='#1D1A2F';x.lineWidth=4;for(const s2 of[-1,1]){x.beginPath();x.arc(s2*28,5,11,.2,2.9);x.stroke()}}
+    else{const bl=blink>0?.15:1;for(const s2 of[-1,1]){x.fillStyle='#fff';x.beginPath();x.ellipse(s2*28,0,15,18*bl,0,0,7);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.ellipse(s2*28+3,3,8,10*bl,0,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(s2*28+6,-2,3,0,7);x.fill()}}
+    x.fillStyle='rgba(255,90,140,.35)';x.beginPath();x.ellipse(-52,26,12,7,0,0,7);x.ellipse(52,26,12,7,0,0,7);x.fill();
+    x.strokeStyle='#1D1A2F';x.lineWidth=4;x.beginPath();if(chew>0){x.ellipse(0,34,10,6+Math.abs(Math.sin(t/60))*6,0,0,7)}else if(sad)x.arc(0,46,14,3.5,5.9);else x.arc(0,26,16,.3,2.8);x.stroke();
+    if(P.clean<40&&mode!=='game'){x.fillStyle='rgba(120,90,50,.5)';for(const[a,b]of[[-50,-10],[40,40],[10,-30],[-20,50]]){x.beginPath();x.arc(a,b,8,0,7);x.fill()}}x.restore()}
+  function bar(px,py,lab,v,col){MOB.txt(x,lab,px,py,18);MOB.rr(x,px-30,py+14,60,9,4);x.fillStyle='rgba(0,0,0,.15)';x.fill();MOB.rr(x,px-30,py+14,60*v/100,9,4);x.fillStyle=v<30?'#ff4a4a':col;x.fill()}
+  let tickT=0;
+  function update(dt){t+=dt;FX.step(dt);FL.step(dt);chew=Math.max(0,chew-dt);sayT=Math.max(0,sayT-dt);if(Math.random()<dt/3000)blink=150;blink=Math.max(0,blink-dt);
+    tickT+=dt;if(tickT>1000){tickT=0;const m=1/60;P.hunger=Math.max(0,P.hunger-m*1.2);P.fun=Math.max(0,P.fun-m*(P.sleep?0:1.5));P.clean=Math.max(0,P.clean-m*.6);P.energy=P.sleep?Math.min(100,P.energy+m*40):Math.max(0,P.energy-m*.8);if(P.sleep&&P.energy>=100){P.sleep=0;talk('I feel great!')}if(Math.random()<.05)save()}
+    for(const b of bubbles)b.t+=dt;bubbles=bubbles.filter(b=>b.t<900);if(game)game.step(dt)}
+  function draw(){if(mode==='game'){game.draw();FX.draw(x);return}const night=P.sleep;const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,night?'#1a1a3a':'#ffe8f4');g.addColorStop(1,night?'#2a2a5a':'#ffd0e4');x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle=night?'#3a3a6a':'#f0b8d0';x.fillRect(0,440,W,H-440);if(mode==='bath'){x.fillStyle='#bfe8ff';MOB.rr(x,60,300,280,150,40);x.fill()}
+    bar(50,24,'🍗',P.hunger,'#ff9a3a');bar(130,24,'⚡',P.energy,'#ffd23f');bar(210,24,'🎈',P.fun,'#ff6aa0');bar(290,24,'🧼',P.clean,'#6ab8ff');MOB.txt(x,'🪙'+P.coins,W-40,30,16,'#1D1A2F');
+    MOB.txt(x,P.name+' · Lv '+P.lvl,W/2,80,18,night?'#fff':'#8a2a5a');MOB.rr(x,W/2-60,94,120,8,4);x.fillStyle='rgba(0,0,0,.12)';x.fill();MOB.rr(x,W/2-60,94,120*P.xp/(P.lvl*30),8,4);x.fillStyle='#ffd23f';x.fill();
+    drawPet(PX,PY,1);if(P.sleep){MOB.txt(x,'z',PX+80,PY-90-Math.sin(t/500)*8,24,'#fff');MOB.txt(x,'Z',PX+100,PY-120-Math.sin(t/500+1)*8,30,'#fff')}
+    for(const b of bubbles){x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=2;x.beginPath();x.arc(b.x,b.y-b.t*.05,6+b.t*.01,0,7);x.stroke()}
+    if(sayT>0&&say){MOB.rr(x,PX-80,170,160,40,20);x.fillStyle='#fff';x.fill();MOB.txt(x,say,PX,190,16,'#1D1A2F')}
+    if(mode==='feed'){x.fillStyle='rgba(255,255,255,.7)';x.fillRect(0,H-170,W,80);FOOD.forEach((f,i)=>{const fx=i*W/4+W/8;MOB.txt(x,f[0],fx,H-142,34);MOB.txt(x,'🪙'+f[2],fx,H-106,12,'#1D1A2F')});MOB.txt(x,'Drag food to '+P.name,W/2,H-182,13,'#8a2a5a')}
+    if(mode==='bath')MOB.txt(x,'Scrub '+P.name+' with your finger',W/2,H-110,14,'#2a5a8a');
+    if(drag)MOB.txt(x,FOOD[drag.i][0],drag.x,drag.y,44);
+    x.fillStyle=night?'#15152a':'#fff';x.fillRect(0,H-80,W,80);BTN.forEach((b,i)=>{const bx=i*W/5+W/10;const on=(i===0&&mode==='feed')||(i===1&&mode==='bath')||(i===2&&P.sleep);if(on){x.fillStyle='#ffd23f';x.beginPath();x.arc(bx,H-50,26,0,7);x.fill()}MOB.txt(x,b[0],bx,H-50,26);MOB.txt(x,b[1],bx,H-16,12,night?'#aaa':'#8a2a5a')});
+    if(panel){x.fillStyle='rgba(0,0,0,.5)';x.fillRect(0,0,W,H);panel.items.forEach((s,i)=>{MOB.rr(x,60,204+i*64,W-120,54,16);x.fillStyle='#fff';x.fill();x.fillStyle=COLS[i][1];x.beginPath();x.arc(96,231+i*64,16,0,7);x.fill();MOB.txt(x,s,W/2+20,231+i*64,16,'#1D1A2F')})}
+    FX.draw(x);FL.draw(x)}
+  upd();c.loop(dt=>{update(dt);draw()});c.on(window,'beforeunload',save)}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

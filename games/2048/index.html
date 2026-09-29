@@ -2,43 +2,77 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>2048: Play Free Online, No Download | Detourr</title>
 <meta name="description" content="Slide and merge tiles. Chase the big number.">
-<link rel="canonical" href="https://detourr.netlify.app/games/2048/">
+<link rel="canonical" href="https://detourr.net/games/2048/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FFD23F">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Detourr">
 <meta property="og:title" content="2048: play free on Detourr"><meta property="og:description" content="Slide and merge tiles. Chase the big number.">
-<meta property="og:url" content="https://detourr.netlify.app/games/2048/"><meta property="og:image" content="https://detourr.netlify.app/og.png"><meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@600;800;900&display=swap">
+<meta property="og:url" content="https://detourr.net/games/2048/"><meta property="og:image" content="https://detourr.net/og.png"><meta name="twitter:card" content="summary_large_image">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "2048", "description": "Slide and merge tiles. Chase the big number.", "url": "https://detourr.netlify.app/games/2048/", "genre": "Puzzle", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.netlify.app/"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "2048", "description": "Slide and merge tiles. Chase the big number.", "url": "https://detourr.net/games/2048/", "genre": "Puzzle", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
 <style>
-:root{--ink:#1D1A2F;--sun:#FFD23F;--paper:#FFFDF6;--red:#F2352A}
-*{box-sizing:border-box}body{margin:0;background:var(--sun);color:var(--ink);font:600 17px/1.5 Figtree,system-ui,sans-serif}
-a{color:inherit}.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;font:900 28px/1 'Arial Black','Helvetica Neue',Arial,sans-serif;letter-spacing:-.06em;color:#161616}.brand svg{width:40px;height:40px}
-.pill{background:var(--paper);border:3px solid var(--ink);border-radius:99px;padding:6px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;font-weight:800}
-.card{background:var(--paper);border:3px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);overflow:hidden}
-.hero{display:block;aspect-ratio:120/72;max-height:340px;width:100%;border-bottom:3px solid var(--ink)}.hero svg{width:100%;height:100%;display:block}
-.body{padding:18px 22px 24px}h1{font:400 44px/1.05 'Bagel Fat One',system-ui;margin:4px 0 8px}
-.chip{display:inline-block;background:var(--sun);border:2px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:13px;font-weight:800}
-.play{display:inline-block;margin:14px 0 6px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:14px;padding:12px 26px;font:900 22px Figtree,system-ui;text-decoration:none;box-shadow:4px 4px 0 var(--ink)}
-ul.f{padding-left:20px;margin:10px 0}h2{font:400 26px 'Bagel Fat One',system-ui;margin:28px 0 10px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.rg{display:block;background:var(--paper);border:3px solid var(--ink);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
-.rg .ra{display:block;aspect-ratio:120/72;border-bottom:2px solid var(--ink)}.rg svg{width:100%;height:100%;display:block}.rg b{display:block;padding:6px 8px;font-size:14px}
-footer{margin-top:30px;font-size:14px}
-</style></head><body><div class="wrap">
+/* styles used only by this game */
+/* 2048 */
+.g2048{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px;background:var(--ink);border-radius:14px;width:min(100%,420px);touch-action:none}
+.g2048 div{aspect-ratio:1;border-radius:8px;display:grid;place-items:center;font:700 clamp(18px,6.5vw,34px) var(--mono);background:#3a3552;color:var(--ink)}
+</style>
+</head><body class="gamepage">
+<script>window.PAGE_GAME="2048"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap">
 <div class="top"><a class="brand" href="/" aria-label="Detourr home"><svg viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></svg><span>detourr</span></a><a class="pill" href="/">All 235 games</a></div>
-<main class="card"><a class="hero" href="/#2048" style="background:var(--orange)" aria-label="Play 2048"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="18" y="10" width="40" height="40" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="40" height="40" rx="6" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><text x="38" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#1D1A2F">16</text><text x="82" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#fff">32</text></svg></a>
+<main class="card"><a class="hero" href="/games/2048/" style="background:var(--orange)" aria-label="Play 2048"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="18" y="10" width="40" height="40" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="40" height="40" rx="6" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><text x="38" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#1D1A2F">16</text><text x="82" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#fff">32</text></svg></a>
 <div class="body"><span class="chip">Puzzle</span><h1>2048</h1>
 <p>Slide and merge tiles. Chase the big number.</p>
-<a class="play" href="/#2048">▶ Play 2048 free</a>
+<a class="play" href="/games/2048/">▶ Play 2048 free</a>
 <ul class="f"><li>Free, no download and no sign-up</li><li>Works on phones, tablets, Chromebooks and computers</li><li>Live leaderboard: beat other players’ high scores</li></ul>
 <p>2048 is one of 235 free games on Detourr. It runs right in your browser, so there’s nothing to install and no account to make. Press play and it starts instantly.</p>
 </div></main>
 <h2>More Puzzle games</h2><div class="grid"><a class="rg" href="/games/mine-sweep/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><circle cx="60" cy="36" r="16" fill="#1D1A2F"/><g stroke="#1D1A2F" stroke-width="5" stroke-linecap="round"><path d="M60 10V62M34 36H86M42 18L78 54M78 18L42 54"/></g><circle cx="54" cy="30" r="4" fill="#fff"/></svg></span><b>Mine Sweep</b></a><a class="rg" href="/games/five-letters/"><span class="ra" style="background:var(--green)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3"><rect x="8" y="22" width="18" height="18" rx="3" fill="#2BB673"/><rect x="30" y="22" width="18" height="18" rx="3" fill="#8c86a3"/><rect x="52" y="22" width="18" height="18" rx="3" fill="#FF9F43"/><rect x="74" y="22" width="18" height="18" rx="3" fill="#2BB673"/><rect x="96" y="22" width="18" height="18" rx="3" fill="#FFFDF6"/></g></svg></span><b>Five Letters</b></a><a class="rg" href="/games/lights-off/"><span class="ra" style="background:#3a3552"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3"><rect x="30" y="6" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="51" y="6" width="18" height="18" rx="3" fill="#5A5470"/><rect x="72" y="6" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="30" y="27" width="18" height="18" rx="3" fill="#5A5470"/><rect x="51" y="27" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="72" y="27" width="18" height="18" rx="3" fill="#5A5470"/><rect x="30" y="48" width="18" height="18" rx="3" fill="#FFE27A"/><rect x="51" y="48" width="18" height="18" rx="3" fill="#5A5470"/><rect x="72" y="48" width="18" height="18" rx="3" fill="#5A5470"/></g></svg></span><b>Lights Off</b></a><a class="rg" href="/games/sliding-puzzle/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3" fill="#7FC8F8"><rect x="30" y="6" width="28" height="28" rx="4"/><rect x="62" y="6" width="28" height="28" rx="4"/><rect x="30" y="38" width="28" height="28" rx="4"/></g><g font-family="monospace" font-weight="700" font-size="15" text-anchor="middle" fill="#1D1A2F"><text x="44" y="25">1</text><text x="76" y="25">2</text><text x="44" y="57">3</text></g></svg></span><b>Sliding Puzzle</b></a><a class="rg" href="/games/word-scramble/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><g stroke="#1D1A2F" stroke-width="3" fill="#FFFDF6"><rect x="10" y="22" width="18" height="22" rx="3" transform="rotate(-8 19 33)"/><rect x="32" y="22" width="18" height="22" rx="3" transform="rotate(6 41 33)"/><rect x="54" y="22" width="18" height="22" rx="3"/><rect x="76" y="22" width="18" height="22" rx="3" transform="rotate(-5 85 33)"/><rect x="98" y="22" width="16" height="22" rx="3" transform="rotate(9 106 33)"/></g><g font-family="monospace" font-weight="700" font-size="13" text-anchor="middle" fill="#1D1A2F"><text x="19" y="38">L</text><text x="41" y="38">E</text><text x="63" y="38">W</text><text x="85" y="38">O</text><text x="106" y="38">H</text></g></svg></span><b>Word Scramble</b></a><a class="rg" href="/games/tower-of-hanoi/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M10 64H110M30 64V14M60 64V14M90 64V14" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><g stroke="#1D1A2F" stroke-width="2.5"><rect x="14" y="52" width="32" height="10" rx="3" fill="#F2352A"/><rect x="18" y="42" width="24" height="10" rx="3" fill="#FF9F43"/><rect x="50" y="52" width="20" height="10" rx="3" fill="#FFE27A"/></g></svg></span><b>Tower of Hanoi</b></a><a class="rg" href="/games/sudoku/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="30" y="6" width="60" height="60" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><path d="M50 6V66M70 6V66M30 26H90M30 46H90" stroke="#1D1A2F" stroke-width="2"/><g font-family="monospace" font-weight="700" font-size="13" fill="#1D1A2F" text-anchor="middle"><text x="40" y="21">5</text><text x="80" y="41">3</text><text x="60" y="61">9</text><text x="40" y="61" fill="#2d6fd6">1</text></g></svg></span><b>Sudoku</b></a><a class="rg" href="/games/picture-grid/"><span class="ra" style="background:var(--mint)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="36" y="16" width="50" height="50" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><g fill="#1D1A2F"><rect x="46" y="26" width="10" height="10"/><rect x="66" y="26" width="10" height="10"/><rect x="46" y="46" width="30" height="10"/></g><g font-family="monospace" font-size="9" font-weight="700" fill="#1D1A2F"><text x="20" y="34">1 1</text><text x="26" y="54">3</text><text x="48" y="12">1</text><text x="68" y="12">1</text></g></svg></span><b>Picture Grid</b></a><a class="rg" href="/games/jigsaw/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M20 14h24c0-10 14-10 14 0h24v22c-10 0-10 14 0 14v16H58c0-10-14-10-14 0H20V50c10 0 10-14 0-14z" fill="#7FC8F8" stroke="#1D1A2F" stroke-width="3"/><path d="M84 36c10 0 10 14 0 14" fill="#FF8FB1" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Jigsaw</b></a><a class="rg" href="/games/word-search/"><span class="ra" style="background:var(--sun2)"><svg viewBox="0 0 120 72" aria-hidden="true"><rect x="24" y="6" width="72" height="60" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><rect x="30" y="14" width="58" height="12" rx="6" fill="#FF8FB1" opacity=".7"/><g font-family="monospace" font-weight="700" font-size="11" fill="#1D1A2F"><text x="34" y="24">C A T S</text><text x="34" y="42">Q W O X</text><text x="34" y="60">L D O G</text></g></svg></span><b>Word Search</b></a><a class="rg" href="/games/echo/"><span class="ra" style="background:var(--orange)"><svg viewBox="0 0 120 72" aria-hidden="true"><path d="M60 36V6A30 30 0 0 0 30 36z" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36V6A30 30 0 0 1 90 36z" fill="#2d6fd6" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H30A30 30 0 0 0 60 66z" fill="#2BB673" stroke="#1D1A2F" stroke-width="3"/><path d="M60 36H90A30 30 0 0 1 60 66z" fill="#FF9F43" stroke="#1D1A2F" stroke-width="3"/></svg></span><b>Echo</b></a><a class="rg" href="/games/quick-math/"><span class="ra" style="background:var(--sky)"><svg viewBox="0 0 120 72" aria-hidden="true"><text x="60" y="46" font-family="monospace" font-weight="700" font-size="28" text-anchor="middle" fill="#1D1A2F">7×8=?</text></svg></span><b>Quick Math</b></a></div>
 <footer><p><a href="/">← Back to all 235 free games on Detourr</a></p></footer>
-</div></body></html>
+</div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script>
+/* ===================== 2048: game code ===================== */
+G.push({id:'2048',name:'2048',kind:'puzzle',tint:'var(--orange)',blurb:'Slide and merge tiles. Chase the big number.',fmt:b=>b+' pts',
+art:'<rect x="18" y="10" width="40" height="40" rx="6" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="40" height="40" rx="6" fill="#F2352A" stroke="#1D1A2F" stroke-width="3"/><text x="38" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#1D1A2F">16</text><text x="82" y="37" font-family="monospace" font-weight="700" font-size="16" text-anchor="middle" fill="#fff">32</text>',
+run(root,c){
+  const COL={0:['#3a3552','#3a3552'],2:['#FFFDF6','#1D1A2F'],4:['#FFE27A','#1D1A2F'],8:['#FFB86B','#1D1A2F'],16:['#FF9F43','#1D1A2F'],32:['#FF8FB1','#1D1A2F'],64:['#F2352A','#fff'],128:['#7FC8F8','#1D1A2F'],256:['#4DA3E0','#fff'],512:['#6EE7B7','#1D1A2F'],1024:['#B9A7FF','#1D1A2F'],2048:['#FFD23F','#1D1A2F']};
+  let g,score,won,over,fresh=-1;const board=el('div',{class:'g2048'});const cells=[];for(let i=0;i<16;i++){const d=el('div');cells.push(d);board.append(d)}
+  const msg=el('p',{class:'hint'},'Arrow keys or swipe. Two equal tiles merge into one.');
+  function add(){const e=[];g.forEach((v,i)=>{if(!v)e.push(i)});if(!e.length)return;fresh=pick(e);g[fresh]=Math.random()<.9?2:4}
+  function reset(){g=Array(16).fill(0);score=0;won=false;over=false;add();add();render();msg.textContent='Arrow keys or swipe. Two equal tiles merge into one.'}
+  function render(){g.forEach((v,i)=>{const d=cells[i];const col=COL[v]||['#1D1A2F','#FFD23F'];d.textContent=v||'';d.style.background=col[0];d.style.color=col[1];d.style.fontSize=v>=1024?'clamp(14px,5vw,26px)':'';d.classList.remove('pop');if(i===fresh){void d.offsetWidth;d.classList.add('pop')}});c.stat('Score '+score+' · Best '+c.best(score))}
+  function canMove(){for(let i=0;i<16;i++){if(!g[i])return true;if(i%4<3&&g[i]===g[i+1])return true;if(i<12&&g[i]===g[i+4])return true}return false}
+  function move(dx,dy){if(over||(!dx&&!dy))return;let moved=false;const ng=g.slice();
+    for(let k=0;k<4;k++){const idx=[];for(let j=0;j<4;j++){let r,cc;if(dx){cc=dx>0?3-j:j;r=k}else{r=dy>0?3-j:j;cc=k}idx.push(r*4+cc)}
+      const vals=idx.map(i=>g[i]).filter(v=>v),out=[];for(let i=0;i<vals.length;i++){if(vals[i]===vals[i+1]){out.push(vals[i]*2);score+=vals[i]*2;if(vals[i]*2===2048&&!won){won=true;msg.textContent='You made 2048! Keep going if you like.';beep(880,.3,'triangle')}i++}else out.push(vals[i])}
+      while(out.length<4)out.push(0);idx.forEach((i,j)=>{if(ng[i]!==out[j])moved=true;ng[i]=out[j]})}
+    if(!moved)return;g=ng;add();beep(260+Math.min(score,2000)/8,.05,'triangle');render();if(!canMove()){over=true;msg.textContent='No moves left. Final score: '+score+'.';beep(140,.4,'sawtooth')}}
+  root.append(board,msg,el('button',{class:'btn',type:'button',onclick:reset},'New game'));
+  c.on(document,'keydown',e=>{const d=KEYDIR[e.key.toLowerCase()];if(d)move(d[0],d[1])});swipe(c,board,move);reset();
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spring Climber | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FFD23F">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="m_climber"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard">🏆<span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen">⛶<span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Spring Climber</h1><p>Bounce ever upward on a notebook page. Steer by holding the left or right side of the screen (or tilting, or arrow keys). Springs and rockets launch you, cracked ledges crumble, and bugs are best stomped.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script>
+/* ===================== Spring Climber: game code ===================== */
+G.push({id:'m_climber',levels:true,name:'Spring Climber',kind:'arcade',tint:'#fdf6e0',blurb:'Bounce ever upward on a notebook page. Steer by holding the left or right side of the screen (or tilting, or arrow keys). Springs and rockets launch you, cracked ledges crumble, and bugs are best stomped.',fmt:b=>b+' m',
+art:'<rect x="0" y="0" width="120" height="72" fill="#fdf6e0"/><path d="M0 18H120M0 36H120M0 54H120" stroke="#cfe0f0" stroke-width="1.5"/><rect x="14" y="54" width="34" height="7" rx="3" fill="#6ad04a" stroke="#1D1A2F" stroke-width="2"/><rect x="70" y="30" width="34" height="7" rx="3" fill="#6ad04a" stroke="#1D1A2F" stroke-width="2"/><rect x="42" y="14" width="18" height="22" rx="7" fill="#ffd23f" stroke="#1D1A2F" stroke-width="2.5"/>',
+run(root,c){const W=400,H=640;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.parts();
+  let pl,plats,mons,camY,maxY,state,t,steer,tilt;
+  function mkPlat(y){const h=-y/100;const r=Math.random();const type=r<Math.min(.25,.04+h*.004)*c.pick(.7,1,1.3)?'break':r<Math.min(.45,.08+h*.006)?'move':'norm';return{x:MOB.rnd(10,W-80),y,w:62,type,vx:type==='move'?MOB.rnd(.8,1.8)*(Math.random()<.5?1:-1):0,spring:type==='norm'&&Math.random()<.08,rocket:type==='norm'&&Math.random()<.015&&h>20,gone:0}}
+  function reset(){pl={x:W/2,y:H-100,vx:0,vy:-11,face:1,boost:0};plats=[{x:W/2-40,y:H-40,w:80,type:'norm',vx:0}];let y=H-40;while(y>-H){y-=MOB.rnd(50,90);plats.push(mkPlat(y))}mons=[];camY=0;maxY=0;state='ready';steer=0;upd()}
+  const upd=()=>c.stat(Math.floor(maxY/10)+' m · Best '+(c.best()||0)+' m');
+  const keys={};c.on(document,'keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.l=1;if(e.key==='ArrowRight'||e.key==='d')keys.r=1;if(state==='ready'&&(e.key===' '||e.key.startsWith('Arrow')))state='play'});c.on(document,'keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.l=0;if(e.key==='ArrowRight'||e.key==='d')keys.r=0});
+  c.on(window,'deviceorientation',e=>{if(e.gamma!=null)tilt=MOB.clamp(e.gamma/25,-1,1)});
+  MOB.drag(c,cv,W,H,{down:p=>{if(state==='ready'){state='play'}else if(state==='over'){if(t-overT>600)reset();return}steer=p.x<W/2?-1:1},move:p=>{steer=p.x<W/2?-1:1},up:()=>{steer=0}});
+  let overT=0;t=0;
+  function update(dt){t+=dt;FX.step(dt);if(state!=='play')return;const k=dt/16;
+    const want=(keys.l?-1:0)+(keys.r?1:0)||steer||tilt||0;pl.vx+=(want*6.2-pl.vx)*Math.min(1,.18*k);if(want)pl.face=want>0?1:-1;
+    if(pl.boost>0){pl.boost-=dt;pl.vy=-16}else pl.vy+=.38*k;pl.x+=pl.vx*k;pl.y+=pl.vy*k;if(pl.x<-20)pl.x=W+20;if(pl.x>W+20)pl.x=-20;
+    if(pl.vy>0)for(const p of plats){if(p.gone)continue;if(pl.x+14>p.x&&pl.x-14<p.x+p.w&&pl.y+20>=p.y&&pl.y+20-pl.vy*k<=p.y+4){
+        if(p.type==='break'){p.gone=1;FX.burst(p.x+p.w/2,p.y,10,'#a87a4a',3,500);beep(180,.05,'square',.04);continue}
+        if(p.rocket){pl.boost=1600;beep(300,.4,'sawtooth',.06);p.rocket=0}else if(p.spring&&Math.abs(pl.x-(p.x+p.w/2))<18){pl.vy=-19;beep(900,.12,'sine',.07)}else{pl.vy=-11.2;beep(520,.04,'triangle',.04)}pl.y=p.y-20}}
+    for(const p of plats){if(p.vx){p.x+=p.vx*k;if(p.x<0||p.x+p.w>W)p.vx*=-1}}
+    for(const m of mons){m.x+=Math.sin(t/500+m.ph)*1.2*k;if(m.dead){m.y+=6*k;continue}if(Math.hypot(pl.x-m.x,pl.y-m.y)<30){if(pl.vy>0&&pl.y<m.y-8||pl.boost>0){m.dead=1;pl.vy=-13;beep(700,.1,'square',.06);FX.burst(m.x,m.y,14,'#9a4ae8',3,500)}else{state='over';overT=t;beep(100,.5,'sawtooth',.12);c.stat('Caught by a bug at '+Math.floor(maxY/10)+' m · Best '+c.best(Math.floor(maxY/10))+' m')}}}
+    const top=H*.4;if(pl.y-camY<top)camY=pl.y-top;const hgt=-(camY)+0;if(hgt>maxY){maxY=hgt;upd()}
+    let minY=Math.min(...plats.map(p=>p.y));while(minY>camY-H){minY-=MOB.rnd(50,90)*Math.min(1.5,1+maxY/40000)*c.pick(.9,1,1.1);plats.push(mkPlat(minY));if(Math.random()<Math.min(.06,maxY/60000)*c.pick(.6,1,1.4))mons.push({x:MOB.rnd(40,W-40),y:minY-40,ph:Math.random()*6})}
+    plats=plats.filter(p=>p.y<camY+H+40);mons=mons.filter(m=>m.y<camY+H+60);
+    if(pl.y-camY>H+40){state='over';overT=t;beep(200,.6,'sine',.1);c.stat('Fell at '+Math.floor(maxY/10)+' m · Best '+c.best(Math.floor(maxY/10))+' m')}}
+  function draw(){x.fillStyle='#fdf6e0';x.fillRect(0,0,W,H);x.strokeStyle='#cfe0f0';x.lineWidth=1.5;const o=((-camY)%24+24)%24;for(let y=o;y<H;y+=24){x.beginPath();x.moveTo(0,y);x.lineTo(W,y);x.stroke()}x.strokeStyle='#f0b8b8';x.beginPath();x.moveTo(40,0);x.lineTo(40,H);x.stroke();
+    for(const p of plats){if(p.gone)continue;const y=p.y-camY;MOB.rr(x,p.x,y,p.w,10,5);x.fillStyle=p.type==='break'?'#c8a070':p.type==='move'?'#5ab0f0':'#6ad04a';x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2;x.stroke();if(p.type==='break'){x.beginPath();x.moveTo(p.x+p.w/2,y);x.lineTo(p.x+p.w/2-5,y+10);x.stroke()}
+      if(p.spring){const sx=p.x+p.w/2;x.strokeStyle='#8a8a9a';x.lineWidth=3;x.beginPath();for(let i=0;i<4;i++){x.lineTo(sx-6,y-3-i*4);x.lineTo(sx+6,y-5-i*4)}x.stroke()}
+      if(p.rocket){x.fillStyle='#ff5a3a';MOB.rr(x,p.x+p.w/2-7,y-26,14,24,5);x.fill();x.strokeStyle='#1D1A2F';x.stroke()}}
+    for(const m of mons){const y=m.y-camY;x.fillStyle='#9a4ae8';x.beginPath();x.ellipse(m.x,y,20,16,0,0,7);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2;x.stroke();for(const s of[-1,1]){x.beginPath();x.moveTo(m.x+s*14,y-4);x.lineTo(m.x+s*26,y-12+Math.sin(t/60)*4);x.stroke()}x.fillStyle='#fff';x.beginPath();x.arc(m.x-6,y-3,5,0,7);x.arc(m.x+6,y-3,5,0,7);x.fill();x.fillStyle='#1D1A2F';x.beginPath();x.arc(m.x-6,y-2,2,0,7);x.arc(m.x+6,y-2,2,0,7);x.fill()}
+    const py=pl.y-camY;x.save();x.translate(pl.x,py);x.scale(pl.face,1);const sq=pl.vy<-8?1.1:1;x.fillStyle='#ffd23f';MOB.rr(x,-15,-20*sq,30,38*sq,12);x.fill();x.strokeStyle='#1D1A2F';x.lineWidth=2.5;x.stroke();x.fillStyle='#1D1A2F';x.beginPath();x.arc(5,-8,3,0,7);x.fill();x.fillStyle='#ff9a1f';x.fillRect(12,-6,12,6);x.strokeRect(12,-6,12,6);
+    x.strokeStyle='#1D1A2F';x.lineWidth=3;for(const s of[-6,6]){x.beginPath();x.moveTo(s,18*sq);x.lineTo(s,24);x.stroke()}if(pl.boost>0){x.fillStyle='#ff5a3a';MOB.rr(x,-24,-10,10,24,4);x.fill();FX.burst(pl.x-19*pl.face,py+16,2,['#ffd23f','#ff6a1a'],2,300)}x.restore();
+    FX.draw(x);MOB.big(x,Math.floor(maxY/10)+' m',W/2,34,30,'#fff','#1D1A2F');
+    if(state==='ready')banner(x,W,H,'Spring Climber','Hold left or right side to steer. Tap to start');if(state==='over')banner(x,W,H,Math.floor(maxY/10)+' m','Tap to jump again')}
+  reset();c.loop(dt=>{update(dt);draw()})}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>
