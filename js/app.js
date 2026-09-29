@@ -160,7 +160,6 @@ function renderDaily(){['#daily','#dailyW'].forEach(q=>{const b=$(q);if(b){rende
 function renderDailyInto(box){box.innerHTML='';const g=dailyGame();const st=streak();const t=today();
   if(g){const done=S.get('dailyDone_'+t,false),sc=dayScores()[g.id];let v='';try{v=sc!=null?g.fmt(sc):''}catch(e){}
     box.append(el('a',{class:'dc'+(done?' done':''),href:gameUrl(g)},el('span',{class:'ic',html:ico(done?'check':'calendar')}),el('span',null,el('b',null,done?'Challenge done: '+v:'Today’s challenge: '+g.name),done?'New one tomorrow · tap to beat it again':'Set any score today · '+durLabel(g))))}
-  if(g&&box.id==='daily'||g&&box.id==='dailyW')dailyBoard(box,g);
   if(box.id==='daily'||box.id==='dailyW')recentBoard(box);
   const played=st.last===t;box.append(el('div',{class:'dc streak'},el('span',{class:'ic',html:ico('flame')}),el('span',null,el('b',null,st.n?st.n+'-day Detourr streak':'Start a Detourr streak'),played?'You’re on it today'+(st.max>st.n?' · best '+st.max:''):st.n?'Play anything today to keep it':'Play one game a day to build it')))}
 /* today's challenge board on the homepage card (needs a leaderboard name) */
