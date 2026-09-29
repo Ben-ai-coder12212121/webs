@@ -58,8 +58,6 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
-- **Low graphics mode removed** (owner: it only made games look worse). `gfxLow()` in `core.js` always returns `false`, the Graphics button stays hidden, and the superhero games (`js/lib/havoc.js`) always have shadows on; their G toggle is gone.
-- **Homepage trimmed:** the Silent and Keyboard-only filters and the "Today's top" box were removed.
 - **Mobile pass and sign fix:**
   - The homepage sign's shadow is now drawn inside the SVG (`.bigsh`). The old CSS `drop-shadow` on a rotating button left a seam in Safari after hover.
   - No random zooming: `touch-action:manipulation` on `html` (no double-tap zoom), 16px text boxes on touch screens (iOS zooms into smaller ones), and `text-size-adjust:100%`.
@@ -101,6 +99,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
   - Student audit: report published as a private artifact at https://claude.ai/artifact/WF8eHo2Uk5GDtKvCM8xfFZ. 43 games hidden, 12 released, core list of 75.
   - Homepage time picks (1 / 5 / 15+ min) and modes.
   - Daily challenge and daily leaderboard, streaks, badges, the Continue row, the end-of-round strip, and "beat my score" links.
+  - Low-graphics mode for 3D games.
   - Fonts and libraries self-hosted.
   - 15 mobile-style games.
   - Moonblade art upgrade.

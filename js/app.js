@@ -196,7 +196,7 @@ const gfxBtn=el('button',{class:'btn',type:'button',hidden:true,title:'3D graphi
 function syncGfx(){const m=S.get('gfx','auto');let low=false;try{low=gfxLow()}catch(e){}gfxBtn.innerHTML=ico('gear')+' '+(m==='auto'?'Graphics: Auto ('+(low?'low':'high')+')':m==='low'?'Graphics: Low':'Graphics: High')}
 gfxBtn.addEventListener('click',()=>{const m=S.get('gfx','auto');S.set('gfx',m==='auto'?'low':m==='low'?'high':'auto');location.reload()});
 {const fs=$('#fs');if(fs&&fs.parentNode){fs.parentNode.insertBefore(gfxBtn,fs);syncGfx()}}
-function checkGfx(){gfxBtn.hidden=true}/* graphics toggle removed: always full quality */
+function checkGfx(){gfxBtn.hidden=!arena.querySelector('.g3,canvas[data-engine="three"]')}
 {const mt=$('#moretog');if(mt)mt.addEventListener('click',()=>{const f=mt.closest('.filters');const o=!f.classList.contains('open');f.classList.toggle('open',o);mt.setAttribute('aria-expanded',o?'true':'false');mt.textContent=o?'Less ▴':'More ▾'})}
 document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));renderGrid()}));
 const KIND={game:'Game',toy:'Toy',chill:'Chill',sports:'Sports',music:'Music',weird:'Weird',puzzle:'Puzzle',shooter:'3D Shooter',hero:'Superhero',smash:'Smash',geo:'Geography',info:'Cool Info',io:'.io',arcade:'Arcade',casual:'Casual',board:'Board & Classic',cooking:'Cooking',sim:'Simulators',escape:'Escape Room'};

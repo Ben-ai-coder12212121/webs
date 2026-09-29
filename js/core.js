@@ -15,8 +15,7 @@ const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a
 const S={get(k,d){try{const v=localStorage.getItem('unb_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('unb_'+k,JSON.stringify(v))}catch(e){}}};
 /* 3D graphics quality: 'low' turns off shadows and antialiasing and starts at a lower resolution. 'auto' picks low on
    Chromebooks and machines with 4 or fewer CPU cores or 4 GB or less memory. */
-/* low graphics mode was removed: every 3D game always renders at full quality */
-function gfxLow(){return false}
+function gfxLow(){const m=S.get('gfx','auto');if(m==='low')return true;if(m==='high')return false;try{return /CrOS/.test(navigator.userAgent)||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4}catch(e){return false}}
 let muted=S.get('muted',false),AC=null;
 function beep(f,d,type,v){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.07,t);g.gain.exponentialRampToValueAtTime(.0001,t+(d||.1));o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+(d||.1)+.02)}catch(e){}}
 function syncMute(){const t='Sound: '+(muted?'off':'on'),h=ico(muted?'mute':'sound')+'<span class="t"> '+t+'</span>';[$('#mute'),$('#muteHome')].forEach(m=>{if(m){m.innerHTML=h;m.title=t;m.setAttribute('aria-label',t)}})}

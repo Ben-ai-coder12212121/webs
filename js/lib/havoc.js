@@ -17,7 +17,7 @@ function havocGame(root,c,cfg){return with3D(root,c,()=>{
   K.sky(KM?'#232b44':'#1f2a4a',KM?'#e8906a':'#f3b27a');
   scene.add(new T.HemisphereLight(0xd6e4ff,0x6a5460,.66));const sun=new T.DirectionalLight(0xfff0dc,.9);sun.position.set(-80,140,60);scene.add(sun);scene.add(sun.target);
   sun.shadow.mapSize.set(2048,2048);{const s0=sun.shadow.camera;s0.left=-110;s0.right=110;s0.top=110;s0.bottom=-110;s0.near=10;s0.far=500}sun.shadow.bias=-.0006;RND.shadowMap.type=T.PCFSoftShadowMap;
-  let hiQ=true;/* always full quality (the G fast-graphics toggle was removed) */function setQ(q){hiQ=q;S.set('hx_hq',q);RND.shadowMap.enabled=q;sun.castShadow=q;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)}})}
+  let hiQ=S.get('hx_hq',!('ontouchstart' in window));function setQ(q){hiQ=q;S.set('hx_hq',q);RND.shadowMap.enabled=q;sun.castShadow=q;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)}})}
   setQ(hiQ);const flashL=[0,1,2].map(()=>{const l=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:0xffc070,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));l.visible=false;scene.add(l);return{l,i:0,get intensity(){return this.i},set intensity(v){this.i=v;this.l.visible=v>.05;this.l.material.opacity=Math.min(.85,v*.25);this.l.scale.setScalar(2+v*2.2)},position:{copy:p=>{return null}}}});let flashI=0;
   /* ---------- world constants ---------- */
   const BS=4,CELL=48,ST=16,N=7,HALF=N*CELL/2,LIM=HALF+24;const lineAt=k=>-HALF+k*CELL;
@@ -439,7 +439,7 @@ function havocGame(root,c,cfg){return with3D(root,c,()=>{
   function kIdle(rdt){if(!KG)return;if(!built){props=[];genCity();buildLamps();built=true}if(!KZ.init){KZ.init=true;P.p.set(lineAt(3),0,SHORE+70);P.p.y=-seaD(P.p.z);KZ.yaw=Math.PI;tailReset()}
     KG.visible=true;HR.visible=false;KG.position.copy(P.p);KG.rotation.y=KZ.yaw;KZ.t+=rdt;P.v.set(0,0,0);kbHide();kAnim(rdt,false);KG.updateMatrixWorld(true);tailTick(rdt);cam.place(P.p.clone().setY(Math.max(P.p.y+22,12)),rdt,95,14,2)}
   function kaijuFrame(dt,rdt,now,I,Kk){KZ.t+=dt;kbHide();if(wTex){wTex.offset.x+=dt*.01;wTex.offset.y+=dt*.004}if(foam)foam.material.opacity=.4+Math.sin(KZ.t*1.3)*.15;
-
+    if(tap.g){setQ(!hiQ);H.say('Graphics: '+(hiQ?'HIGH (shadows on)':'FAST (shadows off)'),1200)}
     KZ.flashT-=dt;
     if(!P.alive){P.dead-=rdt;kDeadTick(dt);P.v.set(0,0,0);kAnim(dt,false);KG.position.copy(P.p);KG.updateMatrixWorld(true);tailTick(dt);kCam(rdt);if(P.dead<=0&&F.free)respawn();return}
     const fire=!!(I.down||I.fire||Kk.j),brK=!!(Kk.r||I.right||I.det);const eg=(b,key)=>{const v=!!b,r=v&&!KZ[key];KZ[key]=v;return r};
@@ -720,7 +720,7 @@ function havocGame(root,c,cfg){return with3D(root,c,()=>{
     if(KM){kaijuFrame(dt,rdt,now,I,Kk);worldTick(dt,now,false);kHud();for(const k in tap)delete tap[k];return}
     // weapon switching
     for(let i=0;i<WP.length;i++)if(Kk[String(i+1)]&&P.wi!==i)setW(i);if(I.wheel&&now-lastWheel>120){setW(P.wi+(I.wheel>0?1:-1));lastWheel=now}const wn=!!I.wnext;if(wn&&!wnL)setW(P.wi+1);wnL=wn;
-    const gk=!!tap.g;gL=gk;
+    const gk=!!tap.g;if(gk){setQ(!hiQ);H.say('Graphics: '+(hiQ?'HIGH (shadows on)':'FAST (shadows off)'),1200)}gL=gk;
     if(!P.alive){P.dead-=rdt;if(P.dead<=0)respawn();HR.position.copy(P.p);cam.place(P.p.clone().add(new T.Vector3(0,2,0)),rdt,10,3,4);return}
     // movement
     const mv=K.moveIn();const sprint=!!(Kk.shift||I.alt);const upK=!!(Kk[' ']||I.jumpBtn),dnK=!!(Kk.z||Kk.control||I.dn);const jetOn=!P.ground;
