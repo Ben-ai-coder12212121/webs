@@ -58,6 +58,10 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **Dark site theme** (the owner found the yellow too bright in class): page background `#121019`, dark cards, light text, violet `#7a68e8` for selected chips, `theme-color` `#121019`.
+  - Tokens at the end of `css/site.css`: `--bg`, `--paper`, `--ink` (text), `--line` (borders and shadows), `--onbg`/`--onfg` (selected chips), `--tx` (text on light boxes).
+  - Inside `#arena` / `.arena` the original light palette is restored, so games keep their own colours. Plain text on the arena is light, and every rule with a light background got `color:var(--tx)` so it keeps dark text.
+  - New pages from `tools/new-game.cjs` use the dark `theme-color`.
 - **Stillshot made distinct from SUPERHOT** (so it can't be mistaken for a copy):
   - Enemies are now "Tickers": navy clockwork guards with brass joints, a glowing clock face and a wind-up key. They burst into gears, not red glass. Rooms have a warm sepia "paused photo" palette, and the UI accent is amber.
   - Taglines reworded; the "leap into their body" move is now **Swap** (trade places and take their weapon); the flashing replay words are gone (plain "REPLAY").
