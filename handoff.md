@@ -58,6 +58,12 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **Stillshot made distinct from SUPERHOT** (so it can't be mistaken for a copy):
+  - Enemies are now "Tickers": navy clockwork guards with brass joints, a glowing clock face and a wind-up key. They burst into gears, not red glass. Rooms have a warm sepia "paused photo" palette, and the UI accent is amber.
+  - Taglines reworded; the "leap into their body" move is now **Swap** (trade places and take their weapon); the flashing replay words are gone (plain "REPLAY").
+  - **Story:** 5 chapters of 10 levels (Meridian Clockworks, Director Hale, the Regulator), a story card before each level, and an epilogue. Data: `CH`, `STORY`, `EPILOGUE`.
+  - **Unlocks by chapter:** Dash (Shift, ch 2), Parry (punch bullets back, ch 3), Flash (G, ch 4), Overclock (ch 5). New guards: shield Tickers (ch 3+) and blue synced Tickers that move while you stand still (ch 5). A boss with a health bar ends each chapter.
+  - **Arena:** the same powers and enemies unlock by kill count, with a supply drop every 8 kills and a Champion boss every 25.
 - **Site checklist pass:**
   - New `/privacy/` and `/terms/` pages, linked from every footer and listed in the sitemap.
   - UI emoji replaced by line icons.
