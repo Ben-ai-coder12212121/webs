@@ -185,7 +185,7 @@ G.push(
 {"id":"gunsim","name":"Gun Sim Pro","kind":"toy","tint":"#1a1714","url":"/games/gun-sim-pro/","wide":true,"big":true,"fmt":b=>b.toFixed(2)+'s drill'},
 {"id":"zsurv","name":"Dead Zone","kind":"game","tint":"#0b0e16","url":"/games/dead-zone/","wide":true,"big":true,"fmt":b=>'wave '+b},
 {"id":"octagon","name":"Octagon","kind":"arcade","tint":"#08060f","url":"/games/octagon/","wide":true,"big":false,"fmt":b=>'level '+b},
-{"id":"stillshot","name":"Stillshot","kind":"game","tint":"#f1f1f3","url":"/games/stillshot/","wide":true,"big":true,"fmt":b=>'level '+b},
+{"id":"stillshot","name":"Stillshot","kind":"game","tint":"#efe7da","url":"/games/stillshot/","wide":true,"big":true,"fmt":b=>'level '+b},
 {"id":"fishing","name":"Tight Lines","kind":"game","tint":"#2a6a8a","url":"/games/tight-lines/","wide":true,"big":true,"fmt":b=>b+' species'},
 {"id":"flightsim","name":"Horizon Flight Sim","kind":"game","tint":"#5ec8ff","url":"/games/horizon-flight-sim/","wide":true,"big":true,"fmt":b=>b+' pts'},
 {"id":"skyfront","name":"Skyfront 1943","kind":"game","tint":"#ffb02e","url":"/games/skyfront-1943/","wide":true,"big":true,"fmt":b=>b+' pts'},
