@@ -134,9 +134,12 @@ function meta(g){return META[g.id]||{d:['toy','chill','info'].includes(g.kind)?1
 const CORE=new Set(['snake','flap','reaction','typing','stack','breakout','whack','aim','simon','wyr','odd','math','stroop','hype','jetpack','georush','crazywheel','ballbreak','octagon','babel','mindreader','toast','hillclimb','2048','mines','word','sudoku','nonogram','parking','gems','blockfit','pipes','spotdiff','wordsearch','jigsaw','chess','c4','fourcolors','solitaire','battleship','cook_pizza','dotsboxes','slime','sand2','popit','pencils','bubbles','kaleido','pixel','gt_dust','plinko','cloth','ph_buddy','ph_castle','ph_wreck','toy_screen','io_hole','io_blob','io_noodle','io_paper','io_tanks','io_sumo','geo_flags','geo_bigger','geo_wai','geo_country','kart','hoops','bowling','tune','hs_havoc','hs_villain','hs_kaiju','stillshot','rumble']);
 const durLabel=g=>{const d=meta(g).d;return d>=15?'15+ min':d+' min'};
 /* modes: filters that apply to the random button, the time picks, "Another detourr" and the grid */
-const MODES={silent:'Silent',kb:'Keyboard only',quick:'Quick games',class:'Classroom-friendly'};
-let modes=Object.assign({silent:false,kb:false,quick:false,class:false},S.get('modes',{}));
-function modeOK(g){const m=meta(g);if(modes.silent&&m.s)return false;if(modes.kb&&!m.k)return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.kind==='hero'||g.kind==='shooter'))return false;return true}
+const MODES={big:'Big games only',silent:'Silent',kb:'Keyboard only',quick:'Quick games',class:'Classroom-friendly'};
+/* the big games: superheroes, 3D worlds, sims and story games (what the old "Big games" random button picked) */
+const MAJOR=new Set(['openroad','apexgt','wanted','zsurv','stillshot','fishing','flightsim','skyfront','rumble','breach','royale','e3_study','e3_sub','e3_cabin','kart','octagon','jetpack','sim_farm','sim_town','sim_tractor','geo_wai','powerlab','gunsim','goose','ph_buddy']);
+const isMajor=g=>!!(g.major||g.kind==='hero'||MAJOR.has(g.id));
+let modes=Object.assign({big:false,silent:false,kb:false,quick:false,class:false},S.get('modes',{}));
+function modeOK(g){const m=meta(g);if(modes.big&&!isMajor(g))return false;if(modes.silent&&m.s)return false;if(modes.kb&&!m.k)return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.kind==='hero'||g.kind==='shooter'))return false;return true}
 function syncModes(){document.querySelectorAll('#modes button').forEach(b=>{const on=!!modes[b.dataset.m];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false')})}
 function setMode(k,v){modes[k]=v;S.set('modes',modes);if(k==='silent'){try{muted=v;S.set('muted',v);if(typeof syncMute==='function')syncMute()}catch(e){}}syncModes();renderGrid();try{renderQuick()}catch(e){}}
 document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.m,!modes[b.dataset.m]);if(!modes.silent)beep(600,.05,'triangle',.05)}));
@@ -232,7 +235,10 @@ const DETOUR_EMO={hero:'🔥',shooter:'💥',smash:'💀',toy:'💀',sports:'�
 const detourEmo=g=>DETOUR_EMO[g.kind]||'🎮';
 function updDetourrs(){const n=S.get('detours',0);const d=$('#dcount');if(d)d.textContent=n?'You’ve taken '+n+' detourr'+(n>1?'s':'')+'.':'Press it. You know you want to.'}
 let spinning=false;
-function spinTo(g){if(spinning)return;spinning=true;const n=S.get('detours',0)+1;S.set('detours',n);updDetourrs();
+/* game pages load the slim catalog (no card art); fetch the pictures in the background so the spinner can show them */
+let artP=null;function loadArt(){if(G.every(x=>x.art))return Promise.resolve();return artP||(artP=new Promise(r=>{const s=document.createElement('script');s.src='/js/catalog-art.js';s.onload=()=>{const A=window.GART||{};G.forEach(x=>{if(!x.art&&A[x.id])x.art=A[x.id]});r()};s.onerror=()=>{artP=null;r()};document.head.append(s)}))}
+if(G.some(x=>!x.art))setTimeout(()=>{(window.requestIdleCallback||setTimeout)(()=>loadArt())},2500);
+function spinTo(g){if(spinning)return;if(G.some(x=>!x.art)){spinning=true;Promise.race([loadArt(),new Promise(r=>setTimeout(r,900))]).then(()=>{spinning=false;if(G.some(x=>!x.art))G.forEach(x=>{if(!x.art)x.art='<text x="60" y="48" font-size="36" text-anchor="middle">'+detourEmo(x)+'</text>'});spinTo(g)});return}spinning=true;const n=S.get('detours',0)+1;S.set('detours',n);updDetourrs();
   const quick=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;const pool=G.filter(x=>x!==g&&x!==current&&poolOK(x));const seq=[];let prev=null;for(let i=0;i<(quick?2:15);i++){let x;do{x=pick(pool)}while(x===prev&&pool.length>1);seq.push(x);prev=x}seq.push(g);
   const ov=el('div',{class:'spin',role:'status','aria-live':'polite'});ov.innerHTML='<div class="spinbox"><div class="spinlbl">Detourr #'+n+'</div><div class="reel"><div class="pin"></div><div class="rcard"></div></div><div class="spinsub">Spinning…</div></div>';document.body.append(ov);
   const card=ov.querySelector('.rcard'),sub=ov.querySelector('.spinsub');
