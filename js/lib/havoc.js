@@ -17,7 +17,7 @@ function havocGame(root,c,cfg){return with3D(root,c,()=>{
   K.sky(KM?'#232b44':'#1f2a4a',KM?'#e8906a':'#f3b27a');
   scene.add(new T.HemisphereLight(0xd6e4ff,0x6a5460,.66));const sun=new T.DirectionalLight(0xfff0dc,.9);sun.position.set(-80,140,60);scene.add(sun);scene.add(sun.target);
   sun.shadow.mapSize.set(2048,2048);{const s0=sun.shadow.camera;s0.left=-110;s0.right=110;s0.top=110;s0.bottom=-110;s0.near=10;s0.far=500}sun.shadow.bias=-.0006;RND.shadowMap.type=T.PCFSoftShadowMap;
-  let hiQ=S.get('hx_hq',!('ontouchstart' in window));function setQ(q){hiQ=q;S.set('hx_hq',q);RND.shadowMap.enabled=q;sun.castShadow=q;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)}})}
+  let hiQ=true;try{hiQ=sessionStorage.getItem('unb_hx_hq')!=='0'}catch(e){}/* High by default on every device; G switches for this tab only */function setQ(q){hiQ=q;try{sessionStorage.setItem('unb_hx_hq',q?'1':'0')}catch(e){}RND.shadowMap.enabled=q;sun.castShadow=q;scene.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.needsUpdate=true)}})}
   setQ(hiQ);const flashL=[0,1,2].map(()=>{const l=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:0xffc070,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending}));l.visible=false;scene.add(l);return{l,i:0,get intensity(){return this.i},set intensity(v){this.i=v;this.l.visible=v>.05;this.l.material.opacity=Math.min(.85,v*.25);this.l.scale.setScalar(2+v*2.2)},position:{copy:p=>{return null}}}});let flashI=0;
   /* ---------- world constants ---------- */
   const BS=4,CELL=48,ST=16,N=7,HALF=N*CELL/2,LIM=HALF+24;const lineAt=k=>-HALF+k*CELL;

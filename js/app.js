@@ -192,9 +192,9 @@ const beatPill=el('span',{class:'beatpill',hidden:true});
 function syncBeat(){if(beatTarget==null||!current||!current.fmt){beatPill.hidden=true;return}let f='';try{f=current.fmt(beatTarget)}catch(e){f=String(beatTarget)}beatPill.hidden=false;beatPill.classList.toggle('won',beatWon);beatPill.textContent=beatWon?'You beat '+f+'!':'Beat '+f}
 {const st=$('#stat');if(st&&st.parentNode)st.parentNode.insertBefore(beatPill,st)}
 /* 3D games: a Graphics button (Auto / Low / High). Low turns off shadows and antialiasing; the game restarts to apply it. */
-const gfxBtn=el('button',{class:'btn',type:'button',hidden:true,title:'3D graphics quality'});
-function syncGfx(){const m=S.get('gfx','auto');let low=false;try{low=gfxLow()}catch(e){}gfxBtn.innerHTML=ico('gear')+' '+(m==='auto'?'Graphics: Auto ('+(low?'low':'high')+')':m==='low'?'Graphics: Low':'Graphics: High')}
-gfxBtn.addEventListener('click',()=>{const m=S.get('gfx','auto');S.set('gfx',m==='auto'?'low':m==='low'?'high':'auto');location.reload()});
+const gfxBtn=el('button',{class:'btn sbopt',type:'button',hidden:true,title:'3D graphics quality'});
+function syncGfx(){let low=false;try{low=gfxLow()}catch(e){}gfxBtn.innerHTML=ico('gear')+'<span class="t"> Graphics: '+(low?'Low':'High')+'</span>';gfxBtn.title=low?'Graphics: Low (tap for High)':'Graphics: High (tap for Low)'}
+gfxBtn.addEventListener('click',()=>{try{sessionStorage.setItem('unb_gfx',gfxLow()?'high':'low')}catch(e){}location.reload()});
 {const fs=$('#fs');if(fs&&fs.parentNode){fs.parentNode.insertBefore(gfxBtn,fs);syncGfx()}}
 function checkGfx(){gfxBtn.hidden=!arena.querySelector('.g3,canvas[data-engine="three"]')}
 {const mt=$('#moretog');if(mt)mt.addEventListener('click',()=>{const f=mt.closest('.filters');const o=!f.classList.contains('open');f.classList.toggle('open',o);mt.setAttribute('aria-expanded',o?'true':'false');mt.textContent=o?'Less ▴':'More ▾'})}
