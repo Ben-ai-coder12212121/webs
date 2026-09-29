@@ -16,7 +16,7 @@ function escCss(){if(document.getElementById('esc-css'))return;const s=document.
 .esc-card h4{margin:0 0 8px;font-size:18px}
 .esc-card p{margin:6px 0}
 .esc-card .btn{margin-top:10px}
-.esc-msg{min-height:26px;font-weight:800;background:#FFFDF6;border:3px solid #1D1A2F;border-radius:10px;padding:6px 10px}
+.esc-msg{min-height:26px;font-weight:800;background:#FFFDF6;color:#1D1A2F;border:3px solid #1D1A2F;border-radius:10px;padding:6px 10px}
 .esc-inv{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .esc-inv>span{font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
 .esc-slot{width:56px;height:56px;border:3px solid #1D1A2F;border-radius:12px;background:#FFFDF6;font-size:28px;cursor:pointer;display:grid;place-items:center;padding:0;position:relative}
