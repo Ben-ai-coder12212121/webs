@@ -940,7 +940,7 @@ function burstMelon(m,pt){const O=RG;O.W.remove(m);O.ray.splice(O.ray.indexOf(m)
   for(let i=0;i<40;i++){const v=new V3(rnd(-2.5,2.5),rnd(.5,4),rnd(-4,.8));particle(SMOKE,m.position,v,rnd(.03,.07),.5,rnd(.4,.9),0xc01830,.85,false,1);if(i<14){const jb=new T.Mesh(new T.SphereGeometry(.006,6,4),O.fleshMat);jb.position.copy(m.position);fxRoot.add(jb);bits.push({o:jb,v:v.clone().multiplyScalar(.9),ax:_n.clone(),rs:0,life:3,r:.004,juice:true})}}}
 function bringPaper(){if(!RG||!RG.paper)return;const P=RG.paper;if(P.target<2)P.target=P.prev||7;else{P.prev=P.target;P.target=1.25}clk(160,2,.3,.08);ui.sync();ui.toast(P.target<2?'Bringing your target up close…':'Sending the target back to '+P.target+' m')}
 function startDrill(){if(!RG)return;resetTargets();drill.on=false;drill.hits=0;drill.splits=[];drill.t=0;drill.wait=rnd(1.4,2.8);ui.drill('STANDBY','Hit all '+(RG.drillN||5)+' steel plates as fast as you can');}
-function endDrill(){drill.on=false;const t=drill.t;const b=c.best(Math.round(t*100)/100,true);ui.drill(t.toFixed(2)+'s',(b===Math.round(t*100)/100?'New best! ':'Best '+(b!=null?b.toFixed(2)+'s':'—')+' · ')+'splits '+drill.splits.map(s=>s.toFixed(2)).join(' · '));clk(3000,4,.2,.3);setTimeout(()=>{if(!drill.on&&!drill.wait)ui.drill(null)},6000)}
+function endDrill(){drill.on=false;const t=drill.t;const b=c.best(Math.round(t*100)/100,true);ui.drill(t.toFixed(2)+'s',(b===Math.round(t*100)/100?'New best! ':'Best '+(b!=null?b.toFixed(2)+'s':'-')+' · ')+'splits '+drill.splits.map(s=>s.toFixed(2)).join(' · '));clk(3000,4,.2,.3);setTimeout(()=>{if(!drill.on&&!drill.wait)ui.drill(null)},6000)}
 
 /* ---------- ZOMBIE SURVIVAL MODE ---------- */
 const zoneW=grp(scene);zoneW.visible=false;let ZN=null;const ARENA=25;
