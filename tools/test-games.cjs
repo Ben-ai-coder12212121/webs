@@ -1,7 +1,7 @@
 // Opens every game page on a local server and reports script errors.
 // Usage (from the repo root, with `npx http-server . -p 8766 -s` running):
 //   PW=/path/to/playwright node tools/test-games.cjs [http://localhost:8766] [gameId ...]
-// Prints ALL CLEAN when every game opened without errors.
+// Prints ALL CLEAN when every game opened without script errors or missing files.
 const { chromium } = require(process.env.PW || 'playwright');
 const fs = require('fs'), path = require('path');
 const BASE = (process.argv[2] || 'http://localhost:8766').replace(/\/$/, '');
@@ -16,6 +16,8 @@ const NM = process.env.NM || path.join(ROOT, 'src/t/node_modules/');
   const p = await b.newPage({ viewport: { width: 1000, height: 700 } });
   const bad = []; let cur = '';
   p.on('pageerror', e => bad.push(cur + ': ' + e.message));
+  // files on our own site that fail to load (e.g. a relative path that breaks on /games/<name>/ pages)
+  p.on('response', r => { try { if (r.status() >= 400 && r.url().startsWith(BASE) && !r.url().includes('/api/')) bad.push(cur + ': missing ' + r.url().slice(BASE.length)) } catch (e) {} });
   // serve the big libraries locally when they're installed (faster, works offline)
   const local = (pat, file) => fs.existsSync(NM + file) && p.route(pat, r => r.fulfill({ body: fs.readFileSync(NM + file), contentType: 'application/javascript' }));
   await local('**/three.min.js', 'three/build/three.min.js');

@@ -55,7 +55,8 @@ const HOLES=[{par:2,s:[80,200],h:[520,200],w:[],sand:[],water:[]},
 const fmtT=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 function clock(c,fn){let s=0;const id=setInterval(()=>{s++;fn(s)},1000);return{get s(){return s},stop(){clearInterval(id)},dispose:()=>clearInterval(id)}}
 let threeP=null;
-function load3D(){if(window.THREE)return Promise.resolve(window.THREE);if(threeP)return threeP;threeP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';s.onload=()=>res(window.THREE);s.onerror=()=>{threeP=null;rej(new Error('3D library failed to load'))};document.head.append(s)});return threeP}
+function load3D(){if(window.THREE)return Promise.resolve(window.THREE);if(threeP)return threeP;/* served from our own domain first (school filters sometimes block CDNs), the CDN as a fallback */
+  threeP=new Promise((res,rej)=>{const add=(src,next)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(window.THREE);s.onerror=()=>{s.remove();if(next)add(next);else{threeP=null;rej(new Error('3D library failed to load'))}};document.head.append(s)};add('/assets/lib/three.min.js','https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js')});return threeP}
 function tex(T,w,h,fn,rx,ry){const cv=document.createElement('canvas');cv.width=w;cv.height=h;fn(cv.getContext('2d'),w,h);const t=new T.CanvasTexture(cv);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx||1,ry||1);t.anisotropy=4;return t}
 const TX={
   tiles:(a,b,s)=>(x,w,h)=>{const n=s||4;for(let i=0;i<n;i++)for(let j=0;j<n;j++){x.fillStyle=(i+j)%2?a:b;x.fillRect(i*w/n,j*h/n,w/n,h/n)}x.strokeStyle='rgba(0,0,0,.18)';x.lineWidth=2;for(let i=0;i<=n;i++){x.beginPath();x.moveTo(i*w/n,0);x.lineTo(i*w/n,h);x.moveTo(0,i*h/n);x.lineTo(w,i*h/n);x.stroke()}},
