@@ -58,6 +58,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **No more blur mid-game on High:** `Stage3D` (`core.js`) used to lower the render resolution (down to 0.55) whenever frames took over 24ms, so games like Octagon went blurry on phones after a few seconds. That adaptive drop now only happens in Low graphics.
 - **Graphics default to High on every device, every time** (owner request; the old automatic Low on Chromebooks and weaker devices is gone). The Graphics button toggles High/Low for this browser tab only: `sessionStorage unb_gfx` (`gfxMode()`/`gfxLow()` in `core.js`). The superhero games' G toggle works the same way (`sessionStorage unb_hx_hq`).
 - **Homepage trimmed:** the Silent and Keyboard-only filters and the "Today's top" box were removed.
 - **Mobile pass and sign fix:**
