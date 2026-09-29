@@ -58,6 +58,8 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **Graphics default to High on every device, every time** (owner request; the old automatic Low on Chromebooks and weaker devices is gone). The Graphics button toggles High/Low for this browser tab only: `sessionStorage unb_gfx` (`gfxMode()`/`gfxLow()` in `core.js`). The superhero games' G toggle works the same way (`sessionStorage unb_hx_hq`).
+- **Homepage trimmed:** the Silent and Keyboard-only filters and the "Today's top" box were removed.
 - **Mobile pass and sign fix:**
   - The homepage sign's shadow is now drawn inside the SVG (`.bigsh`). The old CSS `drop-shadow` on a rotating button left a seam in Safari after hover.
   - No random zooming: `touch-action:manipulation` on `html` (no double-tap zoom), 16px text boxes on touch screens (iOS zooms into smaller ones), and `text-size-adjust:100%`.
