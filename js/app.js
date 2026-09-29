@@ -134,15 +134,15 @@ function meta(g){return META[g.id]||{d:['toy','chill','info'].includes(g.kind)?1
 const CORE=new Set(['snake','flap','reaction','typing','stack','breakout','whack','aim','simon','wyr','odd','math','stroop','hype','jetpack','georush','crazywheel','ballbreak','octagon','babel','mindreader','toast','hillclimb','2048','mines','word','sudoku','nonogram','parking','gems','blockfit','pipes','spotdiff','wordsearch','jigsaw','chess','c4','fourcolors','solitaire','battleship','cook_pizza','dotsboxes','slime','sand2','popit','pencils','bubbles','kaleido','pixel','gt_dust','plinko','cloth','ph_buddy','ph_castle','ph_wreck','toy_screen','io_hole','io_blob','io_noodle','io_paper','io_tanks','io_sumo','geo_flags','geo_bigger','geo_wai','geo_country','kart','hoops','bowling','tune','hs_havoc','hs_villain','hs_kaiju','stillshot','rumble']);
 const durLabel=g=>{const d=meta(g).d;return d>=15?'15+ min':d+' min'};
 /* modes: filters that apply to the random button, the time picks, "Another detourr" and the grid */
-const MODES={big:'Big games only',silent:'Silent',kb:'Keyboard only',quick:'Quick games',class:'Classroom-friendly'};
+const MODES={big:'Big games only',quick:'Quick games',class:'Classroom-friendly'};
 /* the big games: superheroes, 3D worlds, sims and story games (what the old "Big games" random button picked) */
 const MAJOR=new Set(['openroad','apexgt','wanted','zsurv','stillshot','fishing','flightsim','skyfront','rumble','breach','royale','e3_study','e3_sub','e3_cabin','kart','octagon','jetpack','sim_farm','sim_town','sim_tractor','geo_wai','powerlab','gunsim','goose','ph_buddy']);
 const isMajor=g=>!!(g.major||g.kind==='hero'||MAJOR.has(g.id));
-let modes=Object.assign({big:false,silent:false,kb:false,quick:false,class:false},S.get('modes',{}));
-function modeOK(g){const m=meta(g);if(modes.big&&!isMajor(g))return false;if(modes.silent&&m.s)return false;if(modes.kb&&!m.k)return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.kind==='hero'||g.kind==='shooter'))return false;return true}
+let modes=Object.assign({big:false,quick:false,class:false},S.get('modes',{}));delete modes.silent;delete modes.kb;/* the Silent and Keyboard-only filters were removed */
+function modeOK(g){const m=meta(g);if(modes.big&&!isMajor(g))return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.kind==='hero'||g.kind==='shooter'))return false;return true}
 function syncModes(){document.querySelectorAll('#modes button').forEach(b=>{const on=!!modes[b.dataset.m];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false')})}
-function setMode(k,v){modes[k]=v;S.set('modes',modes);if(k==='silent'){try{muted=v;S.set('muted',v);if(typeof syncMute==='function')syncMute()}catch(e){}}syncModes();renderGrid();try{renderQuick()}catch(e){}}
-document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.m,!modes[b.dataset.m]);if(!modes.silent)beep(600,.05,'triangle',.05)}));
+function setMode(k,v){modes[k]=v;S.set('modes',modes);syncModes();renderGrid();try{renderQuick()}catch(e){}}
+document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.m,!modes[b.dataset.m]);beep(600,.05,'triangle',.05)}));
 syncModes();
 /* ---- daily challenge and Detourr streak (kept on this device) ---- */
 const today=()=>{const d=new Date();return Math.floor((d.getTime()-d.getTimezoneOffset()*6e4)/864e5)};
