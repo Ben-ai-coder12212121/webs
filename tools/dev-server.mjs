@@ -1,6 +1,6 @@
 // Local preview server with working online multiplayer.
 // Serves the site like `npx serve`, and answers /api/mp (the room-code server) using the same code as the
-// Netlify function, with rooms kept in memory. Leaderboards stay off locally.
+// Netlify function, with rooms kept in memory. /api/lb (leaderboards) also works, kept in memory.
 // Usage: node tools/dev-server.mjs [port]   (default 3000), then open http://localhost:3000
 import http from 'node:http';
 import fs from 'node:fs';
@@ -15,11 +15,15 @@ const fnSrc = fs.readFileSync(path.join(ROOT, 'netlify/functions/mp.mjs'), 'utf8
   .replace(/^import .*@netlify\/blobs.*$/m, '')
   .replace(/^export default .*$/m, '').replace(/^export const config .*$/m, '');
 const { handle } = await import('data:text/javascript;base64,' + Buffer.from(fnSrc).toString('base64'));
+const lbSrc = fs.readFileSync(path.join(ROOT, 'netlify/functions/lb.mjs'), 'utf8')
+  .replace(/^import .*@netlify\/blobs.*$/m, '')
+  .replace(/^export default .*$/m, '').replace(/^export const config .*$/m, '');
+const { handle: lbHandle } = await import('data:text/javascript;base64,' + Buffer.from(lbSrc).toString('base64'));
 
 // in-memory stand-in for Netlify Blobs
 const mem = new Map();
 const store = {
-  async get(k) { return mem.has(k) ? JSON.parse(mem.get(k)) : null; },
+  async get(k) { return mem.has(k) ? JSON.parse(mem.get(k)) : null; },  // (options like {type:'json'} are ignored)
   async setJSON(k, v) { mem.set(k, JSON.stringify(v)); },
   async delete(k) { mem.delete(k); },
   async list({ prefix }) { return { blobs: [...mem.keys()].filter(k => k.startsWith(prefix)).map(key => ({ key })) }; },
@@ -29,9 +33,9 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
-  if (url.pathname === '/api/mp') {
+  if (url.pathname === '/api/mp' || url.pathname === '/api/lb') {
     const body = req.method === 'POST' ? await new Promise(r => { let b = ''; req.on('data', c => b += c); req.on('end', () => r(b)); }) : undefined;
-    const r = await handle(new Request('http://localhost' + req.url, { method: req.method, body, headers: { 'content-type': 'application/json' } }), store);
+    const r = await (url.pathname === '/api/lb' ? lbHandle : handle)(new Request('http://localhost' + req.url, { method: req.method, body, headers: { 'content-type': 'application/json' } }), store);
     res.writeHead(r.status, { 'content-type': 'application/json' });
     return res.end(await r.text());
   }
