@@ -13,8 +13,7 @@
 
   gtag('config', 'G-6D1DVZMJG8');
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="pizzaheist"</script>
@@ -37,7 +36,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Pizza Heist: game code ===================== */
 function heroRaccoon(T){const g=humanoid(T,{skin:0x8c86a3,shirt:0x3a3552,pants:0x2a2640,eye:0xffffff});const h=g.userData.head;part(T,bx(T,.52,.12,.02),M(T,0x1D1A2F),0,.05,.26,h);part(T,new T.ConeGeometry(.1,.2,4),M(T,0x8c86a3),-.18,.32,0,h);part(T,new T.ConeGeometry(.1,.2,4),M(T,0x8c86a3),.18,.32,0,h);const tail=new T.Group();for(let k=0;k<5;k++)part(T,cy(T,.16,.16,.18),M(T,k%2?0x1D1A2F:0xb9b4c9),0,-k*.17,0,tail);tail.position.set(0,1,-.35);tail.rotation.x=-1;g.add(tail);g.userData.anim=()=>{tail.rotation.z=Math.sin(performance.now()/250)*.3};return g}

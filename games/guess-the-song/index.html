@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Guess the Song", "description": "Name that hit! Hear famous hooks, decode emoji song titles, match hits from Sabrina Carpenter, Billie Eilish, Taylor Swift and more to their artists, and guess the year.", "url": "https://detourr.net/games/guess-the-song/", "genre": "Music", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 <style>
 /* styles used only by this game */
@@ -50,7 +49,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Guess the Song: game code ===================== */
 function playMel(mel,bpm,type){if(muted)return 0;try{const a=ac();let t=a.currentTime+.06;const b=60/bpm;for(const[s,d]of mel){tone(hz(s),t,Math.max(.18,d*b*.95),type||'triangle',.14);t+=d*b}return(t-a.currentTime)*1000}catch(e){return 0}}

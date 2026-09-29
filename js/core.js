@@ -7,6 +7,9 @@ const rand=n=>Math.floor(Math.random()*n);
 const pick=a=>a[rand(a.length)];
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rand(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
 const S={get(k,d){try{const v=localStorage.getItem('unb_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('unb_'+k,JSON.stringify(v))}catch(e){}}};
+/* 3D graphics quality: 'low' turns off shadows and antialiasing and starts at a lower resolution. 'auto' picks low on
+   Chromebooks and machines with 4 or fewer CPU cores or 4 GB or less memory. */
+function gfxLow(){const m=S.get('gfx','auto');if(m==='low')return true;if(m==='high')return false;try{return /CrOS/.test(navigator.userAgent)||(navigator.hardwareConcurrency||8)<=4||(navigator.deviceMemory||8)<=4}catch(e){return false}}
 let muted=S.get('muted',false),AC=null;
 function beep(f,d,type,v){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v||.07,t);g.gain.exponentialRampToValueAtTime(.0001,t+(d||.1));o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+(d||.1)+.02)}catch(e){}}
 function syncMute(){const t='Sound: '+(muted?'off':'on');$('#mute').textContent=t;{const m=$('#muteHome');if(m)m.textContent=t}}
@@ -84,7 +87,7 @@ function humanoid(T,o){const g=new T.Group();const skin=M(T,o.skin||0xf1c7a0),sh
   if(o.hair!=null)part(T,bx(T,.54,.16,.54),M(T,o.hair),0,2.14,0,g);g.userData.legs=[legL,legR];g.userData.arms=[armL,armR];g.userData.head=head;g.userData.body=body;return g}
 function Stage3D(root,c,opt){
   const T=window.THREE;const wrap=el('div',{class:'g3'+(opt.tall?' tall':'')});const hud=el('div',{class:'hud'});wrap.append(hud);root.append(wrap);
-  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(1.75,window.devicePixelRatio||1));wrap.prepend(renderer.domElement);
+  const lowG=gfxLow();const renderer=new T.WebGLRenderer({antialias:!lowG,powerPreference:'high-performance'});renderer.setPixelRatio(lowG?Math.min(.85,window.devicePixelRatio||1):Math.min(1.75,window.devicePixelRatio||1));if(lowG)try{Object.defineProperty(renderer.shadowMap,'enabled',{get:()=>false,set:()=>{},configurable:true})}catch(e){}wrap.prepend(renderer.domElement);
   const scene=new T.Scene();const camera=new T.PerspectiveCamera(opt.fov||72,16/9,.05,opt.far||400);
   const input={keys:{},mdx:0,mdy:0,down:false,right:false,wheel:0,locked:false,touch:false,joy:{x:0,y:0},look:{x:0,y:0},fire:false,alt:false,tap:false};
   const size=()=>{const w=wrap.clientWidth,h=wrap.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()};const ro=new ResizeObserver(size);ro.observe(wrap);size();

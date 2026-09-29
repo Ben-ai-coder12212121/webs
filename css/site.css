@@ -425,3 +425,20 @@ a.tile{text-decoration:none;color:inherit;text-align:left;font:inherit}
 @media (max-width:560px){.hero small{display:none}.hero p{font-size:16px}}
 .dnarrow{display:none}
 @media (max-width:860px){.dwide{display:none}.dnarrow{display:flex}}
+/* today's board, badges, end-of-round strip, compact filters */
+.daily .dboard{font-size:13px}
+.daily details.badges{display:block;padding:0}
+.daily details.badges summary{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;list-style:none}
+.daily details.badges summary::-webkit-details-marker{display:none}
+.daily details.badges ul{list-style:none;margin:0;padding:4px 12px 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-width:440px}
+.daily details.badges li{display:grid;grid-template-columns:24px 1fr;column-gap:6px;font-size:12.5px;line-height:1.25;opacity:.45;filter:grayscale(1)}
+.daily details.badges li.on{opacity:1;filter:none}
+.daily details.badges li span{grid-row:span 2;font-size:18px}
+.daily details.badges li small{font-weight:600;opacity:.8}
+.endstrip{position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:8px 10px 8px 14px;box-shadow:4px 4px 0 var(--ink);font:700 15px Figtree,system-ui,sans-serif;color:var(--ink);max-width:calc(100vw - 24px);animation:stripin .25s ease-out}
+.endstrip .btn{font-size:14px;padding:6px 10px}
+@keyframes stripin{from{transform:translate(-50%,20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.endstrip{animation:none}}
+.filters .fmore{display:none}
+.filters.open .fmore{display:inline-flex}
+.filters .moretog{font-weight:800}

@@ -13,8 +13,7 @@
 
   gtag('config', 'G-6D1DVZMJG8');
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="snowball"</script>
@@ -37,7 +36,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Snowball Siege: game code ===================== */
 const SNOWY={wall:(x,w,h)=>{x.fillStyle='#dcecfb';x.fillRect(0,0,w,h);x.strokeStyle='#b8d2ec';x.lineWidth=4;for(let r=0;r<4;r++)for(let k=0;k<3;k++)x.strokeRect(k*w/3+(r%2)*w/6,r*h/4,w/3,h/4)},wall2:TX.hedge,floor:TX.snow,outside:TX.snow,sky:0xbfe0ff,fog:0xe6f2ff,fogNear:25,fogFar:110,amb:1,hemi:0xffffff,ground:0xb8d2ec,sun:.6,floorScale:6};

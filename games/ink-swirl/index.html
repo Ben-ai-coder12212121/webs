@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Ink Swirl", "description": "Drag to pour colored ink into swirling water and watch it curl and mix.", "url": "https://detourr.net/games/ink-swirl/", "genre": "Toys", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="gt_ink"</script>
@@ -46,7 +45,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script src="/js/lib/toys.js"></script>
 <script>
 /* ===================== Ink Swirl: game code ===================== */
@@ -54,6 +53,8 @@ G.push({id:'gt_ink',name:'Ink Swirl',kind:'toy',wide:true,tint:'#FFFDF6',blurb:'
 art:'<rect width="120" height="72" fill="#FFFDF6"/><path d="M20 40c10-20 30-20 34 0s24 18 34-2" fill="none" stroke="#2d6fd6" stroke-width="6" stroke-linecap="round" opacity=".7"/><path d="M30 50c16-10 26 6 40-6s20-16 30-4" fill="none" stroke="#FF8FB1" stroke-width="5" stroke-linecap="round" opacity=".7"/>',
 run(root,c){const{x,W,H,P}=glowCanvas(root,'Drag to pour ink. Tap for a drop. The colors change as you go.');const ps=[];let t=0,hue=rand(360);x.fillStyle='#FFFDF6';x.fillRect(0,0,W,H);
   const add=(px,py,n)=>{for(let i=0;i<n;i++)ps.push({x:px+(Math.random()-.5)*8,y:py+(Math.random()-.5)*8,l:1,h:hue+(Math.random()-.5)*20})};
+  /* open with ink already swirling instead of a blank page */
+  for(let k=0;k<5;k++){hue=(hue+55)%360;const cx=W*(.2+.6*Math.random()),cy=H*(.25+.5*Math.random());for(let j=0;j<12;j++)add(cx+(Math.random()-.5)*60,cy+(Math.random()-.5)*60,45)}
   c.loop(dt=>{t+=dt/1000;if(P.down)add(P.x,P.y,14),hue=(hue+.6)%360;else if(idle(P)&&Math.random()<.3){hue=(hue+.3)%360;add(W/2+Math.sin(t*.7)*200,H/2+Math.cos(t*.5)*120,6)}
     x.fillStyle='rgba(255,253,246,.035)';x.fillRect(0,0,W,H);
     for(let i=ps.length-1;i>=0;i--){const p=ps[i];const a=Math.sin(p.x*.008+t*.3)*Math.cos(p.y*.009-t*.25)*3.2+Math.sin((p.x+p.y)*.003+t*.1)*2;p.x+=Math.cos(a)*1.4;p.y+=Math.sin(a)*1.4;p.l-=dt/9000;x.fillStyle=`hsla(${p.h},75%,45%,${p.l*.18})`;x.beginPath();x.arc(p.x,p.y,3+ (1-p.l)*4,0,7);x.fill();if(p.l<=0||p.x<-10||p.x>W+10||p.y<-10||p.y>H+10)ps.splice(i,1)}if(ps.length>6000)ps.splice(0,ps.length-6000)})}});

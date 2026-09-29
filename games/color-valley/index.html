@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Color Valley", "description": "Hop upward through spinning color rings. You can only pass through your own color.", "url": "https://detourr.net/games/color-valley/", "genre": "Arcade", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="colorvalley"</script>
@@ -46,7 +45,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script src="/js/lib/arcade.js"></script>
 <script>
 /* ===================== Color Valley: game code ===================== */
@@ -58,14 +57,14 @@ run(root,c){const W=400,H=640;const[cv,x]=mk(W,H,'width:min(100%,400px)');root.a
   function addObs(y){const k=obs.length%3;const sp=(c.pick(1.2,1.7,2.3))*Math.min(1.5,1+score*.02)*(Math.random()<.5?1:-1);obs.push({y,type:k===2?'bar':'ring',a:Math.random()*6,sp,r:k===1?90:70,star:true,sw:true})}
   function hop(){if(state==='over'){reset();return}state='play';ball.vy=-420;beep(700,.04,'triangle',.03)}
   function colAt(o,ang){const a=((ang-o.a)%(Math.PI*2)+Math.PI*4)%(Math.PI*2);return Math.floor(a/(Math.PI/2))}
-  function step(dt){if(state!=='play')return;ball.vy+=1200*dt;ball.y+=ball.vy*dt;const sy=ball.y-cam;if(sy<H*.45)cam=ball.y-H*.45;if(sy>H+20)die();
+  function step(dt){if(state!=='play')return;ball.vy+=1200*dt;ball.y+=ball.vy*dt;if(cam===0&&ball.y>H-120){ball.y=H-120;ball.vy=0}/* start platform: holds the ball until it climbs to the first ring */const sy=ball.y-cam;if(sy<H*.45)cam=ball.y-H*.45;if(sy>H+20)die();
     obs.forEach(o=>{o.a+=o.sp*dt;if(o.type==='ring'){const d=Math.abs(ball.y-o.y);if(Math.abs(d-o.r)<12){const ang=ball.y<o.y?-Math.PI/2:Math.PI/2;if(colAt(o,ang)!==ball.c)die()}}else{if(Math.abs(ball.y-o.y)<10){const off=((o.a*60)%(W)+W)%W;const seg=Math.floor(((W/2-off+W*2)%W)/(W/4));if(seg!==ball.c)die()}}
       if(o.star&&Math.abs(ball.y-o.y)<16){o.star=false;score++;beep(1000,.06,'triangle',.04)}if(o.sw&&ball.y<o.y-150&&ball.y>o.y-170){o.sw=false;let nc=rand(4);if(nc===ball.c)nc=(nc+1)%4;ball.c=nc;beep(500,.08,'sine',.04)}});
     if(obs[0].y-cam>H+120){obs.shift();addObs(obs[obs.length-1].y-300)}c.stat('Color Valley · '+score)}
   function die(){if(state!=='play')return;state='over';best=c.best(score);noise(.4,'lowpass',500,.3)}
   function draw(){x.fillStyle='#1D1A2F';x.fillRect(0,0,W,H);obs.forEach(o=>{const y=o.y-cam;if(y<-120||y>H+120)return;if(o.type==='ring'){for(let k=0;k<4;k++){x.strokeStyle=CC[k];x.lineWidth=14;x.beginPath();x.arc(W/2,y,o.r,o.a+k*Math.PI/2+.02,o.a+(k+1)*Math.PI/2-.02);x.stroke()}}else{const off=((o.a*60)%W+W)%W;for(let k=-1;k<5;k++){x.fillStyle=CC[(k%4+4)%4];x.fillRect(off+k*W/4-W,y-7,W/4,14);x.fillRect(off+k*W/4,y-7,W/4,14)}}
       if(o.star){x.fillStyle='#fff';x.font='22px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('★',W/2,y)}if(o.sw){const sy=y-160;for(let k=0;k<4;k++){x.fillStyle=CC[k];x.beginPath();x.moveTo(W/2,sy);x.arc(W/2,sy,11,k*Math.PI/2,(k+1)*Math.PI/2);x.fill()}}});
-    x.fillStyle=CC[ball.c];x.beginPath();x.arc(W/2,ball.y-cam,10,0,7);x.fill();x.fillStyle='#fff';x.font='800 26px Figtree';x.textAlign='left';x.fillText(score,16,36);if(state==='ready')banner(x,W,H,'Color Valley','Tap to hop');if(state==='over')banner(x,W,H,score+' stars','Best '+best+' · tap to retry')}
+    if(H-110-cam<H+10){x.fillStyle='rgba(255,255,255,.25)';x.fillRect(W/2-50,H-110-cam,100,6)}x.fillStyle=CC[ball.c];x.beginPath();x.arc(W/2,ball.y-cam,10,0,7);x.fill();x.fillStyle='#fff';x.font='800 26px Figtree';x.textAlign='left';x.fillText(score,16,36);if(state==='ready')banner(x,W,H,'Color Valley','Tap to hop');if(state==='over')banner(x,W,H,score+' stars','Best '+best+' · tap to retry')}
   c.on(cv,'pointerdown',e=>{e.preventDefault();hop()});c.on(document,'keydown',e=>{if(e.key===' '){e.preventDefault();hop()}});reset();c.loop(dt=>{step(Math.min(.03,dt/1000));draw()})}});
 </script>
 <script src="/js/app.js"></script>

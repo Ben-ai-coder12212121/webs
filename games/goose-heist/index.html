@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Goose Heist", "description": "3D third-person. You are a goose. Steal the gardener\u2019s stuff and honk your way out of trouble.", "url": "https://detourr.net/games/goose-heist/", "genre": "Weird", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="goose"</script>
@@ -46,7 +45,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Goose Heist: game code ===================== */
 function heroGoose(T){const g=new T.Group();const W2=M(T,0xffffff);const body=part(T,sp(T,.5),W2,0,.7,0,g);body.scale.set(1,.8,1.4);const neck=part(T,cy(T,.12,.14,.8),W2,0,1.2,.35,g);neck.rotation.x=.3;const head=part(T,sp(T,.18),W2,0,1.62,.48,g);part(T,new T.ConeGeometry(.08,.3,8),M(T,0xFF9F43),0,1.6,.72,g).rotation.x=Math.PI/2;part(T,sp(T,.04),M(T,0x1D1A2F),.1,1.68,.58,g);part(T,sp(T,.04),M(T,0x1D1A2F),-.1,1.68,.58,g);

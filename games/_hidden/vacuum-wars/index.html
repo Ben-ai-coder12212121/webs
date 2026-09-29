@@ -13,8 +13,7 @@
 
   gtag('config', 'G-6D1DVZMJG8');
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="vacuum"</script>
@@ -37,7 +36,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Vacuum Wars: game code ===================== */
 function heroCat(T){const g=humanoid(T,{skin:0xFF9F43,shirt:0x8c96a8,pants:0x5a6474,eye:0x2BB673});const h=g.userData.head;part(T,new T.ConeGeometry(.12,.22,4),M(T,0xFF9F43),-.16,.34,0,h);part(T,new T.ConeGeometry(.12,.22,4),M(T,0xFF9F43),.16,.34,0,h);const tail=part(T,cy(T,.05,.05,.8),M(T,0xFF9F43),0,1,-.35,g);tail.rotation.x=-.8;g.userData.anim=(P,dt)=>{tail.rotation.z=Math.sin(performance.now()/300)*.4};part(T,bx(T,.8,.3,.5),M(T,0x5a6474),0,1.55,-.1,g);return g}

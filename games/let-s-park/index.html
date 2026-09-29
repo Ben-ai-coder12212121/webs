@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Let\u2019s Park", "description": "Draw a path from each car to its matching parking spot, then press Go. Don\u2019t let them crash!", "url": "https://detourr.net/games/let-s-park/", "genre": "Arcade", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="letspark"</script>
@@ -46,7 +45,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script src="/js/lib/arcade.js"></script>
 <script>
 /* ===================== Let’s Park: game code ===================== */
@@ -64,9 +63,11 @@ run(root,c){const W=600,H=600;const[cv,x]=mk(W,H,'width:min(100%,600px)');const 
     if(!moving){const ok=cars.every(k=>{const s=spots[k.c];return Math.hypot(k.x-s.x,k.y-s.y)<18});if(ok){state='won';msg='All parked!';S.set('lp_lv',Math.max(S.get('lp_lv',1),lvl+1));c.best(lvl);[523,659,784].forEach((q,i)=>c.after(()=>beep(q,.15,'triangle',.06),i*100))}else{state='fail';msg='Someone missed their spot'}}}
   function draw(){x.fillStyle='#5A5470';x.fillRect(0,0,W,H);x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=2;for(let i=0;i<W;i+=60){x.beginPath();x.moveTo(i,0);x.lineTo(i,H);x.stroke()}
     walls.forEach(w=>{x.fillStyle='#8c86a3';x.fillRect(w.x,w.y,w.w,w.h);x.strokeStyle='#1D1A2F';x.strokeRect(w.x,w.y,w.w,w.h)});
-    spots.forEach(s=>{x.setLineDash([6,5]);x.strokeStyle=CC[s.c];x.lineWidth=3;x.strokeRect(s.x-16,s.y-24,32,48);x.setLineDash([]);x.fillStyle=CC[s.c];x.font='800 14px Figtree';x.textAlign='center';x.fillText('P',s.x,s.y+5)});
+    spots.forEach(s=>{x.globalAlpha=.28;x.fillStyle=CC[s.c];x.fillRect(s.x-18,s.y-27,36,54);x.globalAlpha=1;x.setLineDash([6,5]);x.strokeStyle=CC[s.c];x.lineWidth=3;x.strokeRect(s.x-18,s.y-27,36,54);x.setLineDash([]);x.fillStyle=CC[s.c];x.font='800 14px Figtree';x.textAlign='center';x.fillText('P',s.x,s.y+5)});
     cars.forEach(k=>{if(k.path){x.strokeStyle=CC[k.c];x.globalAlpha=.6;x.lineWidth=5;x.lineJoin='round';x.beginPath();k.path.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();x.globalAlpha=1}});
-    cars.forEach(k=>{x.save();x.translate(k.x,k.y);x.rotate(k.a+Math.PI/2);x.fillStyle=CC[k.c];x.strokeStyle='#1D1A2F';x.lineWidth=2.5;x.beginPath();x.roundRect?x.roundRect(-12,-20,24,40,6):x.rect(-12,-20,24,40);x.fill();x.stroke();x.fillStyle='#9fd6ff';x.fillRect(-8,-12,16,9);x.restore()});
+    /* early levels: animate the path you're meant to draw until the first one is drawn */
+    if(state==='plan'&&lvl<=2&&!drawing&&cars.every(k=>!k.path)){const k=cars[0],sp=spots[k.c],f=(performance.now()/1400)%1;x.setLineDash([2,10]);x.lineCap='round';x.strokeStyle='rgba(255,255,255,.8)';x.lineWidth=5;x.beginPath();x.moveTo(k.x,k.y);x.lineTo(sp.x,sp.y);x.stroke();x.setLineDash([]);x.fillStyle='#fff';x.beginPath();x.arc(k.x+(sp.x-k.x)*f,k.y+(sp.y-k.y)*f,9,0,7);x.fill();x.font='800 16px Figtree';x.textAlign='center';x.fillText('Drag from the car to its spot, then press Go',W/2,H/2+20)}
+    cars.forEach(k=>{x.save();x.translate(k.x,k.y);x.rotate(k.a+Math.PI/2);x.scale(1.2,1.2);x.fillStyle=CC[k.c];x.strokeStyle='#1D1A2F';x.lineWidth=2.5;x.beginPath();x.roundRect?x.roundRect(-12,-20,24,40,6):x.rect(-12,-20,24,40);x.fill();x.stroke();x.fillStyle='#9fd6ff';x.fillRect(-8,-12,16,9);x.restore()});
     x.fillStyle='#fff';x.font='700 16px "JetBrains Mono"';x.textAlign='left';x.fillText('LEVEL '+lvl,14,26);if(state==='won'||state==='fail')banner(x,W,H,msg,state==='won'?'Tap for level '+(lvl+1):'Tap to try again')}
   c.on(cv,'pointerdown',e=>{if(state==='won'){lvl++;build();return}if(state==='fail'){cars.forEach(k=>{k.x=k.sx;k.y=k.sy;k.pi=0;k.prog=0;k.done=false;k.a=-Math.PI/2});state='plan';return}if(state!=='plan')return;const p=canvasPos(cv,e);const k=cars.find(q=>Math.hypot(q.x-p.x,q.y-p.y)<26);if(k){drawing=k;k.path=[[k.x,k.y]];cv.setPointerCapture(e.pointerId)}});
   c.on(cv,'pointermove',e=>{if(!drawing)return;const p=canvasPos(cv,e);const L=drawing.path;const l=L[L.length-1];if(Math.hypot(p.x-l[0],p.y-l[1])>8)L.push([p.x,p.y])});

@@ -24,7 +24,7 @@ const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 // page: head and shared markup from an existing page, then this game's code
 const tpl = fs.readFileSync(path.join(ROOT, 'games/2048/index.html'), 'utf8');
 const gtag = tpl.match(/<!-- Google tag[\s\S]*?<\/script>\s*<script>[\s\S]*?<\/script>/) || tpl.match(/<script async src="https:\/\/www.googletagmanager[\s\S]*?<\/script>\s*<script>[\s\S]*?<\/script>/);
-const fonts = tpl.match(/<link rel="preconnect"[\s\S]*?display=swap">/)[0];
+const fonts = '<link rel="stylesheet" href="/css/fonts.css">';
 const body = tpl.slice(tpl.indexOf('<div id="stage">'), tpl.indexOf('<div class="seo">'));
 const head = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -44,7 +44,7 @@ const seo = `<div class="seo">
 `;
 const scripts = `<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 ${libs.map(l => `<script src="/js/lib/${l}.js"></script>`).join('\n')}${libs.length ? '\n' : ''}<script>
 /* ===================== ${g.name}: game code ===================== */
 ${code}
@@ -75,4 +75,5 @@ if (wip) {
   if (m && !m[1].includes("'" + g.id + "'")) app = app.replace(m[0], `const WIP_IDS=[${m[1]}, '${g.id}']`);
   fs.writeFileSync(appP, app);
 }
+require('./catalog-lite.cjs');
 console.log('wrote', 'games/' + slug + '/index.html', '| catalog', g.id, wip ? '| in progress' : '');
