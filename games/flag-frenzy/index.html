@@ -51,7 +51,7 @@
 <script>
 /* ===================== Flag Frenzy: game code ===================== */
 let flagsP=null;
-function loadFlags(){if(!flagsP)flagsP=fetch('geo/flags.json').then(r=>{if(!r.ok)throw new Error('flags');return r.json()}).then(o=>{Object.keys(o).forEach(k=>{flagURL[k]=URL.createObjectURL(new Blob([o[k]],{type:'image/svg+xml'}))})}).catch(e=>{flagsP=null;throw e});return flagsP}
+function loadFlags(){if(!flagsP)flagsP=fetch('/geo/flags.json').then(r=>{if(!r.ok)throw new Error('flags');return r.json()}).then(o=>{Object.keys(o).forEach(k=>{flagURL[k]=URL.createObjectURL(new Blob([o[k]],{type:'image/svg+xml'}))})}).catch(e=>{flagsP=null;throw e});return flagsP}
 G.push({id:'geo_flags',name:'Flag Frenzy',kind:'geo',levels:true,wide:true,tint:'#F2352A',blurb:'60 seconds, as many flags as you can. Streaks multiply your points.',fmt:b=>b+' pts',
 art:'<rect width="120" height="72" fill="#F2352A"/><path d="M24 64V10" stroke="#1D1A2F" stroke-width="4" stroke-linecap="round"/><path d="M26 12h46l-8 12 8 12H26z" fill="#FFFDF6" stroke="#1D1A2F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="46" cy="24" r="6" fill="#F2352A" stroke="#1D1A2F" stroke-width="2"/><path d="M78 30h28v18H78z" fill="#FFD23F" stroke="#1D1A2F" stroke-width="2.5"/><path d="M78 36h28M78 42h28" stroke="#2d6fd6" stroke-width="3"/>',
 run(root,c){let cl=null,dead=false;const r=withGeo(root,c,'world',fs=>{loadFlags().then(()=>{if(!dead)cl=flagQuiz(root,c,fs,'flag')}).catch(()=>{if(!dead)root.append(el('p',{class:'hint'},'Couldn’t load the flags. Check your connection and reopen the game.'))});return()=>{dead=true;cl&&cl()}});return()=>{dead=true;r();cl&&cl()}}});

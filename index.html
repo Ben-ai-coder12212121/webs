@@ -38,15 +38,17 @@
 
   <section class="hero">
     <div>
-      <h1>Bored? Take a detourr.</h1>
-      <p>One button, endless places to go. Hit the sign and land somewhere good: a satisfying toy, a weird little game, a fact that breaks your brain, a quick puzzle, or a full superhero rampage when you want chaos. Then hit it again. There’s always another detourr.</p>
-      <small><span id="count">54</span> games · no sign-up · no ads · your best scores stay on this device</small>
-      <ul class="perks"><li><b>🔀 One button, endless detourrs</b>Satisfying, weird, clever or chaotic. Something new every press.</li><li><b>🎮 <span id="count2">200+</span> games, toys &amp; cool stuff</b>From ten-second toys and mind-blowing facts to giant 3D rampages.</li><li><b>🌐 Nothing to download</b>Works on phones, tablets, Chromebooks and school laptops.</li></ul>
+      <h1>Bored? Take a Detourr.</h1>
+      <p>One button. A game that starts in seconds. Works on Chromebooks, no sign-up, no downloads.</p>
+      <small><span id="count">54</span> games · no ads · your scores and streak stay on this device</small>
+      <div class="daily dwide" id="dailyW"></div>
     </div>
     <div class="press">
       <button class="big" id="bigBtn" type="button" aria-label="Take a detourr to a random game"><svg viewBox="0 0 300 330" aria-hidden="true"><g transform="translate(20 0) scale(2.6)"><g transform="rotate(45 50 50)"><rect x="17" y="17" width="66" height="66" rx="7" fill="#161616"/><rect x="24.5" y="24.5" width="51" height="51" rx="3" fill="none" stroke="#FF7A1A" stroke-width="3.2"/></g><path d="M44.5 73V60.5C44.5 55.5 46.5 52.5 49.5 49.5L53.5 45.5C56 43 57 41 57 37.5V35" fill="none" stroke="#FF7A1A" stroke-width="8.5"/><path d="M47.5 37.5L56.5 24L66 37.5Z" fill="#FF7A1A"/></g><rect x="42" y="258" width="216" height="64" rx="12" fill="#161616"/><rect x="50" y="266" width="200" height="48" rx="7" fill="none" stroke="#FF7A1A" stroke-width="3.5"/><text x="150" y="300" text-anchor="middle" font-family="Arial Black,Helvetica Neue,Arial,sans-serif" font-weight="900" font-size="24" fill="#FF7A1A" textLength="190" lengthAdjust="spacingAndGlyphs">TAKE A DETOURR</text></svg></button>
-      <div class="plate" id="rndPlate">Random game</div>
-      <div class="seg" id="rndMode" role="group" aria-label="What the random button picks"><button type="button" data-m="simple">Simple</button><button type="button" data-m="big">Big games</button><button type="button" data-m="all">Everything</button></div>
+      <div class="plate" id="rndPlate">🎲 Random game</div>
+      <div class="qtime" id="qtime" role="group" aria-label="How long have you got?"><button type="button" data-d="1">⚡ 1 min</button><button type="button" data-d="5">⏱ 5 min</button><button type="button" data-d="15">🕒 15 min</button><button type="button" data-d="any">🎲 Surprise me</button></div>
+      <div class="modes" id="modes" role="group" aria-label="Modes"><button type="button" data-m="silent" aria-pressed="false">🔇 Silent</button><button type="button" data-m="kb" aria-pressed="false">⌨️ Keyboard only</button><button type="button" data-m="quick" aria-pressed="false">⚡ Quick games</button><button type="button" data-m="class" aria-pressed="false">🏫 Classroom-friendly</button></div>
+      <div class="daily dnarrow" id="daily"></div>
       <div class="dcount" id="dcount"></div>
       <button class="mobtog presspc" id="mobTop" type="button" aria-pressed="false"><i></i>📱 Mobile-friendly only</button>
     </div>

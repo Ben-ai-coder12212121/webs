@@ -1,6 +1,6 @@
 /* lib/physics.js: code shared by several games (from src/heroes/physics.js) */
 let matterP=null;
-function loadMatter(){if(window.Matter)return Promise.resolve(window.Matter);if(matterP)return matterP;matterP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js';s.onload=()=>res(window.Matter);s.onerror=()=>{matterP=null;rej(new Error('physics failed'))};document.head.append(s)});return matterP}
+function loadMatter(){if(window.Matter)return Promise.resolve(window.Matter);if(matterP)return matterP;matterP=new Promise((res,rej)=>{const add=(src,next)=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(window.Matter);s.onerror=()=>{s.remove();if(next)add(next);else{matterP=null;rej(new Error('physics failed'))}};document.head.append(s)};add('/assets/lib/matter.min.js','https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js')});return matterP}
 function withMatter(root,c,start){const ld=el('div',{class:'g3load'},el('b',null,'Loading physics…'),el('small',null,'Warming up the smashing engine.'));root.append(ld);let dead=false,cleanup=null;
   loadMatter().then(()=>{if(dead)return;ld.remove();try{cleanup=start()}catch(err){root.append(el('p',{class:'hint'},'This game hit an error: '+err.message));console.error(err)}}).catch(()=>{if(dead)return;ld.innerHTML='';ld.append(el('b',null,'Couldn’t load the physics engine'),el('small',null,'Check your internet connection, then reopen this game.'))});
   return()=>{dead=true;cleanup&&cleanup()}}

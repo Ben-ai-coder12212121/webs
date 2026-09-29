@@ -223,9 +223,9 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 .vs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;width:100%;text-align:center}
 .vs small{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .hanoi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
-.peg{height:220px;position:relative;display:flex;flex-direction:column-reverse;align-items:center;padding:0 0 4px;background:none;border:0;border-bottom:6px solid var(--ink);cursor:pointer;border-radius:10px 10px 0 0}
-.peg::before{content:"";position:absolute;bottom:0;top:24px;width:8px;background:var(--ink);border-radius:4px;left:50%;transform:translateX(-50%)}
-.peg.sel{background:rgba(255,255,255,.45)}
+.hanoi .peg{width:auto;box-shadow:none;height:220px;position:relative;display:flex;flex-direction:column-reverse;align-items:center;padding:0 0 4px;background:none;border:0;border-bottom:6px solid var(--ink);cursor:pointer;border-radius:10px 10px 0 0}
+.hanoi .peg::before{content:"";position:absolute;bottom:0;top:24px;width:8px;background:var(--ink);border-radius:4px;left:50%;transform:translateX(-50%)}
+.hanoi .peg.sel{background:rgba(255,255,255,.45)}
 .disk{height:24px;border:3px solid var(--ink);border-radius:8px;position:relative;z-index:1;margin-top:3px;transition:transform .1s}
 .odd{display:grid;gap:6px;width:min(100%,420px);aspect-ratio:1}
 .odd button{border:0;border-radius:8px;cursor:pointer;padding:0}
@@ -400,3 +400,28 @@ a.tile{text-decoration:none;color:inherit;text-align:left;font:inherit}
 /* full screen on computers: the game area's height already excludes the top bar, so its padding must fit inside it too */
 #stage.fs3 .arena{box-sizing:border-box}
 #stage.fs3 .g3{max-height:100%}
+/* ---- quick time picks, modes, daily challenge and streak (homepage) ---- */
+.qtime{display:grid;grid-template-columns:repeat(4,auto);gap:8px}
+.qtime button,.modes button{border:3px solid var(--ink);border-radius:12px;background:var(--paper);font:800 15px Figtree,system-ui,sans-serif;padding:8px 12px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.qtime button:hover,.modes button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.qtime button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.qtime button[data-d=any]{background:var(--sun)}
+.modes{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:440px}
+.modes button{font-size:13px;padding:5px 10px;border-radius:99px;box-shadow:2px 2px 0 var(--ink)}
+.modes button.on{background:var(--ink);color:var(--sun)}
+.daily{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.daily .dc{display:flex;align-items:center;gap:10px;background:#fffdf6;border:3px solid var(--ink);border-radius:14px;padding:8px 12px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;line-height:1.25;text-align:left}
+.daily .dc b{display:block;font-size:15px}
+.daily .dc .ic{font-size:26px}
+.daily .dc.done{background:#e3f7e9}
+.daily .dc.streak{cursor:default}
+.tile .meta .dur{font-style:normal;background:transparent;border:0;padding:0;opacity:.8}
+.modenote{grid-column:1/-1;font-size:14px;opacity:.8;margin:-4px 0 4px}
+.modenote button{all:unset;cursor:pointer;text-decoration:underline;font-weight:700}
+.beatpill{background:#ff5a3a;color:#fff;font:800 13px Figtree,system-ui,sans-serif;border-radius:99px;padding:4px 10px;white-space:nowrap}
+.beatpill.won{background:#2BB673}
+@media (max-width:560px){.qtime{grid-template-columns:repeat(2,1fr)}.daily{justify-content:center}}
+.press .daily{justify-content:center;margin-top:4px}
+@media (max-width:560px){.hero small{display:none}.hero p{font-size:16px}}
+.dnarrow{display:none}
+@media (max-width:860px){.dwide{display:none}.dnarrow{display:flex}}
