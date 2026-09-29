@@ -105,7 +105,9 @@ run(root,c){return with3D(root,c,()=>{
     const fire=I.down||I.fire||Kk.f||Kk.j;if(fire&&!dashLatch&&P.dashCd<=0&&P.stun<=0){dashLatch=true;P.dash=.45;P.dashCd=2;sweep(300,1400,.35,'sawtooth',.06);K.ring(new T.Vector3(P.x,.3,P.z),0xffffff,1,9,.4);cam.shake=.3}if(!fire)dashLatch=false;
     if(P.spin>0){P.spin-=dt;P.face+=dt*14;P.spd*=Math.pow(.2,dt)}
     else if(P.stun>0){P.stun-=dt;P.spd*=Math.pow(.02,dt)}
-    else if(mv.m>0){const tgt=Math.atan2(mv.x,mv.z);const da=wrapA(tgt-P.face);const drifting=(I.right||Kk.e||I.drift)&&P.spd>18;const rate=drifting?8:11-6.5*Math.min(1,P.spd/MAX);P.face+=clamp(da,-rate*dt,rate*dt);if(Math.abs(da)>2.2&&P.spd>30){P.spd-=160*dt;if(Math.random()<.6)K.puff(new T.Vector3(P.x,.3,P.z),0xffffff,.6,.4)}else P.spd+=(P.spd<60?90:P.spd<100?32:16)*dt*mv.m;P.spd=Math.min(P.spd,MAX)}
+    else if(mv.m>0){const tgt=Math.atan2(mv.x,mv.z);const da=wrapA(tgt-P.face);const drifting=(I.right||Kk.e||I.drift)&&P.spd>18;const rate=drifting?8:11-6.5*Math.min(1,P.spd/MAX);P.face+=clamp(da,-rate*dt,rate*dt);if(Math.abs(da)>2.2&&P.spd>30){P.spd-=160*dt;if(Math.random()<.6)K.puff(new T.Vector3(P.x,.3,P.z),0xffffff,.6,.4)}else P.spd+=(P.spd<60?90:P.spd<100?32:16)*dt*mv.m;P.spd=Math.min(P.spd,MAX);
+      /* backing up (S / down / joystick back) is a controllable jog, never super speed */
+      if(mv.f<-.25&&P.dash<=0){const cap=14;if(P.spd>cap)P.spd=Math.max(cap,P.spd-240*dt)}}
     else P.spd=Math.max(0,P.spd-(P.spd>60?70:110)*dt);
     if(P.dash>0){P.dash-=dt;P.spd=Math.max(P.spd,MAX*1.55)}else if(P.spd>MAX)P.spd=Math.max(MAX,P.spd-120*dt);
     const drifting=(I.right||Kk.e||I.drift)&&P.spd>18&&P.stun<=0&&P.spin<=0;{const dm=wrapA(P.face-P.mv);P.mv+=clamp(dm,-(drifting?2.2:25)*dt,(drifting?2.2:25)*dt);if(drifting){P.spd*=Math.pow(.93,dt);const slip=Math.abs(wrapA(P.face-P.mv));P.drift+=dt*slip;if(Math.random()<dt*30)K.burst(new T.Vector3(P.x,.2,P.z),[0xffffff,0xFFE27A,0xd8d4e4],2,5,.35,8);if(slip>.3&&Math.random()<dt*2)K.puff(new T.Vector3(P.x,.2,P.z),0xd8d4e4,.6,.5)}else if(P.drift>.6){const pts=Math.round(P.drift*200);score+=pts;H.pow('DRIFT +'+pts,new T.Vector3(P.x,2.5,P.z),'#FFD23F');P.drift=0}else P.drift=0}
