@@ -22,9 +22,15 @@ Each game is its own page. There is no build step: edit a file, refresh the brow
 | `netlify/functions/` | Leaderboards, multiplayer and the suggestion box (these only run on Netlify). |
 | `_redirects`, `netlify.toml` | Netlify redirects and deploy rules. |
 | `tools/test-games.cjs` | Opens every game page in a headless browser and reports errors. |
+| `tools/new-game.cjs`, `tools/release-game.cjs` | Add a game (optionally to 🚧 In progress); move finished games out of In progress (listing, search engines, sitemap). |
+| `tools/allgames.cjs`, `tools/catalog-lite.cjs` | Rebuild the homepage footer's A–Z list and `js/catalog-lite.js` (the slim catalog game pages load) after changing `js/catalog.js` or the hidden list. |
 | `src/` | The old single-file build system. Archived: the site no longer builds from it. |
 
-Every page loads, in order: `css/site.css`, `js/core.js`, `js/catalog.js`, the game's `js/lib/` files, the game's own code, `js/app.js`.
+Every page loads, in order: `css/site.css`, `css/fonts.css`, `js/core.js`, the catalog (`js/catalog.js` on the homepage, the slimmer `js/catalog-lite.js` on game pages), the game's `js/lib/` files, the game's own code, `js/app.js`.
+
+Fonts and the big libraries (three.js, Matter.js, d3) are served from this site (`assets/fonts/`, `assets/lib/`), because school networks sometimes block outside CDNs.
+
+**Hiding a game:** add its id to `HIDDEN` in `js/app.js` (its page and links keep working), then run `node tools/allgames.cjs`. **Homepage tags** (session length, needs sound, keyboard-only, not classroom-friendly) are in `META_RAW` in `js/app.js`; the core 75 are in `CORE`.
 
 ### Editing
 

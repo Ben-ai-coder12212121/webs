@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Sticky Goo", "description": "A blob of goo that sticks to everything. Stretch it back and fling it to the star, avoiding spikes.", "url": "https://detourr.net/games/sticky-goo/", "genre": "Casual", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="stickygoo"</script>
@@ -46,7 +45,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Sticky Goo: game code ===================== */
 G.push({id:'stickygoo',name:'Sticky Goo',kind:'casual',levels:true,tint:'#6EE7B7',blurb:'A blob of goo that sticks to everything. Stretch it back and fling it to the star, avoiding spikes.',fmt:b=>'level '+b,
@@ -59,7 +58,10 @@ run(root,c){const W=820,H=520;const[cv,x]=mk(W,H,'width:100%');root.append(cv,el
     goo={x:50,y:H-34,vx:0,vy:0,stuck:true};star={x:W-70,y:60+R()*(H-160)};for(let k=0;k<12;k++){const w=walls.slice(4).find(w=>star.x>w.x-34&&star.x<w.x+w.w+34&&star.y>w.y-34&&star.y<w.y+w.h+34);if(!w)break;star.y=w.y-44;if(star.y<60){star.y=60+R()*(H-160);star.x=W-70-R()*120}}spikes=spikes.filter(sp=>Math.hypot(sp.x+sp.w/2-star.x,sp.y-star.y)>60&&!(sp.x<90&&sp.y>H-60));flings=0;state='play';trail=[];c.stat('Sticky Goo · level '+lvl)}
   function step(dt){if(state!=='play'||goo.stuck)return;for(let k=0;k<4;k++){const d=dt/4;goo.vy+=900*d;goo.x+=goo.vx*d;goo.y+=goo.vy*d;for(const w of walls){if(goo.x>w.x-12&&goo.x<w.x+w.w+12&&goo.y>w.y-12&&goo.y<w.y+w.h+12){const dl=goo.x-(w.x-12),dr=w.x+w.w+12-goo.x,du=goo.y-(w.y-12),dd=w.y+w.h+12-goo.y;const m=Math.min(dl,dr,du,dd);if(m===dl)goo.x=w.x-12;else if(m===dr)goo.x=w.x+w.w+12;else if(m===du)goo.y=w.y-12;else goo.y=w.y+w.h+12;goo.stuck=true;goo.vx=goo.vy=0;noise(.12,'lowpass',500,.2);return}}
     for(const s of spikes)if(goo.x>s.x-8&&goo.x<s.x+s.w+8&&goo.y>s.y-8&&goo.y<s.y+s.h+8){state='fail';noise(.4,'highpass',1200,.3);return}if(Math.hypot(goo.x-star.x,goo.y-star.y)<30){state='won';S.set('goo_lv',Math.max(S.get('goo_lv',1),lvl+1));c.best(lvl);[523,659,784].forEach((q,i)=>c.after(()=>beep(q,.15,'triangle',.06),i*100));return}}trail.push([goo.x,goo.y]);if(trail.length>24)trail.shift()}
-  function draw(){x.fillStyle='#1D1A2F';x.fillRect(0,0,W,H);walls.forEach(w=>{x.fillStyle='#5A5470';x.fillRect(w.x,w.y,w.w,w.h)});spikes.forEach(s=>{x.fillStyle='#F2352A';for(let i=0;i<s.w;i+=10){x.beginPath();x.moveTo(s.x+i,s.y+s.h);x.lineTo(s.x+i+5,s.y);x.lineTo(s.x+i+10,s.y+s.h);x.fill()}});
+  function draw(){const bg=x.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#2d3a7a');bg.addColorStop(1,'#5a3a8a');x.fillStyle=bg;x.fillRect(0,0,W,H);x.fillStyle='rgba(255,255,255,.05)';for(let gx=0;gx<W;gx+=40)x.fillRect(gx,0,1,H);for(let gy=0;gy<H;gy+=40)x.fillRect(0,gy,W,1);
+    walls.forEach(w=>{x.fillStyle='#8a7fb0';x.fillRect(w.x,w.y,w.w,w.h);x.fillStyle='#b8aee0';x.fillRect(w.x,w.y,w.w,Math.min(5,w.h))});
+    /* first fling on the first levels: show what to do */
+    if(flings===0&&lvl<=2&&!drag&&state==='play'){const t=performance.now()/400;const ox=Math.sin(t)*10;x.strokeStyle='#fff';x.fillStyle='#fff';x.lineWidth=3;x.beginPath();x.moveTo(goo.x+30,goo.y-6);x.lineTo(goo.x+70+ox,goo.y+20);x.stroke();x.beginPath();x.arc(goo.x+74+ox,goo.y+22,7,0,7);x.fill();x.font='800 15px Figtree';x.textAlign='left';x.textBaseline='middle';x.fillText('Drag back from the goo, then let go',goo.x+90,goo.y-6)}spikes.forEach(s=>{x.fillStyle='#F2352A';for(let i=0;i<s.w;i+=10){x.beginPath();x.moveTo(s.x+i,s.y+s.h);x.lineTo(s.x+i+5,s.y);x.lineTo(s.x+i+10,s.y+s.h);x.fill()}});
     x.fillStyle='#FFD23F';x.font='36px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('★',star.x,star.y+Math.sin(performance.now()/300)*3);x.strokeStyle='rgba(110,231,183,.35)';x.lineWidth=6;x.beginPath();trail.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();
     if(drag){const dx=drag.x-goo.x,dy=drag.y-goo.y,L=Math.min(140,Math.hypot(dx,dy));const a=Math.atan2(dy,dx);x.strokeStyle='#6EE7B7';x.lineWidth=10;x.lineCap='round';x.beginPath();x.moveTo(goo.x,goo.y);x.lineTo(goo.x+Math.cos(a)*L,goo.y+Math.sin(a)*L);x.stroke();let px=goo.x,py=goo.y,vx=-Math.cos(a)*L*6,vy=-Math.sin(a)*L*6;x.fillStyle='rgba(255,255,255,.4)';for(let i=0;i<30;i++){vy+=900*.03;px+=vx*.03;py+=vy*.03;if(i%2){x.beginPath();x.arc(px,py,3,0,7);x.fill()}}}
     const sq=goo.stuck?1:1+Math.min(.3,Math.hypot(goo.vx,goo.vy)/2000);x.fillStyle='#6EE7B7';x.strokeStyle='#fff';x.lineWidth=3;x.beginPath();x.ellipse(goo.x,goo.y,13*sq,13/sq,Math.atan2(goo.vy,goo.vx),0,7);x.fill();x.stroke();x.fillStyle='#1D1A2F';x.beginPath();x.arc(goo.x-4,goo.y-2,2.5,0,7);x.arc(goo.x+4,goo.y-2,2.5,0,7);x.fill();

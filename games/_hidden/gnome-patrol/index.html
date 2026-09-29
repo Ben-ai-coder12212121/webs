@@ -13,8 +13,7 @@
 
   gtag('config', 'G-6D1DVZMJG8');
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="gnome"</script>
@@ -37,7 +36,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Gnome Patrol: game code ===================== */
 function freezeAI(e,dt,api,{dist,see}){const P=api.P;const fwd=P.yaw;const toE=Math.atan2(-(e.x-P.x),-(e.z-P.z));let da=toE-fwd;while(da>Math.PI)da-=2*Math.PI;while(da<-Math.PI)da+=2*Math.PI;const lit=see&&dist<24&&Math.abs(da)<.42;e.frozenNow=lit;if(lit){e.seen=true;if(!e.wasLit){beep(1200,.03,'sine',.03)}e.wasLit=true;return true}e.wasLit=false;return false}

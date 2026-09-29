@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Five Letters", "description": "Guess the hidden word in six tries.", "url": "https://detourr.net/games/five-letters/", "genre": "Puzzle", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 <style>
 /* styles used only by this game */
@@ -53,27 +52,38 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Five Letters: game code ===================== */
 G.push({id:'word',name:'Five Letters',kind:'puzzle',tint:'var(--green)',blurb:'Guess the hidden word in six tries.',fmt:b=>b+' streak',
 art:'<g stroke="#1D1A2F" stroke-width="3"><rect x="8" y="22" width="18" height="18" rx="3" fill="#2BB673"/><rect x="30" y="22" width="18" height="18" rx="3" fill="#8c86a3"/><rect x="52" y="22" width="18" height="18" rx="3" fill="#FF9F43"/><rect x="74" y="22" width="18" height="18" rx="3" fill="#2BB673"/><rect x="96" y="22" width="18" height="18" rx="3" fill="#FFFDF6"/></g>',
 run(root,c){
+  /* two modes: 📅 Daily (the same word for everyone today, one attempt, shareable result) and ♾ Practice (endless) */
+  const dayN=()=>{const d=new Date();return Math.floor((d.getTime()-d.getTimezoneOffset()*6e4)/864e5)};const DAY0=20724;
+  const dailyWord=()=>{const L=WORDS;let h=Math.imul(dayN(),2654435761)>>>0;h=(h^(h>>>15))>>>0;return L[h%L.length]};
+  let mode=S.get('word_mode','daily'),hist=[];
   let ans,row,cur,over,streak=S.get('word_streak',0);const grid=el('div',{class:'wgrid'});const rows=[];
   for(let r=0;r<6;r++){const rw=el('div',{class:'wrow'});const cs=[];for(let k=0;k<5;k++){const d=el('div');cs.push(d);rw.append(d)}rows.push({rw,cs});grid.append(rw)}
   const kb=el('div',{class:'kb'});const keys={};['qwertyuiop','asdfghjkl','+zxcvbnm-'].forEach(line=>{const d=el('div');[...line].forEach(ch=>{const lab=ch==='+'?'Enter':ch==='-'?'⌫':ch;const b=el('button',{type:'button',class:ch==='+'||ch==='-'?'wide':''},lab);b.addEventListener('click',()=>key(ch==='+'?'enter':ch==='-'?'back':ch));if(ch!=='+'&&ch!=='-')keys[ch]=b;d.append(b)});kb.append(d)});
-  const msg=el('p',{class:'hint'},'');const again=el('button',{class:'btn primary',type:'button',onclick:reset},'New word');
-  function reset(){ans=pick(WORDS);row=0;cur='';over=false;again.hidden=true;rows.forEach(r=>r.cs.forEach(d=>{d.textContent='';d.className=''}));Object.values(keys).forEach(b=>b.className='');msg.textContent='Green = right spot. Orange = in the word, wrong spot.';c.stat('Streak '+streak)}
+  const msg=el('p',{class:'hint'},'');const again=el('button',{class:'btn primary',type:'button',onclick:()=>{if(mode==='daily'){mode='practice';S.set('word_mode',mode);syncSeg()}reset()}},'New word');
+  const shareB=el('button',{class:'btn',type:'button',hidden:true},'📣 Share result');
+  const seg=el('div',{class:'seg',role:'group','aria-label':'Mode'});const segB=[['daily','📅 Daily word'],['practice','♾ Practice']].map(([k,l])=>{const b=el('button',{type:'button'},l);b.addEventListener('click',()=>{mode=k;S.set('word_mode',k);syncSeg();reset()});seg.append(b);return[k,b]});
+  function syncSeg(){segB.forEach(([k,b])=>b.classList.toggle('on',k===mode))}
+  const dstate=()=>{const d=S.get('word_daily',{d:0,g:[]});return d.d===dayN()?d:{d:dayN(),g:[]}};
+  function shareText(){const d=dstate();const won=d.g[d.g.length-1]===dailyWord();const grid2=d.g.map(g=>{const r=score(g,dailyWord());return r.map(x=>x==='g'?'🟩':x==='y'?'🟨':'⬛').join('')}).join('\n');return'Detourr Five Letters #'+(dayN()-DAY0)+' '+(won?d.g.length:'X')+'/6\n'+grid2+'\nhttps://detourr.net/games/five-letters/'}
+  shareB.addEventListener('click',async()=>{const t=shareText();try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(t);msg.textContent='Result copied! Paste it to your friends.'}catch(e){msg.textContent=t}});
+  function score(g,a){const res=Array(5).fill('n'),pool={};for(let i=0;i<5;i++){if(g[i]===a[i])res[i]='g';else pool[a[i]]=(pool[a[i]]||0)+1}for(let i=0;i<5;i++)if(res[i]!=='g'&&pool[g[i]]){res[i]='y';pool[g[i]]--}return res}
+  function reset(){ans=mode==='daily'?dailyWord():pick(WORDS);row=0;cur='';over=false;again.hidden=true;shareB.hidden=true;rows.forEach(r=>r.cs.forEach(d=>{d.textContent='';d.className=''}));Object.values(keys).forEach(b=>b.className='');msg.textContent=mode==='daily'?'Today’s word is the same for everyone. You get one go.':'Green = right spot. Orange = in the word, wrong spot.';c.stat(mode==='daily'?'Daily word #'+(dayN()-DAY0):'Streak '+streak);
+    if(mode==='daily'){const d=dstate();for(const g of d.g){cur=g;paint();submit(true)}cur='';if(over){shareB.hidden=false;again.textContent='Play practice words';again.hidden=false}}else again.textContent='New word'}
   function paint(){rows[row].cs.forEach((d,i)=>d.textContent=cur[i]||'')}
   function key(k){if(over)return;if(k==='back'){cur=cur.slice(0,-1);paint();return}if(k==='enter')return submit();if(/^[a-z]$/.test(k)&&cur.length<5){cur+=k;paint();beep(600,.02,'square',.03)}}
-  function submit(){if(cur.length<5){const rw=rows[row].rw;rw.classList.remove('shake');void rw.offsetWidth;rw.classList.add('shake');msg.textContent='Five letters, please.';return}
-    const res=Array(5).fill('n'),pool={};for(let i=0;i<5;i++){if(cur[i]===ans[i])res[i]='g';else pool[ans[i]]=(pool[ans[i]]||0)+1}
-    for(let i=0;i<5;i++)if(res[i]!=='g'&&pool[cur[i]]){res[i]='y';pool[cur[i]]--}
+  function submit(replay){if(cur.length<5){const rw=rows[row].rw;rw.classList.remove('shake');void rw.offsetWidth;rw.classList.add('shake');msg.textContent='Five letters, please.';return}
+    const res=score(cur,ans);if(mode==='daily'&&!replay){const d=dstate();d.g.push(cur);S.set('word_daily',d)}
     const rank={n:1,y:2,g:3};res.forEach((r,i)=>{const d=rows[row].cs[i];setTimeout(()=>{d.className=r;beep(300+i*80,.05,'triangle',.04)},i*110);const kbtn=keys[cur[i]];const was=kbtn.className;if(!was||rank[r]>rank[was])kbtn.className=r});
-    if(cur===ans){over=true;streak++;S.set('word_streak',streak);c.best(streak);msg.textContent=['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'][row];again.hidden=false;c.stat('Streak '+streak+' · Best '+c.best());return}
-    row++;cur='';if(row===6){over=true;streak=0;S.set('word_streak',0);msg.textContent='The word was '+ans.toUpperCase()+'.';again.hidden=false;c.stat('Streak 0 · Best '+(c.best()||0))}}
+    if(cur===ans){over=true;if(mode==='daily'){msg.textContent=['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'][row]+' Come back tomorrow for a new word.';shareB.hidden=false;again.textContent='Play practice words';again.hidden=false;if(!replay){const b=c.best();c.best(b==null?0:b)}return}streak++;S.set('word_streak',streak);c.best(streak);msg.textContent=['Genius!','Magnificent!','Impressive!','Splendid!','Great!','Phew!'][row];again.hidden=false;c.stat('Streak '+streak+' · Best '+c.best());return}
+    row++;cur='';if(row===6){over=true;msg.textContent='The word was '+ans.toUpperCase()+'.';again.hidden=false;if(mode==='daily'){shareB.hidden=false;again.textContent='Play practice words';return}streak=0;S.set('word_streak',0);c.stat('Streak 0 · Best '+(c.best()||0))}}
   c.on(document,'keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key.toLowerCase();if(k==='enter'){e.preventDefault();if(over)reset();else key('enter')}else if(k==='backspace')key('back');else if(/^[a-z]$/.test(k))key(k)});
-  root.append(grid,msg,kb,again);reset();
+  root.append(seg,grid,msg,kb,el('div',{class:'row'},again,shareB));syncSeg();reset();
 }});
 </script>
 <script src="/js/app.js"></script>

@@ -11,8 +11,7 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Domino Run", "description": "Draw a path of dominoes anywhere, then tip the first one over.", "url": "https://detourr.net/games/domino-run/", "genre": "Toys", "gamePlatform": "Web browser", "applicationCategory": "Game", "operatingSystem": "Any", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "publisher": {"@type": "Organization", "name": "Detourr", "url": "https://detourr.net/"}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Overpass:wght@800;900&display=swap">
+<link rel="stylesheet" href="/css/fonts.css">
 <link rel="stylesheet" href="/css/site.css">
 </head><body class="gamepage">
 <script>window.PAGE_GAME="dominoes"</script>
@@ -46,7 +45,7 @@
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
-<script src="/js/catalog.js"></script>
+<script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Domino Run: game code ===================== */
 G.push({id:'dominoes',name:'Domino Run',kind:'toy',wide:true,tint:'#FF9F43',blurb:'Draw a path of dominoes anywhere, then tip the first one over.',fmt:null,
@@ -56,6 +55,8 @@ run(root,c){
   c.on(cv,'pointerdown',e=>{e.preventDefault();cv.setPointerCapture(e.pointerId);const p=canvasPos(cv,e);if(!running&&doms.length&&Math.hypot(p.x-doms[0].x,p.y-doms[0].y)<20&&doms[0].st===0){tip();return}drawing=true;last=p});
   c.on(cv,'pointermove',e=>{if(!drawing)return;const p=canvasPos(cv,e);const d=Math.hypot(p.x-last.x,p.y-last.y);if(d>=18){const a=Math.atan2(p.y-last.y,p.x-last.x);doms.push({x:p.x,y:p.y,a,st:0,t:0,h:(doms.length*9)%360});last=p;beep(1400,.01,'square',.015)}});
   c.on(cv,'pointerup',()=>drawing=null);
+  /* open with a ready-made spiral so the first tap already does something */
+  {let th=0,r=215;while(r>70){const px=W/2+Math.cos(th)*r*1.45,py=H/2+Math.sin(th)*r,nx=W/2+Math.cos(th+.01)*r*1.45,ny=H/2+Math.sin(th+.01)*r;doms.push({x:px,y:py,a:Math.atan2(ny-py,nx-px),st:0,t:0,h:(doms.length*9)%360});const dt=19/(r*1.2);th+=dt;r-=dt*9}}
   function tip(){if(!doms.length)return;running=true;doms[0].st=1}
   c.loop(dt=>{doms.forEach((d,i)=>{if(d.st===1){d.t+=dt/140;if(d.t>=1){d.t=1;d.st=2;noise(.03,'highpass',2500,.12);beep(900+Math.random()*300,.015,'square',.03);const n=doms[i+1];if(n&&n.st===0&&Math.hypot(n.x-d.x,n.y-d.y)<30)n.st=1}}});if(running&&doms.every(d=>d.st!==1))running=false;
     x.fillStyle='#e8d3a3';x.fillRect(0,0,W,H);x.fillStyle='rgba(138,90,43,.08)';for(let i=0;i<W;i+=40)x.fillRect(i,0,20,H);
