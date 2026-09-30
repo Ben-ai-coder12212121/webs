@@ -58,6 +58,11 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Recently done (newest first)
 
+- **Paint Boy fixed and extended:**
+  - From about level 12 the random mazes stopped growing (about 40 tiles), and some came out as a single tile, which can't be won (5% at level 12, 20%+ by level 20). That's why the owner felt the levels stop at 12.
+  - Now each level is a seeded maze, so it's the same every time. The grid grows up to 17×17, and the builder keeps the best of up to 400 attempts, aiming for 30% of the grid, with a square-loop fallback. Difficulty changes the grid by ±1.
+  - Checked headless: levels 1 to 60 on all difficulties can all be finished, with 90 to 110 tiles late on and builds under 50ms.
+  - New: Undo (U/Backspace or button), Enter/Space/arrow goes to the next level, and the best move count per level (`pb_mv_<lvl>_<difficulty>`).
 - **No more blur mid-game on High:** `Stage3D` (`core.js`) used to lower the render resolution (down to 0.55) whenever frames took over 24ms, so games like Octagon went blurry on phones after a few seconds. That adaptive drop now only happens in Low graphics.
 - **Graphics default to High on every device, every time** (owner request; the old automatic Low on Chromebooks and weaker devices is gone). The Graphics button toggles High/Low for this browser tab only: `sessionStorage unb_gfx` (`gfxMode()`/`gfxLow()` in `core.js`). The superhero games' G toggle works the same way (`sessionStorage unb_hx_hq`).
 - **Homepage trimmed:** the Silent and Keyboard-only filters and the "Today's top" box were removed.
