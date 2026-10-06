@@ -293,10 +293,41 @@ def project(snap, rows):
     final = growth @ values + snap["account"]["cash"]
     start = values.sum() + snap["account"]["cash"]
     pct = {p: float(np.percentile(final, p)) for p in (5, 25, 50, 75, 95)}
+    cov = np.outer(vols, vols) * corr
+    port_vol = float(np.sqrt(values @ cov @ values) / values.sum())
     return {"end": end, "days": (end - TODAY).days, "start": start, "pct": pct,
             "p_loss": float((final < start).mean() * 100),
             "p_down5": float((final < start * 0.95).mean() * 100),
-            "note": cfg.get("dividends_note", ""), "mu": cfg["equity_expected_return"]}
+            "note": cfg.get("dividends_note", ""), "mu": cfg["equity_expected_return"],
+            "long": project_long(snap, start, port_vol)}
+
+
+def project_long(snap, start, port_vol):
+    """Closed-form lognormal range to the target age, plus cash-flow scenarios.
+
+    Uses the portfolio's current volatility (floored, since six months of data
+    understates long-run swings) and the same expected return as the
+    short-term projection. Scenarios compound at the median growth rate.
+    """
+    profile, cfg = snap.get("profile", {}), snap["projection"]
+    if "age" not in profile or "target_age" not in profile:
+        return None
+    years = profile["target_age"] - profile["age"]
+    vol = max(port_vol, cfg.get("long_vol_floor", 0.15))
+    drift = math.log1p(cfg["equity_expected_return"]) - vol ** 2 / 2
+    deflate = (1 + cfg.get("inflation", 0.025)) ** years
+    z = {5: -1.645, 25: -0.674, 50: 0.0, 75: 0.674, 95: 1.645}
+    pct = {p: start * math.exp(drift * years + zz * vol * math.sqrt(years)) for p, zz in z.items()}
+    growth = math.exp(drift) - 1
+    scen = []
+    for sc in cfg.get("scenarios", []):
+        v = start
+        for y in range(years):
+            v = max(v * (1 + growth) + (sc["yearly"] if y >= sc["start_year"] else 0), 0)
+        scen.append((sc["label"], v, v / deflate))
+    return {"years": years, "age": profile["target_age"], "vol": vol, "growth": growth,
+            "pct": pct, "real": {p: v / deflate for p, v in pct.items()},
+            "inflation": cfg.get("inflation", 0.025), "scenarios": scen}
 
 
 def upcoming_earnings(rows):
@@ -341,6 +372,18 @@ def write_markdown(snap, rows, pf, events, proj):
             v = proj["pct"][p]
             L.append(f"| {label} | {money(v)} | {money(v - proj['start'], True)} ({(v / proj['start'] - 1) * 100:+.1f}%) |")
         L += ["", f"Chance of ending below today: {proj['p_loss']:.0f}%. Chance of dropping more than 5%: {proj['p_down5']:.0f}%. {proj['note']}"]
+        lg = proj.get("long")
+        if lg:
+            L += ["", f"## Projection to age {lg['age']} ({lg['years']} years, no deposits or withdrawals)", "",
+                  "| Outcome | Value | In today's dollars |", "|---|---:|---:|"]
+            for p, label in ((5, "Bad (1 in 20)"), (25, "Below average"), (50, "Middle"), (75, "Above average"), (95, "Great (1 in 20)")):
+                L.append(f"| {label} | {money(lg['pct'][p])} | {money(lg['real'][p])} |")
+            L += ["", "| Scenario (middle outcome) | Value | In today's dollars |", "|---|---:|---:|",
+                  f"| No deposits or withdrawals | {money(lg['pct'][50])} | {money(lg['real'][50])} |"]
+            L += [f"| {lab} | {money(v)} | {money(r)} |" for lab, v, r in lg["scenarios"]]
+            L += ["", f"Assumes {proj['mu'] * 100:.0f}%/yr expected return with {lg['vol'] * 100:.0f}% yearly swings "
+                  f"(about {lg['growth'] * 100:.1f}%/yr compounded in the middle case) and {lg['inflation'] * 100:.1f}% inflation. "
+                  "Ignores taxes on dividends."]
     L += ["", "## How the score works", "",
           "Stocks (0-100): analyst upside to mean target (30) + buy-rating share (15) + momentum (20) "
           "+ low volatility (20) + valuation by trailing P/E (15).  ",
@@ -391,6 +434,18 @@ def write_html(snap, rows, pf, events, proj):
             f"Chance of ending below today: <b>{proj['p_loss']:.0f}%</b>; of dropping more than 5%: <b>{proj['p_down5']:.0f}%</b>. "
             f"Simulated from each holding's volatility and correlations with an assumed {proj['mu'] * 100:.0f}%/yr expected return. "
             f"{e(proj['note'])}</p></div>")
+        lg = proj.get("long")
+        if lg:
+            rows_l = "".join(
+                f"<tr><td>{label}</td><td class=num>{money(lg['pct'][p])}</td><td class=num>{money(lg['real'][p])}</td></tr>"
+                for p, label in ((5, "Bad (1 in 20)"), (25, "Below average"), (50, "<b>Middle</b>"), (75, "Above average"), (95, "Great (1 in 20)")))
+            rows_s = f"<tr><td>No deposits or withdrawals</td><td class=num>{money(lg['pct'][50])}</td><td class=num>{money(lg['real'][50])}</td></tr>" + "".join(
+                f"<tr><td>{e(lab)}</td><td class=num>{money(v)}</td><td class=num>{money(r)}</td></tr>" for lab, v, r in lg["scenarios"])
+            proj_html += (f"<h2>Projected value at age {lg['age']} ({lg['years']} years)</h2><div class=two>"
+                f"<div class=wrap><table class=slim><thead><tr><th>Outcome, no cash flows</th><th class=num>Value</th><th class=num>Today's $</th></tr></thead><tbody>{rows_l}</tbody></table></div>"
+                f"<div class=wrap><table class=slim><thead><tr><th>Scenario, middle outcome</th><th class=num>Value</th><th class=num>Today's $</th></tr></thead><tbody>{rows_s}</tbody></table></div></div>"
+                f"<p class=fine>Assumes {proj['mu'] * 100:.0f}%/yr expected return with {lg['vol'] * 100:.0f}% yearly swings "
+                f"(about {lg['growth'] * 100:.1f}%/yr compounded in the middle case) and {lg['inflation'] * 100:.1f}% inflation. Ignores taxes on dividends.</p>")
     doc = f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Holdings Scan</title>
@@ -417,6 +472,7 @@ ul{{padding-left:18px}}
 .proj{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}}.proj p{{color:var(--mute);font-size:13px;margin:12px 0 0}}
 .range{{position:relative;height:14px;background:var(--line);border-radius:7px;margin:6px 0 16px}}.band{{position:absolute;top:0;bottom:0;background:var(--info);opacity:.35;border-radius:7px}}
 .mid{{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--info);margin-left:-1px}}.now{{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink);margin-left:-1px}}
+.two{{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}}table.slim{{min-width:0}}
 .pqs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}}.pq span{{display:block;color:var(--mute);font-size:12px}}.pq b{{display:block;font-size:18px}}.pq small{{font-size:12px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
 </style></head><body><main>
 <h1>Robinhood Holdings Scan</h1><p class=sub>Data as of {e(snap['as_of'])} · {e(snap['account']['label'])}</p>
