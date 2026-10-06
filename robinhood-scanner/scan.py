@@ -96,6 +96,7 @@ def grade(score):
 
 def scan(snap):
     total = snap["account"]["total_value"]
+    locked = set(snap.get("profile", {}).get("locked", []))
     rows = []
     for p in snap["equities"]:
         sym, price = p["symbol"], p["price"]
@@ -108,7 +109,7 @@ def scan(snap):
             **p, "value": value, "cost": cost, "pnl": value - cost,
             "pnl_pct": (value / cost - 1) * 100, "weight": value / total * 100,
             "trend": t, "off_high": (price / p["hi52"] - 1) * 100,
-            "f_mom": mom, "f_risk": rsk,
+            "f_mom": mom, "f_risk": rsk, "locked": sym in locked,
         }
         if p["kind"] == "etf":
             r["f_quality"] = CORE_ETF_QUALITY.get(sym, 30)
@@ -136,6 +137,8 @@ def verdict(r):
         if sym == "QQQM":
             return "HOLD", "Growth tilt that works with VOO, but it overlaps: MSFT, GOOGL and MU are already inside both funds."
         if sym == "VXUS":
+            if r["locked"]:
+                return "HOLD (locked)", "Sensible international diversifier. Kept in place to protect the transfer bonus."
             return "HOLD (harvest candidate)", "Sensible international diversifier. Sitting on a short-term loss you could harvest by swapping to a similar, not identical, fund."
         return "HOLD", "Index fund."
     notes = []
@@ -168,7 +171,8 @@ def portfolio_checks(snap, rows):
     etf_w = sum(r["weight"] for r in rows if r["kind"] == "etf")
     stocks = [r for r in rows if r["kind"] == "stock"]
     small = [r["symbol"] for r in stocks if r["weight"] < SMALL_POSITION_PCT]
-    losers = sorted((r for r in rows if r["pnl"] < 0), key=lambda r: r["pnl"])
+    profile = snap.get("profile", {})
+    losers = sorted((r for r in rows if r["pnl"] < 0 and not r["locked"]), key=lambda r: r["pnl"])
     harvestable = sum(r["pnl"] for r in losers)
     crypto_val = sum(c["qty"] * c["price"] for c in snap["crypto"])
     crypto_cost = sum(c["cost_basis"] for c in snap["crypto"])
@@ -211,10 +215,24 @@ def portfolio_checks(snap, rows):
             f"{', '.join(r['symbol'] for r in realized)} sold for a {'loss' if pnl < 0 else 'gain'} of ${abs(pnl):,.2f} (short-term). "
             f"To keep the loss, don't rebuy {', '.join(r['symbol'] for r in realized)} in any account, including the Roth, "
             f"before {clear:%b %-d, %Y}."))
-    findings.append(("bad", "Roth IRA is empty",
-        "Your Roth IRA holds $0.03. Growth inside a Roth is tax-free forever. For most people, funding it "
-        "(2026 limit: $7,500 if under 50, income limits apply) beats any stock pick in this report. "
-        "Fund it with new money. Selling here to fund it would realize short-term gains and losses."))
+    if profile.get("earned_income", True):
+        findings.append(("bad", "Roth IRA is empty",
+            "Your Roth IRA holds $0.03. Growth inside a Roth is tax-free forever. For most people, funding it "
+            "(2026 limit: $7,500 if under 50, income limits apply) beats any stock pick in this report. "
+            "Fund it with new money. Selling here to fund it would realize short-term gains and losses."))
+    else:
+        findings.append(("info", "Roth IRA on hold",
+            "Roth contributions need earned income (wages or self-employment), so it stays empty for now. "
+            "Fund it in any year you have earned income, up to the lesser of that income or the annual limit. "
+            "If you're married and file jointly, a spouse's earnings can fund it (spousal IRA)."))
+        findings.append(("good", "Low income can mean 0% tax on long-term gains",
+            "If your taxable income stays low, federal tax on long-term gains can be 0% (2026: taxable income up to roughly "
+            "$49K single / $98K joint). Once lots pass one year (from Aug 2027), you could sell some winners and rebuy right away "
+            "to reset your cost basis tax-free. The wash-sale rule doesn't apply to gains. Check with a tax pro first."))
+    if profile.get("locked"):
+        findings.append(("info", "Locked positions",
+            f"{', '.join(profile['locked'])}: {profile['lock_reason']}. The scanner won't suggest selling them. "
+            "Check the bonus terms for how long assets must stay and whether the rule covers specific positions or just account value."))
     findings.append(("info", "Every lot is short-term", snap["tax_note"] +
         " Gains sold before then are taxed as ordinary income. Holding winners past one year can save 10-20 percentage points of tax."))
     if losers:
