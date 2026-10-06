@@ -198,7 +198,13 @@ def portfolio_checks(snap, rows):
     findings.append(("warn", "Overlap",
         "MSFT, GOOGL and MU are already large holdings inside VOO and QQQM, so you own them twice. "
         "That's fine if you want the tilt, just know your real big-tech exposure is higher than the position list shows."))
-    if acct["cash"] < 100:
+    if acct["cash"] < 100 and profile.get("cash_held_elsewhere"):
+        lev = acct["buying_power"] > acct["cash"] + 1
+        findings.append(("good" if not lev else "warn", "Fully invested; cash buffer kept at the bank",
+            "Your emergency cash lives outside Robinhood, so being fully invested here is fine. "
+            + ("Buying power equals cash, so the account can't borrow." if not lev else
+               f"Buying power (${acct['buying_power']:,.2f}) exceeds cash, so margin borrowing is available. Avoid using it.")))
+    elif acct["cash"] < 100:
         findings.append(("bad", "No cash on hand",
             f"Cash is ${acct['cash']:.2f} and buying power is ${acct['buying_power']:.2f}. You can't buy dips or cover a margin call. "
             "Keep the account out of margin debt; borrowing to invest magnifies losses as well as gains."))
