@@ -25,6 +25,9 @@ OUT = ROOT / "reports"
 
 # Broad index funds get a fixed quality score for diversification and low cost.
 CORE_ETF_QUALITY = {"VOO": 45, "VXUS": 40, "QQQM": 36}
+# Expense ratios (% per year) for the index funds, used for the cost grade.
+EXPENSE_RATIO = {"VOO": 0.03, "VXUS": 0.05, "QQQM": 0.15}
+SPECULATIVE_CAP_PCT = 10.0    # suggested ceiling for single stocks + crypto
 SMALL_POSITION_PCT = 1.0      # under this weight a position barely moves the account
 CONCENTRATION_PCT = 25.0      # single-stock weight that starts to dominate outcomes
 TODAY = date(2026, 10, 6)
@@ -337,6 +340,86 @@ def project_long(snap, start, port_vol):
             "inflation": cfg.get("inflation", 0.025), "scenarios": scen}
 
 
+GPA = {"A": 4.0, "A-": 3.7, "B+": 3.3, "B": 3.0, "B-": 2.7, "C+": 2.3, "C": 2.0, "C-": 1.7, "D": 1.0, "F": 0.0}
+
+
+def letter(gpa):
+    return min(GPA, key=lambda g: abs(GPA[g] - gpa))
+
+
+def assess(snap, rows, pf, events):
+    """Advisor-style summary: allocation, report card, strengths, watch list, stress test, to-dos."""
+    acct, profile = snap["account"], snap.get("profile", {})
+    total = acct["total_value"]
+    val = {r["symbol"]: r["value"] for r in rows}
+    stocks = [r for r in rows if r["kind"] == "stock"]
+    crypto = sum(c["qty"] * c["price"] for c in snap["crypto"])
+    alloc = [
+        ("US index funds", " + ".join(s for s in ("VOO", "QQQM") if s in val), sum(val.get(s, 0) for s in ("VOO", "QQQM"))),
+        ("International index", "VXUS", val.get("VXUS", 0)),
+        ("Single stocks", f"{len(stocks)} positions", sum(r["value"] for r in stocks)),
+        ("Crypto", "/".join(c["symbol"] for c in snap["crypto"]), crypto),
+        ("Cash", "in Robinhood", acct["cash"]),
+    ]
+    alloc = [(n, d, v, v / total * 100) for n, d, v in alloc]
+    spec_pct = (sum(r["value"] for r in stocks) + crypto) / total * 100
+
+    etfs = [r for r in rows if r["kind"] == "etf"]
+    fee = sum(r["value"] * EXPENSE_RATIO.get(r["symbol"], 0.2) for r in etfs) / max(sum(r["value"] for r in etfs), 1)
+    pick_score = sum(r["score"] * r["value"] for r in stocks) / max(sum(r["value"] for r in stocks), 1)
+    weak = [r["symbol"] for r in stocks if r["score"] < 54]
+    strong = [r["symbol"] for r in stocks if r["score"] >= 70]
+    levered = acct["buying_power"] > acct["cash"] + 1
+    safe = profile.get("cash_held_elsewhere") and not levered
+    age = profile.get("age")
+    card = [
+        ("Diversification", "A" if pf["etf_w"] >= 85 else "B" if pf["etf_w"] >= 70 else "C",
+         f"{pf['etf_w']:.0f}% in index funds covering thousands of companies worldwide."),
+        ("Costs", "A" if fee <= 0.1 else "B",
+         f"Index funds cost about {fee:.2f}% a year on average, about ${fee / 100 * sum(r['value'] for r in etfs):,.0f}/yr. Almost nothing leaks to fees."),
+        ("Fit for your age", "A-" if age and age < 35 and spec_pct < 20 else "B",
+         (f"All stocks at {age} with {profile.get('target_age', 60) - age} years to go is appropriate."
+          if age else "Add your age to the profile for this grade.")),
+        ("Stock picks", grade(pick_score),
+         f"Value-weighted score {pick_score:.0f}. Strongest: {', '.join(strong) or 'none'}. Weakest: {', '.join(weak) or 'none'}."),
+        ("Liquidity and safety", "A" if safe else "D",
+         "Emergency cash is at the bank and the account can't borrow." if safe else
+         "No cash buffer recorded, or margin borrowing is available."),
+        ("Tax setup", "B" if snap.get("tax_note") else "A",
+         "Every lot is short-term until Aug 2027, and locked positions limit harvesting. Little to fix until then."),
+    ]
+    overall = letter(sum(GPA[g] for _, g, _ in card) / len(card))
+
+    worst = min(rows, key=lambda r: r["pnl"])
+    working = [
+        f"The core does the heavy lifting: {pf['etf_w']:.0f}% in low-cost index funds, led by VOO at {val.get('VOO', 0) / total * 100:.0f}%.",
+        f"Losses are small and spread out. The biggest is {worst['symbol']} at {money(worst['pnl'], True)}, {abs(worst['pnl']) / total * 100:.1f}% of the account.",
+    ]
+    if snap.get("realized"):
+        working.append("You've cut weak positions and booked the losses: " + ", ".join(r["symbol"] for r in snap["realized"]) + ".")
+    if safe:
+        working.append("Emergency cash sits at the bank, so this account can stay fully invested.")
+
+    watch = []
+    small = [r for r in stocks if r["weight"] < SMALL_POSITION_PCT]
+    if small:
+        watch.append(f"Small positions ({', '.join(r['symbol'] for r in small)}): fine as deliberate bets, "
+                     f"but together they're {sum(r['weight'] for r in small):.1f}% of the account and can't move the total much.")
+    watch.append("You own the same tech companies twice: MSFT, GOOGL and MU sit inside VOO and QQQM too. Avoid adding more tech on top.")
+    watch.append(f"Single stocks plus crypto are {spec_pct:.1f}% of the account, "
+                 + ("under" if spec_pct <= SPECULATIVE_CAP_PCT else "over") + f" the {SPECULATIVE_CAP_PCT:.0f}% cap.")
+    if events:
+        watch.append("Earnings: " + "; ".join(f"{s} {date.fromisoformat(d):%b %-d}" for d, s in events) + ".")
+
+    stress = [(label, drop, total * drop) for label, drop in (("Typical bear market, like 2022", 0.25), ("Severe crash, like 2008", 0.50))]
+    yrs = profile.get("target_age", 60) - age if age else None
+    lows = [n.lower() for n, g, _ in card if GPA[g] < 3.3]
+    summary = (f"A strong, diversified core{f' for a {yrs}-year horizon' if yrs else ''}. "
+               + (f"Room to improve: {', '.join(lows)}." if lows else "No weak spots."))
+    return {"overall": overall, "summary": summary, "alloc": alloc, "card": card, "working": working, "watch": watch,
+            "stress": stress, "todo": profile.get("todo", []), "spec_pct": spec_pct}
+
+
 def upcoming_earnings(rows):
     ev = [(r["next_earnings"], r["symbol"]) for r in rows if r.get("next_earnings")]
     return sorted(ev)
@@ -351,8 +434,18 @@ def money(x, signed=False):
     return "$" + s
 
 
-def write_markdown(snap, rows, pf, events, proj):
+def write_markdown(snap, rows, pf, events, proj, a):
     L = [f"# Robinhood Holdings Scan: {snap['as_of']}", ""]
+    L += [f"## Assessment: {a['overall']} overall", "", "| Area | Grade | Why |", "|---|:-:|---|"]
+    L += [f"| {n} | {g} | {w} |" for n, g, w in a["card"]]
+    L += ["", "| Allocation | Holdings | Value | Share |", "|---|---|---:|---:|"]
+    L += [f"| {n} | {d} | {money(v)} | {p:.1f}% |" for n, d, v, p in a["alloc"]]
+    L += ["", "**What's working**", ""] + [f"- {x}" for x in a["working"]]
+    L += ["", "**What to watch**", ""] + [f"- {x}" for x in a["watch"]]
+    L += ["", "**Stress test**", ""] + [f"- {l}: about -{money(v)} (-{d * 100:.0f}%)" for l, d, v in a["stress"]]
+    if a["todo"]:
+        L += ["", "**To-do**", ""] + [f"{i}. {t}" for i, t in enumerate(a["todo"], 1)]
+    L += [""]
     L += [f"**Account value:** {money(pf['total'])}  ",
           f"**Unrealized P&L (equities):** {money(pf['unrealized'], True)}  ",
           f"**Portfolio score:** {pf['w_score']:.0f}/100 ({pf['w_grade']})  ",
@@ -401,7 +494,7 @@ def write_markdown(snap, rows, pf, events, proj):
     (OUT / "report.md").write_text("\n".join(L) + "\n")
 
 
-def write_html(snap, rows, pf, events, proj):
+def write_html(snap, rows, pf, events, proj, a):
     e = html.escape
     tone = {"good": "good", "warn": "warn", "bad": "bad", "info": "info"}
     def chip(a):
@@ -453,13 +546,39 @@ def write_html(snap, rows, pf, events, proj):
                 f"<div class=wrap><table class=slim><thead><tr><th>Scenario, middle outcome</th><th class=num>Value</th><th class=num>Today's $</th></tr></thead><tbody>{rows_s}</tbody></table></div></div>"
                 f"<p class=fine>Assumes {proj['mu'] * 100:.0f}%/yr expected return with {lg['vol'] * 100:.0f}% yearly swings "
                 f"(about {lg['growth'] * 100:.1f}%/yr compounded in the middle case) and {lg['inflation'] * 100:.1f}% inflation. Ignores taxes on dividends.</p>")
+    gcls = lambda g: "gA" if g[0] in "AB" else "gC" if g[0] == "C" else "gD"
+    segs = "".join(
+        f"<div class='seg s{i}' style='flex-grow:{max(p, 0.6):.2f}' title='{e(n)}: {money(v)} ({p:.1f}%)'></div>"
+        for i, (n, d, v, p) in enumerate(a["alloc"], 1) if v >= 1)
+    legend = "".join(
+        f"<li><i class='sw s{i}'></i><span>{e(n)}<small>{e(d)}</small></span><b>{p:.1f}%</b><em>{money(v)}</em></li>"
+        for i, (n, d, v, p) in enumerate(a["alloc"], 1) if v >= 1)
+    grades = "".join(
+        f"<div class=rc><b class='big {gcls(g)}'>{e(g)}</b><div><h3>{e(n)}</h3><p>{e(w)}</p></div></div>"
+        for n, g, w in a["card"])
+    li = lambda xs: "".join(f"<li>{e(x)}</li>" for x in xs)
+    stress = "".join(f"<div class=st><span>{e(l)}</span><b class=neg>-{money(v)}</b><small>-{d * 100:.0f}% → {money(pf['total'] - v)}</small></div>"
+                     for l, d, v in a["stress"])
+    todo = "".join(f"<li>{e(t)}</li>" for t in a["todo"])
+    assess_html = f"""<section class=assess>
+<div class=ahead><div class=overall><span>Overall</span><b class='{gcls(a['overall'])}'>{e(a['overall'])}</b></div>
+<div><h2>Assessment</h2><p>{e(a['summary'])}</p></div></div>
+<div class=rcs>{grades}</div>
+<h3 class=sh>Where the money is</h3>
+<div class=alloc role=img aria-label="Allocation bar">{segs}</div><ul class=legend>{legend}</ul>
+<div class=cols><div class=col><h3 class=sh>What's working</h3><ul class=ticks>{li(a['working'])}</ul></div>
+<div class=col><h3 class=sh>What to watch</h3><ul class=dots>{li(a['watch'])}</ul></div></div>
+<h3 class=sh>Stress test: what a crash would look like</h3><div class=sts>{stress}</div>
+<p class=note>Your portfolio moves almost in step with the overall market. Both kinds of drop have happened and fully recovered for people who held on. Decide now that you won't sell when it happens.</p>
+{f"<h3 class=sh>To-do</h3><ol class=todo>{todo}</ol>" if todo else ""}
+</section>"""
     doc = f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Holdings Scan</title>
 <style>
-:root{{--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#e4e4e0;--pos:#0a7d45;--neg:#c2362b;--warn:#a86400;--info:#2557a7}}
-@media (prefers-color-scheme:dark){{:root:not([data-theme=light]){{--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff}}}}
-:root[data-theme=dark]{{--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff}}
+:root{{--c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#9a9aa2;--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#e4e4e0;--pos:#0a7d45;--neg:#c2362b;--warn:#a86400;--info:#2557a7}}
+@media (prefers-color-scheme:dark){{:root:not([data-theme=light]){{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#6b6b70;--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff}}}}
+:root[data-theme=dark]{{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#6b6b70;--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff}}
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}}
 main{{max-width:1100px;margin:0 auto;padding:24px 16px 48px}}h1{{font-size:24px;margin:0 0 4px}}.sub{{color:var(--mute);margin:0 0 20px}}
 .kpis{{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px}}
@@ -480,6 +599,23 @@ ul{{padding-left:18px}}
 .range{{position:relative;height:14px;background:var(--line);border-radius:7px;margin:6px 0 16px}}.band{{position:absolute;top:0;bottom:0;background:var(--info);opacity:.35;border-radius:7px}}
 .mid{{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--info);margin-left:-1px}}.now{{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink);margin-left:-1px}}
 .two{{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}}table.slim{{min-width:0}}
+.assess{{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:8px}}
+.ahead{{display:flex;gap:16px;align-items:center;margin-bottom:16px}}.ahead h2{{margin:0}}.ahead p{{margin:2px 0 0;color:var(--mute)}}
+.overall{{flex:none;width:84px;height:84px;border-radius:14px;border:1px solid var(--line);display:grid;place-content:center;text-align:center}}
+.overall span{{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}}.overall b{{font-size:34px;line-height:1.1}}
+.rcs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}}
+.rc{{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px}}.rc h3{{margin:0;font-size:14px}}.rc p{{margin:2px 0 0;font-size:13px;color:var(--mute)}}
+.big{{flex:none;width:40px;font-size:22px;text-align:center}}
+.sh{{font-size:14px;margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}}
+.alloc{{display:flex;gap:2px;height:22px}}.seg{{flex-basis:0;min-width:3px}}.seg:first-child{{border-radius:4px 0 0 4px}}.seg:last-child{{border-radius:0 4px 4px 0}}
+.s1{{background:var(--c1)}}.s2{{background:var(--c2)}}.s3{{background:var(--c3)}}.s4{{background:var(--c4)}}.s5{{background:var(--c5)}}
+.legend{{list-style:none;padding:0;margin:10px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 16px}}
+.legend li{{display:grid;grid-template-columns:12px 1fr auto;gap:2px 8px;align-items:baseline;font-size:14px}}.legend small{{display:block;color:var(--mute);font-size:12px}}
+.legend em{{grid-column:2/4;font-style:normal;color:var(--mute);font-size:12px;margin-top:-4px}}.sw{{width:12px;height:12px;border-radius:3px;display:inline-block}}
+.cols{{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:4px 24px}}
+.ticks,.dots,.todo{{margin:0;padding-left:20px;font-size:14px}}.ticks li,.dots li,.todo li{{margin:6px 0}}.ticks li::marker{{content:"✓  ";color:var(--pos)}}.dots li::marker{{color:var(--warn)}}
+.sts{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}}.st{{border:1px solid var(--line);border-radius:10px;padding:12px}}
+.st span{{display:block;font-size:13px;color:var(--mute)}}.st b{{display:block;font-size:20px}}.st small{{color:var(--mute)}}.note{{font-size:13px;color:var(--mute);margin:10px 0 0}}
 .pqs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}}.pq span{{display:block;color:var(--mute);font-size:12px}}.pq b{{display:block;font-size:18px}}.pq small{{font-size:12px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
 </style></head><body><main>
 <h1>Robinhood Holdings Scan</h1><p class=sub>Data as of {e(snap['as_of'])} · {e(snap['account']['label'])}</p>
@@ -490,11 +626,12 @@ ul{{padding-left:18px}}
 <div class=kpi><span>In index funds</span><b>{pf['etf_w']:.0f}%</b></div>
 <div class=kpi><span>Weighted volatility</span><b>{pf['w_vol']:.0f}%/yr</b></div>
 </div>
+{assess_html}
 {proj_html}
 <h2>Positions</h2><div class=wrap><table><thead><tr><th>Symbol</th><th class=num>Value</th><th class=num>Weight</th><th class=num>P&amp;L</th>
 <th class=num>13-wk</th><th class=num>Vol</th><th class=num>Analyst upside</th><th class=num>Score</th><th>Action</th></tr></thead>
 <tbody>{''.join(trs)}</tbody></table></div>
-<h2>Portfolio findings</h2><div class=finds>{cards}</div>
+<h2>Detailed findings</h2><div class=finds>{cards}</div>
 <h2>Upcoming earnings</h2><ul>{ev}</ul>
 <p class=fine>Score: analyst upside (30) + buy-rating share (15) + momentum (20) + low volatility (20) + valuation (15) for stocks;
 index funds swap the analyst factors for a diversification/cost quality score. Rules-based decision aid, not personalized financial, tax, or legal advice.</p>
@@ -509,14 +646,16 @@ def main():
     pf = portfolio_checks(snap, rows)
     events = upcoming_earnings(rows)
     proj = project(snap, rows)
-    write_markdown(snap, rows, pf, events, proj)
-    write_html(snap, rows, pf, events, proj)
+    a = assess(snap, rows, pf, events)
+    write_markdown(snap, rows, pf, events, proj, a)
+    write_html(snap, rows, pf, events, proj, a)
     print(f"{'SYM':6} {'VALUE':>9} {'WT':>6} {'P&L':>8} {'13WK':>7} {'VOL':>5} {'UPSIDE':>7} {'SCORE':>5}  ACTION")
     for r in rows:
         up = "   n/a" if r["upside"] is None else f"{r['upside']:+6.0f}%"
         print(f"{r['symbol']:6} {r['value']:9,.0f} {r['weight']:5.1f}% {r['pnl']:+8,.0f} "
               f"{r['trend']['ret13']:+6.1f}% {r['trend']['vol']:4.0f}% {up} {r['score']:4} {r['grade']:2}  {r['action']}")
     print(f"\nPortfolio score {pf['w_score']:.0f} ({pf['w_grade']}), unrealized {pf['unrealized']:+,.0f}")
+    print("Assessment: " + a["overall"] + " | " + ", ".join(f"{n} {g}" for n, g, _ in a["card"]))
     if proj:
         print(f"Projection to {proj['end']}: " + ", ".join(f"p{p} {v:,.0f}" for p, v in proj["pct"].items())
               + f"; P(loss) {proj['p_loss']:.0f}%")
