@@ -323,7 +323,8 @@ def project_long(snap, start, port_vol):
     for sc in cfg.get("scenarios", []):
         v = start
         for y in range(years):
-            v = max(v * (1 + growth) + (sc["yearly"] if y >= sc["start_year"] else 0), 0)
+            flow = sc["yearly"] * (1 + sc.get("grow", 0)) ** y if y >= sc["start_year"] else 0
+            v = max(v * (1 + growth) + flow, 0)
         scen.append((sc["label"], v, v / deflate))
     return {"years": years, "age": profile["target_age"], "vol": vol, "growth": growth,
             "pct": pct, "real": {p: v / deflate for p, v in pct.items()},
