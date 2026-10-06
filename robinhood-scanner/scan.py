@@ -241,12 +241,62 @@ def portfolio_checks(snap, rows):
             "Selling a loser and buying a similar but not identical fund or stock books a loss that offsets gains and up to "
             "$3,000 of ordinary income. Don't rebuy the same security within 30 days (wash-sale rule)."))
     findings.append(("info", "Crypto",
-        f"${crypto_val:,.2f} in MON/XLM (cost ${crypto_cost:,.2f}). Negligible at {crypto_val / total * 100:.2f}% of the account."))
+        f"${crypto_val:,.2f} in {'/'.join(c['symbol'] for c in snap['crypto'])} (cost ${crypto_cost:,.2f}). Negligible at {crypto_val / total * 100:.2f}% of the account."))
     return {
         "total": total, "unrealized": unrealized, "etf_w": etf_w, "w_vol": w_vol,
         "w_score": w_score, "w_grade": grade(w_score), "findings": findings,
         "crypto_val": crypto_val,
     }
+
+
+def project(snap, rows):
+    """Monte Carlo of account value at the horizon date.
+
+    Each equity gets its own volatility from weekly returns, linked by the
+    correlations observed over the weeks every holding has traded. Drift is a
+    flat long-run assumption, not a forecast from recent momentum.
+    """
+    import numpy as np
+    cfg = snap.get("projection")
+    if not cfg:
+        return None
+    end = date.fromisoformat(cfg["horizon_end"])
+    T = (end - TODAY).days / 365
+    syms = [r["symbol"] for r in rows]
+    closes = [snap["weekly_closes"][s] for s in syms]
+    n = min(len(c) for c in closes)
+    rets = np.array([np.diff(np.log(c[-n:])) for c in closes])
+    corr = np.corrcoef(rets)
+    vols = np.array([r["trend"]["vol"] / 100 for r in rows])
+    values = np.array([r["value"] for r in rows])
+
+    crypto_val = sum(c["qty"] * c["price"] for c in snap["crypto"])
+    if crypto_val > 0:
+        k = len(syms)
+        big = np.full((k + 1, k + 1), cfg["crypto_equity_corr"])
+        big[:k, :k] = corr
+        big[k, k] = 1.0
+        corr = big
+        vols = np.append(vols, cfg["crypto_vol"])
+        values = np.append(values, crypto_val)
+    # Clip tiny negative eigenvalues so the sample correlation is usable.
+    w, v = np.linalg.eigh(corr)
+    corr = v @ np.diag(np.clip(w, 1e-8, None)) @ v.T
+    L = np.linalg.cholesky(corr)
+
+    mu = np.full(len(values), cfg["equity_expected_return"])
+    if crypto_val > 0:
+        mu[-1] = 0.0
+    rng = np.random.default_rng(7)
+    z = rng.standard_normal((cfg["paths"], len(values))) @ L.T
+    growth = np.exp((np.log1p(mu) - vols ** 2 / 2) * T + vols * np.sqrt(T) * z)
+    final = growth @ values + snap["account"]["cash"]
+    start = values.sum() + snap["account"]["cash"]
+    pct = {p: float(np.percentile(final, p)) for p in (5, 25, 50, 75, 95)}
+    return {"end": end, "days": (end - TODAY).days, "start": start, "pct": pct,
+            "p_loss": float((final < start).mean() * 100),
+            "p_down5": float((final < start * 0.95).mean() * 100),
+            "note": cfg.get("dividends_note", ""), "mu": cfg["equity_expected_return"]}
 
 
 def upcoming_earnings(rows):
@@ -263,7 +313,7 @@ def money(x, signed=False):
     return "$" + s
 
 
-def write_markdown(snap, rows, pf, events):
+def write_markdown(snap, rows, pf, events, proj):
     L = [f"# Robinhood Holdings Scan: {snap['as_of']}", ""]
     L += [f"**Account value:** {money(pf['total'])}  ",
           f"**Unrealized P&L (equities):** {money(pf['unrealized'], True)}  ",
@@ -282,6 +332,15 @@ def write_markdown(snap, rows, pf, events):
     if events:
         L += ["", "## Upcoming earnings (volatility events)", ""]
         L += [f"- {d}: {s}" for d, s in events]
+    if proj:
+        L += ["", f"## Projection to {proj['end']:%b %-d, %Y} ({proj['days']} days)", "",
+              f"Starting value {money(proj['start'])}. Range of outcomes from {len(proj['pct'])}-point percentiles "
+              f"of a simulation using each holding's volatility and correlations and an assumed {proj['mu'] * 100:.0f}%/yr expected return:", "",
+              "| Outcome | Value | Change |", "|---|---:|---:|"]
+        for p, label in ((5, "Bad (1 in 20)"), (25, "Below average"), (50, "Middle"), (75, "Above average"), (95, "Great (1 in 20)")):
+            v = proj["pct"][p]
+            L.append(f"| {label} | {money(v)} | {money(v - proj['start'], True)} ({(v / proj['start'] - 1) * 100:+.1f}%) |")
+        L += ["", f"Chance of ending below today: {proj['p_loss']:.0f}%. Chance of dropping more than 5%: {proj['p_down5']:.0f}%. {proj['note']}"]
     L += ["", "## How the score works", "",
           "Stocks (0-100): analyst upside to mean target (30) + buy-rating share (15) + momentum (20) "
           "+ low volatility (20) + valuation by trailing P/E (15).  ",
@@ -292,7 +351,7 @@ def write_markdown(snap, rows, pf, events):
     (OUT / "report.md").write_text("\n".join(L) + "\n")
 
 
-def write_html(snap, rows, pf, events):
+def write_html(snap, rows, pf, events, proj):
     e = html.escape
     tone = {"good": "good", "warn": "warn", "bad": "bad", "info": "info"}
     def chip(a):
@@ -313,6 +372,25 @@ def write_html(snap, rows, pf, events):
         f'<div class="find {tone[t]}"><h3>{e(title)}</h3><p>{e(body)}</p></div>'
         for t, title, body in pf["findings"])
     ev = "".join(f"<li><b>{e(d)}</b> {e(s)}</li>" for d, s in events)
+    proj_html = ""
+    if proj:
+        lo, hi = proj["pct"][5], proj["pct"][95]
+        def pos(v):
+            return (v - lo) / (hi - lo) * 100
+        bars = []
+        for p, label in ((5, "Bad (1 in 20)"), (25, "Below avg"), (50, "Middle"), (75, "Above avg"), (95, "Great (1 in 20)")):
+            v = proj["pct"][p]
+            cls = "pos" if v >= proj["start"] else "neg"
+            bars.append(f"<div class=pq><span>{label}</span><b>{money(v)}</b><small class={cls}>{money(v - proj['start'], True)} "
+                        f"({(v / proj['start'] - 1) * 100:+.1f}%)</small></div>")
+        proj_html = (f"<h2>Projected value on {proj['end']:%b %-d, %Y}</h2>"
+            f"<div class=proj><div class=range><div class=band style='left:{pos(proj['pct'][25]):.1f}%;width:{pos(proj['pct'][75]) - pos(proj['pct'][25]):.1f}%'></div>"
+            f"<div class=mid style='left:{pos(proj['pct'][50]):.1f}%'></div><div class=now style='left:{pos(proj['start']):.1f}%' title='Today'></div></div>"
+            f"<div class=pqs>{''.join(bars)}</div>"
+            f"<p>Today {money(proj['start'])} (black tick). Shaded band is the middle half of outcomes. "
+            f"Chance of ending below today: <b>{proj['p_loss']:.0f}%</b>; of dropping more than 5%: <b>{proj['p_down5']:.0f}%</b>. "
+            f"Simulated from each holding's volatility and correlations with an assumed {proj['mu'] * 100:.0f}%/yr expected return. "
+            f"{e(proj['note'])}</p></div>")
     doc = f"""<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Holdings Scan</title>
@@ -335,7 +413,11 @@ td small{{display:block;color:var(--mute);font-size:12px;max-width:340px}}.sym{{
 .find{{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--info);border-radius:10px;padding:12px 14px}}
 .find.good{{border-left-color:var(--pos)}}.find.warn{{border-left-color:var(--warn)}}.find.bad{{border-left-color:var(--neg)}}
 .find h3{{margin:0 0 4px;font-size:15px}}.find p{{margin:0;color:var(--mute);font-size:14px}}
-ul{{padding-left:18px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
+ul{{padding-left:18px}}
+.proj{{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}}.proj p{{color:var(--mute);font-size:13px;margin:12px 0 0}}
+.range{{position:relative;height:14px;background:var(--line);border-radius:7px;margin:6px 0 16px}}.band{{position:absolute;top:0;bottom:0;background:var(--info);opacity:.35;border-radius:7px}}
+.mid{{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--info);margin-left:-1px}}.now{{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink);margin-left:-1px}}
+.pqs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}}.pq span{{display:block;color:var(--mute);font-size:12px}}.pq b{{display:block;font-size:18px}}.pq small{{font-size:12px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
 </style></head><body><main>
 <h1>Robinhood Holdings Scan</h1><p class=sub>Data as of {e(snap['as_of'])} · {e(snap['account']['label'])}</p>
 <div class=kpis>
@@ -345,6 +427,7 @@ ul{{padding-left:18px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
 <div class=kpi><span>In index funds</span><b>{pf['etf_w']:.0f}%</b></div>
 <div class=kpi><span>Weighted volatility</span><b>{pf['w_vol']:.0f}%/yr</b></div>
 </div>
+{proj_html}
 <h2>Positions</h2><div class=wrap><table><thead><tr><th>Symbol</th><th class=num>Value</th><th class=num>Weight</th><th class=num>P&amp;L</th>
 <th class=num>13-wk</th><th class=num>Vol</th><th class=num>Analyst upside</th><th class=num>Score</th><th>Action</th></tr></thead>
 <tbody>{''.join(trs)}</tbody></table></div>
@@ -362,14 +445,18 @@ def main():
     rows = scan(snap)
     pf = portfolio_checks(snap, rows)
     events = upcoming_earnings(rows)
-    write_markdown(snap, rows, pf, events)
-    write_html(snap, rows, pf, events)
+    proj = project(snap, rows)
+    write_markdown(snap, rows, pf, events, proj)
+    write_html(snap, rows, pf, events, proj)
     print(f"{'SYM':6} {'VALUE':>9} {'WT':>6} {'P&L':>8} {'13WK':>7} {'VOL':>5} {'UPSIDE':>7} {'SCORE':>5}  ACTION")
     for r in rows:
         up = "   n/a" if r["upside"] is None else f"{r['upside']:+6.0f}%"
         print(f"{r['symbol']:6} {r['value']:9,.0f} {r['weight']:5.1f}% {r['pnl']:+8,.0f} "
               f"{r['trend']['ret13']:+6.1f}% {r['trend']['vol']:4.0f}% {up} {r['score']:4} {r['grade']:2}  {r['action']}")
     print(f"\nPortfolio score {pf['w_score']:.0f} ({pf['w_grade']}), unrealized {pf['unrealized']:+,.0f}")
+    if proj:
+        print(f"Projection to {proj['end']}: " + ", ".join(f"p{p} {v:,.0f}" for p, v in proj["pct"].items())
+              + f"; P(loss) {proj['p_loss']:.0f}%")
     print(f"Reports written to {OUT}/report.md and report.html")
 
 
