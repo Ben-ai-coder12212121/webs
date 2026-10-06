@@ -665,8 +665,8 @@ def write_html(snap, rows, pf, events, proj, a):
 <title>Holdings Scan</title>
 <style>
 :root{{--c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#eda100;--c5:#9a9aa2;--bg:#f7f7f5;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#e4e4e0;--pos:#0a7d45;--neg:#c2362b;--warn:#a86400;--info:#2557a7}}
-@media (prefers-color-scheme:dark){{:root:not([data-theme=light]){{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#6b6b70;--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff}}}}
-:root[data-theme=dark]{{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#6b6b70;--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff}}
+@media (prefers-color-scheme:dark){{:root:not([data-theme=light]){{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#6b6b70;--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff;color-scheme:dark}}}}
+:root[data-theme=dark]{{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#c98500;--c5:#6b6b70;--bg:#121214;--card:#1c1c1f;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--pos:#3ccf85;--neg:#ff6b5e;--warn:#f0a940;--info:#79a7ff;color-scheme:dark}}
 *{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}}
 main{{max-width:1100px;margin:0 auto;padding:24px 16px 48px}}h1{{font-size:24px;margin:0 0 4px}}.sub{{color:var(--mute);margin:0 0 20px}}
 .kpis{{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px}}
@@ -734,6 +734,13 @@ ul{{padding-left:18px}}
 index funds swap the analyst factors for a diversification/cost quality score. Rules-based decision aid, not personalized financial, tax, or legal advice.</p>
 </main></body></html>"""
     (OUT / "report.html").write_text(doc)
+    # Same page without the document skeleton, for publishing as a claude.ai page
+    # (the host adds doctype, head and body itself).
+    head, body = doc.split("</head><body>", 1)
+    style = head[head.index("<style>"):]
+    title = "<title>Holdings Scan</title>"
+    page = title + "\n" + style.replace(title, "") + "\n" + body.replace("</body></html>", "")
+    (OUT / "page.html").write_text(page)
 
 
 def main():
