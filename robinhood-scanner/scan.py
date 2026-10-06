@@ -435,13 +435,50 @@ def assess(snap, rows, pf, events):
     if events:
         watch.append("Earnings: " + "; ".join(f"{s} {date.fromisoformat(d):%b %-d}" for d, s in events) + ".")
 
+    verdicts = [holding_verdict(r, events) for r in rows]
     stress = [(label, drop, total * drop) for label, drop in (("Typical bear market, like 2022", 0.25), ("Severe crash, like 2008", 0.50))]
     yrs = profile.get("target_age", 60) - age if age else None
     lows = [n.lower() for n, g, _ in card if GPA[g] < 3.3]
     summary = (f"A strong, diversified core{f' for a {yrs}-year horizon' if yrs else ''}. "
                + (f"Room to improve: {', '.join(lows)}." if lows else "No weak spots."))
     return {"overall": overall, "summary": summary, "alloc": alloc, "card": card, "working": working, "watch": watch,
-            "stress": stress, "todo": profile.get("todo", []), "spec_pct": spec_pct}
+            "stress": stress, "verdicts": verdicts, "todo": profile.get("todo", []), "spec_pct": spec_pct}
+
+
+def holding_verdict(r, events):
+    """Collapse the scanner action into a plain BUY / HOLD / SELL call with a short reason."""
+    a, sym = r["action"], r["symbol"]
+    earn = dict((s, d) for d, s in events).get(sym)
+    if a.startswith(("ADD", "HOLD / ADD")):
+        call = "BUY"
+    elif a.startswith(("TRIM", "CONSOL")):
+        call = "SELL"
+    else:
+        call = "HOLD"
+    bits = [f"score {r['score']} ({r['grade']})"]
+    if r["upside"] is not None:
+        bits.append(f"analysts {r['upside']:+.0f}%")
+    bits.append(f"{r['trend']['vol']:.0f}% vol")
+    if sym == "VOO":
+        why = "Core holding and the best home for new money, including the $100/month."
+    elif r.get("locked"):
+        why = "Keep for the transfer bonus. Solid international diversifier."
+    elif sym == "QQQM":
+        why = "Keep the growth tilt, but don't add: it overlaps VOO and your tech stocks."
+    elif call == "BUY":
+        why = "Strong score and analyst upside. Add only in small amounts"
+        why += f", ideally after earnings on {date.fromisoformat(earn):%b %-d}." if earn else "."
+        if r["trend"]["vol"] > 60:
+            why += " Very volatile, so keep it small."
+    elif call == "SELL":
+        why = (f"Optional: only {r['weight']:.1f}% of the account, so it can't move your total much. "
+               "Keep it only if it's a deliberate bet you want to follow.")
+    else:
+        why = "Reasonable to hold. No reason to add or sell right now."
+        if earn:
+            why += f" Earnings {date.fromisoformat(earn):%b %-d}."
+    return {"symbol": sym, "call": call, "why": why, "stats": " · ".join(bits),
+            "value": r["value"], "pnl": r["pnl"]}
 
 
 def upcoming_earnings(rows):
@@ -469,6 +506,8 @@ def write_markdown(snap, rows, pf, events, proj, a):
     L += [f"| {n} | {g} | {w} |" for n, g, w in a["card"]]
     L += ["", "| Allocation | Holdings | Value | Share |", "|---|---|---:|---:|"]
     L += [f"| {n} | {d} | {money(v)} | {p:.1f}% |" for n, d, v, p in a["alloc"]]
+    L += ["", "**Holding by holding**", "", "| Holding | Call | Why | Stats |", "|---|:-:|---|---|"]
+    L += [f"| {v['symbol']} | {v['call']} | {v['why']} | {v['stats']} |" for v in a["verdicts"]]
     L += ["", "**What's working**", ""] + [f"- {x}" for x in a["working"]]
     L += ["", "**What to watch**", ""] + [f"- {x}" for x in a["watch"]]
     L += ["", "**Stress test**", ""] + [f"- {l}: about -{money(v)} (-{d * 100:.0f}%)" for l, d, v in a["stress"]]
@@ -599,6 +638,10 @@ def write_html(snap, rows, pf, events, proj, a):
     grades = "".join(
         f"<div class=rc><b class='big {gcls(g)}'>{e(g)}</b><div><h3>{e(n)}</h3><p>{e(w)}</p></div></div>"
         for n, g, w in a["card"])
+    vcards = "".join(
+        f"<div class=vc><div class=vtop><b>{e(v['symbol'])}</b><span class='call c{v['call']}'>{v['call']}</span></div>"
+        f"<p>{e(v['why'])}</p><small>{money(v['value'])} · <span class=\"{'pos' if v['pnl'] >= 0 else 'neg'}\">{money(v['pnl'], True)}</span> · {e(v['stats'])}</small></div>"
+        for v in a["verdicts"])
     li = lambda xs: "".join(f"<li>{e(x)}</li>" for x in xs)
     stress = "".join(f"<div class=st><span>{e(l)}</span><b class=neg>-{money(v)}</b><small>-{d * 100:.0f}% → {money(pf['total'] - v)}</small></div>"
                      for l, d, v in a["stress"])
@@ -608,6 +651,7 @@ def write_html(snap, rows, pf, events, proj, a):
 <div><h2>Assessment</h2><p>{e(a['summary'])}</p></div></div>
 {ret_html}
 <div class=rcs>{grades}</div>
+<h3 class=sh>Holding by holding: buy, hold or sell</h3><div class=vcs>{vcards}</div>
 <h3 class=sh>Where the money is</h3>
 <div class=alloc role=img aria-label="Allocation bar">{segs}</div><ul class=legend>{legend}</ul>
 <div class=cols><div class=col><h3 class=sh>What's working</h3><ul class=ticks>{li(a['working'])}</ul></div>
@@ -664,6 +708,11 @@ ul{{padding-left:18px}}
 .ret{{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}}.ret .sh{{margin-top:0}}.ret p{{margin:0 0 8px}}
 .parts{{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 20px}}
 .parts li{{display:flex;justify-content:space-between;gap:8px;font-size:14px;border-bottom:1px dashed var(--line);padding:4px 0}}
+.vcs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}}
+.vc{{border:1px solid var(--line);border-radius:10px;padding:12px}}.vc p{{margin:6px 0;font-size:13px}}.vc small{{color:var(--mute);font-size:12px}}
+.vtop{{display:flex;justify-content:space-between;align-items:center}}.vtop b{{font-size:16px}}
+.call{{font-size:12px;font-weight:800;letter-spacing:.06em;padding:3px 10px;border-radius:99px;border:1.5px solid currentColor}}
+.cBUY{{color:var(--pos)}}.cHOLD{{color:var(--info)}}.cSELL{{color:var(--neg)}}
 .pqs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}}.pq span{{display:block;color:var(--mute);font-size:12px}}.pq b{{display:block;font-size:18px}}.pq small{{font-size:12px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
 </style></head><body><main>
 <h1>Robinhood Holdings Scan</h1><p class=sub>Data as of {e(snap['as_of'])} · {e(snap['account']['label'])}</p>
