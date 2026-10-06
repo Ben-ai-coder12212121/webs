@@ -194,9 +194,23 @@ def portfolio_checks(snap, rows):
     findings.append(("warn", "Overlap",
         "MSFT, GOOGL and MU are already large holdings inside VOO and QQQM, so you own them twice. "
         "That's fine if you want the tilt, just know your real big-tech exposure is higher than the position list shows."))
-    findings.append(("bad" if acct["cash"] < 100 else "good", "No cash on hand",
-        f"Cash is ${acct['cash']:.2f} and buying power is ${acct['buying_power']:.2f}. You can't buy dips or cover a margin call. "
-        "Keep the account out of margin debt; borrowing to invest magnifies losses as well as gains."))
+    if acct["cash"] < 100:
+        findings.append(("bad", "No cash on hand",
+            f"Cash is ${acct['cash']:.2f} and buying power is ${acct['buying_power']:.2f}. You can't buy dips or cover a margin call. "
+            "Keep the account out of margin debt; borrowing to invest magnifies losses as well as gains."))
+    else:
+        findings.append(("info", "Cash waiting to be deployed",
+            f"${acct['cash']:,.2f} in cash ({acct['cash'] / total * 100:.1f}% of the account). Fine as a small buffer; "
+            "beyond that, idle cash drags on returns. Decide where it goes rather than letting it sit."))
+    realized = snap.get("realized", [])
+    if realized:
+        pnl = sum(r["qty"] * r["price"] - r["cost"] - r["fees"] for r in realized)
+        last = max(date.fromisoformat(r["date"]) for r in realized)
+        clear = date.fromordinal(last.toordinal() + 31)
+        findings.append(("good" if pnl < 0 else "info", "Realized this year",
+            f"{', '.join(r['symbol'] for r in realized)} sold for a {'loss' if pnl < 0 else 'gain'} of ${abs(pnl):,.2f} (short-term). "
+            f"To keep the loss, don't rebuy {', '.join(r['symbol'] for r in realized)} in any account, including the Roth, "
+            f"before {clear:%b %-d, %Y}."))
     findings.append(("bad", "Roth IRA is empty",
         "Your Roth IRA holds $0.03. Growth inside a Roth is tax-free forever. For most people, funding it "
         "(2026 limit: $7,500 if under 50, income limits apply) beats any stock pick in this report. "
