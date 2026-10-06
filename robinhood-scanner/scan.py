@@ -253,9 +253,33 @@ def portfolio_checks(snap, rows):
         f"${crypto_val:,.2f} in {'/'.join(c['symbol'] for c in snap['crypto'])} (cost ${crypto_cost:,.2f}). Negligible at {crypto_val / total * 100:.2f}% of the account."))
     return {
         "total": total, "unrealized": unrealized, "etf_w": etf_w, "w_vol": w_vol,
+        "returns": total_return(snap, unrealized),
         "w_score": w_score, "w_grade": grade(w_score), "findings": findings,
         "crypto_val": crypto_val,
     }
+
+
+def total_return(snap, unrealized):
+    """What you put in vs what it's worth now, split into where the gain came from.
+
+    Cost-basis P&L alone misleads: bonuses and transfer matches arrive as cash or
+    shares, so they raise the account value without ever showing as a gain on a
+    position. net_contributed is the user's own money in (bank deposits plus the
+    value of assets transferred in, minus withdrawals).
+    """
+    contributed = snap.get("profile", {}).get("net_contributed")
+    if not contributed:
+        return None
+    total = snap["account"]["total_value"]
+    gain = total - contributed
+    crypto_pnl = sum(c["qty"] * c["price"] - c["cost_basis"] for c in snap["crypto"])
+    realized = snap.get("lifetime_realized", 0.0)
+    other = gain - unrealized - crypto_pnl - realized
+    return {"contributed": contributed, "gain": gain, "pct": gain / contributed * 100,
+            "parts": [("Price changes on current stocks", unrealized),
+                      ("Price changes on crypto", crypto_pnl),
+                      ("Closed trades (lifetime)", realized),
+                      ("Bonuses, dividends and interest", other)]}
 
 
 def project(snap, rows):
@@ -436,6 +460,11 @@ def money(x, signed=False):
 
 def write_markdown(snap, rows, pf, events, proj, a):
     L = [f"# Robinhood Holdings Scan: {snap['as_of']}", ""]
+    rt = pf["returns"]
+    if rt:
+        L += ["## Total return", "", f"You put in **{money(rt['contributed'])}**; it's worth **{money(pf['total'])}**: "
+              f"**{money(rt['gain'], True)} ({rt['pct']:+.2f}%)**.", "", "| Source | Amount |", "|---|---:|"]
+        L += [f"| {n} | {money(v, True)} |" for n, v in rt["parts"]] + [""]
     L += [f"## Assessment: {a['overall']} overall", "", "| Area | Grade | Why |", "|---|:-:|---|"]
     L += [f"| {n} | {g} | {w} |" for n, g, w in a["card"]]
     L += ["", "| Allocation | Holdings | Value | Share |", "|---|---|---:|---:|"]
@@ -447,7 +476,7 @@ def write_markdown(snap, rows, pf, events, proj, a):
         L += ["", "**To-do**", ""] + [f"{i}. {t}" for i, t in enumerate(a["todo"], 1)]
     L += [""]
     L += [f"**Account value:** {money(pf['total'])}  ",
-          f"**Unrealized P&L (equities):** {money(pf['unrealized'], True)}  ",
+          f"**Unrealized P&L (equities, vs cost basis):** {money(pf['unrealized'], True)}  ",
           f"**Portfolio score:** {pf['w_score']:.0f}/100 ({pf['w_grade']})  ",
           f"**Weighted volatility:** {pf['w_vol']:.0f}% annualized", ""]
     L += ["## Positions", "",
@@ -546,6 +575,20 @@ def write_html(snap, rows, pf, events, proj, a):
                 f"<div class=wrap><table class=slim><thead><tr><th>Scenario, middle outcome</th><th class=num>Value</th><th class=num>Today's $</th></tr></thead><tbody>{rows_s}</tbody></table></div></div>"
                 f"<p class=fine>Assumes {proj['mu'] * 100:.0f}%/yr expected return with {lg['vol'] * 100:.0f}% yearly swings "
                 f"(about {lg['growth'] * 100:.1f}%/yr compounded in the middle case) and {lg['inflation'] * 100:.1f}% inflation. Ignores taxes on dividends.</p>")
+    rt = pf["returns"]
+    if rt:
+        ret_kpi = (f"<div class=kpi><span>Total gain vs. money you put in</span><b class=\"{'pos' if rt['gain'] >= 0 else 'neg'}\">"
+                   f"{money(rt['gain'], True)}</b><small class=kmute>{rt['pct']:+.2f}% on {money(rt['contributed'])}</small></div>")
+        parts = "".join(f"<li><span>{e(n)}</span><b class=\"{'pos' if v >= 0 else 'neg'}\">{money(v, True)}</b></li>" for n, v in rt["parts"])
+        ret_html = (f"<div class=ret><h3 class=sh>Total return</h3><p>You put in <b>{money(rt['contributed'])}</b>. "
+                    f"It's worth <b>{money(pf['total'])}</b> now: <b class=\"{'pos' if rt['gain'] >= 0 else 'neg'}\">{money(rt['gain'], True)} "
+                    f"({rt['pct']:+.2f}%)</b>.</p><ul class=parts>{parts}</ul>"
+                    "<p class=note>Position P&amp;L only compares prices to your cost basis. Bonuses and matches add value "
+                    "without showing up as a gain on any position, so this is the truer number.</p></div>")
+    else:
+        ret_kpi = (f"<div class=kpi><span>Unrealized P&amp;L (vs cost basis)</span><b class=\"{'pos' if pf['unrealized'] >= 0 else 'neg'}\">"
+                   f"{money(pf['unrealized'], True)}</b><small class=kmute>Add net_contributed to the profile for total return</small></div>")
+        ret_html = ""
     gcls = lambda g: "gA" if g[0] in "AB" else "gC" if g[0] == "C" else "gD"
     segs = "".join(
         f"<div class='seg s{i}' style='flex-grow:{max(p, 0.6):.2f}' title='{e(n)}: {money(v)} ({p:.1f}%)'></div>"
@@ -563,6 +606,7 @@ def write_html(snap, rows, pf, events, proj, a):
     assess_html = f"""<section class=assess>
 <div class=ahead><div class=overall><span>Overall</span><b class='{gcls(a['overall'])}'>{e(a['overall'])}</b></div>
 <div><h2>Assessment</h2><p>{e(a['summary'])}</p></div></div>
+{ret_html}
 <div class=rcs>{grades}</div>
 <h3 class=sh>Where the money is</h3>
 <div class=alloc role=img aria-label="Allocation bar">{segs}</div><ul class=legend>{legend}</ul>
@@ -616,12 +660,16 @@ ul{{padding-left:18px}}
 .ticks,.dots,.todo{{margin:0;padding-left:20px;font-size:14px}}.ticks li,.dots li,.todo li{{margin:6px 0}}.ticks li::marker{{content:"✓  ";color:var(--pos)}}.dots li::marker{{color:var(--warn)}}
 .sts{{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}}.st{{border:1px solid var(--line);border-radius:10px;padding:12px}}
 .st span{{display:block;font-size:13px;color:var(--mute)}}.st b{{display:block;font-size:20px}}.st small{{color:var(--mute)}}.note{{font-size:13px;color:var(--mute);margin:10px 0 0}}
+.kmute{{display:block;color:var(--mute);font-size:12px}}
+.ret{{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}}.ret .sh{{margin-top:0}}.ret p{{margin:0 0 8px}}
+.parts{{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 20px}}
+.parts li{{display:flex;justify-content:space-between;gap:8px;font-size:14px;border-bottom:1px dashed var(--line);padding:4px 0}}
 .pqs{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}}.pq span{{display:block;color:var(--mute);font-size:12px}}.pq b{{display:block;font-size:18px}}.pq small{{font-size:12px}}.fine{{color:var(--mute);font-size:13px;margin-top:28px}}
 </style></head><body><main>
 <h1>Robinhood Holdings Scan</h1><p class=sub>Data as of {e(snap['as_of'])} · {e(snap['account']['label'])}</p>
 <div class=kpis>
 <div class=kpi><span>Account value</span><b>{money(pf['total'])}</b></div>
-<div class=kpi><span>Unrealized P&amp;L</span><b class="{'pos' if pf['unrealized'] >= 0 else 'neg'}">{money(pf['unrealized'], True)}</b></div>
+{ret_kpi}
 <div class=kpi><span>Portfolio score</span><b>{pf['w_score']:.0f}/100 · {pf['w_grade']}</b></div>
 <div class=kpi><span>In index funds</span><b>{pf['etf_w']:.0f}%</b></div>
 <div class=kpi><span>Weighted volatility</span><b>{pf['w_vol']:.0f}%/yr</b></div>
