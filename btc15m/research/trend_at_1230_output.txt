@@ -1,0 +1,15 @@
+1993 markets, Sep 16 - Oct 7 2026, 1 contract per window
+
+trend @12:30, filled ~12:00 left (realistic) n=1993 win=64.6% avg cost=64.0c avg P&L=-1.34c (+/-1.02)  total=$ -26.66  1st half -2.36c / 2nd half -0.32c
+trend @13:00, filled same minute (optimistic) n=1993 win=64.6% avg cost=63.6c avg P&L=-0.96c (+/-1.05)  total=$ -19.20  1st half -2.30c / 2nd half +0.37c
+trend @12:00, filled same minute (optimistic) n=1993 win=67.6% avg cost=66.4c avg P&L=-0.78c (+/-1.02)  total=$ -15.52  1st half -1.76c / 2nd half +0.20c
+
+By price paid (realistic fill):
+  paid 40-50c                                n= 196 win=42.3% avg cost=45.2c avg P&L=-4.84c (+/-3.53)  total=$  -9.48  1st half -7.47c / 2nd half -2.20c
+  paid 50-60c                                n= 443 win=53.7% avg cost=54.8c avg P&L=-3.08c (+/-2.37)  total=$ -13.66  1st half -4.80c / 2nd half -1.37c
+  paid 60-70c                                n= 559 win=66.2% avg cost=64.7c avg P&L=-0.47c (+/-2.00)  total=$  -2.64  1st half -1.15c / 2nd half +0.20c
+  paid 70-80c                                n= 452 win=75.7% avg cost=74.1c avg P&L=-0.47c (+/-2.02)  total=$  -2.13  1st half -0.00c / 2nd half -0.94c
+  paid 80-100c                               n= 258 win=87.6% avg cost=84.4c avg P&L=+1.17c (+/-2.04)  total=$  +3.03  1st half +1.21c / 2nd half +1.14c
+
+Same idea without fees (is there any edge at all?):
+trend @12:30, no fee                         n=1993 win=64.6% avg cost=64.0c avg P&L=+0.66c (+/-1.02)  total=$ +13.20  1st half -0.36c / 2nd half +1.68c
