@@ -293,3 +293,11 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 
 .end-cta { text-align: center; padding: 56px 0; border-top: 1px solid var(--line); }
 .end-cta p { color: var(--muted); }
+
+/* Veteran-owned badge in the homepage hero */
+.vet-badge { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 32px; }
+.vet-badge img { width: 57px; height: 30px; display: block; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35); }
+.vet-badge span {
+  font-weight: 800; font-stretch: 87.5%; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 0.08em; color: #fff;
+}
