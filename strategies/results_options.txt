@@ -1,0 +1,42 @@
+Option strategies (CBOE benchmark indexes on the S&P 500, no trading costs)
+
+  strategy                                      period                     CAGR    vol  Sharpe   maxDD worst yr
+  S&P 500 buy & hold (SPY)                      2007-01-04 - 2026-10-06   11.0%  19.5%    0.63  -55.2%   -36.8%
+  Sell monthly ATM puts, cash-secured (PUT)     2007-01-04 - 2026-10-06    7.3%  13.8%    0.58  -37.1%   -26.8%
+  Sell weekly ATM puts, cash-secured (WPUT)     2007-01-04 - 2026-10-06    4.5%  12.3%    0.42  -28.6%   -15.2%
+  Covered call, monthly ATM (BXM)               2007-01-04 - 2026-10-06    6.1%  14.3%    0.49  -40.1%   -28.7%
+  Covered call, monthly 2% OTM (BXY)            2007-01-04 - 2026-10-06    8.2%  18.7%    0.52  -44.8%   -31.2%
+  Covered call, monthly 30-delta (BXMD)         2007-01-04 - 2026-10-06    8.5%  16.8%    0.57  -47.0%   -31.3%
+  Covered call, weekly ATM (BXMW)               2012-07-02 - 2026-10-06    7.7%  11.7%    0.70  -30.6%   -12.0%
+  Collar: own S&P, buy 5% OTM put, sell 10% OTM call (CLL)2008-08-27 - 2026-10-06    7.1%  12.9%    0.60  -26.3%   -15.1%
+  Protective put: own S&P + 5% OTM put (PPUT)   2007-01-04 - 2026-10-06    8.3%  13.7%    0.65  -42.0%   -20.1%
+  Iron condor, monthly (CNDR)                   2007-01-04 - 2026-10-06    0.9%   7.8%    0.16  -19.7%    -6.1%
+  Iron butterfly, monthly (BFLY)                2007-01-04 - 2026-10-06   -2.1%  11.6%   -0.13  -54.9%   -15.0%
+  S&P + VIX call tail hedge (VXTH)              2007-01-04 - 2026-10-06    9.9%  16.6%    0.65  -43.3%   -26.1%
+  S&P 500 buy & hold (SPY) since 2015           2015-01-05 - 2026-10-06   13.9%  17.5%    0.83  -33.7%   -18.2%
+  Sell monthly ATM puts, cash-secured (PUT)     2015-01-05 - 2026-10-06    8.3%  12.4%    0.70  -28.9%    -7.7%
+  Sell weekly ATM puts, cash-secured (WPUT)     2015-01-05 - 2026-10-06    3.8%  11.8%    0.38  -25.9%   -14.3%
+  Covered call, monthly ATM (BXM)               2015-01-05 - 2026-10-06    7.7%  12.8%    0.64  -30.3%   -11.4%
+  Covered call, monthly 2% OTM (BXY)            2015-01-05 - 2026-10-06    9.7%  14.5%    0.71  -31.4%   -15.8%
+  Covered call, monthly 30-delta (BXMD)         2015-01-05 - 2026-10-06   10.2%  14.9%    0.72  -32.3%   -16.1%
+  Covered call, weekly ATM (BXMW)               2015-01-05 - 2026-10-06    7.0%  12.4%    0.61  -30.6%   -12.0%
+  Collar: own S&P, buy 5% OTM put, sell 10% OTM call (CLL)2015-01-05 - 2026-10-06    9.9%  12.0%    0.84  -17.2%   -15.0%
+  Protective put: own S&P + 5% OTM put (PPUT)   2015-01-05 - 2026-10-06   10.6%  12.7%    0.86  -22.1%   -19.8%
+  Iron condor, monthly (CNDR)                   2015-01-05 - 2026-10-06    1.6%   7.2%    0.25  -19.5%    -6.1%
+  Iron butterfly, monthly (BFLY)                2015-01-05 - 2026-10-06   -1.9%  11.5%   -0.11  -42.4%   -15.0%
+  S&P + VIX call tail hedge (VXTH)              2015-01-05 - 2026-10-06   11.2%  14.6%    0.80  -29.8%   -26.1%
+
+Return in the worst stretches:
+                                                                  2008 crash      2020 Covid crash      2022 bear market   2018 Volmageddon/Q4
+  S&P 500 buy & hold (SPY)                                            -55.2%                -33.7%                -24.5%                -19.3%
+  Sell monthly ATM puts, cash-secured (PUT)                           -34.8%                -28.9%                -13.7%                -15.4%
+  Sell weekly ATM puts, cash-secured (WPUT)                           -23.6%                -25.3%                -18.5%                -17.1%
+  Covered call, monthly ATM (BXM)                                     -39.1%                -30.2%                -17.2%                -15.2%
+  Covered call, monthly 2% OTM (BXY)                                  -44.3%                -31.4%                -21.3%                -17.6%
+  Covered call, monthly 30-delta (BXMD)                               -47.0%                -32.3%                -22.0%                -17.7%
+  Covered call, weekly ATM (BXMW)                                        n/a                -30.6%                -16.0%                -14.1%
+  Collar: own S&P, buy 5% OTM put, sell 10% OTM call (CLL)                -21.8%                -14.9%                -17.1%                 -7.6%
+  Protective put: own S&P + 5% OTM put (PPUT)                         -41.5%                -11.8%                -21.7%                -14.2%
+  Iron condor, monthly (CNDR)                                           1.7%                 -9.2%                 -5.6%                 -9.4%
+  Iron butterfly, monthly (BFLY)                                       -1.3%                 -3.2%                 -4.9%                -11.6%
+  S&P + VIX call tail hedge (VXTH)                                    -43.3%                 27.6%                -29.2%                -18.3%
