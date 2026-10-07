@@ -30,7 +30,7 @@ EXPENSE_RATIO = {"VOO": 0.03, "VXUS": 0.05, "QQQM": 0.15}
 SPECULATIVE_CAP_PCT = 10.0    # suggested ceiling for single stocks + crypto
 SMALL_POSITION_PCT = 1.0      # under this weight a position barely moves the account
 CONCENTRATION_PCT = 25.0      # single-stock weight that starts to dominate outcomes
-TODAY = date(2026, 10, 6)
+TODAY = date.today()
 
 
 def clamp(x, lo, hi):
@@ -217,13 +217,18 @@ def portfolio_checks(snap, rows):
             "beyond that, idle cash drags on returns. Decide where it goes rather than letting it sit."))
     realized = snap.get("realized", [])
     if realized:
-        pnl = sum(r["qty"] * r["price"] - r["cost"] - r["fees"] for r in realized)
-        last = max(date.fromisoformat(r["date"]) for r in realized)
-        clear = date.fromordinal(last.toordinal() + 31)
-        findings.append(("good" if pnl < 0 else "info", "Realized this year",
-            f"{', '.join(r['symbol'] for r in realized)} sold for a {'loss' if pnl < 0 else 'gain'} of ${abs(pnl):,.2f} (short-term). "
-            f"To keep the loss, don't rebuy {', '.join(r['symbol'] for r in realized)} in any account, including the Roth, "
-            f"before {clear:%b %-d, %Y}."))
+        pl = lambda r: r["qty"] * r["price"] - r["cost"] - r["fees"]
+        pnl = sum(pl(r) for r in realized)
+        parts = ", ".join(f"{r['symbol']} {money(pl(r), True)}" for r in realized)
+        msg = f"Sold {parts}: net {'loss' if pnl < 0 else 'gain'} of ${abs(pnl):,.2f}, all short-term."
+        sold_losses = [r for r in realized if pl(r) < 0]
+        if sold_losses:
+            last = max(date.fromisoformat(r["date"]) for r in sold_losses)
+            clear = date.fromordinal(last.toordinal() + 31)
+            if clear > TODAY:
+                msg += (f" To keep the losses, don't rebuy {', '.join(r['symbol'] for r in sold_losses)} in any account, "
+                        f"including the Roth, before {clear:%b %-d, %Y}.")
+        findings.append(("good" if pnl < 0 else "info", "Sold this year", msg))
     if profile.get("earned_income", True):
         findings.append(("bad", "Roth IRA is empty",
             "Your Roth IRA holds $0.03. Growth inside a Roth is tax-free forever. For most people, funding it "
