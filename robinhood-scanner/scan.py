@@ -100,6 +100,8 @@ def grade(score):
 def scan(snap):
     total = snap["account"]["total_value"]
     locked = set(snap.get("profile", {}).get("locked", []))
+    # Stocks the owner holds on purpose despite a weak score: never told to sell.
+    conviction = set(snap.get("profile", {}).get("conviction", []))
     rows = []
     for p in snap["equities"]:
         sym, price = p["symbol"], p["price"]
@@ -112,7 +114,7 @@ def scan(snap):
             **p, "value": value, "cost": cost, "pnl": value - cost,
             "pnl_pct": (value / cost - 1) * 100, "weight": value / total * 100,
             "trend": t, "off_high": (price / p["hi52"] - 1) * 100,
-            "f_mom": mom, "f_risk": rsk, "locked": sym in locked,
+            "f_mom": mom, "f_risk": rsk, "locked": sym in locked, "conviction": sym in conviction,
         }
         if p["kind"] == "etf":
             r["f_quality"] = CORE_ETF_QUALITY.get(sym, 30)
@@ -165,6 +167,8 @@ def verdict(r):
         action = "TRIM / SELL"
     if w < SMALL_POSITION_PCT and s < 62:
         action = "CONSOLIDATE"
+    if r.get("conviction") and action in ("CONSOLIDATE", "TRIM / SELL"):
+        action = "HOLD (your pick)"
     return action, "; ".join(notes) or "Balanced profile."
 
 
@@ -466,6 +470,11 @@ def holding_verdict(r, events):
     bits.append(f"{r['trend']['vol']:.0f}% vol")
     if sym == "VOO":
         why = "Core holding and the best home for new money, including the $100/month."
+    elif r.get("conviction") and call == "HOLD":
+        why = ("Your conviction pick. The score is low (mixed analyst views, weak trend, big swings), "
+               "so keep it small enough that a 50% drop wouldn't bother you.")
+        if earn:
+            why += f" Earnings {date.fromisoformat(earn):%b %-d}."
     elif r.get("locked"):
         why = "Keep for the transfer bonus. Solid international diversifier."
     elif sym == "QQQM":
