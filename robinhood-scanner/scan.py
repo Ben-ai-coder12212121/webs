@@ -284,7 +284,7 @@ def total_return(snap, unrealized):
             "parts": [("Price changes on current stocks", unrealized),
                       ("Price changes on crypto", crypto_pnl),
                       ("Closed trades (lifetime)", realized),
-                      ("Bonuses, dividends and interest", other)]}
+                      ("Bonuses, dividends, interest and prediction markets", other)]}
 
 
 def project(snap, rows):
