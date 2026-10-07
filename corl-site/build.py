@@ -35,7 +35,6 @@ NAV = [
         ("team", "Our Team", "team.html"),
         ("credentials", "Credentials", "credentials.html"),
     ]),
-    ("careers", "Careers", "careers.html", None),
 ]
 
 BUSINESS_JSONLD = {
@@ -103,6 +102,9 @@ def render(meta, body):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{description}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
 <link rel="stylesheet" href="assets/styles.css">
 <script type="application/ld+json">
 {jsonld}
@@ -112,7 +114,7 @@ def render(meta, body):
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="index.html">Corl Communications</a>
+    <a class="brand" href="index.html"><img src="assets/corl-logo.png" alt="Corl Communications Inc. – Structured Cabling Solutions" width="650" height="102"></a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       <ul>{nav}</ul>
@@ -137,7 +139,7 @@ def render(meta, body):
     </div>
     <div>
       <p><a href="services.html">Services</a> · <a href="projects.html">Projects</a> · <a href="service-areas.html">Service Areas</a><br>
-      <a href="about.html">About</a> · <a href="careers.html">Careers</a> · <a href="quote.html">Request a Quote</a></p>
+      <a href="about.html">About</a> · <a href="quote.html">Request a Quote</a></p>
     </div>
   </div>
 </footer>

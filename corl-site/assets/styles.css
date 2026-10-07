@@ -11,7 +11,7 @@
   --accent-dark: #c05414;
   --radius: 6px;
   --wrap: 1160px;
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -29,11 +29,12 @@ body {
 
 h1, h2, h3, h4 {
   color: var(--navy);
-  line-height: 1.2;
+  line-height: 1.15;
   margin: 0 0 0.5em;
-  font-weight: 700;
+  font-weight: 800;
+  font-stretch: 87.5%;
 }
-h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); letter-spacing: -0.02em; }
+h1 { font-size: clamp(2rem, 4.5vw, 3.1rem); font-weight: 900; letter-spacing: -0.01em; }
 h2 { font-size: clamp(1.55rem, 3vw, 2.1rem); letter-spacing: -0.01em; }
 h3 { font-size: 1.2rem; }
 p { margin: 0 0 1em; }
@@ -60,6 +61,8 @@ ul { padding-left: 1.2em; }
   border: 2px solid var(--accent);
   font-size: 1rem;
   font-family: inherit;
+  font-stretch: 87.5%;
+  font-weight: 700;
   cursor: pointer;
   line-height: 1.2;
 }
@@ -74,16 +77,15 @@ ul { padding-left: 1.2em; }
   border-bottom: 1px solid var(--line);
   position: sticky; top: 0; z-index: 50;
 }
-.header-inner { display: flex; align-items: center; gap: 24px; min-height: 68px; }
-.brand {
-  font-weight: 800; font-size: 1.15rem; color: var(--navy);
-  text-decoration: none; white-space: nowrap; letter-spacing: -0.01em;
-}
+.header-inner { display: flex; align-items: center; gap: 24px; min-height: 76px; }
+.brand { display: block; line-height: 0; flex-shrink: 0; }
+.brand img { height: 46px; width: auto; display: block; }
+@media (max-width: 480px) { .brand img { height: 38px; } }
 .site-nav { margin-left: auto; }
 .site-nav > ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
 .site-nav a {
   display: block; padding: 8px 10px; text-decoration: none;
-  color: var(--ink); font-weight: 500; font-size: 0.95rem; border-radius: 4px;
+  color: var(--ink); font-weight: 600; font-size: 1rem; font-stretch: 87.5%; border-radius: 4px;
 }
 .site-nav a:hover { color: var(--navy); background: var(--bg-alt); }
 .site-nav a[aria-current="page"], .has-sub.is-active > a { color: var(--navy); font-weight: 700; }
@@ -96,7 +98,7 @@ ul { padding-left: 1.2em; }
 }
 .has-sub:hover .sub, .has-sub:focus-within .sub { display: block; }
 .header-cta { display: flex; align-items: center; gap: 14px; }
-.header-phone { font-weight: 700; text-decoration: none; white-space: nowrap; }
+.header-phone { font-weight: 800; font-stretch: 87.5%; font-size: 1.05rem; text-decoration: none; white-space: nowrap; }
 .header-cta .btn { padding: 10px 16px; font-size: 0.95rem; }
 .nav-toggle {
   display: none; margin-left: auto; background: none; border: 1px solid var(--line);

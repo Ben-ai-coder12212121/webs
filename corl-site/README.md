@@ -14,5 +14,5 @@ Static site hosted on Wix, written from the Corl Communications Website Brief.
    site 496bdf91-...); each drop replaces every file, so always send all of them.
 
 Photo slots are blank gray blocks (`.photo`) until Corl's own photos are added.
-Forms open the visitor's email program addressed to sales@ or careers@, because
+Forms open the visitor's email program addressed to sales@, because
 the site is static.
