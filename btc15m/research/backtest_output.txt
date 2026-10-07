@@ -1,0 +1,84 @@
+markets=1993  samples=27901  train=16730  test=11171
+OVER base rate: 0.507
+Coinbase close vs official target: mean -1.47$, abs median 10.30$
+
+Recalibration fit (train):
+  a only:             a=1.115 b0=+0.108
+  a + momentum terms: a=1.117 b_mom=-0.005 b_prev15=-0.061 b0=+0.109
+
+Out-of-sample accuracy (lower is better), same rows, where market quote valid:
+  random-walk model          logloss=0.4778  brier=0.1584
+  recalibrated (a)           logloss=0.4784  brier=0.1582
+  recalibrated + momentum    logloss=0.4783  brier=0.1583
+  Kalshi market mid          logloss=0.4631  brier=0.1540
+
+Stacked fit y ~ logit(mid) + logit(model) + mom (train): mid=1.040 model=-0.002 mom=+0.078 b0=+0.013
+  stacked out-of-sample logloss=0.4635  brier=0.1541
+
+Reliability (test, recalibrated+momentum):
+  p in [0.0,0.1): n= 1451  predicted=0.028  actual=0.034
+  p in [0.1,0.2): n=  703  predicted=0.151  actual=0.128
+  p in [0.2,0.3): n=  795  predicted=0.250  actual=0.181
+  p in [0.3,0.4): n= 1009  predicted=0.352  actual=0.284
+  p in [0.4,0.5): n= 1269  predicted=0.452  actual=0.379
+  p in [0.5,0.6): n= 1420  predicted=0.551  actual=0.539
+  p in [0.6,0.7): n= 1205  predicted=0.649  actual=0.649
+  p in [0.7,0.8): n=  925  predicted=0.749  actual=0.751
+  p in [0.8,0.9): n=  788  predicted=0.846  actual=0.867
+  p in [0.9,1.0): n= 1606  predicted=0.973  actual=0.950
+
+Strategy sim, TEST period, fills at same-minute quotes, fee 2c:
+  model edge>=0c                         n=  790  win=45.2%  avg pnl= -5.31c (+/-1.66)  ROI=-10.5%  total=$ -41.93  maxDD=$43.67
+  model edge>=2c                         n=  714  win=45.9%  avg pnl= -1.44c (+/-1.69)  ROI= -3.0%  total=$ -10.32  maxDD=$19.82
+  model edge>=4c                         n=  538  win=39.0%  avg pnl= -4.03c (+/-1.87)  ROI= -9.4%  total=$ -21.68  maxDD=$25.08
+  model edge>=6c                         n=  385  win=30.9%  avg pnl= -7.76c (+/-2.13)  ROI=-20.1%  total=$ -29.87  maxDD=$34.44
+  model edge>=8c                         n=  245  win=26.9%  avg pnl= -8.66c (+/-2.69)  ROI=-24.3%  total=$ -21.21  maxDD=$24.76
+  model edge>=10c                        n=  158  win=22.8%  avg pnl= -9.60c (+/-3.13)  ROI=-29.6%  total=$ -15.17  maxDD=$16.74
+  stacked edge>=2c                       no trades
+  stacked edge>=4c                       no trades
+  stacked edge>=6c                       no trades
+
+Strategy sim, TEST period, fills at NEXT-minute (realistic manual) quotes, fee 2c:
+  model edge>=0c                         n=  798  win=40.9%  avg pnl= -1.68c (+/-1.65)  ROI= -4.0%  total=$ -13.42  maxDD=$22.51
+  model edge>=2c                         n=  797  win=39.5%  avg pnl= -2.29c (+/-1.64)  ROI= -5.5%  total=$ -18.24  maxDD=$25.48
+  model edge>=4c                         n=  796  win=37.7%  avg pnl= -2.82c (+/-1.63)  ROI= -7.0%  total=$ -22.43  maxDD=$26.56
+  model edge>=6c                         n=  786  win=34.1%  avg pnl= -4.73c (+/-1.61)  ROI=-12.2%  total=$ -37.18  maxDD=$37.15
+  model edge>=8c                         n=  769  win=32.6%  avg pnl= -4.78c (+/-1.61)  ROI=-12.8%  total=$ -36.74  maxDD=$36.44
+  model edge>=10c                        n=  746  win=30.2%  avg pnl= -6.29c (+/-1.60)  ROI=-17.3%  total=$ -46.95  maxDD=$46.65
+  stacked edge>=2c                       n=  795  win=38.6%  avg pnl= -2.05c (+/-1.63)  ROI= -5.0%  total=$ -16.26  maxDD=$19.80
+  stacked edge>=4c                       n=  787  win=38.0%  avg pnl= -2.41c (+/-1.63)  ROI= -6.0%  total=$ -18.97  maxDD=$23.56
+  stacked edge>=6c                       n=  765  win=35.6%  avg pnl= -3.83c (+/-1.64)  ROI= -9.7%  total=$ -29.32  maxDD=$29.97
+
+Resting LIMIT orders at fair - fee - edge (test, maker-style):
+  limit edge>=0c rest 2m                 n=  775  win=41.3%  avg pnl=-11.20c (+/-1.68)  ROI=-21.3%  total=$ -86.83  maxDD=$87.11
+  limit edge>=0c rest 5m                 n=  776  win=39.9%  avg pnl=-11.55c (+/-1.65)  ROI=-22.4%  total=$ -89.64  maxDD=$89.92
+  limit edge>=2c rest 2m                 n=  772  win=39.4%  avg pnl=-11.33c (+/-1.66)  ROI=-22.3%  total=$ -87.43  maxDD=$87.73
+  limit edge>=2c rest 5m                 n=  772  win=38.6%  avg pnl=-11.11c (+/-1.65)  ROI=-22.3%  total=$ -85.75  maxDD=$86.05
+  limit edge>=4c rest 2m                 n=  768  win=38.0%  avg pnl=-10.76c (+/-1.66)  ROI=-22.1%  total=$ -82.61  maxDD=$82.93
+  limit edge>=4c rest 5m                 n=  769  win=38.4%  avg pnl= -9.46c (+/-1.65)  ROI=-19.8%  total=$ -72.72  maxDD=$73.04
+  limit edge>=6c rest 2m                 n=  764  win=35.6%  avg pnl=-11.24c (+/-1.63)  ROI=-24.0%  total=$ -85.89  maxDD=$86.23
+  limit edge>=6c rest 5m                 n=  764  win=37.0%  avg pnl= -9.01c (+/-1.63)  ROI=-19.6%  total=$ -68.85  maxDD=$69.19
+  limit edge>=8c rest 2m                 n=  750  win=34.7%  avg pnl=-10.26c (+/-1.64)  ROI=-22.8%  total=$ -76.93  maxDD=$76.64
+  limit edge>=8c rest 5m                 n=  753  win=36.5%  avg pnl= -7.56c (+/-1.65)  ROI=-17.1%  total=$ -56.90  maxDD=$57.26
+
+By time remaining (model, edge>=4c, next-minute fills):
+  1-4 min left                           n=  280  win=29.3%  avg pnl= -2.23c (+/-2.58)  ROI= -7.1%  total=$  -6.23  maxDD=$8.37
+  4-8 min left                           n=  607  win=31.1%  avg pnl= -3.20c (+/-1.70)  ROI= -9.3%  total=$ -19.45  maxDD=$21.96
+  8-12 min left                          n=  724  win=38.1%  avg pnl= -3.26c (+/-1.61)  ROI= -7.9%  total=$ -23.58  maxDD=$33.83
+  12-15 min left                         n=  716  win=36.5%  avg pnl= -3.54c (+/-1.72)  ROI= -8.8%  total=$ -25.32  maxDD=$26.78
+
+By entry price (model, edge>=4c, next-minute fills):
+  cost 0.05-0.30                         n=  764  win=21.9%  avg pnl= -2.58c (+/-1.49)  ROI=-10.6%  total=$ -19.72  maxDD=$22.50
+  cost 0.30-0.50                         n=  586  win=35.2%  avg pnl= -5.55c (+/-1.98)  ROI=-13.6%  total=$ -32.54  maxDD=$42.49
+  cost 0.50-0.70                         n=  395  win=57.5%  avg pnl= -3.15c (+/-2.47)  ROI= -5.2%  total=$ -12.46  maxDD=$20.02
+  cost 0.70-0.95                         n=  239  win=78.7%  avg pnl= -2.64c (+/-2.64)  ROI= -3.3%  total=$  -6.32  maxDD=$12.82
+
+Baselines (test, next-minute fills):
+  buy the favourite @ 3 min left         n=  324  win=69.1%  avg pnl= -5.43c (+/-2.31)  ROI= -7.3%  total=$ -17.58  maxDD=$17.65
+  momentum @ 10 min left                 n=  767  win=70.0%  avg pnl= -2.09c (+/-1.53)  ROI= -2.9%  total=$ -16.01  maxDD=$20.86
+
+Panic fade (test):
+  fade 1-min move >= 10c                 n=  748  win=31.8%  avg pnl= -4.89c (+/-1.56)  ROI=-13.3%  total=$ -36.61  maxDD=$36.84
+  fade 1-min move >= 15c                 n=  624  win=30.4%  avg pnl= -4.55c (+/-1.68)  ROI=-13.0%  total=$ -28.37  maxDD=$29.63
+  fade 1-min move >= 20c                 n=  429  win=27.5%  avg pnl= -4.55c (+/-1.96)  ROI=-14.2%  total=$ -19.54  maxDD=$19.79
+  fade 1-min move >= 25c                 n=  279  win=27.6%  avg pnl= -3.28c (+/-2.43)  ROI=-10.6%  total=$  -9.16  maxDD=$12.12
