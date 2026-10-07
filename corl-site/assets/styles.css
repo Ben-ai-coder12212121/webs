@@ -158,6 +158,13 @@ ul { padding-left: 1.2em; }
   font-weight: 700; color: var(--muted); margin-bottom: 0.6em;
 }
 
+/* Numbers bar */
+.numbers { background: var(--navy); color: #fff; }
+.numbers .wrap { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 72px; padding-top: 28px; padding-bottom: 28px; }
+.number { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.number strong { font-size: clamp(2rem, 4vw, 2.6rem); font-weight: 900; font-stretch: 87.5%; line-height: 1; }
+.number span { margin-top: 6px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #c9d3e1; }
+
 /* Trust bar */
 .trust { background: var(--bg-alt); border-bottom: 1px solid var(--line); }
 .trust ul {
