@@ -23,6 +23,7 @@ PHONE_TEL = "+17175641896"
 EMAIL = "sales@corlcommunications.com"
 ADDRESS_1 = "1601 South 19th Street"
 ADDRESS_2 = "Harrisburg, PA 17104"
+HOURS_HTML = "Mon–Thu 7 am–5 pm<br>Fri 7 am–2 pm<br>Sat–Sun closed"
 
 # (key, label, href, children)
 NAV = [
@@ -56,6 +57,20 @@ BUSINESS_JSONLD = {
         "addressCountry": "US",
     },
     "areaServed": "Pennsylvania",
+    "openingHoursSpecification": [
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday"],
+            "opens": "07:00",
+            "closes": "17:00",
+        },
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Friday",
+            "opens": "07:00",
+            "closes": "14:00",
+        },
+    ],
 }
 
 
@@ -140,6 +155,7 @@ def render(meta, body):
     </div>
     <div>
       <p><a href="tel:{PHONE_TEL}">{PHONE}</a><br><a href="mailto:{EMAIL}">{EMAIL}</a></p>
+      <p>{HOURS_HTML}</p>
     </div>
     <div>
       <p><a href="services.html">Services</a> · <a href="projects.html">Projects</a> · <a href="service-areas.html">Service Areas</a><br>
