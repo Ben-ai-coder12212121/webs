@@ -115,13 +115,17 @@ def render(meta, body):
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" href="index.html"><img src="assets/corl-logo.png" alt="Corl Communications Inc. – Structured Cabling Solutions" width="650" height="102"></a>
-    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <div class="vet-badge">
+      <img src="assets/us-flag.svg" alt="American flag" width="38" height="20">
+      <span>Veteran-Owned</span>
+    </div>
     <nav id="site-nav" class="site-nav" aria-label="Main">
       <ul>{nav}</ul>
     </nav>
     <div class="header-cta">
       <a class="header-phone" href="tel:{PHONE_TEL}">{PHONE}</a>
       <a class="btn" href="quote.html">Request a Quote</a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
     </div>
   </div>
 </header>
