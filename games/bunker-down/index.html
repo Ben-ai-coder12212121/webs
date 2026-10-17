@@ -40,7 +40,7 @@ run(root,c){
 if(!document.getElementById('bd-fonts')){const f=document.createElement('style');f.id='bd-fonts';f.textContent="@font-face{font-family:'Black Ops One';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/fonts/BlackOpsOne-latin.woff2) format('woff2')}\n@font-face{font-family:'Atkinson Hyperlegible';font-style:normal;font-weight:400;font-display:swap;src:url(/assets/fonts/AtkinsonHyperlegible-latin.woff2) format('woff2')}\n@font-face{font-family:'Atkinson Hyperlegible';font-style:normal;font-weight:700;font-display:swap;src:url(/assets/fonts/AtkinsonHyperlegible-700-latin.woff2) format('woff2')}\n@media (max-width:700px){#arena .g3.bd{aspect-ratio:9/16;max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px)}}";document.head.append(f)}
 try{document.fonts.load('40px "Black Ops One"');document.fonts.load('16px "Atkinson Hyperlegible"')}catch(e){}
 // The game lives in its own shadow tree so its styles and the site's never mix.
-const host=document.createElement('div');host.className='g3 bd';root.append(host);
+const host=document.createElement('div');host.className='g3 tall bd';root.append(host);
 const shadow=host.attachShadow({mode:'open'});
 shadow.innerHTML='<style>'+'\n:host{\n  --ink:#2b2622; --paper:#f4ecd8; --paper2:#e9dcc0; --mustard:#f2c14e; --rust:#d64933;\n  --olive:#4b5d3a; --night:#14110f; --green:#58c26b;\n  --stencil:"Black Ops One",Impact,"Arial Black",sans-serif;\n  --type:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;\n}\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}\n:host{display:block;overflow:hidden;background:var(--night);color:var(--paper);font-family:var(--type);-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}\ncanvas#game{position:absolute;inset:0;width:100%;height:100%;display:block}\n.hidden{display:none!important}\n.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10;\n  padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}\n.screen.dim{background:rgba(10,8,7,.72);backdrop-filter:blur(2px)}\n.panel{width:100%;max-width:560px;background:var(--paper);color:var(--ink);border-radius:6px;padding:26px 24px;\n  box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 0 60px rgba(120,90,40,.25);position:relative;max-height:100%;overflow:auto;touch-action:pan-y}\n.panel:before{content:"";position:absolute;inset:8px;border:2px dashed rgba(43,38,34,.18);border-radius:4px;pointer-events:none}\nh1,h2,h3{font-family:var(--stencil);font-weight:400;margin:0;letter-spacing:1px}\n.title{font-size:clamp(46px,12vw,86px);line-height:.9;color:var(--mustard);text-shadow:4px 4px 0 var(--rust),8px 8px 0 rgba(0,0,0,.5);text-align:center}\n.tag{text-align:center;color:#e8dcc0;margin:14px 0 26px;font-size:clamp(14px,3.6vw,18px)}\n.menu{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:360px}\n.btn{font-family:var(--stencil);font-size:20px;letter-spacing:1px;border:0;border-radius:6px;padding:14px 22px;cursor:pointer;\n  background:var(--mustard);color:var(--ink);box-shadow:0 5px 0 #a87c1c,0 8px 20px rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s;width:100%}\n.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #a87c1c}\n.btn.red{background:var(--rust);color:#fff;box-shadow:0 5px 0 #8e2a1b,0 8px 20px rgba(0,0,0,.4)}\n.btn.ghost{background:transparent;color:var(--paper);box-shadow:none;border:2px solid rgba(244,236,216,.4);font-size:16px}\n.btn.dark{background:var(--ink);color:var(--paper);box-shadow:0 5px 0 #000}\n.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}\n.best{color:#bfb39a;font-size:14px;text-align:center;min-height:18px}\n.hazard{height:14px;background:repeating-linear-gradient(-45deg,var(--mustard) 0 14px,#1a1a1a 14px 28px);border-radius:3px;margin:0 0 18px}\n.panel h2{font-size:28px;color:var(--rust);margin-bottom:10px}\n.panel p{line-height:1.55;margin:10px 0;font-size:17px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:14px 0;font-size:15px;align-items:center}\nkbd{font-family:var(--stencil);background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:4px;font-size:13px;white-space:nowrap}\n.row{display:flex;gap:10px;margin-top:18px}\n.row .btn{flex:1}\n.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}\n.chip{background:var(--paper2);border-radius:6px;padding:6px 12px;font-size:15px;border:1px solid rgba(0,0,0,.08)}\n.chip.lost{opacity:.5;text-decoration:line-through}\n.bigemoji{font-size:22px;vertical-align:middle}\n\n/* in-game buttons */\n#hudbtns{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;z-index:5;align-items:flex-end}\n.hbtn{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:rgba(20,16,14,.7);color:#fff;\n  font-family:var(--stencil);font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none}\n.hbtn svg{width:26px;height:26px;margin-bottom:2px}\n.hbtn.seal{background:rgba(70,160,85,.85);border-color:#b8f5c2;width:96px;height:96px;font-size:14px;animation:pulse 1s infinite}\n@keyframes pulse{50%{transform:scale(1.07)}}\n#topbtns{position:absolute;right:max(12px,env(safe-area-inset-right));z-index:6;display:flex;gap:8px}\n.sbtn{width:40px;height:40px;border-radius:8px;border:0;background:rgba(20,16,14,.7);color:#fff;font-size:18px;cursor:pointer}\n\n/* survival journal */\n#survival{position:absolute;inset:0;overflow-y:auto;z-index:8;touch-action:pan-y;-webkit-user-select:text;user-select:text;\n  background:#15110e;padding:16px 12px 0}\n.journal{max-width:720px;min-height:calc(100% - 16px);margin:0 auto;background:var(--paper);color:#1f1b18;border-radius:10px 10px 0 0;\n  padding:22px 24px 0;font-size:18px;line-height:1.6;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}\n.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}\n.day{font-family:var(--stencil);font-size:42px;line-height:1}\n.stats{display:flex;flex-wrap:wrap;gap:8px;flex:1;justify-content:flex-end}\n.stat{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:5px 10px;font-size:15px;color:#5a514a}\n.stat .ic{font-size:20px;line-height:1}\n.stat b{font-size:20px;color:#1f1b18}\n.stat.zero b{color:#b3261e}\n.bar{width:70px;height:10px;background:rgba(0,0,0,.12);border-radius:5px;overflow:hidden;display:inline-block}\n.bar i{display:block;height:100%;background:#2f6b2f}\n.bar i.mid{background:#c98a12}.bar i.low{background:#b3261e}\n.gear{width:100%;display:flex;flex-wrap:wrap;gap:6px;font-size:15px;color:#4a423b;align-items:center}\n.gear span{background:rgba(0,0,0,.06);border-radius:6px;padding:2px 8px}\n.steps{list-style:none;display:flex;gap:6px;margin:16px 0 0;padding:0;counter-reset:s}\n.steps li{flex:1;text-align:center;font-size:15px;font-weight:700;padding:6px 2px;border-bottom:4px solid rgba(0,0,0,.12);color:#8a8077;counter-increment:s}\n.steps li:before{content:counter(s) ". "}\n.steps li.on{color:#1f1b18;border-color:var(--rust)}\n.steps li.done{color:#2f6b2f;border-color:#2f6b2f}\n.body{flex:1;padding:20px 0 24px}\n.body h2{font-family:var(--stencil);font-size:26px;margin:0 0 10px;color:#1f1b18}\n.help{color:#4a423b;margin:0 0 16px;font-size:16px}\n.log p{margin:0 0 12px}\n.log p.bad{color:#9e2a1a}\n.log p.good{color:#2f6b2f}\n.side{margin:14px 0 0;font-size:16px;color:#4a423b}\n.ev{background:#fff;border:2px solid #1f1b18;border-radius:10px;padding:16px 18px;margin-top:20px}\n.ev h3{font-size:22px;color:var(--rust);margin:0 0 6px}\n.ev .choices{display:flex;flex-direction:column;gap:10px;margin-top:14px}\n.ev .res{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.15);font-weight:700}\n.cbtn{font:inherit;font-size:17px;text-align:left;padding:11px 14px;min-height:48px;border-radius:8px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}\n.cbtn:hover:not(:disabled){background:var(--mustard)}\n.cbtn:disabled{opacity:.4;cursor:not-allowed}\n.cbtn small{font-size:14px;opacity:.8}\n.crew{display:flex;flex-direction:column;gap:10px}\n.card{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:12px 14px}\n.card .face{font-size:40px;line-height:1;text-align:center}\n.card .info b{font-size:19px;display:block;line-height:1.3}\n.card .st{font-size:16px;line-height:1.4}\n.st .w{color:#a14a0b;font-weight:700}.st .d{color:#b3261e;font-weight:700}.st .ok{color:#2f6b2f}\n.card .acts{display:flex;gap:8px}\n.tog{font:inherit;font-size:16px;font-weight:700;min-width:100px;height:48px;padding:0 10px;border-radius:8px;border:2px solid rgba(0,0,0,.2);background:#f4f1ea;color:#3a332d;cursor:pointer;white-space:nowrap}\n.tog.on{background:#2f6b2f;border-color:#2f6b2f;color:#fff}\n.tog:disabled{opacity:.35;cursor:not-allowed}\n.tog.med{border-color:var(--rust);color:var(--rust);background:#fff}\n.note{background:#e3f0da;border-radius:8px;padding:8px 12px;margin:0 0 14px;color:#2f6b2f;font-weight:700;font-size:16px}\n.pick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 18px}\n.pbtn{font:inherit;font-size:16px;min-height:46px;padding:8px 16px;border-radius:6px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}\n.pbtn.on{background:#1f1b18;color:var(--paper)}\n.pbtn:disabled{opacity:.35;cursor:not-allowed}\n.label{font-weight:700;font-size:16px;margin:0}\n.nav{position:sticky;bottom:0;background:var(--paper);border-top:2px solid rgba(0,0,0,.1);display:flex;flex-wrap:wrap;gap:10px;align-items:center;\n  padding:14px 0 max(14px,env(safe-area-inset-bottom))}\n.nav .btn{flex:1;font-size:18px}\n.nav .btn.back{flex:0 0 auto;width:auto;background:transparent;color:#1f1b18;box-shadow:none;border:2px solid rgba(0,0,0,.25)}\n.nav .warn{width:100%;margin:0;font-size:15px;color:#9e2a1a}\n#night{position:absolute;inset:0;background:#000;color:var(--paper);z-index:30;display:flex;align-items:center;justify-content:center;\n  font-family:var(--stencil);font-size:34px;opacity:0;pointer-events:none;transition:opacity .5s}\n#night.show{opacity:1;pointer-events:all}\n@media (max-width:560px){\n  .hbtn{width:60px;height:60px;font-size:11px}\n  .hbtn.seal{width:76px;height:76px;font-size:12px}\n  .hbtn svg{width:20px;height:20px}\n  #survival{padding:0}\n  .journal{border-radius:0;padding:16px 16px 0;font-size:17px;min-height:100%}\n  .top{gap:10px}\n  .day{font-size:30px;width:100%}\n  .stats{justify-content:flex-start;gap:6px}\n  .stat{padding:4px 8px}\n  .stat .lbl{display:none}\n  .bar{width:46px}\n  .gear{font-size:14px}\n  .nav .btn{font-size:16px;padding:14px 12px}\n  .card{grid-template-columns:44px 1fr}\n  .card .face{font-size:34px}\n  .card .acts{grid-column:1/-1}\n  .tog{flex:1;min-width:0}\n}\n\n.sbtn svg{width:18px;height:18px;vertical-align:middle}\n'+'</style>'+'\n<canvas id="game"></canvas>\n\n<div id="topbtns" class="hidden">\n  <button class="sbtn" id="btnPause" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>\n</div>\n<div id="hudbtns" class="hidden">\n  <button class="hbtn seal hidden" id="btnSeal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>SEAL</button>\n  <button class="hbtn" id="btnDrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v13M6 11l6 6 6-6M5 21h14"/></svg>DROP</button>\n</div>\n\n<!-- Title -->\n<div id="scrTitle" class="screen">\n  <div class="menu">\n    <div class="title">BUNKER<br>DOWN</div>\n    <div class="tag">The sirens are wailing.<br>You have <b style="color:var(--mustard)">one minute</b>.</div>\n    <button class="btn red" id="btnPlay">PLAY</button>\n    <button class="btn" id="btnQuick">SURVIVAL ONLY</button>\n    <button class="btn ghost" id="btnHow">HOW TO PLAY</button>\n    <div class="best" id="bestLine"></div>\n  </div>\n</div>\n\n<!-- Briefing -->\n<div id="scrBrief" class="screen dim hidden">\n  <div class="panel">\n    <div class="hazard"></div>\n    <h2>EMERGENCY ALERT</h2>\n    <p><b>This is not a drill.</b> Missiles are inbound. Impact in <b>60 seconds</b>.</p>\n    <p>Run through the house, <b>grab supplies</b>, and <b>find your family</b>. Touch a family member and they\'ll run for the shelter on their own.</p>\n    <p>Drop your loot into the <b>shelter hatch</b> in the hallway and be standing on it when the clock hits zero.</p>\n    <div class="keys">\n      <kbd>WASD / ←↑↓→</kbd><span>Move (or drag anywhere on touch screens)</span>\n      <kbd>BUMP</kbd><span>Walk into cupboards, fridges and closets to search them</span>\n      <kbd>SPACE</kbd><span>Drop the last thing you picked up</span>\n      <kbd>E / ENTER</kbd><span>Seal the hatch early (when standing on it)</span>\n    </div>\n    <p style="font-size:14px;opacity:.8">After that, you\'ll ration food and water, send people out to scavenge and make hard calls, day after day, until help arrives… if it does.</p>\n    <div class="row"><button class="btn ghost dark" id="btnBriefBack" style="flex:.5">BACK</button><button class="btn red" id="btnGo">I\'M READY</button></div>\n  </div>\n</div>\n\n<!-- How to play -->\n<div id="scrHow" class="screen dim hidden">\n  <div class="panel">\n    <div class="hazard"></div>\n    <h2>HOW TO PLAY</h2>\n    <p><b>Part 1: The Minute.</b> You can carry 4 things at once (find the 🎒 backpack for 6). Every trip to the hatch costs time. Family members are slower than you, so wake them up early. The dog won\'t sit still.</p>\n    <p><b>Part 2: The Shelter.</b> Each day you decide who gets 🥫 soup and 💧 water. Going without water for 5 days, or food for 8, is fatal. Sick or hurt people need 💊 medicine.</p>\n    <p>Send someone outside to scavenge. A 😷 gas mask, 🪓 axe, 🔦 flashlight and 🗺️ map all make the trip safer or quicker.</p>\n    <p>Events will test you. Items like the 🔒 padlock, 🧴 bug spray and 🔧 wrench can save the day. Keep up <b>morale</b> or people may walk out.</p>\n    <p>Want to get out alive? <b>The 📻 radio is your best hope of rescue.</b></p>\n    <div class="row"><button class="btn" id="btnHowBack">GOT IT</button></div>\n  </div>\n</div>\n\n<!-- Pause -->\n<div id="scrPause" class="screen dim hidden">\n  <div class="menu">\n    <h1 style="font-size:48px;color:var(--mustard)">PAUSED</h1>\n    <button class="btn" id="btnResume">RESUME</button>\n    <button class="btn ghost" id="btnQuit">QUIT TO MENU</button>\n  </div>\n</div>\n\n<!-- Shelter result -->\n<div id="scrResult" class="screen dim hidden">\n  <div class="panel" id="resultBody"></div>\n</div>\n\n<!-- End -->\n<div id="scrEnd" class="screen dim hidden">\n  <div class="panel" id="endBody"></div>\n</div>\n\n<div id="survival" class="hidden"></div>\n<div id="night"></div>\n\n';
 /* =========================================================
@@ -242,6 +242,158 @@ function drawEmoji(c, e, x, y, size, flip = false) {
   if (flip) { c.save(); c.translate(x, y); c.scale(-1, 1); c.drawImage(img, -s / 2, -s / 2, s, s); c.restore(); }
   else c.drawImage(img, x - s / 2, y - s / 2, s, s);
 }
+// ---------- characters: drawn and animated (no emoji) ----------
+const INK = '#1d1a2f';
+const LOOKS = {
+  you:  { skin: '#f1c27d', hair: '#4a2c1a', style: 'short', shirt: '#2f9c95', shirt2: '#22756f', pants: '#34405e', shoes: '#2b2622', s: 1, seed: 0.3 },
+  rosa: { skin: '#c68b5e', hair: '#2b1a12', style: 'pony', shirt: '#d9534f', shirt2: '#a83c38', pants: '#3a3a48', shoes: '#2b2622', s: 0.97, seed: 1.7 },
+  june: { skin: '#eab48c', hair: '#c0662b', style: 'long', shirt: '#7fb069', shirt2: '#5d8a4b', pants: '#4a6fa5', shoes: '#f4ecd8', s: 0.9, seed: 2.9, phones: '#2b2622' },
+  milo: { skin: '#f3cfa6', hair: '#e0b04a', style: 'cap', cap: '#3e7cb1', shirt: '#f2c14e', shirt2: '#cc9a2a', pants: '#6b4c3b', shoes: '#c0392b', s: 0.74, seed: 0.9 }
+};
+const dirOf = (dx, dy, prev) => Math.abs(dx) < .01 && Math.abs(dy) < .01 ? (prev || 'down') : Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+function blob(c, x, y, w, h, r, fill, line = 1.6) { rr(c, x, y, w, h, r); c.fillStyle = fill; c.fill(); if (line) { c.lineWidth = line; c.strokeStyle = INK; c.stroke(); } }
+function oval(c, x, y, rx, ry, fill, line = 1.6) { c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = fill; c.fill(); if (line) { c.lineWidth = line; c.strokeStyle = INK; c.stroke(); } }
+function limb(c, px, py, ang, w, len, fill, end, endFill) {
+  c.save(); c.translate(px, py); c.rotate(ang);
+  blob(c, -w / 2, 0, w, len, w / 2, fill, 1.4);
+  if (end) oval(c, end === 'shoe' ? 1 : 0, len, end === 'shoe' ? 4.2 : 2.7, end === 'shoe' ? 2.4 : 2.7, endFill, 1.4);
+  c.restore();
+}
+// x,y = feet. mode: 'walk' | 'stand' | 'panic'. ph = walk phase in radians.
+function drawPerson(c, x, y, L, dir, ph, mode, t, shadow = true) {
+  const s = L.s, walk = mode === 'walk', panic = mode === 'panic';
+  const sw = walk ? Math.sin(ph) : 0;
+  const bob = walk ? Math.abs(Math.cos(ph)) * 2 : panic ? Math.abs(Math.sin(t * 9 + L.seed)) * 3.5 : Math.sin(t * 2.2 + L.seed) * 0.6;
+  if (shadow) { c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(x, y, 13 * s, 4.5 * s, 0, 0, 7); c.fill(); }
+  c.save(); c.translate(x, y - bob * s); if (dir === 'left') c.scale(-1, 1); c.scale(s, s);
+  const hip = -12, sh = -27, hr = 10.5, hy = sh - hr + 1.5;
+  const side = dir === 'left' || dir === 'right', back = dir === 'up';
+  const wave = Math.sin(t * 13 + L.seed) * 0.35;
+  const shade = (hex, k) => { const n = parseInt(hex.slice(1), 16); const f = v => Math.max(0, Math.min(255, Math.round(v * k))); return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`; };
+  const hairTop = () => {
+    c.beginPath(); c.arc(0, hy, hr + .7, Math.PI, 0); c.lineTo(hr * .95, hy - .5);
+    c.quadraticCurveTo(hr * .3, hy - 6, 0, hy - 3.2); c.quadraticCurveTo(-hr * .4, hy - 6.5, -hr * .95, hy - .5); c.closePath();
+    c.fillStyle = L.hair; c.fill(); c.lineWidth = 1.6; c.strokeStyle = INK; c.stroke();
+  };
+  const cap = front => {
+    c.beginPath(); c.arc(0, hy - 1, hr + 1, Math.PI, 0); c.closePath(); c.fillStyle = L.cap; c.fill(); c.lineWidth = 1.6; c.strokeStyle = INK; c.stroke();
+    if (front === 'side') blob(c, 2, hy - 3, hr + 5, 3.2, 1.6, shade(L.cap, .8), 1.4);
+    else if (front) oval(c, 0, hy - 1.5, hr + 1.5, 2.6, shade(L.cap, .8), 1.4);
+    oval(c, 0, hy - hr - .5, 1.6, 1.2, shade(L.cap, .7), 0);
+  };
+  if (side) {
+    // facing right (left is mirrored)
+    const a = sw * .6;
+    limb(c, -1, sh + 2, panic ? -2.8 + wave : a * 1.2, 4.6, 11.5, shade(L.shirt, .82), 'hand', L.skin);
+    limb(c, 0, hip, -a, 5.6, 12, shade(L.pants, .8), 'shoe', L.shoes);
+    limb(c, 0, hip, a, 5.6, 12, L.pants, 'shoe', L.shoes);
+    if (L.style === 'long') blob(c, -hr - 1, hy - 2, hr + 2, hr + 8, 5, L.hair);
+    if (L.style === 'pony') { oval(c, -hr - 2.5, hy + 1 + Math.sin(ph) * .8, 3.6, 5, L.hair); }
+    blob(c, -6.5, sh, 13, 16, 5.5, L.shirt);
+    c.fillStyle = L.shirt2; c.fillRect(-5.7, hip - 3.4, 11.4, 2.6);
+    oval(c, 0, hy, hr, hr, L.skin);
+    oval(c, hr * .9, hy + 2.2, 1.8, 1.6, shade(L.skin, .9), 1.2);
+    if (L.style === 'cap') cap('side');
+    else {
+      c.beginPath(); c.arc(0, hy, hr + .7, Math.PI * .62, Math.PI * 1.86); c.quadraticCurveTo(-1, hy - 1, -hr * .38, hy + hr * .62);
+      c.closePath(); c.fillStyle = L.hair; c.fill(); c.lineWidth = 1.6; c.strokeStyle = INK; c.stroke();
+    }
+    const blink = ((t + L.seed) % 3.6) < .12;
+    if (blink) { c.strokeStyle = INK; c.lineWidth = 1.4; c.beginPath(); c.moveTo(3.4, hy + .8); c.lineTo(6.4, hy + .8); c.stroke(); }
+    else { oval(c, 4.9, hy + .6, 1.4, 1.9, INK, 0); oval(c, 5.3, hy - .2, .5, .5, '#fff', 0); }
+    c.strokeStyle = INK; c.lineWidth = 1.3; c.beginPath();
+    if (panic) { oval(c, 6.6, hy + 5.6, 1.4, 1.8, INK, 0); } else { c.arc(5.4, hy + 4.2, 2, .2 * Math.PI, .75 * Math.PI); c.stroke(); }
+    if (L.phones) { c.strokeStyle = L.phones; c.lineWidth = 2.4; c.beginPath(); c.arc(0, hy, hr + 1.8, Math.PI * 1.15, Math.PI * 1.85); c.stroke(); oval(c, -1.5, hy + 1, 3.6, 4.6, '#d64933', 1.4); }
+    limb(c, 1, sh + 2, panic ? -2.5 - wave : -a * 1.2, 4.6, 11.5, L.shirt, 'hand', L.skin);
+  } else {
+    const lift = v => Math.max(0, v) * 3.2;
+    const legL = lift(sw), legR = lift(-sw);
+    blob(c, -6.8, hip, 5.8, 12 - legL, 2.8, L.pants, 1.4); oval(c, -3.9, -legL - .5, 4, 2.4, L.shoes, 1.4);
+    blob(c, 1, hip, 5.8, 12 - legR, 2.8, L.pants, 1.4); oval(c, 3.9, -legR - .5, 4, 2.4, L.shoes, 1.4);
+    if (!back && L.style === 'long') blob(c, -hr - 1.5, hy - 2, (hr + 1.5) * 2, hr + 9, 5, L.hair);
+    if (!back && L.style === 'pony') oval(c, hr + 1.2, hy + 2 + Math.sin(ph) * .6, 3, 4.2, L.hair);
+    const armA = panic ? 2.65 + wave : -sw * .22, armB = panic ? -2.65 - wave : sw * .22;
+    if (panic) { limb(c, -8, sh + 3, armA, 4.6, 11.5, L.shirt, 'hand', L.skin); limb(c, 8, sh + 3, armB, 4.6, 11.5, L.shirt, 'hand', L.skin); }
+    blob(c, -8.5, sh, 17, 16, 6, L.shirt);
+    c.fillStyle = L.shirt2; c.fillRect(-7.6, hip - 3.4, 15.2, 2.6);
+    if (!panic) { limb(c, -9.6, sh + 2.5, armA, 4.6, 11, L.shirt, 'hand', L.skin); limb(c, 9.6, sh + 2.5, armB, 4.6, 11, L.shirt, 'hand', L.skin); }
+    oval(c, 0, hy, hr, hr, L.skin);
+    if (back) {
+      if (L.style === 'cap') { oval(c, 0, hy + 1, hr, hr - 1, L.hair); cap(false); }
+      else {
+        oval(c, 0, hy, hr + .7, hr + .7, L.hair);
+        if (L.style === 'long') blob(c, -hr - .5, hy, (hr + .5) * 2, hr + 6, 5, L.hair);
+        if (L.style === 'pony') oval(c, 0, hy + hr + 2 + Math.sin(ph) * .8, 3.4, 5, L.hair);
+      }
+      if (L.phones) { c.strokeStyle = L.phones; c.lineWidth = 2.4; c.beginPath(); c.arc(0, hy, hr + 1.8, Math.PI, 0); c.stroke(); oval(c, -hr - 1, hy + 1, 2.6, 4, '#d64933', 1.4); oval(c, hr + 1, hy + 1, 2.6, 4, '#d64933', 1.4); }
+    } else {
+      if (L.style === 'cap') cap(true); else hairTop();
+      const blink = ((t + L.seed) % 3.6) < .12;
+      for (const ex of [-3.7, 3.7]) {
+        if (blink) { c.strokeStyle = INK; c.lineWidth = 1.4; c.beginPath(); c.moveTo(ex - 1.6, hy + 1.6); c.lineTo(ex + 1.6, hy + 1.6); c.stroke(); }
+        else { oval(c, ex, hy + 1.4, 1.4, 1.9, INK, 0); oval(c, ex + .45, hy + .6, .5, .5, '#fff', 0); }
+      }
+      c.fillStyle = 'rgba(232,96,106,.35)'; c.beginPath(); c.arc(-6.4, hy + 4.4, 1.9, 0, 7); c.arc(6.4, hy + 4.4, 1.9, 0, 7); c.fill();
+      if (panic) oval(c, 0, hy + 6, 1.7, 2.2, INK, 0);
+      else { c.strokeStyle = INK; c.lineWidth = 1.3; c.beginPath(); c.arc(0, hy + 4.4, 2.2, .18 * Math.PI, .82 * Math.PI); c.stroke(); }
+      if (L.phones) { c.strokeStyle = L.phones; c.lineWidth = 2.4; c.beginPath(); c.arc(0, hy, hr + 1.8, Math.PI, 0); c.stroke(); oval(c, -hr - 1, hy + 1, 2.6, 4, '#d64933', 1.4); oval(c, hr + 1, hy + 1, 2.6, 4, '#d64933', 1.4); }
+    }
+  }
+  c.restore();
+}
+// x,y = feet. Faces right unless right === false.
+function drawDog(c, x, y, right, ph, moving, t, excited, shadow = true) {
+  const sw = moving ? Math.sin(ph) : 0, bob = moving ? Math.abs(Math.cos(ph)) * 1.6 : 0;
+  if (shadow) { c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(x, y, 15, 4.5, 0, 0, 7); c.fill(); }
+  c.save(); c.translate(x, y - bob); if (!right) c.scale(-1, 1);
+  const fur = '#c98a4b', dark = '#8a5a2e', light = '#efd0a0';
+  const leg = (lx, a, col) => { c.save(); c.translate(lx, -10.5); c.rotate(a); blob(c, -2.3, 0, 4.6, 10.5, 2.2, col, 1.4); c.restore(); };
+  leg(-9, -sw * .55, dark); leg(7, sw * .55, dark);
+  const wag = Math.sin(t * (excited ? 24 : 9)) * .55;
+  c.save(); c.translate(-12, -17); c.rotate(-.95 + wag); blob(c, -2, -11, 4, 12, 2, fur, 1.4); c.restore();
+  oval(c, 0, -15, 14, 7.5, fur);
+  c.fillStyle = light; c.beginPath(); c.ellipse(1, -10.8, 9, 2.6, 0, 0, 7); c.fill();
+  oval(c, -4, -18, 4, 2.5, dark, 0);
+  leg(-6, sw * .55, fur); leg(10, -sw * .55, fur);
+  c.save(); c.translate(10.5, -18.5); c.rotate(-.5); c.fillStyle = '#d64933'; c.fillRect(-1.8, -5.5, 3.6, 11); c.restore();
+  const hb = excited && !moving ? Math.sin(t * 14) * 1.5 : 0;
+  c.save(); c.translate(13.5, -23 + hb);
+  oval(c, 0, 0, 7.6, 7, fur);
+  oval(c, 6.6, 2.4, 4.9, 3.4, light);
+  oval(c, 10.8, 1.3, 1.8, 1.5, INK, 0);
+  const blink = ((t + .5) % 3.1) < .12;
+  if (blink) { c.strokeStyle = INK; c.lineWidth = 1.3; c.beginPath(); c.moveTo(1.4, -1.6); c.lineTo(4, -1.6); c.stroke(); }
+  else { oval(c, 2.7, -1.8, 1.3, 1.6, INK, 0); oval(c, 3.1, -2.4, .45, .45, '#fff', 0); }
+  if (excited || moving) { c.fillStyle = '#e8606a'; rr(c, 5.5, 5, 3, 4.4, 1.5); c.fill(); c.strokeStyle = INK; c.lineWidth = 1; c.stroke(); }
+  c.save(); c.translate(-2.6, -4.6); c.rotate(.35 + (moving ? Math.sin(ph * 2) * .18 : Math.sin(t * 2) * .05)); blob(c, -2.6, 0, 5.2, 9.5, 2.6, dark, 1.4); c.restore();
+  c.restore();
+  c.restore();
+}
+// round portrait canvases for the HUD and the journal
+const PORT = new Map();
+function portrait(id) {
+  let cv = PORT.get(id); if (cv) return cv;
+  cv = document.createElement('canvas'); cv.width = cv.height = 96; const c = cv.getContext('2d');
+  c.beginPath(); c.arc(48, 48, 46, 0, 7); c.fillStyle = id === 'biscuit' ? '#f3dfb8' : '#e9dcc0'; c.fill();
+  c.save(); c.clip();
+  if (id === 'biscuit') { const k = 2.7; c.translate(48, 0); c.scale(k, k); drawDog(c, -13 / k - 13.5, 52 / k + 23, true, 0, false, 1, false, false); }
+  else { const L = LOOKS[id], k = 2.5 / L.s, hy = -27 - 10.5 + 1.5; c.translate(48, 0); c.scale(k, k); drawPerson(c, 0, 44 / k - hy * L.s, L, 'down', 0, 'stand', 1, false); }
+  c.restore();
+  c.lineWidth = 3; c.strokeStyle = INK; c.beginPath(); c.arc(48, 48, 45, 0, 7); c.stroke();
+  PORT.set(id, cv); return cv;
+}
+const PORT_URL = new Map();
+function face(id, size = 28) {
+  let u = PORT_URL.get(id); if (!u) { u = portrait(id).toDataURL(); PORT_URL.set(id, u); }
+  return `<img class="pf" src="${u}" width="${size}" height="${size}" alt="">`;
+}
+{ const st = document.createElement('style'); st.textContent = '.pf{border-radius:50%;vertical-align:middle;display:inline-block;flex:none}.card .face .pf{width:52px;height:52px}.chip .pf{margin:-4px 2px -4px -4px}'; shadow.append(st); }
+function drawCharacter(c, who, t) {
+  // who: { kind:'player'|'fam', ... }
+  if (who.dog) drawDog(c, who.x, who.y, who.right, who.ph, who.moving, t, who.excited);
+  else drawPerson(c, who.x, who.y, who.L, who.dir, who.ph, who.mode, t);
+}
+
 function seeded(s) { return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
 
 function drawFurn(c, f, opened) {
@@ -588,6 +740,7 @@ function updateScavenge(dt) {
   p.vy += (iv.y * speed - p.vy) * Math.min(1, dt * 14);
   const sp = Math.hypot(p.vx, p.vy);
   if (sp > 20) { p.face = Math.atan2(p.vy, p.vx); p.walk += dt * sp / 18; }
+  G.dustT = (G.dustT || 0) - dt; if (sp > 150 && G.dustT <= 0) { G.dustT = .12; dust(p.x, p.y + 12); }
   const steps = Math.ceil(sp * dt / 10) || 1;
   for (let i = 0; i < steps; i++) moveBox(p, p.vx * dt / steps, p.vy * dt / steps);
 
@@ -638,6 +791,7 @@ function updateScavenge(dt) {
 
   // family
   for (const m of G.fam) {
+    const ox = m.x, oy = m.y;
     if (m.state === 'idle') {
       if (m.def.kind === 'dog') wander(m, dt);
       if (Math.hypot(m.x - p.x, m.y - p.y) < .95 * T) {
@@ -648,10 +802,21 @@ function updateScavenge(dt) {
     } else if (m.state === 'run') {
       runToHatch(m, dt);
     }
+    animFam(m, ox, oy, dt);
   }
 
   if (G.time <= 0) { G.time = 0; endScavenge(inHatch(p.x, p.y)); }
 }
+
+function animFam(m, ox, oy, dt) {
+  const dx = m.x - ox, dy = m.y - oy, d = Math.hypot(dx, dy);
+  m.moving = d > .05;
+  if (!m.moving) return;
+  m.dir = dirOf(dx, dy, m.dir); m.ph = (m.ph || 0) + d / 16;
+  m.dust = (m.dust || 0) - dt;
+  if (m.state === 'run' && m.dust <= 0) { m.dust = .14; dust(m.x, m.y + 12); }
+}
+function dust(x, y) { G.parts.push({ x: x + rand(-4, 4), y, vx: rand(-20, 20), vy: rand(-26, -8), t: 0, life: rand(.35, .55), col: 'rgba(225,215,195,.75)' }); }
 
 function openContainer(c) {
   c.opened = true; c.prog = 1; Snd.open();
@@ -744,8 +909,9 @@ function render(now) {
       drawEmoji(ctx, ITEMS[it.k].e, it.x, it.y - 4 + b, 26);
     }
     // family
-    for (const m of G.fam) { if (m.state === 'idle' || m.state === 'run') drawFam(ctx, m, t); }
-    drawPlayer(ctx, G.player, t);
+    const cast = G.fam.filter(m => m.state === 'idle' || m.state === 'run').map(m => ({ y: m.y, f: () => drawFam(ctx, m, t) }));
+    cast.push({ y: G.player.y, f: () => drawPlayer(ctx, G.player, t) });
+    cast.sort((a, b) => a.y - b.y).forEach(d => d.f());
     // search ring
     if (G.searching && G.searching.prog > 0 && G.phase === 'play') {
       const p = G.player; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.beginPath(); ctx.arc(p.x, p.y - 2, 26, 0, 7); ctx.stroke();
@@ -807,43 +973,34 @@ function drawHatch(c, t) {
 }
 
 function drawPlayer(c, p, t) {
-  const moving = Math.hypot(p.vx, p.vy) > 30, sw = moving ? Math.sin(p.walk) : 0;
-  c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(p.x, p.y + 14, 16, 6, 0, 0, 7); c.fill();
-  c.save(); c.translate(p.x, p.y); c.rotate(p.face + Math.PI / 2);
-  // feet
-  circle(c, -7, -sw * 8, 5, '#3b2f2a'); circle(c, 7, sw * 8, 5, '#3b2f2a');
-  // body
-  c.beginPath(); c.ellipse(0, 0, 15, 10, 0, 0, 7); c.fillStyle = '#2f9c95'; c.fill(); c.strokeStyle = '#1d6a65'; c.lineWidth = 2; c.stroke();
-  // arms
-  circle(c, -15, sw * 7, 5, '#f1c27d'); circle(c, 15, -sw * 7, 5, '#f1c27d');
-  // head
-  circle(c, 0, -1, 9, '#f1c27d'); c.beginPath(); c.arc(0, 1, 9.5, Math.PI * 0.05, Math.PI * 0.95); c.fillStyle = '#4a2c1a'; c.fill();
-  c.restore();
+  const moving = Math.hypot(p.vx, p.vy) > 30;
+  p.dir = dirOf(p.vx, p.vy, p.dir);
+  drawPerson(c, p.x, p.y + 12, LOOKS.you, p.dir, p.walk * .7, moving ? 'walk' : 'stand', t);
   // carried stack
   const n = p.carry.length;
   for (let i = 0; i < n; i++) {
     const ang = -Math.PI / 2 + (i - (n - 1) / 2) * 0.55;
-    drawEmoji(c, ITEMS[p.carry[i]].e, p.x + Math.cos(ang) * 30, p.y - 6 + Math.sin(ang) * 30 + Math.sin(t * 6 + i) * 1.5, 18);
+    drawEmoji(c, ITEMS[p.carry[i]].e, p.x + Math.cos(ang) * 26, p.y - 36 + Math.sin(ang) * 26 + Math.sin(t * 6 + i) * 1.5, 18);
   }
 }
 
 function drawFam(c, m, t) {
-  const running = m.state === 'run' || (m.def.kind === 'dog' && m.tgt);
-  const b = running ? Math.abs(Math.sin(t * 14 + m.bob)) * -6 : Math.sin(t * 2 + m.bob) * 1.5;
-  c.fillStyle = 'rgba(0,0,0,.3)'; c.beginPath(); c.ellipse(m.x, m.y + 14, 14, 5, 0, 0, 7); c.fill();
-  drawEmoji(c, m.def.e, m.x, m.y - 2 + b, 34, m.flip);
+  const feet = m.y + 12, dog = m.def.kind === 'dog';
+  if (dog) drawDog(c, m.x, feet, m.flip, m.ph || 0, !!m.moving, t, m.state === 'run');
+  else drawPerson(c, m.x, feet, LOOKS[m.def.id], m.dir || 'down', m.ph || 0, m.moving ? 'walk' : m.state === 'idle' ? 'panic' : 'stand', t);
+  const top = feet - (dog ? 34 : 50 * LOOKS[m.def.id].s);
   if (m.state === 'idle') {
     const pulse = 1 + 0.15 * Math.sin(t * 8);
-    c.save(); c.translate(m.x, m.y - 36); c.scale(pulse, pulse);
+    c.save(); c.translate(m.x, top - 8); c.scale(pulse, pulse);
     c.fillStyle = '#d64933'; rr(c, -12, -12, 24, 24, 12); c.fill(); c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke();
     c.fillStyle = '#fff'; c.font = '18px "Black Ops One", Impact, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('!', 0, 1);
     c.restore();
   }
   if (m.bubbleT > 0) {
     c.font = '13px "Atkinson Hyperlegible", sans-serif'; const tw = c.measureText(m.bubble).width + 16;
-    c.fillStyle = '#fff'; rr(c, m.x - tw / 2, m.y - 62, tw, 22, 8); c.fill();
-    c.beginPath(); c.moveTo(m.x - 5, m.y - 41); c.lineTo(m.x + 5, m.y - 41); c.lineTo(m.x, m.y - 34); c.fill();
-    c.fillStyle = '#2b2622'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(m.bubble, m.x, m.y - 51);
+    c.fillStyle = '#fff'; rr(c, m.x - tw / 2, top - 30, tw, 22, 8); c.fill();
+    c.beginPath(); c.moveTo(m.x - 5, top - 9); c.lineTo(m.x + 5, top - 9); c.lineTo(m.x, top - 2); c.fill();
+    c.fillStyle = '#2b2622'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(m.bubble, m.x, top - 19);
   }
 }
 
@@ -869,7 +1026,7 @@ function drawHUD(c, cam, t) {
   G.fam.forEach((m, i) => {
     const x = 10, y = 10 + i * 46;
     c.fillStyle = 'rgba(20,16,14,.78)'; rr(c, x, y, narrow ? 46 : 118, 40, 10); c.fill();
-    drawEmoji(c, m.def.e, x + 22, y + 20, 24);
+    c.drawImage(portrait(m.def.id), x + 6, y + 4, 32, 32);
     const st = m.state === 'saved' ? ['✔', '#58c26b'] : m.state === 'run' ? ['➜', '#f2c14e'] : ['?', '#d64933'];
     circle(c, x + 36, y + 31, 8, st[1]); c.fillStyle = '#111'; c.font = '11px "Black Ops One", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(st[0], x + 36, y + 32);
     if (!narrow) { c.textAlign = 'left'; c.fillStyle = '#f4ecd8'; c.font = '13px "Black Ops One", sans-serif'; c.fillText(m.def.name, x + 50, y + 15); c.font = '11px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#bdb19a'; c.fillText(m.state === 'saved' ? 'safe' : m.state === 'run' ? 'running' : 'missing', x + 50, y + 29); }
@@ -1009,9 +1166,9 @@ function invChips(inv) {
 function showShelterResult() {
   mode = 'result';
   const saved = G.fam.filter(m => m.state === 'saved'), lost = G.fam.filter(m => m.state !== 'saved');
-  const fam = [`<span class="chip"><span class="bigemoji">${YOU.e}</span> ${YOU.name} (you)</span>`]
-    .concat(saved.map(m => `<span class="chip"><span class="bigemoji">${m.def.e}</span> ${m.def.name}</span>`))
-    .concat(lost.map(m => `<span class="chip lost"><span class="bigemoji">${m.def.e}</span> ${m.def.name}</span>`)).join('');
+  const fam = [`<span class="chip">${face('you')} ${YOU.name} (you)</span>`]
+    .concat(saved.map(m => `<span class="chip">${face(m.def.id)} ${m.def.name}</span>`))
+    .concat(lost.map(m => `<span class="chip lost">${face(m.def.id)} ${m.def.name}</span>`)).join('');
   const total = INV_ORDER.reduce((a, k) => a + G.shelter[k], 0);
   let verdict = saved.length === 4 ? 'The whole family made it. Against all odds.' : saved.length === 0 ? 'You made it down alone. The silence is the worst part.' : `${lost.map(m => m.def.name).join(' and ')} didn't make it down in time.`;
   if (!G.shelter.water && !G.shelter.soup) verdict += ' And you have no food or water…';
@@ -1282,7 +1439,7 @@ function daySteps() {
 }
 function awayLine() {
   const away = S.people.filter(p => p.status === 'away');
-  return away.map(p => `<p class="side">${p.e} <b>${p.name}</b> is outside scavenging. Back in about ${p.away} day${p.away === 1 ? '' : 's'}.</p>`).join('');
+  return away.map(p => `<p class="side">${face(p.id, 26)} <b>${p.name}</b> is outside scavenging. Back in about ${p.away} day${p.away === 1 ? '' : 's'}.</p>`).join('');
 }
 
 function renderDay() {
@@ -1320,7 +1477,7 @@ function renderDay() {
       let acts = `<button class="tog ${r.soup ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="soup" ${!r.soup && freeS <= 0 ? 'disabled' : ''}>${E('soup')} Food</button>
         <button class="tog ${r.water ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="water" ${!r.water && freeW <= 0 ? 'disabled' : ''}>${E('water')} Water</button>`;
       if (p.ill && has('meds')) acts += `<button class="tog med" data-act="treat" data-id="${p.id}">${E('meds')} Treat</button>`;
-      return `<div class="card"><div class="face">${p.e}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div></div><div class="acts">${acts}</div></div>`;
+      return `<div class="card"><div class="face">${face(p.id, 52)}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div></div><div class="acts">${acts}</div></div>`;
     }).join('') + '</div>';
     html += awayLine();
     const gone = S.people.filter(p => p.status === 'dead' || p.status === 'lost');
@@ -1330,7 +1487,7 @@ function renderDay() {
     const elig = home().filter(p => p.kind !== 'dog' && p.kind !== 'kid');
     html += `<h2>Send someone outside?</h2><p class="help">They'll be gone 2–4 days. They might bring back supplies, come back hurt, or not come back at all.</p>
       <p class="label">Who goes?</p><div class="pick"><button class="pbtn ${!S.exp.who ? 'on' : ''}" data-act="nobody">Nobody today</button>
-      ${elig.map(p => `<button class="pbtn ${S.exp.who === p.id ? 'on' : ''}" data-act="who" data-id="${p.id}" ${canGo(p) ? '' : 'disabled'}>${p.e} ${p.id === 'you' ? 'Go yourself' : p.name}${canGo(p) ? '' : ' (too weak)'}</button>`).join('')}</div>`;
+      ${elig.map(p => `<button class="pbtn ${S.exp.who === p.id ? 'on' : ''}" data-act="who" data-id="${p.id}" ${canGo(p) ? '' : 'disabled'}>${face(p.id, 24)} ${p.id === 'you' ? 'Go yourself' : p.name}${canGo(p) ? '' : ' (too weak)'}</button>`).join('')}</div>`;
     if (S.exp.who) {
       const kit = ['mask', 'axe', 'flashlight', 'map'].filter(has);
       html += kit.length
@@ -1462,7 +1619,7 @@ function finishSurvival(rescued) {
   recordRun(days, rescued);
   const fates = S.people.map(p => {
     const f = p.status === 'home' ? (rescued ? 'Rescued' : '') : p.status === 'away' ? 'Still out there' : p.cause;
-    return `<span class="chip ${p.status === 'home' && rescued ? '' : 'lost'}"><span class="bigemoji">${p.e}</span> ${p.name} · ${f}</span>`;
+    return `<span class="chip ${p.status === 'home' && rescued ? '' : 'lost'}">${face(p.id)} ${p.name} · ${f}</span>`;
   }).join('');
   const score = days * 10 + (rescued ? out.length * 100 + 250 : 0);
   const b = { days: c.best() || days };
