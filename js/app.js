@@ -170,7 +170,7 @@ function lbGameOf(k){if(/^best_daily_/.test(k))return null;/* today's challenge 
   const id=k.slice(5);let g=ALLG.find(x=>x.id===id);if(!g){const m=id.match(/^(.*)_(\d)$/);if(m)g=ALLG.find(x=>x.id===m[1])}if(!g||HIDDEN.has(g.id))return null;return{g,label:g.name}}
 async function recentBoard(box){try{if(!await LB.probe())return;const r=await fetch('/api/lb?recent=1',{cache:'no-store'});if(!r.ok)return;const j=await r.json();
   const ago=t=>{const s=Math.max(1,Math.round((Date.now()-t)/1000));return s<60?'just now':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'};
-  const rows=(j.recent||[]).map(e=>({e,m:lbGameOf(e.k)})).filter(x=>x.m).slice(0,5);if(!rows.length)return;
+  const rows=(j.recent||[]).map(e=>({e,m:lbGameOf(e.k)})).filter(x=>x.m).slice(0,3);if(!rows.length)return;
   const list=el('span',{class:'rlist'});rows.forEach(({e,m})=>{let v=e.s;try{v=m.g.fmt(e.s)}catch(er){}const a=el('a',{href:gameUrl(m.g)},el('b',{class:'rn'}),' '+m.label+' · '+v+' ',el('small',null,ago(e.t)));a.querySelector('.rn').textContent=e.n;list.append(a)});
   box.append(el('div',{class:'dc dboard recent'},el('span',{class:'ic',html:ico('trophy')}),el('span',null,el('b',null,'Latest high scores'),list,LB.name()?'':el('small',{style:'display:block;opacity:.7'},'Set a leaderboard name in any game (the trophy button) to show up here.'))))}catch(e){}}
 /* badges: small goals that send players to new corners of the site */
