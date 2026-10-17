@@ -81,7 +81,13 @@ run(root,c){const W=400,H=640;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.par
   let CS,GX,GY;function cellXY(r,cI){return{x:GX+cI*CS+CS/2,y:GY+r*CS+CS/2}}
   const revealed=(r,cI)=>{for(const p of placed){const i=p.dir?r-p.r:cI-p.c;const on=p.dir?cI===p.c&&i>=0&&i<p.w.length:r===p.r&&i>=0&&i<p.w.length;if(on&&(found.has(p.w)||(p.rev||0)>i))return p.w[i]}return null};
   MOB.drag(c,cv,W,H,{down:p=>{if(state==='won'){load(li+1);return}if(Math.hypot(p.x-(WX-150),p.y-(WY+80))<26){letters=MOB.shuf(letters);return}if(Math.hypot(p.x-(WX+150),p.y-(WY+80))<26){hint();return}const i=hit(p);if(i>=0){path=[i];cur=p;beep(500,.03,'sine',.04)}},
-    move:p=>{if(!path.length)return;cur=p;const i=hit(p);if(i>=0&&!path.includes(i)){path.push(i);beep(500+path.length*80,.03,'sine',.04)}else if(i>=0&&path.length>1&&path[path.length-2]===i)path.pop()},up:()=>{if(path.length)submit();path=[]}});
+    move:p=>{if(!path.length)return;cur=p;const i=hit(p);if(i>=0&&!path.includes(i)){path.push(i);beep(500+path.length*80,.03,'sine',.04)}else if(i>=0&&path.length>1&&path[path.length-2]===i)path.pop()},up:()=>{if(path.length)submit();path=[];cur=null}});
+  c.on(document,'keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;const k=e.key;
+    if(state==='won'){if(k==='Enter'||k===' '){e.preventDefault();load(li+1)}return}
+    if(/^[a-z]$/i.test(k)){e.preventDefault();const ch=k.toUpperCase(),i=letters.findIndex((l,j)=>l===ch&&!path.includes(j));if(i>=0){path.push(i);cur=null;beep(500+path.length*80,.03,'sine',.04)}else{shake=250;beep(200,.06,'square',.04)}}
+    else if(k==='Backspace'){e.preventDefault();path.pop();cur=null}
+    else if(k==='Enter'){e.preventDefault();if(path.length)submit();path=[]}
+    else if(k===' '){e.preventDefault();letters=MOB.shuf(letters);path=[]}});
   function draw(dt){t+=dt;FX.step(dt);FL.step(dt);shake=Math.max(0,shake-dt);const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3a5ab8');g.addColorStop(1,'#8a4ab8');x.fillStyle=g;x.fillRect(0,0,W,H);
     CS=Math.min(40,Math.floor(Math.min((W-40)/grid.cols,300/grid.rows)));GX=(W-CS*grid.cols)/2;GY=60+(300-CS*grid.rows)/2;
     const seen=new Set();for(const p of placed)for(let i=0;i<p.w.length;i++){const r=p.r+(p.dir?i:0),cI=p.c+(p.dir?0:i);const k=r+','+cI;if(seen.has(k))continue;seen.add(k);const ch=revealed(r,cI);MOB.rr(x,GX+cI*CS+2,GY+r*CS+2,CS-4,CS-4,6);x.fillStyle=ch?'#ffd23f':'rgba(255,255,255,.85)';x.fill();if(ch)MOB.txt(x,ch,GX+cI*CS+CS/2,GY+r*CS+CS/2+1,CS*.55,'#1D1A2F')}
@@ -91,6 +97,7 @@ run(root,c){const W=400,H=640;const {cv,x}=MOB.canvas(root,W,H);const FX=MOB.par
     if(path.length){x.strokeStyle='#ffb020';x.lineWidth=8;x.lineCap='round';x.lineJoin='round';x.beginPath();path.forEach((i,k)=>{const q=lp(i);k?x.lineTo(q.x,q.y):x.moveTo(q.x,q.y)});if(cur)x.lineTo(cur.x,cur.y);x.stroke()}
     letters.forEach((ch,i)=>{const q=lp(i),on=path.includes(i);x.fillStyle=on?'#ffb020':'transparent';x.beginPath();x.arc(q.x,q.y,24,0,7);x.fill();MOB.txt(x,ch,q.x,q.y+1,30,on?'#fff':'#3a5ab8')});
     for(const[bx,lab,sub]of[[WX-150,'⇄','shuffle'],[WX+150,'💡','hint 3🪙']]){x.fillStyle='rgba(255,255,255,.2)';x.beginPath();x.arc(bx,WY+80,24,0,7);x.fill();MOB.txt(x,lab,bx,WY+80,22,'#fff');MOB.txt(x,sub,bx,WY+114,11,'rgba(255,255,255,.8)')}
+    MOB.txt(x,'Swipe the letters, or type them and press Enter',W/2,H-12,11,'rgba(255,255,255,.75)','center','600 ');
     FX.draw(x);FL.draw(x);if(state==='won')banner(x,W,H,'Puzzle solved!',li+1<PZ.length?'Tap for the next one (+5 coins)':'All 20 done! Tap to start over')}
   load(S.get('ww_lvl',0));c.loop(draw)}});
 </script>
