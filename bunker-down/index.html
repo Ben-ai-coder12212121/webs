@@ -8,13 +8,13 @@
 <title>Bunker Down — One Minute to Impact</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Black+Ops+One&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#2b2622; --paper:#f4ecd8; --paper2:#e9dcc0; --mustard:#f2c14e; --rust:#d64933;
   --olive:#4b5d3a; --night:#14110f; --green:#58c26b;
   --stencil:"Black Ops One",Impact,"Arial Black",sans-serif;
-  --type:"Special Elite","Courier New",monospace;
+  --type:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--night);color:var(--paper);overflow:hidden;font-family:var(--type);
@@ -41,7 +41,7 @@ h1,h2,h3{font-family:var(--stencil);font-weight:400;margin:0;letter-spacing:1px}
 .best{color:#bfb39a;font-size:14px;text-align:center;min-height:18px}
 .hazard{height:14px;background:repeating-linear-gradient(-45deg,var(--mustard) 0 14px,#1a1a1a 14px 28px);border-radius:3px;margin:0 0 18px}
 .panel h2{font-size:28px;color:var(--rust);margin-bottom:10px}
-.panel p{line-height:1.5;margin:10px 0}
+.panel p{line-height:1.55;margin:10px 0;font-size:17px}
 .keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:14px 0;font-size:15px;align-items:center}
 kbd{font-family:var(--stencil);background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:4px;font-size:13px;white-space:nowrap}
 .row{display:flex;gap:10px;margin-top:18px}
@@ -63,63 +63,81 @@ kbd{font-family:var(--stencil);background:var(--ink);color:var(--paper);padding:
 
 /* survival journal */
 #survival{position:fixed;inset:0;overflow-y:auto;z-index:8;touch-action:pan-y;-webkit-user-select:text;user-select:text;
-  background:radial-gradient(ellipse at top,#2c241e,#110e0c 70%);padding:18px 12px 60px}
-.journal{max-width:780px;margin:0 auto;background:var(--paper);color:var(--ink);border-radius:4px;padding:22px 20px 26px;position:relative;
-  box-shadow:0 30px 80px rgba(0,0,0,.6),inset 0 0 80px rgba(130,95,40,.28);
-  background-image:repeating-linear-gradient(transparent 0 29px,rgba(80,110,160,.13) 29px 30px)}
-.journal:before{content:"";position:absolute;left:44px;top:0;bottom:0;width:2px;background:rgba(214,73,51,.25)}
-.jhead{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:10px;padding-left:36px}
-.day{font-family:var(--stencil);font-size:44px;color:var(--ink);line-height:1}
-.morale{font-size:14px;display:flex;align-items:center;gap:8px}
-.bar{width:120px;height:12px;background:rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--rust),var(--mustard),var(--green));background-size:120px 100%}
-.inv{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 6px 36px}
-.inv .it{background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.1);border-radius:6px;padding:3px 8px;font-size:15px}
-.inv .it b{font-family:var(--stencil);font-weight:400;margin-left:3px}
-.inv .it.zero{opacity:.4}
-.log{margin:10px 0 10px 36px;font-size:16px;line-height:30px}
-.log p{margin:0 0 0}
+  background:#15110e;padding:16px 12px 0}
+.journal{max-width:720px;min-height:calc(100% - 16px);margin:0 auto;background:var(--paper);color:#1f1b18;border-radius:10px 10px 0 0;
+  padding:22px 24px 0;font-size:18px;line-height:1.6;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.day{font-family:var(--stencil);font-size:42px;line-height:1}
+.stats{display:flex;flex-wrap:wrap;gap:8px;flex:1;justify-content:flex-end}
+.stat{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:5px 10px;font-size:15px;color:#5a514a}
+.stat .ic{font-size:20px;line-height:1}
+.stat b{font-size:20px;color:#1f1b18}
+.stat.zero b{color:#b3261e}
+.bar{width:70px;height:10px;background:rgba(0,0,0,.12);border-radius:5px;overflow:hidden;display:inline-block}
+.bar i{display:block;height:100%;background:#2f6b2f}
+.bar i.mid{background:#c98a12}.bar i.low{background:#b3261e}
+.gear{width:100%;display:flex;flex-wrap:wrap;gap:6px;font-size:15px;color:#4a423b;align-items:center}
+.gear span{background:rgba(0,0,0,.06);border-radius:6px;padding:2px 8px}
+.steps{list-style:none;display:flex;gap:6px;margin:16px 0 0;padding:0;counter-reset:s}
+.steps li{flex:1;text-align:center;font-size:15px;font-weight:700;padding:6px 2px;border-bottom:4px solid rgba(0,0,0,.12);color:#8a8077;counter-increment:s}
+.steps li:before{content:counter(s) ". "}
+.steps li.on{color:#1f1b18;border-color:var(--rust)}
+.steps li.done{color:#2f6b2f;border-color:#2f6b2f}
+.body{flex:1;padding:20px 0 24px}
+.body h2{font-family:var(--stencil);font-size:26px;margin:0 0 10px;color:#1f1b18}
+.help{color:#4a423b;margin:0 0 16px;font-size:16px}
+.log p{margin:0 0 12px}
 .log p.bad{color:#9e2a1a}
 .log p.good{color:#2f6b2f}
-.ev{margin:18px 0 18px 36px;background:#fff8e6;border:2px solid var(--ink);border-radius:6px;padding:14px 16px;box-shadow:4px 4px 0 var(--ink);line-height:1.5}
-.ev h3{font-size:20px;color:var(--rust);margin-bottom:6px}
-.ev .choices{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.ev .res{margin-top:10px;font-style:italic;border-top:1px dashed rgba(0,0,0,.25);padding-top:10px}
-.cbtn{font-family:var(--type);font-size:16px;text-align:left;padding:10px 12px;border-radius:6px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink)}
+.side{margin:14px 0 0;font-size:16px;color:#4a423b}
+.ev{background:#fff;border:2px solid #1f1b18;border-radius:10px;padding:16px 18px;margin-top:20px}
+.ev h3{font-size:22px;color:var(--rust);margin:0 0 6px}
+.ev .choices{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.ev .res{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.15);font-weight:700}
+.cbtn{font:inherit;font-size:17px;text-align:left;padding:11px 14px;min-height:48px;border-radius:8px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}
 .cbtn:hover:not(:disabled){background:var(--mustard)}
 .cbtn:disabled{opacity:.4;cursor:not-allowed}
-.cbtn small{opacity:.7}
-.sec{font-family:var(--stencil);font-size:20px;margin:22px 0 8px 36px;color:var(--olive)}
-.crew{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-left:36px}
-.card{background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.15);border-radius:8px;padding:10px;display:flex;gap:10px;align-items:center}
-.card .face{font-size:38px;line-height:1;width:46px;text-align:center}
-.card .info{flex:1;min-width:0}
-.card .info b{font-family:var(--stencil);font-weight:400;font-size:17px;display:block}
-.card .st{font-size:13px;line-height:1.35}
-.card .st .w{color:#b24a12}.card .st .d{color:#a01c0c;font-weight:bold}.card .st .ok{color:#2f6b2f}
-.card .acts{display:flex;flex-direction:column;gap:5px}
-.card.gone{opacity:.55}
-.card.gone .face{filter:grayscale(1)}
-.tog{width:44px;height:34px;border-radius:6px;border:2px solid rgba(0,0,0,.25);background:#fff;font-size:18px;cursor:pointer;opacity:.55;filter:grayscale(.6)}
-.tog.on{opacity:1;filter:none;border-color:var(--olive);background:#dff0c8;box-shadow:inset 0 0 0 2px var(--olive)}
-.tog:disabled{opacity:.2;cursor:not-allowed}
-.tog.med{border-color:var(--rust)}
-.exp{margin:6px 0 0 36px;font-size:15px;line-height:1.5}
-.exp .pick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-.pbtn{font-family:var(--type);font-size:15px;padding:7px 12px;border-radius:20px;border:2px solid var(--ink);background:var(--paper);cursor:pointer;color:var(--ink)}
-.pbtn.on{background:var(--ink);color:var(--paper)}
+.cbtn small{font-size:14px;opacity:.8}
+.crew{display:flex;flex-direction:column;gap:10px}
+.card{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:12px 14px}
+.card .face{font-size:40px;line-height:1;text-align:center}
+.card .info b{font-size:19px;display:block;line-height:1.3}
+.card .st{font-size:16px;line-height:1.4}
+.st .w{color:#a14a0b;font-weight:700}.st .d{color:#b3261e;font-weight:700}.st .ok{color:#2f6b2f}
+.card .acts{display:flex;gap:8px}
+.tog{font:inherit;font-size:16px;font-weight:700;min-width:100px;height:48px;padding:0 10px;border-radius:8px;border:2px solid rgba(0,0,0,.2);background:#f4f1ea;color:#3a332d;cursor:pointer;white-space:nowrap}
+.tog.on{background:#2f6b2f;border-color:#2f6b2f;color:#fff}
+.tog:disabled{opacity:.35;cursor:not-allowed}
+.tog.med{border-color:var(--rust);color:var(--rust);background:#fff}
+.note{background:#e3f0da;border-radius:8px;padding:8px 12px;margin:0 0 14px;color:#2f6b2f;font-weight:700;font-size:16px}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 18px}
+.pbtn{font:inherit;font-size:16px;min-height:46px;padding:8px 16px;border-radius:24px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}
+.pbtn.on{background:#1f1b18;color:var(--paper)}
 .pbtn:disabled{opacity:.35;cursor:not-allowed}
-.endrow{margin:26px 0 0 36px}
-.hint{font-size:13px;opacity:.75;margin-left:36px}
+.label{font-weight:700;font-size:16px;margin:0}
+.nav{position:sticky;bottom:0;background:var(--paper);border-top:2px solid rgba(0,0,0,.1);display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  padding:14px 0 max(14px,env(safe-area-inset-bottom))}
+.nav .btn{flex:1;font-size:18px}
+.nav .btn.back{flex:0 0 auto;width:auto;background:transparent;color:#1f1b18;box-shadow:none;border:2px solid rgba(0,0,0,.25)}
+.nav .warn{width:100%;margin:0;font-size:15px;color:#9e2a1a}
 #night{position:fixed;inset:0;background:#000;color:var(--paper);z-index:30;display:flex;align-items:center;justify-content:center;
   font-family:var(--stencil);font-size:34px;opacity:0;pointer-events:none;transition:opacity .5s}
 #night.show{opacity:1;pointer-events:all}
-@media (max-width:520px){
-  .journal{padding:18px 12px 22px}
-  .journal:before{left:20px}
-  .jhead,.inv,.log,.ev,.sec,.crew,.exp,.endrow,.hint{margin-left:14px;padding-left:0}
-  .day{font-size:36px}
-  .crew{grid-template-columns:1fr}
+@media (max-width:560px){
+  #survival{padding:0}
+  .journal{border-radius:0;padding:16px 16px 0;font-size:17px;min-height:100%}
+  .top{gap:10px}
+  .day{font-size:30px;width:100%}
+  .stats{justify-content:flex-start;gap:6px}
+  .stat{padding:4px 8px}
+  .stat .lbl{display:none}
+  .bar{width:46px}
+  .gear{font-size:14px}
+  .nav .btn{font-size:16px;padding:14px 12px}
+  .card{grid-template-columns:44px 1fr}
+  .card .face{font-size:34px}
+  .card .acts{grid-column:1/-1}
+  .tog{flex:1;min-width:0}
 }
 </style>
 </head>
@@ -1001,7 +1019,7 @@ function drawFam(c, m, t) {
     c.restore();
   }
   if (m.bubbleT > 0) {
-    c.font = '13px "Special Elite", monospace'; const tw = c.measureText(m.bubble).width + 16;
+    c.font = '13px "Atkinson Hyperlegible", sans-serif'; const tw = c.measureText(m.bubble).width + 16;
     c.fillStyle = '#fff'; rr(c, m.x - tw / 2, m.y - 62, tw, 22, 8); c.fill();
     c.beginPath(); c.moveTo(m.x - 5, m.y - 41); c.lineTo(m.x + 5, m.y - 41); c.lineTo(m.x, m.y - 34); c.fill();
     c.fillStyle = '#2b2622'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(m.bubble, m.x, m.y - 51);
@@ -1018,7 +1036,7 @@ function drawHUD(c, cam, t) {
   c.save(); c.translate(vw / 2, py + ph * .44); const pulse = urgent ? 1 + .07 * Math.max(0, Math.sin(t * 2 * Math.PI)) : 1; c.scale(pulse, pulse);
   c.font = `${narrow ? 34 : 42}px "Black Ops One", Impact, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
   c.fillStyle = urgent ? '#ff5a47' : '#f4ecd8'; c.fillText(secs >= 60 ? '1:00' : '0:' + String(secs).padStart(2, '0'), 0, 0); c.restore();
-  c.font = '11px "Special Elite", monospace'; c.textAlign = 'center'; c.fillStyle = '#c9bfa8'; c.fillText('UNTIL IMPACT', vw / 2, py + ph - 9);
+  c.font = '11px "Atkinson Hyperlegible", sans-serif'; c.textAlign = 'center'; c.fillStyle = '#c9bfa8'; c.fillText('UNTIL IMPACT', vw / 2, py + ph - 9);
   // room label
   if (G.roomLabel) {
     c.globalAlpha = Math.min(1, G.roomLabel.t * 2);
@@ -1033,7 +1051,7 @@ function drawHUD(c, cam, t) {
     drawEmoji(c, m.def.e, x + 22, y + 20, 24);
     const st = m.state === 'saved' ? ['✔', '#58c26b'] : m.state === 'run' ? ['➜', '#f2c14e'] : ['?', '#d64933'];
     circle(c, x + 36, y + 31, 8, st[1]); c.fillStyle = '#111'; c.font = '11px "Black Ops One", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(st[0], x + 36, y + 32);
-    if (!narrow) { c.textAlign = 'left'; c.fillStyle = '#f4ecd8'; c.font = '13px "Black Ops One", sans-serif'; c.fillText(m.def.name, x + 50, y + 15); c.font = '11px "Special Elite", monospace'; c.fillStyle = '#bdb19a'; c.fillText(m.state === 'saved' ? 'safe' : m.state === 'run' ? 'running' : 'missing', x + 50, y + 29); }
+    if (!narrow) { c.textAlign = 'left'; c.fillStyle = '#f4ecd8'; c.font = '13px "Black Ops One", sans-serif'; c.fillText(m.def.name, x + 50, y + 15); c.font = '11px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#bdb19a'; c.fillText(m.state === 'saved' ? 'safe' : m.state === 'run' ? 'running' : 'missing', x + 50, y + 29); }
   });
   // minimap
   const mmW = narrow ? 112 : 170, ms = mmW / (MW * 4), mmH = MH * 4 * ms, mx = vw - mmW - 10, my = 58;
@@ -1048,7 +1066,7 @@ function drawHUD(c, cam, t) {
   // carry slots
   const p = G.player, ss = Math.min(48, (vw - 200) / p.cap), gap = 6, tw = p.cap * (ss + gap) - gap, sx = vw / 2 - tw / 2, sy = vh - ss - 18;
   c.fillStyle = 'rgba(20,16,14,.75)'; rr(c, sx - 8, sy - 22, tw + 16, ss + 30, 10); c.fill();
-  c.font = '10px "Special Elite", monospace'; c.fillStyle = '#c9bfa8'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.font = '10px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#c9bfa8'; c.textAlign = 'center'; c.textBaseline = 'middle';
   c.fillText(`CARRYING ${p.carry.length}/${p.cap}`, vw / 2, sy - 11);
   for (let i = 0; i < p.cap; i++) {
     const x = sx + i * (ss + gap);
@@ -1111,7 +1129,7 @@ function drawEnd(c, t) {
       const f = clamp((G.endT - 1.1) / .3, 0, 1) * clamp((2.2 - G.endT) / .8 + 1, 0, 1);
       c.fillStyle = `rgba(255,240,210,${0.08 * f})`; c.fillRect(0, 0, vw, vh);
       c.globalAlpha = clamp((G.endT - 1.6) / .6, 0, 1);
-      c.font = '22px "Special Elite", monospace'; c.fillStyle = '#e8dcc0'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = '22px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#e8dcc0'; c.textAlign = 'center'; c.textBaseline = 'middle';
       c.fillText('The hatch slams shut.', vw / 2, vh / 2 - 18);
       c.globalAlpha = clamp((G.endT - 2.4) / .6, 0, 1);
       c.fillText('Above you, the world turns white.', vw / 2, vh / 2 + 18); c.globalAlpha = 1;
@@ -1408,7 +1426,7 @@ const QUIET = ['A quiet day. We counted the cans twice.', 'Nothing happened toda
   'The walls creak when the wind blows up there. At least, we think it\'s the wind.', 'We scratched another line into the wall.', 'Dust drifts down from the ceiling. We try not to think about it.'];
 
 function beginDay() {
-  S.rations = {}; S.exp = { who: null, gear: {} }; S.event = null;
+  S.rations = {}; S.exp = { who: null, gear: {} }; S.event = null; S.step = 'morning'; S.note = '';
   if (S.rescueDay && S.day >= S.rescueDay && home().length) S.event = rescueEvent('radio');
   else if (!S.rescueDay && S.day >= 16 && home().length && Math.random() < .08) S.event = rescueEvent('patrol');
   else if (S.day >= 2 && home().length && has('radio') && Math.random() < .35) S.event = EVENTS.find(e => e.id === 'radio').make();
@@ -1426,80 +1444,97 @@ function clampRations() {
 }
 function allocated(k) { return home().reduce((a, p) => a + (S.rations[p.id] && S.rations[p.id][k] ? 1 : 0), 0); }
 
-function statusHTML(p) {
-  if (p.status === 'dead') return `<span class="d">✝ ${p.cause}</span>`;
-  if (p.status === 'lost') return `<span class="d">${p.cause}</span>`;
-  if (p.status === 'away') return `Out scavenging · back in ~${p.away} day${p.away === 1 ? '' : 's'}${p.gear.length ? '<br>Took: ' + p.gear.map(E).join(' ') : ''}`;
-  const bits = [];
-  if (p.thirst >= 4) bits.push('<span class="d">Dying of thirst</span>'); else if (p.thirst >= 3) bits.push('<span class="w">Parched</span>'); else if (p.thirst >= 2) bits.push('<span class="w">Thirsty</span>');
-  if (p.hunger >= 7) bits.push('<span class="d">Starving to death</span>'); else if (p.hunger >= 5) bits.push('<span class="w">Starving</span>'); else if (p.hunger >= 3) bits.push('<span class="w">Hungry</span>');
-  if (p.ill) bits.push(`<span class="d">${p.ill.type === 'injured' ? 'Injured' : 'Sick'}${p.ill.days >= 3 ? ', getting worse' : ''}</span>`);
-  if (!bits.length) bits.push('<span class="ok">Doing okay</span>');
-  if (S.morale < 25 && p.kind !== 'dog') bits.push('<span class="w">Despairing</span>');
-  return bits.join(' · ') + `<br><small style="opacity:.6">Last ate ${p.hunger === 0 ? 'today' : p.hunger + 'd ago'} · last drank ${p.thirst === 0 ? 'today' : p.thirst + 'd ago'}</small>`;
+const STEP_NAMES = { morning: 'Morning', care: 'Food & water', out: 'Scavenge' };
+function needText(p) {
+  const out = [];
+  if (p.ill) out.push(['d', p.ill.type === 'injured' ? (p.ill.days >= 3 ? 'Badly hurt, getting worse' : 'Injured') : (p.ill.days >= 3 ? 'Very sick, getting worse' : 'Sick')]);
+  if (p.thirst >= 4) out.push(['d', 'Will die without water today']);
+  else if (p.thirst >= 3) out.push(['w', 'Parched']);
+  else if (p.thirst >= 2) out.push(['w', 'Thirsty']);
+  if (p.hunger >= 7) out.push(['d', 'Will starve without food today']);
+  else if (p.hunger >= 5) out.push(['w', 'Starving']);
+  else if (p.hunger >= 3) out.push(['w', 'Hungry']);
+  if (!out.length) out.push(['ok', 'Doing okay']);
+  return out.slice(0, 2).map(([c, t]) => `<span class="${c}">${t}</span>`).join(' · ');
+}
+function daySteps() {
+  if (S.rescued || !home().length) return ['morning'];
+  const st = ['morning', 'care'];
+  if (!S.people.some(p => p.status === 'away') && home().some(p => p.kind !== 'dog' && p.kind !== 'kid')) st.push('out');
+  return st;
+}
+function awayLine() {
+  const away = S.people.filter(p => p.status === 'away');
+  return away.map(p => `<p class="side">${p.e} <b>${p.name}</b> is outside scavenging. Back in about ${p.away} day${p.away === 1 ? '' : 's'}.</p>`).join('');
 }
 
 function renderDay() {
   S.morale = clamp(Math.round(S.morale), 0, 100);
   clampRations();
-  const ev = S.event;
-  const invHTML = INV_ORDER.filter(k => S.inv[k] || k === 'soup' || k === 'water').map(k => `<span class="it ${S.inv[k] ? '' : 'zero'}" title="${ITEMS[k].name}">${E(k)}<b>${S.inv[k] || 0}</b></span>`).join('');
-  const logHTML = S.log.map(l => `<p class="${l.c}">${l.t}</p>`).join('');
-  let evHTML = '';
-  if (ev) {
-    evHTML = `<div class="ev"><h3>${ev.title}</h3><div>${ev.text}</div>`;
-    if (!ev.done) evHTML += `<div class="choices">${ev.choices.map((c, i) => `<button class="cbtn" data-act="choice" data-i="${i}" ${c.req && !has(c.req) ? 'disabled' : ''}>${c.label}${c.req && !has(c.req) ? ' <small>(you don\'t have one)</small>' : ''}</button>`).join('')}</div>`;
-    else evHTML += `<div class="res">${ev.result}</div>`;
-    evHTML += '</div>';
-  }
-  const crew = S.people.map(p => {
-    const gone = p.status === 'dead' || p.status === 'lost';
-    let acts = '';
-    if (p.status === 'home' && !S.rescued) {
+  const steps = daySteps();
+  if (!steps.includes(S.step)) S.step = steps[0];
+  const idx = steps.indexOf(S.step), ev = S.event, blocking = !!(ev && !ev.done);
+  // header: day, essentials, morale, gear
+  const stat = (k, label) => `<div class="stat ${S.inv[k] ? '' : 'zero'}"><span class="ic">${E(k)}</span><b>${S.inv[k] || 0}</b><span class="lbl">${label}</span></div>`;
+  const mc = S.morale >= 50 ? '' : S.morale >= 25 ? 'mid' : 'low';
+  const gear = INV_ORDER.filter(k => !['soup', 'water', 'meds'].includes(k) && S.inv[k]);
+  let html = `<header class="top"><div class="day">DAY ${S.day}</div>
+    <div class="stats">${stat('soup', 'food')}${stat('water', 'water')}${stat('meds', 'medicine')}
+      <div class="stat"><span class="lbl">Morale</span> <span class="bar"><i class="${mc}" style="width:${S.morale}%"></i></span> <b style="font-size:16px">${moraleWord()}</b></div></div>
+    ${gear.length ? `<div class="gear">Gear: ${gear.map(k => `<span>${E(k)} ${ITEMS[k].name}</span>`).join('')}</div>` : ''}
+  </header>`;
+  if (steps.length > 1) html += `<ol class="steps">${steps.map((s, i) => `<li class="${i === idx ? 'on' : i < idx ? 'done' : ''}">${STEP_NAMES[s]}</li>`).join('')}</ol>`;
+  html += '<section class="body">';
+  if (S.step === 'morning') {
+    html += `<h2>Morning report</h2><div class="log">${S.log.map(l => `<p class="${l.c}">${l.t}</p>`).join('')}</div>${awayLine()}`;
+    if (ev) {
+      html += `<div class="ev"><h3>${ev.title}</h3><div>${ev.text}</div>`;
+      if (!ev.done) html += `<div class="choices">${ev.choices.map((c, i) => { const no = c.req && !has(c.req); return `<button class="cbtn" data-act="choice" data-i="${i}" ${no ? 'disabled' : ''}>${c.label}${no ? ' <small>(you don\'t have one)</small>' : ''}</button>`; }).join('')}</div>`;
+      else html += `<div class="res">${ev.result}</div>`;
+      html += '</div>';
+    }
+  } else if (S.step === 'care') {
+    html += `<h2>Food &amp; water</h2><p class="help">Pick who eats and drinks today. Not everyone needs it every day: water every 2–3 days, food every 4–5.</p>`;
+    if (S.note) html += `<p class="note">${S.note}</p>`;
+    const freeS = S.inv.soup - allocated('soup'), freeW = S.inv.water - allocated('water');
+    html += '<div class="crew">' + home().map(p => {
       const r = S.rations[p.id] || {};
-      const freeS = S.inv.soup - allocated('soup'), freeW = S.inv.water - allocated('water');
-      acts = `<button class="tog ${r.soup ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="soup" ${!r.soup && freeS <= 0 ? 'disabled' : ''} title="Give soup">${E('soup')}</button>
-              <button class="tog ${r.water ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="water" ${!r.water && freeW <= 0 ? 'disabled' : ''} title="Give water">${E('water')}</button>`;
-      if (p.ill && has('meds')) acts += `<button class="tog med on" data-act="treat" data-id="${p.id}" title="Give medicine">${E('meds')}</button>`;
-    }
-    return `<div class="card ${gone ? 'gone' : ''}"><div class="face">${p.e}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${statusHTML(p)}</div></div><div class="acts">${acts}</div></div>`;
-  }).join('');
-  // expedition
-  let exp = '';
-  if (!S.rescued) {
-    const away = S.people.find(p => p.status === 'away');
-    if (away) exp = `<div class="exp">${away.e} <b>${away.name}</b> is outside scavenging. Expected back in about ${away.away} day${away.away === 1 ? '' : 's'}.</div>`;
-    else if (home().length) {
-      const elig = home().filter(p => p.kind !== 'dog' && p.kind !== 'kid');
-      const gearKeys = ['mask', 'axe', 'flashlight', 'map'];
-      exp = `<div class="exp">Send someone outside to look for supplies? They'll be gone 2–4 days. It's dangerous up there.
-        <div class="pick">${elig.length ? elig.map(p => `<button class="pbtn ${S.exp.who === p.id ? 'on' : ''}" data-act="who" data-id="${p.id}" ${canGo(p) ? '' : 'disabled'}>${p.e} ${p.id === 'you' ? 'Go yourself' : p.name}${canGo(p) ? '' : ' (too weak)'}</button>`).join('') : '<i>No one here can go.</i>'}</div>
-        ${S.exp.who ? `<div>Take along:</div><div class="pick">${gearKeys.map(k => `<button class="pbtn ${S.exp.gear[k] ? 'on' : ''}" data-act="gear" data-k="${k}" ${has(k) ? '' : 'disabled'}>${E(k)} ${ITEMS[k].name}</button>`).join('')}</div>
-        <div class="hint" style="margin-left:0">${S.exp.gear.mask ? 'The mask will protect them from fallout.' : 'Without a gas mask, the fallout may make them sick.'}${S.exp.gear.map ? ' The map will speed things up.' : ''}</div>` : ''}
-      </div>`;
+      let acts = `<button class="tog ${r.soup ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="soup" ${!r.soup && freeS <= 0 ? 'disabled' : ''}>${E('soup')} Food</button>
+        <button class="tog ${r.water ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="water" ${!r.water && freeW <= 0 ? 'disabled' : ''}>${E('water')} Water</button>`;
+      if (p.ill && has('meds')) acts += `<button class="tog med" data-act="treat" data-id="${p.id}">${E('meds')} Treat</button>`;
+      return `<div class="card"><div class="face">${p.e}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div></div><div class="acts">${acts}</div></div>`;
+    }).join('') + '</div>';
+    html += awayLine();
+    const gone = S.people.filter(p => p.status === 'dead' || p.status === 'lost');
+    if (gone.length) html += `<p class="side">Lost: ${gone.map(p => `${p.name} (${p.cause.toLowerCase()})`).join(', ')}.</p>`;
+    if (has('game') && S.day - S.lastGame >= 4 && homeHumans().length > 1) html += `<div class="pick" style="margin-top:16px"><button class="pbtn" data-act="play">${E('game')} Play the board game tonight (+morale)</button></div>`;
+  } else if (S.step === 'out') {
+    const elig = home().filter(p => p.kind !== 'dog' && p.kind !== 'kid');
+    html += `<h2>Send someone outside?</h2><p class="help">They'll be gone 2–4 days. They might bring back supplies, come back hurt, or not come back at all.</p>
+      <p class="label">Who goes?</p><div class="pick"><button class="pbtn ${!S.exp.who ? 'on' : ''}" data-act="nobody">Nobody today</button>
+      ${elig.map(p => `<button class="pbtn ${S.exp.who === p.id ? 'on' : ''}" data-act="who" data-id="${p.id}" ${canGo(p) ? '' : 'disabled'}>${p.e} ${p.id === 'you' ? 'Go yourself' : p.name}${canGo(p) ? '' : ' (too weak)'}</button>`).join('')}</div>`;
+    if (S.exp.who) {
+      const kit = ['mask', 'axe', 'flashlight', 'map'].filter(has);
+      html += kit.length
+        ? `<p class="label">What do they take?</p><div class="pick">${kit.map(k => `<button class="pbtn ${S.exp.gear[k] ? 'on' : ''}" data-act="gear" data-k="${k}">${E(k)} ${ITEMS[k].name}</button>`).join('')}</div>`
+        : '<p class="help">You have no gear to give them (a gas mask, axe, flashlight or map would help).</p>';
+      html += `<p class="help">${S.exp.gear.mask ? 'The gas mask will protect them from fallout.' : 'Without a gas mask, the fallout may make them sick.'}${S.exp.gear.map ? ' The map will get them back faster.' : ''}</p>`;
     }
   }
-  const canPlay = has('game') && S.day - S.lastGame >= 4 && homeHumans().length > 1 && !S.rescued;
-  const blocking = ev && !ev.done;
-  const endBtn = S.rescued ? `<button class="btn red" data-act="climb">CLIMB OUT INTO THE LIGHT →</button>`
-    : `<button class="btn dark" data-act="end" ${blocking ? 'disabled' : ''}>END DAY ${S.day} ☾</button>${blocking ? '<div class="hint" style="margin:8px 0 0">Decide what to do about today\'s event first.</div>' : ''}`;
-  SV.innerHTML = `<div class="journal">
-    <div class="jhead"><div class="day">DAY ${S.day}</div><div class="morale">Morale <span class="bar"><i style="width:${S.morale}%"></i></span> ${moraleWord()}</div></div>
-    <div class="inv">${invHTML}</div>
-    <div class="log">${logHTML}</div>
-    ${evHTML}
-    <div class="sec">THE SHELTER</div>
-    <div class="hint">Tap ${E('soup')} and ${E('water')} to choose who gets fed today.${has('meds') ? ` Tap ${E('meds')} to treat the sick.` : ''}</div>
-    <div class="crew" style="margin-top:8px">${crew}</div>
-    ${canPlay ? `<div class="exp" style="margin-top:12px"><button class="pbtn" data-act="play">${E('game')} Play the board game tonight (+morale)</button></div>` : ''}
-    ${exp ? '<div class="sec">EXPEDITION</div>' + exp : ''}
-    <div class="endrow">${endBtn}</div>
-  </div>`;
+  html += '</section><footer class="nav">';
+  if (blocking) html += '<p class="warn">Choose what to do about today\'s event first.</p>';
+  if (idx > 0) html += '<button class="btn back" data-act="back">← Back</button>';
+  if (S.rescued) html += '<button class="btn red" data-act="climb">CLIMB OUT INTO THE LIGHT →</button>';
+  else if (idx < steps.length - 1) html += `<button class="btn" data-act="next" ${blocking ? 'disabled' : ''}>Next: ${STEP_NAMES[steps[idx + 1]]} →</button>`;
+  else html += `<button class="btn dark" data-act="end" ${blocking ? 'disabled' : ''}>END DAY ${S.day} ☾</button>`;
+  html += '</footer>';
+  SV.innerHTML = `<div class="journal">${html}</div>`;
 }
 
 SV.addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b || b.disabled || !S) return;
   const act = b.dataset.act;
+  let toTop = false;
   if (act === 'choice') {
     const c = S.event.choices[+b.dataset.i]; if (c.req && !has(c.req)) return;
     Snd.click(); S.event.result = c.run(); S.event.done = true;
@@ -1507,16 +1542,20 @@ SV.addEventListener('click', e => {
     const r = S.rations[b.dataset.id] || (S.rations[b.dataset.id] = {}); const k = b.dataset.k;
     if (!r[k] && S.inv[k] - allocated(k) <= 0) return; r[k] = !r[k]; Snd.click();
   } else if (act === 'treat') {
-    const p = byId(b.dataset.id); if (p && p.ill && takeItem('meds')) { p.ill = null; S.log.push({ t: `${name(p)} took the medicine and ${p.id === 'you' ? 'feel' : 'feels'} much better.`, c: 'good' }); Snd.good(); }
+    const p = byId(b.dataset.id); if (p && p.ill && takeItem('meds')) { p.ill = null; S.note = `${name(p)} took the medicine and ${p.id === 'you' ? 'feel' : 'feels'} much better.`; Snd.good(); }
   } else if (act === 'who') {
-    S.exp.who = S.exp.who === b.dataset.id ? null : b.dataset.id; if (!S.exp.who) S.exp.gear = {}; Snd.click();
+    S.exp.who = b.dataset.id; Snd.click();
+  } else if (act === 'nobody') {
+    S.exp.who = null; S.exp.gear = {}; Snd.click();
   } else if (act === 'gear') {
     S.exp.gear[b.dataset.k] = !S.exp.gear[b.dataset.k]; Snd.click();
   } else if (act === 'play') {
-    S.lastGame = S.day; S.morale += 10; S.log.push({ t: `We played the ${E('game')} board game by lamplight. For an hour, we forgot where we were.`, c: 'good' }); Snd.good();
+    S.lastGame = S.day; S.morale += 10; S.note = `You'll play the ${E('game')} board game tonight. Everyone perks up.`; Snd.good();
+  } else if (act === 'next' || act === 'back') {
+    const steps = daySteps(); S.step = steps[clamp(steps.indexOf(S.step) + (act === 'next' ? 1 : -1), 0, steps.length - 1)]; Snd.click(); toTop = true;
   } else if (act === 'end') { Snd.click(); endDay(); return; }
   else if (act === 'climb') { Snd.click(); finishSurvival(true); return; }
-  const y = SV.scrollTop; renderDay(); SV.scrollTop = y;
+  const y = SV.scrollTop; renderDay(); SV.scrollTop = toTop ? 0 : y;
 });
 
 function die(p, cause, log) { p.status = 'dead'; p.cause = cause; S.deaths++; S.morale -= p.kind === 'dog' ? 12 : 16; log.push({ t: `💀 ${name(p)} ${cause}.`, c: 'bad' }); }
