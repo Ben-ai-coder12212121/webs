@@ -271,5 +271,6 @@ G.push(
 {"id":"m_slicer","name":"Juice Slicer","kind":"arcade","tint":"#ffe0e6","url":"/games/juice-slicer/","levels":true,"fmt":b=>b+' pts'},
 {"id":"m_snip","name":"Snip & Feed","kind":"puzzle","tint":"#fff0c8","url":"/games/snip-feed/","fmt":b=>b+' stars'},
 {"id":"m_spiral","name":"Spiral Drop","kind":"arcade","tint":"#e8e0ff","url":"/games/spiral-drop/","levels":true,"fmt":b=>'level '+b},
-{"id":"m_wordwheel","name":"Word Wheel","kind":"puzzle","tint":"#e8f0ff","url":"/games/word-wheel/","fmt":b=>b+' puzzles'}
+{"id":"m_wordwheel","name":"Word Wheel","kind":"puzzle","tint":"#e8f0ff","url":"/games/word-wheel/","fmt":b=>b+' puzzles'},
+{"id":"bunker","name":"Bunker Down","kind":"game","tint":"#ffd9a0","url":"/games/bunker-down/","wide":true,"fmt":b=>b+' days'}
 );
