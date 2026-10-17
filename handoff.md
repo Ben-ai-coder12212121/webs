@@ -147,6 +147,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 | Lane Lords | The computer opponent and balance need work |
 | Pocket Pet | Needs more to do |
 | Corner Pocket | The computer opponent needs tuning; aiming needs help lines |
+| Bunker Down | New: 60-second house scramble, then shelter survival (rationing, expeditions, radio rescue). Runs in a shadow DOM inside a `.g3` frame; fonts Black Ops One and Atkinson Hyperlegible are self-hosted in `assets/fonts/`. Needs playtesting and balance |
 
 ### Live but needs work (from the audit)
 
