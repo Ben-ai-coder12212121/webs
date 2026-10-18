@@ -148,6 +148,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 | Pocket Pet | Needs more to do |
 | Corner Pocket | The computer opponent needs tuning; aiming needs help lines |
 | Bunker Down | New: 60-second house scramble, then shelter survival (rationing, expeditions, radio rescue). Runs in a shadow DOM inside a `.g3` frame; fonts Black Ops One and Atkinson Hyperlegible are self-hosted in `assets/fonts/`. Needs playtesting and balance |
+| Knuckle Through | New: first-person 3D digging tycoon (`games/knuckle-through/`, id `knuckle`). One 20×12×5000 voxel wall in 17 strata, chunked meshes, fracture debris, a structural-support solver for cave-ins, health with falling-rock and fall damage, a dig crew that works offline, finds and one hidden needle. The game is a self-contained `KnuckleThrough(host, env)` that mounts in a shadow root inside a `.g3` frame; it uses the local three.js r128 via `with3D`, the site Sound button and `c.best` (metres dug). Fonts Big Shoulders Stencil Display, IBM Plex Sans Condensed and Silkscreen are self-hosted in `assets/fonts/`. HP curve was tuned by simulation for 10 to 14 hours to the far side. Needs real-mouse playtesting and balance |
 
 ### Live but needs work (from the audit)
 
