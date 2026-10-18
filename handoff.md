@@ -152,7 +152,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 | Game | What it needs |
 |---|---|
-| Lumberjack Tycoon | New idle game (chop, crew, mill, truck, five forests, Golden Acorn prestige, offline earnings). Needs balance testing over a long session |
+| Lumberjack Tycoon | Rebuilt as a 3D open-world game in the style the owner asked for (the old Roblox lumber game, all original): `TimberTycoon(host, env)`, save key `unb_lumber3d_save`. Chop trees with visible notches until they topple into physics logs, cut and drag pieces, load the pickup, tip the bed onto the buyer's belt. 7 axes, 3 sawmill tiers, belts, land plots with a build mode, toll bridges to snow and swamp, a ferry to a glowing island, day/night. Needs a real-device fps check and an hour of play to tune prices; belts are straight only, one plot per player |
 | Fishing Tycoon | New idle game (cast and hook, 30 fish in five waters, Fishdex, crew, nets, Auto Fisher, five boats, Pearl prestige). Needs balance testing over a long session |
 | Neon Harbor | Open-world crime game; heavy, and the theme isn't classroom-friendly |
 | The Hollow | Survival horror; heavy |
