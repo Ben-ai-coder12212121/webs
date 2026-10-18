@@ -29,7 +29,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
      ```
      Before merging, check that `git diff origin/preview HEAD` is empty. Afterwards, check the live site with `curl -s https://detourr.net/... | grep <something new>`.
    - The sandbox's Chromium can't open external HTTPS sites (certificate error), so check the live site with curl.
-2. **New games go in "🚧 In progress" (`WIP_IDS` at the top of `js/app.js`), not the main list.** They must not be picked by the random button. Move a game out only when the owner says so.
+2. **Every new or rebuilt game goes in "🚧 In progress" (`WIP_IDS` at the top of `js/app.js`), not the main list, and stays there until the owner has checked it and says it is done.** Never run `tools/release-game.cjs` on your own judgement. In-progress games must not be picked by the random button. `tools/new-game.cjs` enforces this: a brand-new id always lands in In progress, and re-running it for an existing game keeps its current place. (Going live still needs the owner's "deploy", rule 1.)
 3. **Q is an aim button in every shooter** (the owner plays on a laptop without a mouse). For games built on `Stage3D`, pass `qAim:true`.
 4. **Add new requests to the to-do list without dropping current work.**
 5. **Don't say art can't be good; get real assets** (CC0 models and textures, see section 6).
@@ -222,7 +222,7 @@ Scripts are classic (non-module) scripts sharing one global scope. A top-level n
   PW=/opt/node22/lib/node_modules/playwright CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome node tools/test-games.cjs http://localhost:3100 [ids…]
   ```
   It should print `ALL CLEAN`. It takes about 10 minutes for all games.
-- `tools/new-game.cjs`: adds a new game page and catalog entry (in progress by default).
+- `tools/new-game.cjs`: adds a new game page and catalog entry. New ids always go to In progress (owner rule); existing games keep their place.
 - `tools/release-game.cjs`: moves a game out of in progress (sitemap, noindex, lists).
 - `tools/allgames.cjs`: rebuilds the homepage footer's "All N games A–Z" list. Run it after changing `HIDDEN` or `WIP_IDS`.
 - `tools/catalog-lite.cjs`: see above.
