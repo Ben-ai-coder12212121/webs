@@ -33,7 +33,7 @@
 <script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Bunker Down: game code ===================== */
-G.push({id:'bunker',name:'Bunker Down',kind:'game',wide:true,tint:'#ffd9a0',blurb:'The sirens are wailing and you have one minute. Grab supplies, round up the family and get to the shelter, then survive until rescue.',fmt:b=>b+' days',
+G.push({id:'bunker',name:'Bunker Down',kind:'game',wide:true,levels:true,tint:'#ffd9a0',blurb:'The sirens are wailing and you have one minute. Grab supplies, round up the family and get to the shelter, then survive until rescue.',fmt:b=>b+' days',
 art:'<rect width="120" height="72" fill="#ffcf6b"/><circle cx="96" cy="16" r="9" fill="#fff4c2" stroke="#1D1A2F" stroke-width="2"/><rect y="52" width="120" height="20" fill="#7a5a3a"/><path d="M14 52V30L34 16L54 30V52Z" fill="#e8dcc0" stroke="#1D1A2F" stroke-width="3" stroke-linejoin="round"/><rect x="28" y="36" width="12" height="16" fill="#9a6b44" stroke="#1D1A2F" stroke-width="2"/><rect x="64" y="44" width="40" height="16" rx="3" fill="#f2c14e" stroke="#1D1A2F" stroke-width="3"/><path d="M68 44L74 60M78 44L84 60M88 44L94 60M98 44L103 57" stroke="#1D1A2F" stroke-width="3"/><rect x="60" y="6" width="26" height="16" rx="3" fill="#1D1A2F"/><text x="73" y="18" font-family="monospace" font-weight="700" font-size="11" text-anchor="middle" fill="#ff5a47">1:00</text>',
 run(root,c){
 'use strict';
@@ -42,7 +42,7 @@ try{document.fonts.load('40px "Black Ops One"');document.fonts.load('16px "Atkin
 // The game lives in its own shadow tree so its styles and the site's never mix.
 const host=document.createElement('div');host.className='g3 tall bd';root.append(host);
 const shadow=host.attachShadow({mode:'open'});
-shadow.innerHTML='<style>'+'\n:host{\n  --ink:#2b2622; --paper:#f4ecd8; --paper2:#e9dcc0; --mustard:#f2c14e; --rust:#d64933;\n  --olive:#4b5d3a; --night:#14110f; --green:#58c26b;\n  --stencil:"Black Ops One",Impact,"Arial Black",sans-serif;\n  --type:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;\n}\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}\n:host{display:block;overflow:hidden;background:var(--night);color:var(--paper);font-family:var(--type);-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}\ncanvas#game{position:absolute;inset:0;width:100%;height:100%;display:block}\n.hidden{display:none!important}\n.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10;\n  padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}\n.screen.dim{background:rgba(10,8,7,.72);backdrop-filter:blur(2px)}\n.panel{width:100%;max-width:560px;background:var(--paper);color:var(--ink);border-radius:6px;padding:26px 24px;\n  box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 0 60px rgba(120,90,40,.25);position:relative;max-height:100%;overflow:auto;touch-action:pan-y}\n.panel:before{content:"";position:absolute;inset:8px;border:2px dashed rgba(43,38,34,.18);border-radius:4px;pointer-events:none}\nh1,h2,h3{font-family:var(--stencil);font-weight:400;margin:0;letter-spacing:1px}\n.title{font-size:clamp(46px,12vw,86px);line-height:.9;color:var(--mustard);text-shadow:4px 4px 0 var(--rust),8px 8px 0 rgba(0,0,0,.5);text-align:center}\n.tag{text-align:center;color:#e8dcc0;margin:14px 0 26px;font-size:clamp(14px,3.6vw,18px)}\n.menu{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:360px}\n.btn{font-family:var(--stencil);font-size:20px;letter-spacing:1px;border:0;border-radius:6px;padding:14px 22px;cursor:pointer;\n  background:var(--mustard);color:var(--ink);box-shadow:0 5px 0 #a87c1c,0 8px 20px rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s;width:100%}\n.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #a87c1c}\n.btn.red{background:var(--rust);color:#fff;box-shadow:0 5px 0 #8e2a1b,0 8px 20px rgba(0,0,0,.4)}\n.btn.ghost{background:transparent;color:var(--paper);box-shadow:none;border:2px solid rgba(244,236,216,.4);font-size:16px}\n.btn.dark{background:var(--ink);color:var(--paper);box-shadow:0 5px 0 #000}\n.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}\n.best{color:#bfb39a;font-size:14px;text-align:center;min-height:18px}\n.hazard{height:14px;background:repeating-linear-gradient(-45deg,var(--mustard) 0 14px,#1a1a1a 14px 28px);border-radius:3px;margin:0 0 18px}\n.panel h2{font-size:28px;color:var(--rust);margin-bottom:10px}\n.panel p{line-height:1.55;margin:10px 0;font-size:17px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:14px 0;font-size:15px;align-items:center}\nkbd{font-family:var(--stencil);background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:4px;font-size:13px;white-space:nowrap}\n.row{display:flex;gap:10px;margin-top:18px}\n.row .btn{flex:1}\n.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}\n.chip{background:var(--paper2);border-radius:6px;padding:6px 12px;font-size:15px;border:1px solid rgba(0,0,0,.08)}\n.chip.lost{opacity:.5;text-decoration:line-through}\n.bigemoji{font-size:22px;vertical-align:middle}\n\n/* in-game buttons */\n#hudbtns{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;z-index:5;align-items:flex-end}\n.hbtn{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:rgba(20,16,14,.7);color:#fff;\n  font-family:var(--stencil);font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none}\n.hbtn svg{width:26px;height:26px;margin-bottom:2px}\n.hbtn.seal{background:rgba(70,160,85,.85);border-color:#b8f5c2;width:96px;height:96px;font-size:14px;animation:pulse 1s infinite}\n@keyframes pulse{50%{transform:scale(1.07)}}\n#topbtns{position:absolute;right:max(12px,env(safe-area-inset-right));z-index:6;display:flex;gap:8px}\n.sbtn{width:40px;height:40px;border-radius:8px;border:0;background:rgba(20,16,14,.7);color:#fff;font-size:18px;cursor:pointer}\n\n/* survival journal */\n#survival{position:absolute;inset:0;overflow-y:auto;z-index:8;touch-action:pan-y;-webkit-user-select:text;user-select:text;\n  background:#15110e;padding:16px 12px 0}\n.journal{max-width:720px;min-height:calc(100% - 16px);margin:0 auto;background:var(--paper);color:#1f1b18;border-radius:10px 10px 0 0;\n  padding:22px 24px 0;font-size:18px;line-height:1.6;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}\n.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}\n.day{font-family:var(--stencil);font-size:42px;line-height:1}\n.stats{display:flex;flex-wrap:wrap;gap:8px;flex:1;justify-content:flex-end}\n.stat{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:5px 10px;font-size:15px;color:#5a514a}\n.stat .ic{font-size:20px;line-height:1}\n.stat b{font-size:20px;color:#1f1b18}\n.stat.zero b{color:#b3261e}\n.bar{width:70px;height:10px;background:rgba(0,0,0,.12);border-radius:5px;overflow:hidden;display:inline-block}\n.bar i{display:block;height:100%;background:#2f6b2f}\n.bar i.mid{background:#c98a12}.bar i.low{background:#b3261e}\n.gear{width:100%;display:flex;flex-wrap:wrap;gap:6px;font-size:15px;color:#4a423b;align-items:center}\n.gear span{background:rgba(0,0,0,.06);border-radius:6px;padding:2px 8px}\n.steps{list-style:none;display:flex;gap:6px;margin:16px 0 0;padding:0;counter-reset:s}\n.steps li{flex:1;text-align:center;font-size:15px;font-weight:700;padding:6px 2px;border-bottom:4px solid rgba(0,0,0,.12);color:#8a8077;counter-increment:s}\n.steps li:before{content:counter(s) ". "}\n.steps li.on{color:#1f1b18;border-color:var(--rust)}\n.steps li.done{color:#2f6b2f;border-color:#2f6b2f}\n.body{flex:1;padding:20px 0 24px}\n.body h2{font-family:var(--stencil);font-size:26px;margin:0 0 10px;color:#1f1b18}\n.help{color:#4a423b;margin:0 0 16px;font-size:16px}\n.log p{margin:0 0 12px}\n.log p.bad{color:#9e2a1a}\n.log p.good{color:#2f6b2f}\n.side{margin:14px 0 0;font-size:16px;color:#4a423b}\n.ev{background:#fff;border:2px solid #1f1b18;border-radius:10px;padding:16px 18px;margin-top:20px}\n.ev h3{font-size:22px;color:var(--rust);margin:0 0 6px}\n.ev .choices{display:flex;flex-direction:column;gap:10px;margin-top:14px}\n.ev .res{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.15);font-weight:700}\n.cbtn{font:inherit;font-size:17px;text-align:left;padding:11px 14px;min-height:48px;border-radius:8px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}\n.cbtn:hover:not(:disabled){background:var(--mustard)}\n.cbtn:disabled{opacity:.4;cursor:not-allowed}\n.cbtn small{font-size:14px;opacity:.8}\n.crew{display:flex;flex-direction:column;gap:10px}\n.card{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:12px 14px}\n.card .face{font-size:40px;line-height:1;text-align:center}\n.card .info b{font-size:19px;display:block;line-height:1.3}\n.card .st{font-size:16px;line-height:1.4}\n.st .w{color:#a14a0b;font-weight:700}.st .d{color:#b3261e;font-weight:700}.st .ok{color:#2f6b2f}\n.card .acts{display:flex;gap:8px}\n.tog{font:inherit;font-size:16px;font-weight:700;min-width:100px;height:48px;padding:0 10px;border-radius:8px;border:2px solid rgba(0,0,0,.2);background:#f4f1ea;color:#3a332d;cursor:pointer;white-space:nowrap}\n.tog.on{background:#2f6b2f;border-color:#2f6b2f;color:#fff}\n.tog:disabled{opacity:.35;cursor:not-allowed}\n.tog.med{border-color:var(--rust);color:var(--rust);background:#fff}\n.note{background:#e3f0da;border-radius:8px;padding:8px 12px;margin:0 0 14px;color:#2f6b2f;font-weight:700;font-size:16px}\n.pick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 18px}\n.pbtn{font:inherit;font-size:16px;min-height:46px;padding:8px 16px;border-radius:6px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}\n.pbtn.on{background:#1f1b18;color:var(--paper)}\n.pbtn:disabled{opacity:.35;cursor:not-allowed}\n.label{font-weight:700;font-size:16px;margin:0}\n.nav{position:sticky;bottom:0;background:var(--paper);border-top:2px solid rgba(0,0,0,.1);display:flex;flex-wrap:wrap;gap:10px;align-items:center;\n  padding:14px 0 max(14px,env(safe-area-inset-bottom))}\n.nav .btn{flex:1;font-size:18px}\n.nav .btn.back{flex:0 0 auto;width:auto;background:transparent;color:#1f1b18;box-shadow:none;border:2px solid rgba(0,0,0,.25)}\n.nav .warn{width:100%;margin:0;font-size:15px;color:#9e2a1a}\n#night{position:absolute;inset:0;background:#000;color:var(--paper);z-index:30;display:flex;align-items:center;justify-content:center;\n  font-family:var(--stencil);font-size:34px;opacity:0;pointer-events:none;transition:opacity .5s}\n#night.show{opacity:1;pointer-events:all}\n@media (max-width:560px){\n  .hbtn{width:60px;height:60px;font-size:11px}\n  .hbtn.seal{width:76px;height:76px;font-size:12px}\n  .hbtn svg{width:20px;height:20px}\n  #survival{padding:0}\n  .journal{border-radius:0;padding:16px 16px 0;font-size:17px;min-height:100%}\n  .top{gap:10px}\n  .day{font-size:30px;width:100%}\n  .stats{justify-content:flex-start;gap:6px}\n  .stat{padding:4px 8px}\n  .stat .lbl{display:none}\n  .bar{width:46px}\n  .gear{font-size:14px}\n  .nav .btn{font-size:16px;padding:14px 12px}\n  .card{grid-template-columns:44px 1fr}\n  .card .face{font-size:34px}\n  .card .acts{grid-column:1/-1}\n  .tog{flex:1;min-width:0}\n}\n\n.sbtn svg{width:18px;height:18px;vertical-align:middle}\n'+'</style>'+'\n<canvas id="game"></canvas>\n\n<div id="topbtns" class="hidden">\n  <button class="sbtn" id="btnPause" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>\n</div>\n<div id="hudbtns" class="hidden">\n  <button class="hbtn seal hidden" id="btnSeal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>SEAL</button>\n  <button class="hbtn" id="btnDrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v13M6 11l6 6 6-6M5 21h14"/></svg>DROP</button>\n</div>\n\n<!-- Title -->\n<div id="scrTitle" class="screen">\n  <div class="menu">\n    <div class="title">BUNKER<br>DOWN</div>\n    <div class="tag">The sirens are wailing.<br>You have <b style="color:var(--mustard)">one minute</b>.</div>\n    <button class="btn red" id="btnPlay">PLAY</button>\n    <button class="btn" id="btnQuick">SURVIVAL ONLY</button>\n    <button class="btn ghost" id="btnHow">HOW TO PLAY</button>\n    <div class="best" id="bestLine"></div>\n  </div>\n</div>\n\n<!-- Briefing -->\n<div id="scrBrief" class="screen dim hidden">\n  <div class="panel">\n    <div class="hazard"></div>\n    <h2>EMERGENCY ALERT</h2>\n    <p><b>This is not a drill.</b> Missiles are inbound. Impact in <b>60 seconds</b>.</p>\n    <p>Run through the house, <b>grab supplies</b>, and <b>find your family</b>. Touch a family member and they\'ll run for the shelter on their own.</p>\n    <p>Drop your loot into the <b>shelter hatch</b> in the hallway and be standing on it when the clock hits zero.</p>\n    <div class="keys">\n      <kbd>WASD / ←↑↓→</kbd><span>Move (or drag anywhere on touch screens)</span>\n      <kbd>BUMP</kbd><span>Walk into cupboards, fridges and closets to search them</span>\n      <kbd>SPACE</kbd><span>Drop the last thing you picked up</span>\n      <kbd>E / ENTER</kbd><span>Seal the hatch early (when standing on it)</span>\n    </div>\n    <p style="font-size:14px;opacity:.8">After that, you\'ll ration food and water, send people out to scavenge and make hard calls, day after day, until help arrives… if it does.</p>\n    <div class="row"><button class="btn ghost dark" id="btnBriefBack" style="flex:.5">BACK</button><button class="btn red" id="btnGo">I\'M READY</button></div>\n  </div>\n</div>\n\n<!-- How to play -->\n<div id="scrHow" class="screen dim hidden">\n  <div class="panel">\n    <div class="hazard"></div>\n    <h2>HOW TO PLAY</h2>\n    <p><b>Part 1: The Minute.</b> You can carry 4 things at once (find the 🎒 backpack for 6). Every trip to the hatch costs time. Family members are slower than you, so wake them up early. The dog won\'t sit still.</p>\n    <p><b>Part 2: The Shelter.</b> Each day you decide who gets 🥫 soup and 💧 water. Going without water for 5 days, or food for 8, is fatal. Sick or hurt people need 💊 medicine.</p>\n    <p>Send someone outside to scavenge. A 😷 gas mask, 🪓 axe, 🔦 flashlight and 🗺️ map all make the trip safer or quicker.</p>\n    <p>Events will test you. Items like the 🔒 padlock, 🧴 bug spray and 🔧 wrench can save the day. Keep up <b>morale</b> or people may walk out.</p>\n    <p>Want to get out alive? <b>The 📻 radio is your best hope of rescue.</b></p>\n    <div class="row"><button class="btn" id="btnHowBack">GOT IT</button></div>\n  </div>\n</div>\n\n<!-- Pause -->\n<div id="scrPause" class="screen dim hidden">\n  <div class="menu">\n    <h1 style="font-size:48px;color:var(--mustard)">PAUSED</h1>\n    <button class="btn" id="btnResume">RESUME</button>\n    <button class="btn ghost" id="btnQuit">QUIT TO MENU</button>\n  </div>\n</div>\n\n<!-- Shelter result -->\n<div id="scrResult" class="screen dim hidden">\n  <div class="panel" id="resultBody"></div>\n</div>\n\n<!-- End -->\n<div id="scrEnd" class="screen dim hidden">\n  <div class="panel" id="endBody"></div>\n</div>\n\n<div id="survival" class="hidden"></div>\n<div id="night"></div>\n\n';
+shadow.innerHTML='<style>'+'\n:host{\n  --ink:#2b2622; --paper:#f4ecd8; --paper2:#e9dcc0; --mustard:#f2c14e; --rust:#d64933;\n  --olive:#4b5d3a; --night:#14110f; --green:#58c26b;\n  --stencil:"Black Ops One",Impact,"Arial Black",sans-serif;\n  --type:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;\n}\n*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}\n:host{display:block;overflow:hidden;background:var(--night);color:var(--paper);font-family:var(--type);-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}\ncanvas#game{position:absolute;inset:0;width:100%;height:100%;display:block}\n.hidden{display:none!important}\n.screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10;\n  padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}\n.screen.dim{background:rgba(10,8,7,.72);backdrop-filter:blur(2px)}\n.panel{width:100%;max-width:560px;background:var(--paper);color:var(--ink);border-radius:6px;padding:26px 24px;\n  box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 0 60px rgba(120,90,40,.25);position:relative;max-height:100%;overflow:auto;touch-action:pan-y}\n.panel:before{content:"";position:absolute;inset:8px;border:2px dashed rgba(43,38,34,.18);border-radius:4px;pointer-events:none}\nh1,h2,h3{font-family:var(--stencil);font-weight:400;margin:0;letter-spacing:1px}\n.title{font-size:clamp(46px,12vw,86px);line-height:.9;color:var(--mustard);text-shadow:4px 4px 0 var(--rust),8px 8px 0 rgba(0,0,0,.5);text-align:center}\n.tag{text-align:center;color:#e8dcc0;margin:14px 0 26px;font-size:clamp(14px,3.6vw,18px)}\n.menu{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:360px}\n.btn{font-family:var(--stencil);font-size:20px;letter-spacing:1px;border:0;border-radius:6px;padding:14px 22px;cursor:pointer;\n  background:var(--mustard);color:var(--ink);box-shadow:0 5px 0 #a87c1c,0 8px 20px rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s;width:100%}\n.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #a87c1c}\n.btn.red{background:var(--rust);color:#fff;box-shadow:0 5px 0 #8e2a1b,0 8px 20px rgba(0,0,0,.4)}\n.btn.ghost{background:transparent;color:var(--paper);box-shadow:none;border:2px solid rgba(244,236,216,.4);font-size:16px}\n.btn.dark{background:var(--ink);color:var(--paper);box-shadow:0 5px 0 #000}\n.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}\n.best{color:#bfb39a;font-size:14px;text-align:center;min-height:18px}\n.hazard{height:14px;background:repeating-linear-gradient(-45deg,var(--mustard) 0 14px,#1a1a1a 14px 28px);border-radius:3px;margin:0 0 18px}\n.panel h2{font-size:28px;color:var(--rust);margin-bottom:10px}\n.panel p{line-height:1.55;margin:10px 0;font-size:17px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:14px 0;font-size:15px;align-items:center}\nkbd{font-family:var(--stencil);background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:4px;font-size:13px;white-space:nowrap}\n.row{display:flex;gap:10px;margin-top:18px}\n.row .btn{flex:1}\n.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}\n.chip{background:var(--paper2);border-radius:6px;padding:6px 12px;font-size:15px;border:1px solid rgba(0,0,0,.08)}\n.chip.lost{opacity:.5;text-decoration:line-through}\n.bigemoji{font-size:22px;vertical-align:middle}\n\n/* in-game buttons */\n#hudbtns{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px;z-index:5;align-items:flex-end}\n.hbtn{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:rgba(20,16,14,.7);color:#fff;\n  font-family:var(--stencil);font-size:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:none}\n.hbtn svg{width:26px;height:26px;margin-bottom:2px}\n.hbtn.seal{background:rgba(70,160,85,.85);border-color:#b8f5c2;width:96px;height:96px;font-size:14px;animation:pulse 1s infinite}\n@keyframes pulse{50%{transform:scale(1.07)}}\n#topbtns{position:absolute;right:max(12px,env(safe-area-inset-right));z-index:6;display:flex;gap:8px}\n.sbtn{width:40px;height:40px;border-radius:8px;border:0;background:rgba(20,16,14,.7);color:#fff;font-size:18px;cursor:pointer}\n\n/* survival journal */\n#survival{position:absolute;inset:0;overflow-y:auto;z-index:8;touch-action:pan-y;-webkit-user-select:text;user-select:text;\n  background:#15110e;padding:16px 12px 0}\n.journal{max-width:720px;min-height:calc(100% - 16px);margin:0 auto;background:var(--paper);color:#1f1b18;border-radius:10px 10px 0 0;\n  padding:22px 24px 0;font-size:18px;line-height:1.6;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.5)}\n.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}\n.day{font-family:var(--stencil);font-size:42px;line-height:1}\n.stats{display:flex;flex-wrap:wrap;gap:8px;flex:1;justify-content:flex-end}\n.stat{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:8px;padding:5px 10px;font-size:15px;color:#5a514a}\n.stat .ic{font-size:20px;line-height:1}\n.stat b{font-size:20px;color:#1f1b18}\n.stat.zero b{color:#b3261e}\n.bar{width:70px;height:10px;background:rgba(0,0,0,.12);border-radius:5px;overflow:hidden;display:inline-block}\n.bar i{display:block;height:100%;background:#2f6b2f}\n.bar i.mid{background:#c98a12}.bar i.low{background:#b3261e}\n.gear{width:100%;display:flex;flex-wrap:wrap;gap:6px;font-size:15px;color:#4a423b;align-items:center}\n.gear span{background:rgba(0,0,0,.06);border-radius:6px;padding:2px 8px}\n.steps{list-style:none;display:flex;gap:6px;margin:16px 0 0;padding:0;counter-reset:s}\n.steps li{flex:1;text-align:center;font-size:15px;font-weight:700;padding:6px 2px;border-bottom:4px solid rgba(0,0,0,.12);color:#8a8077;counter-increment:s}\n.steps li:before{content:counter(s) ". "}\n.steps li.on{color:#1f1b18;border-color:var(--rust)}\n.steps li.done{color:#2f6b2f;border-color:#2f6b2f}\n.body{flex:1;padding:20px 0 24px}\n.body h2{font-family:var(--stencil);font-size:26px;margin:0 0 10px;color:#1f1b18}\n.help{color:#4a423b;margin:0 0 16px;font-size:16px}\n.log p{margin:0 0 12px}\n.log p.bad{color:#9e2a1a}\n.log p.good{color:#2f6b2f}\n.side{margin:14px 0 0;font-size:16px;color:#4a423b}\n.ev{background:#fff;border:2px solid #1f1b18;border-radius:10px;padding:16px 18px;margin-top:20px}\n.ev h3{font-size:22px;color:var(--rust);margin:0 0 6px}\n.ev .choices{display:flex;flex-direction:column;gap:10px;margin-top:14px}\n.ev .res{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.15);font-weight:700}\n.cbtn{font:inherit;font-size:17px;text-align:left;padding:11px 14px;min-height:48px;border-radius:8px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}\n.cbtn:hover:not(:disabled){background:var(--mustard)}\n.cbtn:disabled{opacity:.4;cursor:not-allowed}\n.cbtn small{font-size:14px;opacity:.8}\n.crew{display:flex;flex-direction:column;gap:10px}\n.card{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:12px 14px}\n.card .face{font-size:40px;line-height:1;text-align:center}\n.card .info b{font-size:19px;display:block;line-height:1.3}\n.card .st{font-size:16px;line-height:1.4}\n.st .w{color:#a14a0b;font-weight:700}.st .d{color:#b3261e;font-weight:700}.st .ok{color:#2f6b2f}\n.card .acts{display:flex;gap:8px}\n.tog{font:inherit;font-size:16px;font-weight:700;min-width:100px;height:48px;padding:0 10px;border-radius:8px;border:2px solid rgba(0,0,0,.2);background:#f4f1ea;color:#3a332d;cursor:pointer;white-space:nowrap}\n.tog.on{background:#2f6b2f;border-color:#2f6b2f;color:#fff}\n.tog:disabled{opacity:.35;cursor:not-allowed}\n.tog.med{border-color:var(--rust);color:var(--rust);background:#fff}\n.note{background:#e3f0da;border-radius:8px;padding:8px 12px;margin:0 0 14px;color:#2f6b2f;font-weight:700;font-size:16px}\n.pick{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 18px}\n.pbtn{font:inherit;font-size:16px;min-height:46px;padding:8px 16px;border-radius:6px;border:2px solid #1f1b18;background:var(--paper);cursor:pointer;color:#1f1b18}\n.pbtn.on{background:#1f1b18;color:var(--paper)}\n.pbtn:disabled{opacity:.35;cursor:not-allowed}\n.label{font-weight:700;font-size:16px;margin:0}\n.nav{position:sticky;bottom:0;background:var(--paper);border-top:2px solid rgba(0,0,0,.1);display:flex;flex-wrap:wrap;gap:10px;align-items:center;\n  padding:14px 0 max(14px,env(safe-area-inset-bottom))}\n.nav .btn{flex:1;font-size:18px}\n.nav .btn.back{flex:0 0 auto;width:auto;background:transparent;color:#1f1b18;box-shadow:none;border:2px solid rgba(0,0,0,.25)}\n.nav .warn{width:100%;margin:0;font-size:15px;color:#9e2a1a}\n#night{position:absolute;inset:0;background:#000;color:var(--paper);z-index:30;display:flex;align-items:center;justify-content:center;\n  font-family:var(--stencil);font-size:34px;opacity:0;pointer-events:none;transition:opacity .5s}\n#night.show{opacity:1;pointer-events:all}\n@media (max-width:560px){\n  .hbtn{width:60px;height:60px;font-size:11px}\n  .hbtn.seal{width:76px;height:76px;font-size:12px}\n  .hbtn svg{width:20px;height:20px}\n  #survival{padding:0}\n  .journal{border-radius:0;padding:16px 16px 0;font-size:17px;min-height:100%}\n  .top{gap:10px}\n  .day{font-size:30px;width:100%}\n  .stats{justify-content:flex-start;gap:6px}\n  .stat{padding:4px 8px}\n  .stat .lbl{display:none}\n  .bar{width:46px}\n  .gear{font-size:14px}\n  .nav .btn{font-size:16px;padding:14px 12px}\n  .card{grid-template-columns:44px 1fr}\n  .card .face{font-size:34px}\n  .card .acts{grid-column:1/-1}\n  .tog{flex:1;min-width:0}\n}\n\n.sbtn svg{width:18px;height:18px;vertical-align:middle}\n'+'</style>'+'\n<canvas id="game"></canvas>\n\n<div id="topbtns" class="hidden">\n  <button class="sbtn" id="btnPause" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>\n</div>\n<div id="hudbtns" class="hidden">\n  <button class="hbtn seal hidden" id="btnSeal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg>SEAL</button>\n  <button class="hbtn" id="btnDrop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v13M6 11l6 6 6-6M5 21h14"/></svg>DROP</button>\n</div>\n\n<!-- Title -->\n<div id="scrTitle" class="screen">\n  <div class="menu">\n    <div class="title">BUNKER<br>DOWN</div>\n    <div class="tag">The sirens are wailing.<br>You have <b style="color:var(--mustard)">one minute</b>.</div>\n    <button class="btn red" id="btnPlay">PLAY</button>\n    <button class="btn" id="btnQuick">SURVIVAL ONLY</button>\n    <button class="btn ghost" id="btnHow">HOW TO PLAY</button>\n    <div class="best" id="bestLine"></div>\n  </div>\n</div>\n\n<!-- Briefing -->\n<div id="scrBrief" class="screen dim hidden">\n  <div class="panel">\n    <div class="hazard"></div>\n    <h2>EMERGENCY ALERT</h2>\n    <p><b>This is not a drill.</b> Missiles are inbound. Impact in <b>60 seconds</b>.</p>\n    <p>Run through the house, <b>grab supplies</b>, and <b>find your family</b>. Touch a family member and they\'ll run for the shelter on their own.</p>\n    <p>Drop your loot into the <b>shelter hatch</b> in the hallway and be standing on it when the clock hits zero.</p>\n    <div class="keys">\n      <kbd>WASD / ←↑↓→</kbd><span>Move (or drag anywhere on touch screens)</span>\n      <kbd>BUMP</kbd><span>Walk into cupboards, fridges and closets to search them</span>\n      <kbd>SPACE</kbd><span>Drop the last thing you picked up</span>\n      <kbd>E / ENTER</kbd><span>Seal the hatch early (when standing on it)</span>\n    </div>\n    <p style="font-size:14px;opacity:.8">After that, you\'ll ration food and water, send people out to scavenge and make hard calls, day after day, until help arrives… if it does.</p>\n    <div class="row"><button class="btn ghost dark" id="btnBriefBack" style="flex:.5">BACK</button><button class="btn red" id="btnGo">I\'M READY</button></div>\n  </div>\n</div>\n\n<!-- How to play -->\n<div id="scrHow" class="screen dim hidden">\n  <div class="panel">\n    <div class="hazard"></div>\n    <h2>HOW TO PLAY</h2>\n    <p><b>Part 1: The Minute.</b> You can carry 4 slots at once (find the 🎒 backpack for 6). Big things like the 🪣 water jug and 📦 food crate take 2 slots but hold 3 supplies. Every trip to the hatch costs time. Family members are slower than you, so wake them up early. The dog won\'t sit still.</p>\n    <p><b>Part 2: The Shelter.</b> Everyone has a food and a water meter. Each day you give each person nothing, half or a full portion of 🥫 soup and 💧 water. Let a meter hit empty for too long and they die. Sick or hurt people need 💊 medicine.</p>\n    <p>Send someone out to the houses, the grocery store, the hospital or (with a 🗺️ map) the army checkpoint. A 😷 gas mask, 🪓 axe, 🔦 flashlight and 📕 handbook make the trip safer. They come back exhausted and need rest.</p>\n    <p>Events will test you. Items like the 🔒 padlock, 🧴 bug spray and 🔧 wrench can save the day. Keep up <b>morale</b> or people may walk out.</p>\n    <p>Want to get out alive? <b>The 📻 radio is your best hope of rescue</b>, but listen out for a caravan too. Kindness to the neighbors has a way of coming back.</p>\n    <div class="row"><button class="btn" id="btnHowBack">GOT IT</button></div>\n  </div>\n</div>\n\n<!-- Pause -->\n<div id="scrPause" class="screen dim hidden">\n  <div class="menu">\n    <h1 style="font-size:48px;color:var(--mustard)">PAUSED</h1>\n    <button class="btn" id="btnResume">RESUME</button>\n    <button class="btn ghost" id="btnQuit">QUIT TO MENU</button>\n  </div>\n</div>\n\n<!-- Shelter result -->\n<div id="scrResult" class="screen dim hidden">\n  <div class="panel" id="resultBody"></div>\n</div>\n\n<!-- End -->\n<div id="scrEnd" class="screen dim hidden">\n  <div class="panel" id="endBody"></div>\n</div>\n\n<div id="survival" class="hidden"></div>\n<div id="night"></div>\n\n';
 /* =========================================================
    BUNKER DOWN: an original 60-second scramble + shelter survival game
    ========================================================= */
@@ -130,9 +130,16 @@ const ITEMS = {
   padlock:    { e: '🔒', name: 'Padlock' },
   wrench:     { e: '🔧', name: 'Wrench' },
   teddy:      { e: '🧸', name: 'Teddy Bear' },
-  backpack:   { e: '🎒', name: 'Backpack' }
+  book:       { e: '📕', name: 'Survival Handbook' },
+  cards:      { e: '🃏', name: 'Playing Cards' },
+  backpack:   { e: '🎒', name: 'Backpack' },
+  // big items take two carry slots and unpack into several supplies in the shelter
+  jug:        { e: '🪣', name: 'Water Jug (3 water)', size: 2, gives: ['water', 3] },
+  crate:      { e: '📦', name: 'Food Crate (3 cans)', size: 2, gives: ['soup', 3] }
 };
-const INV_ORDER = ['soup', 'water', 'meds', 'radio', 'flashlight', 'axe', 'mask', 'map', 'game', 'spray', 'padlock', 'wrench', 'teddy'];
+const INV_ORDER = ['soup', 'water', 'meds', 'radio', 'flashlight', 'axe', 'mask', 'map', 'game', 'spray', 'padlock', 'wrench', 'teddy', 'book', 'cards'];
+const SIZE = k => ITEMS[k].size || 1;
+const DMUL = [.85, 1, 1.15][c.level] || 1;
 
 const YOU = { id: 'you', name: 'Sam', e: '🧑', kind: 'adult' };
 const FAMILY = [
@@ -201,6 +208,13 @@ const FURN = [
   { t: 'toychest', x: 20, y: 20, w: 2, h: 1, c: 'Toy Chest' },
   { t: 'closet', x: 31, y: 19, w: 2, h: 2, c: 'Closet' }
 ];
+const MIRROR = Math.random() < .5;
+if (MIRROR) {
+  for (let y = 0; y < MH; y++) ROWS[y] = [...ROWS[y]].reverse().join('');
+  ROOMS.forEach(r => { r.x = MW - r.x - r.w; });
+  FURN.forEach(f => { f.x = MW - f.x - f.w; });
+  HATCH.x = MW - HATCH.x - HATCH.w;
+}
 const BLOCK = ROWS.map(r => [...r].map(ch => ch === '#'));
 FURN.forEach(f => { for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) BLOCK[y][x] = true; });
 const blocked = (tx, ty) => tx < 0 || ty < 0 || tx >= MW || ty >= MH || BLOCK[ty][tx];
@@ -374,9 +388,9 @@ const PORT = new Map();
 function portrait(id) {
   let cv = PORT.get(id); if (cv) return cv;
   cv = document.createElement('canvas'); cv.width = cv.height = 96; const c = cv.getContext('2d');
-  c.beginPath(); c.arc(48, 48, 46, 0, 7); c.fillStyle = id === 'biscuit' ? '#f3dfb8' : '#e9dcc0'; c.fill();
+  c.beginPath(); c.arc(48, 48, 46, 0, 7); c.fillStyle = id === 'biscuit' || id === 'stray' ? '#f3dfb8' : '#e9dcc0'; c.fill();
   c.save(); c.clip();
-  if (id === 'biscuit') { const k = 2.7; c.translate(48, 0); c.scale(k, k); drawDog(c, -13 / k - 13.5, 52 / k + 23, true, 0, false, 1, false, false); }
+  if (id === 'biscuit' || id === 'stray') { const k = 2.7; c.translate(48, 0); c.scale(k, k); drawDog(c, -13 / k - 13.5, 52 / k + 23, true, 0, false, 1, false, false); }
   else { const L = LOOKS[id], k = 2.5 / L.s, hy = -27 - 10.5 + 1.5; c.translate(48, 0); c.scale(k, k); drawPerson(c, 0, 44 / k - hy * L.s, L, 'down', 0, 'stand', 1, false); }
   c.restore();
   c.lineWidth = 3; c.strokeStyle = INK; c.beginPath(); c.arc(48, 48, 45, 0, 7); c.stroke();
@@ -387,7 +401,7 @@ function face(id, size = 28) {
   let u = PORT_URL.get(id); if (!u) { u = portrait(id).toDataURL(); PORT_URL.set(id, u); }
   return `<img class="pf" src="${u}" width="${size}" height="${size}" alt="">`;
 }
-{ const st = document.createElement('style'); st.textContent = '.pf{border-radius:50%;vertical-align:middle;display:inline-block;flex:none}.card .face .pf{width:52px;height:52px}.chip .pf{margin:-4px 2px -4px -4px}'; shadow.append(st); }
+{ const st = document.createElement('style'); st.textContent = '.pf{border-radius:50%;vertical-align:middle;display:inline-block;flex:none}.card .face .pf{width:52px;height:52px}.chip .pf{margin:-4px 2px -4px -4px}.prow{display:flex;align-items:center;gap:4px}.plab{font-size:14px;font-weight:700;min-width:74px}.seg{font:inherit;font-size:14px;font-weight:700;min-width:50px;height:38px;padding:0 8px;border:2px solid rgba(0,0,0,.2);background:#f4f1ea;border-radius:6px;cursor:pointer;color:#3a332d}.seg.on{background:#2f6b2f;border-color:#2f6b2f;color:#fff}.seg:disabled{opacity:.35;cursor:not-allowed}.card .acts{flex-direction:column;align-items:stretch;gap:6px}.tog.med{width:auto;min-width:0}.meter{display:flex;align-items:center;gap:6px;font-size:12px;color:#5a514a;margin-top:3px}.meter span:first-child{width:40px}.mbar{flex:1;max-width:150px;height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden}.mbar i{display:block;height:100%;background:#2f6b2f}.mbar i.mid{background:#c98a12}.mbar i.low{background:#b3261e}@media (max-width:560px){.prow{width:100%}.seg{flex:1}}'; shadow.append(st); }
 function drawCharacter(c, who, t) {
   // who: { kind:'player'|'fam', ... }
   if (who.dog) drawDog(c, who.x, who.y, who.right, who.ph, who.moving, t, who.excited);
@@ -500,7 +514,7 @@ function buildStatic() {
     if (!room) { c.fillStyle = 'rgba(50,30,15,0.45)'; c.fillRect(X, Y, T, T); c.fillStyle = 'rgba(255,230,190,0.12)'; c.fillRect(X + 3, Y + 3, T - 6, T - 6); }
   }
   // rugs & decor
-  c.save();
+  c.save(); if (MIRROR) { c.translate(MW * T, 0); c.scale(-1, 1); }
   box(c, 12.4 * T, 2.2 * T, 6.2 * T, 2.6 * T, '#8c3b3b', '#5a2020', 10); c.strokeStyle = '#c9a66b'; c.lineWidth = 3; rr(c, 12.7 * T, 2.5 * T, 5.6 * T, 2 * T, 8); c.stroke();
   for (let r = 2.4; r > 0.4; r -= 0.6) { circle(c, 26.5 * T, 17 * T, r * T, ['#e0b84a', '#d9734a', '#4aa0d9', '#e0b84a'][Math.round(r / .6) % 4]); }
   box(c, 14.3 * T, 15.2 * T, 2.2 * T, 0.7 * T, '#5f9ea0', '#3f7a7c', 8);
@@ -527,10 +541,12 @@ function buildStatic() {
     c.fillStyle = '#3b3642'; c.fillRect(X, Y, T, 3);
     if (below) { c.fillStyle = '#d9cbb0'; c.fillRect(X, Y + T * .55, T, T * .45); c.fillStyle = '#b8a888'; c.fillRect(X, Y + T - 5, T, 5); c.fillStyle = 'rgba(0,0,0,.15)'; c.fillRect(X, Y + T * .55, T, 2); }
   }
+  c.save(); if (MIRROR) { c.translate(MW * T, 0); c.scale(-1, 1); }
   // windows on outer walls
   [[3, 0], [7, 0], [15, 0], [19, 0], [27, 0], [30, 0], [4, 22], [8, 22], [24, 22], [29, 22], [0, 4], [0, 17], [33, 4], [33, 16]].forEach(([x, y]) => {
     c.fillStyle = '#9fd0e8'; if (y === 0 || y === 22) c.fillRect(x * T + 6, y * T + (y === 0 ? 8 : 18), T - 12, 10); else c.fillRect(x * T + 18, y * T + 6, 10, T - 12);
   });
+  c.restore();
   FURN.forEach(f => { if (!f.c) drawFurn(c, f, false); });
   STATIC = cv;
   // minimap
@@ -615,8 +631,11 @@ function newScavenge() {
   named('Fridge')[0].items = ['water', 'water'];
   named('Medicine Cabinet')[0].items = ['meds'];
   const ps = named('Pantry Shelf'); ps[0].items = ['soup', 'soup']; ps[1].items = ['soup', 'water'];
-  const pool = shuffle(['soup', 'soup', 'soup', 'soup', 'soup', 'water', 'water', 'water', 'water', 'water', 'meds',
-    'radio', 'flashlight', 'axe', 'mask', 'map', 'game', 'spray', 'padlock', 'wrench', 'teddy', 'backpack']);
+  const base = ['soup', 'soup', 'soup', 'soup', 'soup', 'water', 'water', 'water', 'water', 'water', 'meds', 'jug', 'crate',
+    'radio', 'flashlight', 'axe', 'mask', 'map', 'game', 'spray', 'padlock', 'wrench', 'teddy', 'book', 'cards', 'backpack'];
+  if (c.level === 0) base.push('soup', 'water', 'water', 'meds');
+  if (c.level === 2) for (const k of ['soup', 'soup', 'water', 'water']) base.splice(base.indexOf(k), 1);
+  const pool = shuffle(base);
   shuffle(cont.filter(c => !c.items.length)).forEach(c => c.items.push(pool.pop()));
   const used = [];
   const far = s => used.every(u => Math.abs(u.x - s.x) + Math.abs(u.y - s.y) > 1);
@@ -635,12 +654,13 @@ function newScavenge() {
   fam.sort((a, b) => FAMILY.indexOf(a.def) - FAMILY.indexOf(b.def));
   G = {
     phase: 'ready', readyT: 3.2, time: 60, t: 0, endT: 0, survived: false,
-    player: { x: 12.5 * T, y: 6.5 * T, vx: 0, vy: 0, face: 0, carry: [], cap: 4, walk: 0 },
+    player: { x: (MIRROR ? MW - 12.5 : 12.5) * T, y: 6.5 * T, vx: 0, vy: 0, face: 0, carry: [], cap: 4, walk: 0 },
     cont, items, fam, flyers: [], floaters: [], parts: [],
     shelter: Object.fromEntries(INV_ORDER.map(k => [k, 0])),
     toast: null, fullWarn: 0, room: null, roomLabel: null, lastTick: 61, shake: 0, flash: 0, searchT: 0, searching: null
   };
 }
+function slotsUsed(p) { return p.carry.reduce((a, k) => a + SIZE(k), 0); }
 function mkItem(k, x, y) { return { k, x, y, bob: Math.random() * 6, hold: false }; }
 
 function toast(text, t = 2.2) { G.toast = { text, t }; }
@@ -771,8 +791,8 @@ function updateScavenge(dt) {
     if (it.hold) { if (d > .85 * T) it.hold = false; keep.push(it); continue; }
     if (d < .55 * T) {
       if (it.k === 'backpack') { p.cap = 6; Snd.saved(); floater('🎒 BACKPACK! +2 SLOTS', p.x, p.y - 36, '#9ff0a8', 17); burst(it.x, it.y, '#9ff0a8', 14); continue; }
-      if (p.carry.length < p.cap) { p.carry.push(it.k); Snd.pickup(); floater('+' + ITEMS[it.k].e + ' ' + ITEMS[it.k].name, p.x, p.y - 34, '#fff', 15); burst(it.x, it.y, '#ffe9a0', 8); continue; }
-      if (G.fullWarn <= 0) { toast('HANDS FULL! Drop it off at the hatch', 2.2); Snd.full(); G.fullWarn = 2.5; }
+      if (slotsUsed(p) + SIZE(it.k) <= p.cap) { p.carry.push(it.k); Snd.pickup(); floater('+' + ITEMS[it.k].e + ' ' + ITEMS[it.k].name, p.x, p.y - 34, '#fff', 15); burst(it.x, it.y, '#ffe9a0', 8); continue; }
+      if (G.fullWarn <= 0) { toast(SIZE(it.k) > 1 && slotsUsed(p) < p.cap ? 'TOO BIG! It needs 2 free slots' : 'HANDS FULL! Drop it off at the hatch', 2.2); Snd.full(); G.fullWarn = 2.5; }
     }
     keep.push(it);
   }
@@ -782,7 +802,7 @@ function updateScavenge(dt) {
   if (inHatch(p.x, p.y) && p.carry.length) {
     const hx = (HATCH.x + 1) * T, hy = (HATCH.y + 1) * T;
     p.carry.forEach((k, i) => {
-      G.shelter[k]++;
+      const gv = ITEMS[k].gives; if (gv) G.shelter[gv[0]] += gv[1]; else G.shelter[k]++;
       G.flyers.push({ e: ITEMS[k].e, sx: p.x, sy: p.y - 20, tx: hx, ty: hy, t: -i * 0.12, dur: .35, arc: 30, shrink: true });
     });
     floater(p.carry.length + ' stashed!', hx, hy - 40, '#9ff0a8', 18);
@@ -1045,12 +1065,14 @@ function drawHUD(c, cam, t) {
   const p = G.player, ss = Math.min(48, (vw - 200) / p.cap), gap = 6, tw = p.cap * (ss + gap) - gap, sx = vw / 2 - tw / 2, sy = vh - ss - 18;
   c.fillStyle = 'rgba(20,16,14,.75)'; rr(c, sx - 8, sy - 22, tw + 16, ss + 30, 10); c.fill();
   c.font = '10px "Atkinson Hyperlegible", sans-serif'; c.fillStyle = '#c9bfa8'; c.textAlign = 'center'; c.textBaseline = 'middle';
-  c.fillText(`CARRYING ${p.carry.length}/${p.cap}`, vw / 2, sy - 11);
+  const used = slotsUsed(p), cells = [];
+  p.carry.forEach(k => { for (let j = 0; j < SIZE(k); j++) cells.push({ k, first: j === 0, n: SIZE(k) }); });
+  c.fillText(`CARRYING ${used}/${p.cap}`, vw / 2, sy - 11);
   for (let i = 0; i < p.cap; i++) {
-    const x = sx + i * (ss + gap);
-    c.fillStyle = i < p.carry.length ? 'rgba(242,193,78,.25)' : 'rgba(255,255,255,.07)'; rr(c, x, sy, ss, ss, 8); c.fill();
-    c.strokeStyle = p.carry.length >= p.cap ? '#d64933' : 'rgba(255,255,255,.25)'; c.lineWidth = 2; c.stroke();
-    if (p.carry[i]) drawEmoji(c, ITEMS[p.carry[i]].e, x + ss / 2, sy + ss / 2, ss * .6);
+    const x = sx + i * (ss + gap), cell = cells[i];
+    c.fillStyle = cell ? 'rgba(242,193,78,.25)' : 'rgba(255,255,255,.07)'; rr(c, x, sy, ss, ss, 8); c.fill();
+    c.strokeStyle = used >= p.cap ? '#d64933' : 'rgba(255,255,255,.25)'; c.lineWidth = 2; c.stroke();
+    if (cell && cell.first) { const span = ss * cell.n + gap * (cell.n - 1); if (cell.n > 1) { c.fillStyle = 'rgba(242,193,78,.25)'; c.fillRect(x + ss - 2, sy + ss / 2 - 4, gap + 4, 8); } drawEmoji(c, ITEMS[cell.k].e, x + span / 2, sy + ss / 2, ss * .6); }
   }
   // hatch pointer
   const hs = worldToScreen(cam, (HATCH.x + 1) * T, (HATCH.y + 1) * T), m = 50;
@@ -1058,7 +1080,7 @@ function drawHUD(c, cam, t) {
     const cx = vw / 2, cy = vh / 2, ang = Math.atan2(hs.y - cy, hs.x - cx);
     const ex = clamp(hs.x, m, vw - m), ey = clamp(hs.y, m + 60, vh - m - 70);
     c.save(); c.translate(ex, ey); c.rotate(ang);
-    const big = p.carry.length >= p.cap || G.time < 12;
+    const big = slotsUsed(p) >= p.cap || G.time < 12;
     c.scale(big ? 1.25 + .1 * Math.sin(t * 8) : 1, big ? 1.25 + .1 * Math.sin(t * 8) : 1);
     c.fillStyle = 'rgba(88,194,107,.95)'; c.beginPath(); c.moveTo(18, 0); c.lineTo(-10, -13); c.lineTo(-4, 0); c.lineTo(-10, 13); c.closePath(); c.fill();
     c.strokeStyle = '#0d3a16'; c.lineWidth = 2; c.stroke(); c.restore();
@@ -1198,7 +1220,7 @@ $('#btnQuick').onclick = () => {
   const fam = shuffle(FAMILY.slice()).slice(0, randi(1, 4)).sort((a, b) => FAMILY.indexOf(a) - FAMILY.indexOf(b));
   const inv = Object.fromEntries(INV_ORDER.map(k => [k, 0]));
   inv.soup = randi(3, 7); inv.water = randi(3, 7); inv.meds = randi(0, 1);
-  shuffle(['radio', 'flashlight', 'axe', 'mask', 'map', 'game', 'spray', 'padlock', 'wrench', 'teddy']).slice(0, randi(3, 6)).forEach(k => inv[k] = 1);
+  shuffle(['radio', 'flashlight', 'axe', 'mask', 'map', 'game', 'spray', 'padlock', 'wrench', 'teddy', 'book', 'cards']).slice(0, randi(3, 7)).forEach(k => inv[k] = 1);
   startSurvival(fam, inv);
 };
 $('#btnResume').onclick = () => { Snd.click(); togglePause(); };
@@ -1221,20 +1243,25 @@ const addItem = (k, n = 1) => { S.inv[k] = (S.inv[k] || 0) + n; };
 const takeItem = (k, n = 1) => { const t = Math.min(S.inv[k] || 0, n); S.inv[k] -= t; return t; };
 const E = k => ITEMS[k].e;
 const name = p => p.id === 'you' ? 'You' : p.name;
-const canGo = p => p.status === 'home' && p.kind !== 'dog' && p.kind !== 'kid' && !p.ill && p.thirst < 3 && p.hunger < 5;
+const canGo = p => p.status === 'home' && p.kind !== 'dog' && p.kind !== 'kid' && !p.ill && !p.tired && p.water >= 40 && p.food >= 30;
+// Food and water are meters from 0 to 100 that drain every night. A full can or bottle refills part of the meter; half portions refill half as much.
+const NEED = { food: { per: 50, drain: { adult: 12, teen: 11, kid: 9, dog: 10 } }, water: { per: 60, drain: { adult: 20, teen: 19, kid: 16, dog: 18 } } };
+const PORTIONS = [0, .5, 1];
+const amt = n => { const w = Math.floor(n + 1e-9), h = n - w > .25; return w ? w + (h ? '½' : '') : h ? '½' : '0'; };
 
 function startSurvival(famDefs, inv) {
   mode = 'survival'; hideAll(); Snd.stopSiren();
-  const mk = d => ({ id: d.id, name: d.name, e: d.e, kind: d.kind, hunger: 0, thirst: 0, ill: null, status: 'home', away: 0, gear: [], cause: '' });
+  const mk = d => ({ id: d.id, name: d.name, e: d.e, kind: d.kind, food: 100, water: 100, dry: 0, starve: 0, ill: null, status: 'home', away: 0, gear: [], cause: '' });
   S = {
     day: 1, inv: Object.assign(Object.fromEntries(INV_ORDER.map(k => [k, 0])), inv),
     people: [mk(YOU)].concat(famDefs.map(mk)),
     morale: 70, karma: 0, radio: 0, rescueDay: null, recent: [], log: [], event: null,
-    rations: {}, exp: { who: null, gear: {} }, lastGame: -10, rescued: false, over: false, deaths: 0
+    rations: {}, exp: { who: null, gear: {}, dest: 'houses' }, lastGame: -10, rescued: false, over: false, deaths: 0,
+    queue: [], flags: {}, stats: { exp: 0, found: 0, events: 0, portions: 0 }
   };
   const n = S.people.length;
   S.log.push({ t: `The hatch is sealed. Through a foot of steel and concrete we heard the world roar, then go quiet. There ${n === 1 ? 'is just me' : `are ${n} of us`} down here.`, c: '' });
-  S.log.push({ t: 'Nobody knows how long we will have to wait. Ration carefully: everyone needs water every few days, and food too.', c: '' });
+  S.log.push({ t: 'Nobody knows how long we will have to wait. Ration carefully: a can or a bottle can be shared, and water runs out faster than food.', c: '' });
   if (has('radio')) S.log.push({ t: `We have the ${E('radio')} radio. If anyone is out there, that's how we'll hear about it.`, c: 'good' });
   else S.log.push({ t: 'We have no radio. If help comes, we may never hear it coming…', c: 'bad' });
   SV.classList.remove('hidden'); SV.scrollTop = 0;
@@ -1355,10 +1382,10 @@ const EVENTS = [
       } },
       { label: 'Switch it off to save the battery', run: () => 'Silence again. Maybe tomorrow.' }
     ] }) },
-  { id: 'dig', w: 7, can: () => !!S.people.find(p => p.id === 'biscuit' && p.status === 'home'), make: () => ({
-    title: 'Good boy?', text: 'Biscuit is frantically digging and whining at a loose panel near the floor.',
+  { id: 'dig', w: 7, can: () => !!S.people.find(p => p.kind === 'dog' && p.status === 'home'), make: () => ({
+    title: 'Good boy?', text: `${S.people.find(p => p.kind === 'dog' && p.status === 'home').name} is frantically digging and whining at a loose panel near the floor.`,
     choices: [
-      { label: 'Let him dig', run: () => { if (Math.random() < .65) { S.morale += 4; return `Behind the panel: ${lootText(randomLoot(1))}! Biscuit gets extra belly rubs.`; } return 'Just a very old, very dead mouse. Biscuit is proud anyway.'; } },
+      { label: 'Let him dig', run: () => { if (Math.random() < .65) { S.morale += 4; return `Behind the panel: ${lootText(randomLoot(1))}! Extra belly rubs all round.`; } return 'Just a very old, very dead mouse. The dog is very proud anyway.'; } },
       { label: 'Pull him away', run: () => { S.morale -= 2; return 'He sulks in the corner all day.'; } }
     ] }) },
   { id: 'murky', w: 5, can: () => has('water'), make: () => ({
@@ -1373,8 +1400,120 @@ const EVENTS = [
       { label: `Bang the ${E('axe')} axe on the hatch`, req: 'axe', run: () => { S.morale += 3; return 'A shriek, and it\'s gone. Nobody wants to guess what it was.'; } },
       { label: `Shine the ${E('flashlight')} flashlight through the vent`, req: 'flashlight', run: () => 'Two eyes reflect the light, then vanish. It doesn\'t come back.' },
       { label: 'Huddle together', run: () => { S.morale -= 8; return 'It scratches all night. In the morning, it\'s gone. Everyone is exhausted.'; } }
-    ] }) }
+    ] }) },
+  { id: 'gasleak', w: 5, can: () => S.day >= 4, make: () => ({
+    title: 'A sweet smell', text: 'A thin hiss, and a sickly sweet smell. Gas is seeping in through a cracked pipe.',
+    choices: [
+      { label: `Put on the ${E('mask')} gas mask and find the leak`, req: 'mask', run: () => 'Behind the shelving: a split seam. You stuff it with rags and tape. Crisis over.' },
+      { label: `Clamp the pipe with the ${E('wrench')} wrench`, req: 'wrench', run: () => { S.morale += 3; return 'Two hard turns and the hissing stops. Everyone cheers, quietly.'; } },
+      { label: 'Crack the hatch open to air it out', run: () => { if (!has('padlock') && Math.random() < .3) return `The air clears, but someone above saw the hatch move. That night ${loseRandom(2)} went missing.`; return 'Cold, gray air pours in. It smells awful, but it isn\'t gas.'; } },
+      { label: 'Hold your breath and hope', run: () => { const v = pick(homeHumans()); if (v && Math.random() < .55) { makeIll(v, 'sick'); return `The smell fades by evening, but ${name(v)} ${v.id === 'you' ? 'have' : 'has'} a pounding headache and a fever.`; } return 'It fades on its own. Lucky.'; } }
+    ] }) },
+  { id: 'argument', w: 6, can: () => homeHumans().length >= 2 && S.day >= 4, make: () => {
+    const [a, b] = shuffle(homeHumans().slice());
+    return { title: 'Raised voices', text: `${name(a)} and ${name(b)} are shouting at each other about whose turn it was to empty the bucket.`,
+      choices: [
+        { label: `Deal out the ${E('cards')} playing cards`, req: 'cards', run: () => { S.morale += 9; return 'One round of cards turns into ten. By the end, they\'re laughing about it.'; } },
+        { label: `Make them play the ${E('game')} board game together`, req: 'game', run: () => { S.morale += 7; return 'They grumble, then team up against everyone else. Peace, sort of.'; } },
+        { label: 'Sit them down and talk it out', run: () => { if (Math.random() < .55) { S.morale += 4; return 'It takes an hour, but they shake hands.'; } S.morale -= 6; return 'The talk makes it worse. Nobody speaks at dinner.'; } },
+        { label: 'Stay out of it', run: () => { S.morale -= 7; return 'The shouting goes on for hours. The shelter feels very small.'; } }
+      ] };
+  } },
+  { id: 'birthday', w: 9, can: () => !S.flags.birthday && S.day >= 5 && !!S.people.find(p => p.id === 'milo' && p.status === 'home'), make: () => { S.flags.birthday = 1; return {
+    title: 'A birthday', text: 'Milo announces, very seriously, that today is his birthday. He is turning eight.',
+    choices: [
+      { label: `Bake him a "cake" (½ ${E('soup')} soup)`, req: 'soup', run: () => { takeItem('soup', .5); S.morale += 12; return 'Warm soup with a match stuck in it. Milo says it\'s the best cake ever.'; } },
+      { label: `Give him the ${E('cards')} playing cards`, req: 'cards', run: () => { S.morale += 10; return 'He spends the whole day inventing his own card game. The rules change every round.'; } },
+      { label: 'Sing to him', run: () => { S.morale += 5; return 'Everyone sings, badly. He grins anyway.'; } }
+    ] }; } },
+  { id: 'storm', w: 5, can: () => S.day >= 5, make: () => {
+    const away = S.people.filter(p => p.status === 'away');
+    return { title: 'Fallout storm', text: 'The wind howls overhead for hours. Dust hisses against the hatch like sand.' + (away.length ? ` Somewhere out there is ${away.map(p => p.name).join(' and ')}.` : ''),
+      choices: [{ label: 'Wait it out', run: () => { if (away.length) { away.forEach(p => p.away++); S.morale -= 3; return `Whoever is outside will have to shelter until it passes. ${away.length > 1 ? 'They\'ll' : 'They\'ll'} be a day late.`; } S.morale -= 2; return 'By morning it\'s quiet again. A fresh layer of gray dust covers the vent.'; } }] };
+  } },
+  { id: 'package', w: 5, can: () => S.day >= 6, make: () => ({
+    title: 'A box on a rope', text: 'Someone lowered a cardboard box through the vent on a rope. No note. No footsteps.',
+    choices: [
+      { label: 'Open it', run: () => { const r = Math.random(); if (r < .55) { const l = randomLoot(2); S.stats.found += 2; return `Inside: ${lootText(l)}. A gift from a stranger.`; } if (r < .8) return 'Empty, except for a child\'s drawing of a smiling sun.'; const v = pick(homeHumans()); if (v) makeIll(v, 'injured'); return `It was rigged with a nail trap. ${v ? name(v) + ' cut a hand badly.' : ''}`; } },
+      { label: 'Push it back up', run: () => 'You\'ll never know what was in it. Better safe.' }
+    ] }) },
+  { id: 'handbook', w: 6, can: () => has('book'), make: () => ({
+    title: 'Reading by lamplight', text: `You flip through the ${E('book')} survival handbook. Two chapters catch your eye.`,
+    choices: [
+      { label: 'Chapter 4: Making dirty water drinkable', run: () => { addItem('water', .5); return `You rig a filter out of a sock, sand and charcoal and squeeze out half a bottle: +½ ${E('water')}.`; } },
+      { label: 'Chapter 9: First aid in the field', run: () => { const v = home().find(p => p.ill); if (v) { v.ill = null; return `You follow the steps exactly. ${name(v)} ${v.id === 'you' ? 'feel' : 'feels'} much better by night.`; } S.morale += 4; return 'Nobody is hurt right now, but everyone feels a bit safer.'; } }
+    ] }) },
+  { id: 'neighbor', w: 9, can: () => !S.flags.neighbor && S.day >= 3, make: () => { S.flags.neighbor = 1; return {
+    title: 'Walt from next door', text: 'Three knocks, then a voice you know: old Walt from next door. "It\'s Ada. Her fever won\'t break. Please, if you have any medicine…"',
+    choices: [
+      { label: `Give him the ${E('meds')} medicine`, req: 'meds', run: () => { takeItem('meds'); S.karma += 2; S.queue.push({ day: S.day + randi(3, 5), id: 'walt_thanks' }); return '"God bless you," he whispers. You hear him hurry away.'; } },
+      { label: `Send down a can of ${E('soup')} soup instead`, req: 'soup', run: () => { takeItem('soup'); S.karma++; S.queue.push({ day: S.day + randi(4, 6), id: 'walt_small' }); return '"It\'s… something. Thank you."'; } },
+      { label: 'Tell him you have nothing', run: () => { S.queue.push({ day: S.day + 3, id: 'walt_silent' }); return 'A long pause. Then slow footsteps, fading.'; } }
+    ] }; } },
+  { id: 'stray', w: 7, can: () => !S.flags.stray && S.day >= 4 && !S.people.some(p => p.kind === 'dog' && p.status !== 'dead'), make: () => { S.flags.stray = 1; return {
+    title: 'Scratching and whining', text: 'Something is whimpering at the hatch. Through the vent: a scruffy, skinny dog, tail going like crazy.',
+    choices: [
+      { label: `Let it in and feed it (½ ${E('soup')} soup)`, req: 'soup', run: () => { takeItem('soup', .5); S.people.push({ id: 'stray', name: 'Scraps', e: '🐕', kind: 'dog', food: 60, water: 60, dry: 0, starve: 0, ill: null, status: 'home', away: 0, gear: [], cause: '' }); S.morale += 10; return 'It licks every face in the shelter. Milo names it Scraps. Scraps is staying.'; } },
+      { label: 'Toss it a scrap and close the vent', run: () => { S.morale -= 3; return 'It sniffs around for a while, then trots off. The kids are quiet all evening.'; } }
+    ] }; } },
+  { id: 'rumor', w: 6, can: () => !S.flags.caravan && S.day >= 9, make: () => { S.flags.caravan = 1; const d = S.day + 3; S.queue.push({ day: d, id: 'caravan' }); return {
+    title: 'A traveler\'s news', text: `A hoarse voice at the vent: "There's a caravan heading for the safe zone up in the hills. Trucks, guards, the works. They'll pass this street in three days. They take people who can pay their way." That's <b>day ${d}</b>.`,
+    choices: [{ label: 'Thank them and start saving supplies', run: () => { S.morale += 6; return 'For the first time in days, people are talking about the future.'; } }] }; } }
+
 ];
+// Follow-up events that story arcs schedule for a later day (S.queue).
+const ARCS = {
+  walt_thanks: () => ({ title: 'A bundle from Walt', text: 'A heavy bundle thumps down the vent. A note in shaky handwriting: "Ada is up and walking. This is everything from our cellar. Thank you."',
+    choices: [{ label: 'Open it', run: () => { const hadMap = has('map'); addItem('soup', 2); addItem('water', 2); if (!hadMap) addItem('map'); S.stats.found += 5; S.morale += 10; return `2 ${E('soup')}, 2 ${E('water')}${hadMap ? ' and a jar of pickles' : ` and Walt's hand-drawn ${E('map')} map of the neighborhood`}. Kindness comes back around.`; } }] }),
+  walt_small: () => ({ title: 'A note from Walt', text: 'A folded note slides through the vent: "The soup helped. We\'re leaving for the hills. Take this."',
+    choices: [{ label: 'Unfold it', run: () => { addItem('water', 1); S.stats.found++; S.morale += 4; return `Taped inside: a bottle cap full of water purification tablets. +1 ${E('water')}.`; } }] }),
+  walt_silent: () => ({ title: 'Quiet next door', text: 'The tapping from Walt\'s side of the wall has stopped. Nobody wants to talk about why.',
+    choices: [{ label: 'Say nothing', run: () => { S.morale -= 8; return 'Dinner is very quiet tonight.'; } }] }),
+  caravan: () => {
+    const food = S.inv.soup + S.inv.water;
+    return { title: 'The caravan is here!', text: 'Engines, and the creak of wagon wheels. A woman in a gas mask raps on the hatch. "Room for your family, if you can pay. Four rations, or something worth more."',
+      choices: [
+        { label: `Pay 4 rations of food and water (you have ${amt(food)})`, req: food >= 4 ? null : 'nothing', run: () => { let left = 4; for (const k of ['soup', 'water']) { const t = takeItem(k, Math.min(left, S.inv[k])); left -= t; } S.rescued = 'caravan'; Snd.good(); return 'She counts the cans, nods, and pulls the hatch wide open. <b>You\'re leaving.</b>'; } },
+        { label: `Trade the ${E('radio')} radio`, req: 'radio', run: () => { takeItem('radio'); S.rescued = 'caravan'; Snd.good(); return '"A working radio? Deal." <b>You\'re leaving.</b>'; } },
+        { label: `Trade the ${E('map')} map`, req: 'map', run: () => { takeItem('map'); S.rescued = 'caravan'; Snd.good(); return '"Maps are gold out here." <b>You\'re leaving.</b>'; } },
+        { label: 'Stay in the shelter', run: () => { S.morale -= 6; return 'The engines fade into the distance. Maybe staying was the right call. Maybe.'; } }
+      ] };
+  }
+};
+const DESTS = [
+  { id: 'houses', name: 'Nearby houses', days: [2, 3], risk: 0, desc: 'Close by and fairly safe. Picked over, so a bit of everything.' },
+  { id: 'grocery', name: 'Grocery store', days: [3, 4], risk: .07, desc: 'Food and water, if anyone left some.' },
+  { id: 'hospital', name: 'Hospital', days: [3, 4], risk: .12, desc: 'Medicine. Dangerous: everyone wants it.' },
+  { id: 'army', name: 'Army checkpoint', days: [4, 5], risk: .18, needs: 'map', desc: 'Gear and maybe a radio. Far, risky, and you need the map to find it.' }
+];
+function destLoot(dest, n) {
+  const table = { houses: null, grocery: [['soup', 50], ['water', 46], ['cards', 4]], hospital: [['meds', 60], ['water', 20], ['soup', 20]],
+    army: [['radio', has('radio') ? 0 : 24], ['mask', 10], ['flashlight', 10], ['axe', 8], ['padlock', 8], ['wrench', 8], ['book', 8], ['water', 12], ['soup', 12]] }[dest];
+  if (!table) return randomLoot(n, true);
+  const out = {};
+  for (let i = 0; i < n; i++) {
+    const tot = table.reduce((a, [, w]) => a + w, 0); let r = Math.random() * tot, k = table[0][0];
+    for (const [kk, w] of table) { r -= w; if (r <= 0) { k = kk; break; } }
+    out[k] = (out[k] || 0) + 1;
+  }
+  Object.entries(out).forEach(([k, n2]) => addItem(k, n2));
+  return out;
+}
+function thought() {
+  const hs = home(); if (!hs.length) return null;
+  const p = pick(hs), you = p.id === 'you';
+  if (p.water < 35) return you ? 'Your lips are cracked. You catch yourself staring at the water bottles.' : `${p.name} keeps licking dry lips and says nothing.`;
+  if (p.food < 35) return p.kind === 'dog' ? `${p.name} whines at the empty can and looks at you with huge eyes.` : you ? 'Your stomach growls loud enough that everyone hears.' : `${p.name}'s stomach growls all night.`;
+  if (S.morale < 30 && !you && p.kind !== 'dog') return `${p.name} hasn't said a word all day.`;
+  const lines = {
+    you: ['You check the hatch seal again. Still tight.', 'You count the cans twice, then a third time.', 'You lie awake listening to the wind.'],
+    rosa: ['Rosa reorganized the supplies by color. Twice.', 'Rosa hums the song she used to sing in the car.', 'Rosa keeps everyone\'s spirits up. You wonder who keeps hers up.'],
+    june: ['June is writing in a notebook and won\'t show anyone.', 'June taught Milo three card tricks.', 'June says she misses her phone more than pizza.'],
+    milo: ['Milo drew a picture of the sun. It\'s bigger than the shelter.', 'Milo asked if the birds are okay. Nobody answered.', 'Milo built a fort out of the empty cans.'],
+    dog: [`${p.name} sleeps across everyone's feet. Nobody minds.`, `${p.name} chased its own tail for ten minutes. Everyone watched.`]
+  };
+  return pick(p.kind === 'dog' ? lines.dog : lines[p.id] || lines.you);
+}
 function rescueEvent(kind) {
   const win = msg => { S.rescued = true; Snd.good(); return msg + ' <b>You\'re going home.</b>'; };
   const fail = msg => { Snd.bad(); S.rescueDay = null; if (S.radio > 1) S.radio = 1; S.morale -= 15; return msg; };
@@ -1400,34 +1539,40 @@ const QUIET = ['A quiet day. We counted the cans twice.', 'Nothing happened toda
   'The walls creak when the wind blows up there. At least, we think it\'s the wind.', 'We scratched another line into the wall.', 'Dust drifts down from the ceiling. We try not to think about it.'];
 
 function beginDay() {
-  S.rations = {}; S.exp = { who: null, gear: {} }; S.event = null; S.step = 'morning'; S.note = '';
+  S.rations = {}; S.exp = { who: null, gear: {}, dest: 'houses' }; S.event = null; S.step = 'morning'; S.note = '';
+  const due = S.queue.findIndex(q => q.day <= S.day);
   if (S.rescueDay && S.day >= S.rescueDay && home().length) S.event = rescueEvent('radio');
+  else if (due >= 0 && home().length) S.event = ARCS[S.queue.splice(due, 1)[0].id]();
   else if (!S.rescueDay && S.day >= 16 && home().length && Math.random() < .08) S.event = rescueEvent('patrol');
   else if (S.day >= 2 && home().length && has('radio') && Math.random() < .35) S.event = EVENTS.find(e => e.id === 'radio').make();
   else if (S.day >= 2 && home().length && Math.random() < .8) S.event = pickEvent();
   if (!S.event && home().length) S.log.push({ t: pick(QUIET), c: '' });
+  const th = Math.random() < .65 && thought(); if (th) S.log.push({ t: th, c: '' });
 }
 
 function clampRations() {
-  let soup = S.inv.soup, water = S.inv.water;
+  const left = { soup: S.inv.soup, water: S.inv.water };
   for (const p of home()) {
     const r = S.rations[p.id]; if (!r) continue;
-    if (r.soup) { if (soup > 0) soup--; else r.soup = false; }
-    if (r.water) { if (water > 0) water--; else r.water = false; }
+    for (const k of ['soup', 'water']) { const want = r[k] || 0, give = Math.min(want, Math.floor(left[k] * 2) / 2); r[k] = give; left[k] -= give; }
   }
 }
-function allocated(k) { return home().reduce((a, p) => a + (S.rations[p.id] && S.rations[p.id][k] ? 1 : 0), 0); }
+function allocated(k) { return home().reduce((a, p) => a + ((S.rations[p.id] && S.rations[p.id][k]) || 0), 0); }
 
 const STEP_NAMES = { morning: 'Morning', care: 'Food & water', out: 'Scavenge' };
 function needText(p) {
   const out = [];
   if (p.ill) out.push(['d', p.ill.type === 'injured' ? (p.ill.days >= 3 ? 'Badly hurt, getting worse' : 'Injured') : (p.ill.days >= 3 ? 'Very sick, getting worse' : 'Sick')]);
-  if (p.thirst >= 4) out.push(['d', 'Will die without water today']);
-  else if (p.thirst >= 3) out.push(['w', 'Parched']);
-  else if (p.thirst >= 2) out.push(['w', 'Thirsty']);
-  if (p.hunger >= 7) out.push(['d', 'Will starve without food today']);
-  else if (p.hunger >= 5) out.push(['w', 'Starving']);
-  else if (p.hunger >= 3) out.push(['w', 'Hungry']);
+  const dw = NEED.water.drain[p.kind] * DMUL;
+  if (p.tired) out.push(['w', 'Exhausted, resting']);
+  if (p.water <= 0 || (p.dry && p.water < dw)) out.push(['d', 'Will die without water today']);
+  else if (p.water < dw) out.push(['d', 'Out of water by tonight']);
+  else if (p.water < 30) out.push(['w', 'Parched']);
+  else if (p.water < 55) out.push(['w', 'Thirsty']);
+  if (p.food <= 0 && p.starve >= 2) out.push(['d', 'Will starve without food today']);
+  else if (p.food <= 0) out.push(['d', 'Starving']);
+  else if (p.food < 25) out.push(['w', 'Very hungry']);
+  else if (p.food < 50) out.push(['w', 'Hungry']);
   if (!out.length) out.push(['ok', 'Doing okay']);
   return out.slice(0, 2).map(([c, t]) => `<span class="${c}">${t}</span>`).join(' · ');
 }
@@ -1450,7 +1595,7 @@ function renderDay() {
   if (!steps.includes(S.step)) S.step = steps[0];
   const idx = steps.indexOf(S.step), ev = S.event, blocking = !!(ev && !ev.done);
   // header: day, essentials, morale, gear
-  const stat = (k, label) => `<div class="stat ${S.inv[k] ? '' : 'zero'}"><span class="ic">${E(k)}</span><b>${S.inv[k] || 0}</b><span class="lbl">${label}</span></div>`;
+  const stat = (k, label) => `<div class="stat ${S.inv[k] ? '' : 'zero'}"><span class="ic">${E(k)}</span><b>${amt(S.inv[k] || 0)}</b><span class="lbl">${label}</span></div>`;
   const mc = S.morale >= 50 ? '' : S.morale >= 25 ? 'mid' : 'low';
   const gear = INV_ORDER.filter(k => !['soup', 'water', 'meds'].includes(k) && S.inv[k]);
   let html = `<header class="top"><div class="day">DAY ${S.day}</div>
@@ -1469,15 +1614,17 @@ function renderDay() {
       html += '</div>';
     }
   } else if (S.step === 'care') {
-    html += `<h2>Food &amp; water</h2><p class="help">Pick who eats and drinks today. Not everyone needs it every day: water every 2–3 days, food every 4–5.</p>`;
+    html += `<h2>Food &amp; water</h2><p class="help">Choose how much each person gets today: nothing, half or a full portion. One can or bottle can be split between two people. Water runs out faster than food.</p>`;
+    html += `<p class="help" style="margin-top:-8px"><b>Left after today:</b> ${E('soup')} ${amt(S.inv.soup - allocated('soup'))} food · ${E('water')} ${amt(S.inv.water - allocated('water'))} water</p>`;
     if (S.note) html += `<p class="note">${S.note}</p>`;
     const freeS = S.inv.soup - allocated('soup'), freeW = S.inv.water - allocated('water');
     html += '<div class="crew">' + home().map(p => {
       const r = S.rations[p.id] || {};
-      let acts = `<button class="tog ${r.soup ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="soup" ${!r.soup && freeS <= 0 ? 'disabled' : ''}>${E('soup')} Food</button>
-        <button class="tog ${r.water ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="water" ${!r.water && freeW <= 0 ? 'disabled' : ''}>${E('water')} Water</button>`;
-      if (p.ill && has('meds')) acts += `<button class="tog med" data-act="treat" data-id="${p.id}">${E('meds')} Treat</button>`;
-      return `<div class="card"><div class="face">${face(p.id, 52)}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div></div><div class="acts">${acts}</div></div>`;
+      const meter = (k, v) => { const pct = clamp(v, 0, 100); return `<div class="meter"><span>${k === 'food' ? 'Food' : 'Water'}</span><span class="mbar"><i class="${pct < 25 ? 'low' : pct < 55 ? 'mid' : ''}" style="width:${pct}%"></i></span></div>`; };
+      const row = (k, label) => `<div class="prow"><span class="plab">${E(k)} ${label}</span>${PORTIONS.map(v => { const cur = r[k] || 0, free = (k === 'soup' ? freeS : freeW) + cur; return `<button class="seg ${cur === v ? 'on' : ''}" data-act="portion" data-id="${p.id}" data-k="${k}" data-v="${v}" ${v > cur && v > free + 1e-9 ? 'disabled' : ''}>${v === 0 ? 'None' : v === .5 ? '½' : 'Full'}</button>`; }).join('')}</div>`;
+      let acts = row('soup', 'Food') + row('water', 'Water');
+      if (p.ill && has('meds')) acts += `<button class="tog med" data-act="treat" data-id="${p.id}">${E('meds')} Give medicine</button>`;
+      return `<div class="card"><div class="face">${face(p.id, 52)}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div>${meter('food', p.food)}${meter('water', p.water)}</div><div class="acts">${acts}</div></div>`;
     }).join('') + '</div>';
     html += awayLine();
     const gone = S.people.filter(p => p.status === 'dead' || p.status === 'lost');
@@ -1487,19 +1634,22 @@ function renderDay() {
     const elig = home().filter(p => p.kind !== 'dog' && p.kind !== 'kid');
     html += `<h2>Send someone outside?</h2><p class="help">They'll be gone 2–4 days. They might bring back supplies, come back hurt, or not come back at all.</p>
       <p class="label">Who goes?</p><div class="pick"><button class="pbtn ${!S.exp.who ? 'on' : ''}" data-act="nobody">Nobody today</button>
-      ${elig.map(p => `<button class="pbtn ${S.exp.who === p.id ? 'on' : ''}" data-act="who" data-id="${p.id}" ${canGo(p) ? '' : 'disabled'}>${face(p.id, 24)} ${p.id === 'you' ? 'Go yourself' : p.name}${canGo(p) ? '' : ' (too weak)'}</button>`).join('')}</div>`;
+      ${elig.map(p => `<button class="pbtn ${S.exp.who === p.id ? 'on' : ''}" data-act="who" data-id="${p.id}" ${canGo(p) ? '' : 'disabled'}>${face(p.id, 24)} ${p.id === 'you' ? 'Go yourself' : p.name}${canGo(p) ? '' : p.tired ? ' (resting)' : ' (too weak)'}</button>`).join('')}</div>`;
     if (S.exp.who) {
-      const kit = ['mask', 'axe', 'flashlight', 'map'].filter(has);
+      const kit = ['mask', 'axe', 'flashlight', 'map', 'book'].filter(has);
       html += kit.length
         ? `<p class="label">What do they take?</p><div class="pick">${kit.map(k => `<button class="pbtn ${S.exp.gear[k] ? 'on' : ''}" data-act="gear" data-k="${k}">${E(k)} ${ITEMS[k].name}</button>`).join('')}</div>`
         : '<p class="help">You have no gear to give them (a gas mask, axe, flashlight or map would help).</p>';
-      html += `<p class="help">${S.exp.gear.mask ? 'The gas mask will protect them from fallout.' : 'Without a gas mask, the fallout may make them sick.'}${S.exp.gear.map ? ' The map will get them back faster.' : ''}</p>`;
+      html += `<p class="label">Where to?</p><div class="pick">${DESTS.map(d => { const ok = !d.needs || S.exp.gear[d.needs]; return `<button class="pbtn ${S.exp.dest === d.id ? 'on' : ''}" data-act="dest" data-k="${d.id}" ${ok ? '' : 'disabled'}>${d.name} <small>${d.days[0]}–${d.days[1]} days</small></button>`; }).join('')}</div>`;
+      const dd = DESTS.find(d => d.id === S.exp.dest);
+      html += `<p class="help"><b>${dd.name}:</b> ${dd.desc}</p>`;
+      html += `<p class="help">${S.exp.gear.mask ? 'The gas mask will protect them from fallout.' : 'Without a gas mask, the fallout may make them sick.'}${S.exp.gear.map ? ' The map will get them back a day sooner.' : ''}${S.exp.gear.book ? ' The handbook will keep them out of trouble.' : ''}</p>`;
     }
   }
   html += '</section><footer class="nav">';
   if (blocking) html += '<p class="warn">Choose what to do about today\'s event first.</p>';
   if (idx > 0) html += '<button class="btn back" data-act="back">← Back</button>';
-  if (S.rescued) html += '<button class="btn red" data-act="climb">CLIMB OUT INTO THE LIGHT →</button>';
+  if (S.rescued) html += `<button class="btn red" data-act="climb">${S.rescued === 'caravan' ? 'LEAVE WITH THE CARAVAN →' : 'CLIMB OUT INTO THE LIGHT →'}</button>`;
   else if (idx < steps.length - 1) html += `<button class="btn" data-act="next" ${blocking ? 'disabled' : ''}>Next: ${STEP_NAMES[steps[idx + 1]]} →</button>`;
   else html += `<button class="btn dark" data-act="end" ${blocking ? 'disabled' : ''}>END DAY ${S.day}</button>`;
   html += '</footer>';
@@ -1512,10 +1662,10 @@ SV.addEventListener('click', e => {
   let toTop = false;
   if (act === 'choice') {
     const c = S.event.choices[+b.dataset.i]; if (c.req && !has(c.req)) return;
-    Snd.click(); S.event.result = c.run(); S.event.done = true;
-  } else if (act === 'ration') {
-    const r = S.rations[b.dataset.id] || (S.rations[b.dataset.id] = {}); const k = b.dataset.k;
-    if (!r[k] && S.inv[k] - allocated(k) <= 0) return; r[k] = !r[k]; Snd.click();
+    Snd.click(); S.event.result = c.run(); S.event.done = true; S.stats.events++;
+  } else if (act === 'portion') {
+    const r = S.rations[b.dataset.id] || (S.rations[b.dataset.id] = {}), k = b.dataset.k, v = +b.dataset.v, cur = r[k] || 0;
+    if (v > cur && S.inv[k] - allocated(k) + cur < v - 1e-9) return; r[k] = v; Snd.click();
   } else if (act === 'treat') {
     const p = byId(b.dataset.id); if (p && p.ill && takeItem('meds')) { p.ill = null; S.note = `${name(p)} took the medicine and ${p.id === 'you' ? 'feel' : 'feels'} much better.`; Snd.good(); }
   } else if (act === 'who') {
@@ -1524,6 +1674,9 @@ SV.addEventListener('click', e => {
     S.exp.who = null; S.exp.gear = {}; Snd.click();
   } else if (act === 'gear') {
     S.exp.gear[b.dataset.k] = !S.exp.gear[b.dataset.k]; Snd.click();
+    const dd = DESTS.find(d => d.id === S.exp.dest); if (dd.needs && !S.exp.gear[dd.needs]) S.exp.dest = 'houses';
+  } else if (act === 'dest') {
+    S.exp.dest = b.dataset.k; Snd.click();
   } else if (act === 'play') {
     S.lastGame = S.day; S.morale += 10; S.note = `You'll play the ${E('game')} board game tonight. Everyone perks up.`; Snd.good();
   } else if (act === 'next' || act === 'back') {
@@ -1540,15 +1693,17 @@ function endDay() {
   // 1. rations and needs
   for (const p of home()) {
     const r = S.rations[p.id] || {};
-    if (r.soup && takeItem('soup')) p.hunger = 0; else p.hunger++;
-    if (r.water && takeItem('water')) p.thirst = 0; else p.thirst++;
+    const ate = takeItem('soup', r.soup || 0), drank = takeItem('water', r.water || 0);
+    p.food = clamp(p.food + ate * NEED.food.per - NEED.food.drain[p.kind] * DMUL, 0, 100); S.stats.portions += ate + drank; if (p.tired) p.tired--;
+    p.water = clamp(p.water + drank * NEED.water.per - NEED.water.drain[p.kind] * DMUL, 0, 100);
+    p.dry = p.water <= 0 ? p.dry + 1 : 0; p.starve = p.food <= 0 ? p.starve + 1 : 0;
     if (p.ill) p.ill.days++;
-    else if ((p.thirst >= 3 || p.hunger >= 5) && Math.random() < .2) { makeIll(p, 'sick'); log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} weak and feverish from going without.`, c: 'bad' }); }
-    if (p.thirst >= 5) die(p, 'died of thirst', log);
-    else if (p.hunger >= 8) die(p, 'starved to death', log);
+    else if ((p.water < 25 || p.food < 20) && Math.random() < .18) { makeIll(p, 'sick'); log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} weak and feverish from going without.`, c: 'bad' }); }
+    if (p.dry >= 2) die(p, 'died of thirst', log);
+    else if (p.starve >= 3) die(p, 'starved to death', log);
     else if (p.ill && p.ill.days >= 5) die(p, p.ill.type === 'injured' ? 'did not survive the injury' : 'lost the fight with the fever', log);
-    else if (p.thirst === 4) log.push({ t: `${name(p)} can barely speak. Water is needed <b>tomorrow</b> or it\'s over.`, c: 'bad' });
-    else if (p.hunger === 7) log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} skin and bone. Food is needed <b>tomorrow</b>.`, c: 'bad' });
+    else if (p.dry === 1) log.push({ t: `${name(p)} can barely speak. Water is needed <b>today</b> or it\'s over.`, c: 'bad' });
+    else if (p.starve === 2) log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} skin and bone. Food is needed <b>today</b>.`, c: 'bad' });
   }
   // 2. departures
   const ex = S.exp;
@@ -1556,8 +1711,9 @@ function endDay() {
     const p = byId(ex.who);
     if (p && canGo(p)) {
       p.gear = Object.keys(ex.gear).filter(k => ex.gear[k] && has(k)); p.gear.forEach(k => takeItem(k));
-      p.status = 'away'; p.away = (p.gear.includes('map') ? 2 : 3) + randi(0, 1); p.left = S.day;
-      log.push({ t: `${name(p)} climbed out at dusk${p.gear.length ? ' with ' + p.gear.map(E).join(' ') : ' with nothing but courage'}. The hatch clanged shut behind ${p.id === 'you' ? 'you' : 'them'}.`, c: '' });
+      const dd = DESTS.find(d => d.id === ex.dest) || DESTS[0];
+      p.status = 'away'; p.dest = dd.id; p.away = Math.max(1, randi(dd.days[0], dd.days[1]) - (p.gear.includes('map') ? 1 : 0)); p.left = S.day; S.stats.exp++;
+      log.push({ t: `${name(p)} climbed out at dusk, heading for the ${dd.name.toLowerCase()}${p.gear.length ? ' with ' + p.gear.map(E).join(' ') : ' with nothing but courage'}. The hatch clanged shut behind ${p.id === 'you' ? 'you' : 'them'}.`, c: '' });
     }
   }
   // 3. returns
@@ -1566,7 +1722,8 @@ function endDay() {
     p.away--;
     if (p.away > 0) continue;
     const g = k => p.gear.includes(k);
-    let risk = .3 - (g('mask') ? .12 : 0) - (g('axe') ? .1 : 0) - (g('flashlight') ? .04 : 0);
+    const dd = DESTS.find(d => d.id === p.dest) || DESTS[0];
+    let risk = .3 + dd.risk - (g('mask') ? .12 : 0) - (g('axe') ? .1 : 0) - (g('flashlight') ? .04 : 0) - (g('book') ? .06 : 0);
     risk = Math.max(.05, risk);
     const roll = Math.random();
     if (roll < risk * .3) {
@@ -1574,15 +1731,15 @@ function endDay() {
       log.push({ t: `Day after day we waited. ${name(p)} never came back.`, c: 'bad' });
       continue;
     }
-    p.status = 'home'; p.hunger += 1; p.thirst += 1;
+    p.status = 'home'; p.tired = 2; p.food = clamp(p.food - 10, 0, 100); p.water = clamp(p.water - 12, 0, 100);
     if (g('axe') && Math.random() < .1) { p.gear = p.gear.filter(k => k !== 'axe'); log.push({ t: `The ${E('axe')} axe was lost outside.`, c: 'bad' }); }
     p.gear.forEach(k => addItem(k)); p.gear = [];
     if (roll < risk) {
       const type = !g('mask') && Math.random() < .6 ? 'sick' : 'injured'; makeIll(p, type);
-      const loot = randomLoot(randi(0, 2));
+      const loot = destLoot(dd.id, randi(0, 2)); S.stats.found += Object.values(loot).reduce((a, b) => a + b, 0);
       log.push({ t: `${name(p)} stumbled back in, ${type === 'sick' ? 'pale and vomiting from the fallout' : 'bleeding from a deep gash'}. Brought back: ${lootText(loot)}.`, c: 'bad' });
     } else {
-      const loot = randomLoot(randi(2, 3) + (g('flashlight') ? 1 : 0), true);
+      const loot = destLoot(dd.id, randi(2, 3) + (g('flashlight') ? 1 : 0) + (dd.id === 'grocery' ? 1 : 0)); S.stats.found += Object.values(loot).reduce((a, b) => a + b, 0);
       S.morale += 6;
       log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} back, filthy but in one piece! Brought back: ${lootText(loot)}.`, c: 'good' });
       if (!g('mask') && Math.random() < .3) { makeIll(p, 'sick'); log.push({ t: `But ${name(p)} breathed in a lot of dust out there and ${p.id === 'you' ? 'feel' : 'feels'} sick.`, c: 'bad' }); }
@@ -1590,7 +1747,7 @@ function endDay() {
   }
   // 4. morale
   S.morale -= 3;
-  if (S.people.find(p => p.id === 'biscuit' && p.status === 'home')) S.morale += 2;
+  if (S.people.find(p => p.kind === 'dog' && p.status === 'home')) S.morale += 2;
   if (S.morale < 20) {
     const cand = home().filter(p => p.kind === 'adult' || p.kind === 'teen').filter(p => p.id !== 'you');
     if (cand.length && Math.random() < .25) {
@@ -1621,14 +1778,16 @@ function finishSurvival(rescued) {
     const f = p.status === 'home' ? (rescued ? 'Rescued' : '') : p.status === 'away' ? 'Still out there' : p.cause;
     return `<span class="chip ${p.status === 'home' && rescued ? '' : 'lost'}">${face(p.id)} ${p.name} · ${f}</span>`;
   }).join('');
-  const score = days * 10 + (rescued ? out.length * 100 + 250 : 0);
+  const score = days * 10 + (rescued ? out.length * 100 + 250 : 0), st = S.stats;
+  const summary = `<p style="font-size:15px">Days: <b>${days}</b> · Expeditions: <b>${st.exp}</b> · Supplies found: <b>${st.found}</b> · Events faced: <b>${st.events}</b> · Portions shared: <b>${amt(st.portions)}</b></p>`;
+  const caravan = S.rescued === 'caravan';
   const b = { days: c.best() || days };
   $('#endBody').innerHTML = rescued
-    ? `<div class="hazard"></div><h2>RESCUED!</h2><p>On day ${days}, the hatch groaned open and gray daylight poured in. ${out.length === 1 ? 'One survivor' : out.length + ' survivors'} climbed out into a changed world.</p>
-       <div class="chips">${fates}</div><p><b>Score: ${score}</b> · Best run: ${b.days} days</p>
+    ? `<div class="hazard"></div><h2>${caravan ? 'ON THE ROAD' : 'RESCUED!'}</h2><p>${caravan ? `On day ${days}, ${out.length === 1 ? 'you climbed' : 'you all climbed'} onto a rattling truck and the caravan rolled out toward the safe zone in the hills.` : `On day ${days}, the hatch groaned open and gray daylight poured in. ${out.length === 1 ? 'One survivor' : out.length + ' survivors'} climbed out into a changed world.`}</p>
+       <div class="chips">${fates.replace(/Rescued/g, caravan ? 'Left with the caravan' : 'Rescued')}</div>${summary}<p><b>Score: ${score}</b> · Best run: ${b.days} days</p>
        <div class="row"><button class="btn ghost dark" data-go="menu" style="flex:.6">MENU</button><button class="btn red" data-go="retry">PLAY AGAIN</button></div>`
     : `<div class="hazard"></div><h2>THE SHELTER FALLS SILENT</h2><p>You held on for ${days} day${days === 1 ? '' : 's'}. Nobody came in time.</p>
-       <div class="chips">${fates}</div><p><b>Score: ${score}</b> · Best run: ${b.days} days</p>
+       <div class="chips">${fates}</div>${summary}<p><b>Score: ${score}</b> · Best run: ${b.days} days</p>
        <p style="font-size:14px;opacity:.8">Tip: water matters more than food, a gas mask makes scavenging much safer, and the radio is the fastest way out.</p>
        <div class="row"><button class="btn ghost dark" data-go="menu" style="flex:.6">MENU</button><button class="btn red" data-go="retry">PLAY AGAIN</button></div>`;
   SV.classList.add('hidden');

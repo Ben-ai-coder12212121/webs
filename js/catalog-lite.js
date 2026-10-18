@@ -272,6 +272,6 @@ G.push(
 {"id":"m_snip","name":"Snip & Feed","kind":"puzzle","tint":"#fff0c8","url":"/games/snip-feed/","fmt":b=>b+' stars'},
 {"id":"m_spiral","name":"Spiral Drop","kind":"arcade","tint":"#e8e0ff","url":"/games/spiral-drop/","levels":true,"fmt":b=>'level '+b},
 {"id":"m_wordwheel","name":"Word Wheel","kind":"puzzle","tint":"#e8f0ff","url":"/games/word-wheel/","fmt":b=>b+' puzzles'},
-{"id":"bunker","name":"Bunker Down","kind":"game","tint":"#ffd9a0","url":"/games/bunker-down/","wide":true,"fmt":b=>b+' days'},
+{"id":"bunker","name":"Bunker Down","kind":"game","tint":"#ffd9a0","url":"/games/bunker-down/","levels":true,"wide":true,"fmt":b=>b+' days'},
 {"id":"knuckle","name":"Knuckle Through","kind":"game","tint":"#f2b233","url":"/games/knuckle-through/","wide":true,"big":true,"tags":["digging","tycoon","3D"],"fmt":b=>b+' m'}
 );

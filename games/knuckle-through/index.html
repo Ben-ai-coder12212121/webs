@@ -1,8 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <script>try{if(localStorage.getItem("unb_theme")==="\"light\"")document.documentElement.dataset.theme="light"}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Knuckle Through | Detourr</title>
-<meta name="robots" content="noindex">
+<title>Knuckle Through: Play Free Online, No Download | Detourr</title>
+<meta name="description" content="Punch your way out of a cell and through 2.5 km of mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.">
+<link rel="canonical" href="https://detourr.net/games/knuckle-through/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#121019">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
@@ -33,8 +34,8 @@
 <script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Knuckle Through: game code ===================== */
-const KT_CSS = "/* Layout: full-bleed first-person 3D view of a tunnel; HUD pinned to the corners like stencilled plates bolted to rock. Single dark look by design. */\n:host{\n  --ink:#0d0e0f;\n  --plate:#18191b;\n  --plate-2:#222427;\n  --rule:#393c40;\n  --chalk:#ece5d8;\n  --dim:#a39d92;\n  --hazard:#f2b233;\n  --hazard-ink:#1b1404;\n  --jumpsuit:#e0662a;\n  --alarm:#e5533d;\n  --f-stencil:\"Big Shoulders Stencil Display\", Impact, \"Arial Narrow\", sans-serif;\n  --f-body:\"IBM Plex Sans Condensed\", \"Arial Narrow\", system-ui, sans-serif;\n  --f-pixel:\"Silkscreen\", ui-monospace, \"Courier New\", monospace;\n  color-scheme: dark;\n}\n[hidden]{display:none!important}\n#game{position:absolute;inset:0;overflow:hidden;background:#070708;color:var(--chalk);font-family:var(--f-body);font-size:15px;line-height:normal;text-align:left;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;container-type:size;container-name:kt}\n#game button{margin:0}\n#gl,#ov2d{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}\n#gl{touch-action:none}\n#ov2d{pointer-events:none}\nbutton{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}\nbutton:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}\n\n.plate{background:color-mix(in srgb,var(--plate) 88%,transparent);border:1px solid var(--rule);box-shadow:0 2px 0 #000,inset 0 1px 0 rgba(255,255,255,.05);border-radius:3px;position:relative}\n.plate::before,.plate::after{content:\"\";position:absolute;top:5px;width:4px;height:4px;border-radius:50%;background:#55595e;box-shadow:inset -1px -1px 0 #2a2c2f}\n.plate::before{left:5px}.plate::after{right:5px}\n#hudL{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));padding:10px 16px;min-width:150px;display:grid;gap:6px;pointer-events:none}\n#money{font-family:var(--f-pixel);font-size:24px;line-height:1;color:var(--hazard);font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #000}\n.lbl{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}\n.bagrow{display:flex;align-items:center;gap:8px}\n#bagbar{flex:1;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#bagfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--chalk)}\n#bagbar.full #bagfill{background:var(--alarm)}\n#bagtxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}\n\n#hudR{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));padding:9px 16px 10px;display:grid;gap:5px;justify-items:end;text-align:right;max-width:46%;pointer-events:none}\n#roomNo{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim)}\n#roomName{font-family:var(--f-stencil);font-weight:900;font-size:24px;line-height:.95;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}\n#layers{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}\n.chip{font-family:var(--f-pixel);font-size:8px;padding:2px 4px 1px;border:1px solid rgba(0,0,0,.6);color:#111;white-space:nowrap}\n#depthRow{display:grid;gap:3px;justify-items:end;width:100%}\n#depthbar{width:150px;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative}\n#depthfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--hazard)}\n#depthTxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums}\n#needleRow{font-family:var(--f-pixel);font-size:9px;letter-spacing:.08em;color:var(--dim)}\n#needleRow b{font-weight:400;color:#bfefff}\n#hudR .tools{display:flex;gap:4px;pointer-events:auto}\n.mini{font-family:var(--f-pixel);font-size:9px;padding:4px 6px 3px;border:1px solid var(--rule);background:var(--plate-2);color:var(--dim)}\n.mini:hover{color:var(--chalk)}\n\n#hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top,0px));max-width:min(560px,calc(100% - 32px));padding:7px 14px 6px;background:rgba(10,10,11,.82);border:1px dashed var(--hazard);color:var(--chalk);font-size:14px;line-height:1.3;text-align:center;pointer-events:none;text-wrap:balance}\n#hint b{color:var(--hazard);font-family:var(--f-pixel);font-weight:400;font-size:11px;padding:0 3px;border:1px solid var(--hazard);margin:0 2px;white-space:nowrap}\n#resume{position:absolute;left:50%;top:50%;transform:translate(-50%,40px);font-family:var(--f-pixel);font-size:11px;letter-spacing:.1em;color:var(--chalk);background:rgba(10,10,11,.8);border:1px solid var(--rule);padding:8px 12px 7px;pointer-events:none}\n\n#bar{position:absolute;left:0;right:0;bottom:0;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;justify-content:center;align-items:flex-end;gap:10px;pointer-events:none;flex-wrap:wrap}\n#bar>*{pointer-events:auto}\n.toolset{display:flex;gap:4px;padding:4px}\n.tool{width:52px;height:52px;position:relative;background:var(--plate-2);border:1px solid var(--rule);display:grid;place-items:center}\n.tool img{width:32px;height:32px;image-rendering:pixelated}\n.tool .k{position:absolute;left:3px;top:2px;font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.tool .n{position:absolute;left:0;right:0;bottom:2px;font-family:var(--f-pixel);font-size:7px;color:var(--dim);text-align:center}\n.tool.on{background:#3a2f12;border-color:var(--hazard);box-shadow:inset 0 0 0 1px var(--hazard)}\n.tool.on .k,.tool.on .n{color:var(--hazard)}\n.tool.locked{opacity:.38;cursor:not-allowed}\n.act{height:52px;padding:0 14px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;background:var(--plate-2);border:1px solid var(--rule);box-shadow:0 2px 0 #000;position:relative;min-width:96px}\n.act .t{font-family:var(--f-stencil);font-weight:900;font-size:19px;line-height:1;letter-spacing:.04em}\n.act .s{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.act:active{transform:translateY(1px);box-shadow:none}\n#sellBtn.ready{border-color:var(--hazard)}\n#sellBtn.ready .t{color:var(--hazard)}\n#shopBtn .badge{position:absolute;right:-6px;top:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--hazard);color:var(--hazard-ink);font-family:var(--f-pixel);font-size:10px;display:grid;place-items:center;box-shadow:0 1px 0 #000}\n#combo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;pointer-events:none;transition:opacity .2s}\n#combo .v{font-family:var(--f-pixel);font-size:13px;color:var(--hazard);text-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n#combo .bar{width:90px;height:5px;background:rgba(0,0,0,.6);border:1px solid #3b3f43}\n#combo .bar i{display:block;height:100%;width:0;background:var(--hazard)}\n\n/* touch controls */\n#touch{position:absolute;inset:0;pointer-events:none}\n#stick{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(236,229,216,.25);background:rgba(10,10,11,.25);transform:translate(-50%,-50%);display:none}\n#stick i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(242,178,51,.55);border:2px solid #000}\n.tbtn{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:rgba(24,25,27,.8);border:2px solid var(--rule);font-family:var(--f-stencil);font-weight:900;font-size:17px;letter-spacing:.04em;color:var(--chalk);touch-action:none}\n.tbtn.big{width:96px;height:96px;font-size:20px;border-color:var(--hazard);color:var(--hazard)}\n#tPunch{right:max(20px,env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px))}\n#tJump{right:calc(max(20px,env(safe-area-inset-right,0px)) + 104px);bottom:calc(84px + env(safe-area-inset-bottom,0px))}\n\n#shop{position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--plate);border-left:2px solid #000;box-shadow:-12px 0 30px rgba(0,0,0,.5);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:20;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\n#shop.open{transform:none}\n#shop header{display:flex;align-items:center;justify-content:space-between;padding:14px max(16px,env(safe-area-inset-right,0px)) 12px 18px;border-bottom:1px solid var(--rule);background:repeating-linear-gradient(-45deg,#1d1f21 0 8px,#191a1c 8px 16px)}\n#shop h2{margin:0;font-family:var(--f-stencil);font-weight:900;font-size:30px;letter-spacing:.05em;line-height:1}\n#shop .cash{font-family:var(--f-pixel);color:var(--hazard);font-size:13px}\n#shopList{overflow-y:auto;padding:6px max(16px,env(safe-area-inset-right,0px)) 18px 18px;flex:1;-webkit-overflow-scrolling:touch}\n.grp{font-family:var(--f-pixel);font-size:9px;letter-spacing:.16em;color:var(--dim);padding:14px 0 6px;border-bottom:1px solid var(--rule);margin-bottom:2px;text-transform:uppercase}\n.up{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px dashed #2c2f32;align-items:center}\n.up .nm{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:baseline;min-width:0}\n.up .lv{font-family:var(--f-pixel);font-size:9px;color:var(--dim);white-space:nowrap}\n.up .ds{grid-column:1;color:var(--dim);font-size:13px;line-height:1.3}\n.up .ef{grid-column:1;font-family:var(--f-pixel);font-size:9px;color:var(--chalk);font-variant-numeric:tabular-nums}\n.up .ef em{font-style:normal;color:var(--hazard)}\n.buy{grid-column:2;grid-row:1 / span 3;min-width:86px;padding:9px 10px 8px;background:#2b2e31;border:1px solid #44484d;font-family:var(--f-pixel);font-size:11px;color:var(--dim);box-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n.buy.can{background:var(--hazard);color:var(--hazard-ink);border-color:#000}\n.buy.can:hover{filter:brightness(1.08)}\n.buy:active{transform:translateY(1px);box-shadow:none}\n.buy.max{background:transparent;box-shadow:none;border-style:dashed}\n.up.flash{animation:upf .5s}\n@keyframes upf{0%{background:rgba(242,178,51,.25)}100%{background:transparent}}\n.buy.no{animation:shake .25s}\n@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}\n#shop footer{padding:10px max(16px,env(safe-area-inset-right,0px)) 14px 18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:10px}\n.findgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 0}\n.find{border:1px dashed #34373a;padding:8px 9px 7px;display:grid;gap:2px;min-width:0}\n.find .fn{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}\n.find .fn i{width:8px;height:8px;display:inline-block;box-shadow:0 0 0 1px #000}\n.find .fc{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.find.unk{opacity:.55}\n.find.unk .fn{color:var(--dim)}\n\n.ov{position:absolute;inset:0;display:grid;place-items:start center;z-index:30;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}\n.ov.dim{background:radial-gradient(ellipse at center,rgba(8,8,9,.55),rgba(8,8,9,.92))}\n.sheet{max-width:600px;width:100%;text-align:left;margin:auto 0}\n.kicker{font-family:var(--f-pixel);font-size:10px;letter-spacing:.2em;color:var(--hazard);text-transform:uppercase}\n.big{font-family:var(--f-stencil);font-weight:900;text-transform:uppercase;font-size:clamp(34px,min(11cqw,13cqh),104px);line-height:.86;letter-spacing:.01em;margin:8px 0 14px;text-shadow:0 4px 0 #000;text-wrap:balance}\n.big span{color:var(--hazard)}\n.lede{font-size:18px;line-height:1.45;max-width:48ch;color:var(--chalk);margin:0 0 18px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 22px;font-size:14px;color:var(--dim);max-width:460px}\n.keys kbd{font-family:var(--f-pixel);font-size:10px;color:var(--chalk);border:1px solid var(--rule);background:var(--plate-2);padding:3px 6px 2px;white-space:nowrap;justify-self:start}\n.go{font-family:var(--f-stencil);font-weight:900;font-size:26px;letter-spacing:.06em;text-transform:uppercase;color:var(--hazard-ink);background:var(--hazard);padding:12px 26px 10px;border:2px solid #000;box-shadow:0 4px 0 #000}\n.go:active{transform:translateY(2px);box-shadow:0 2px 0 #000}\n.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}\n#prog{font-family:var(--f-pixel);font-size:10px;color:var(--dim);letter-spacing:.06em}\n#card{pointer-events:none;place-items:center;text-align:center;transition:opacity .6s}\n#card>div{padding:34px 44px;background:radial-gradient(closest-side,rgba(8,8,9,.85) 40%,rgba(8,8,9,0))}\n#card .no{font-family:var(--f-pixel);font-size:12px;letter-spacing:.25em;color:var(--hazard)}\n#card .nm{font-family:var(--f-stencil);font-weight:900;font-size:clamp(36px,10cqw,92px);line-height:.9;text-transform:uppercase;text-shadow:0 4px 0 #000;margin:6px 0 10px;text-wrap:balance}\n#card .nt{font-size:17px;color:var(--chalk);text-shadow:0 2px 0 #000;max-width:40ch;margin:0 auto}\n#card .mt{font-family:var(--f-pixel);font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:.06em}\n.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:0 0 22px;max-width:440px}\n.stats div{border-top:1px solid var(--rule);padding-top:6px}\n.stats b{display:block;font-family:var(--f-pixel);font-weight:400;font-size:18px;color:var(--hazard);font-variant-numeric:tabular-nums}\n#toast{position:absolute;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-pixel);font-size:12px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;transition:opacity .4s;max-width:calc(100% - 32px);text-align:center}\n.gain{position:absolute;font-family:var(--f-pixel);font-size:14px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;animation:gain 1.1s ease-out forwards;white-space:nowrap;z-index:5}\n@keyframes gain{0%{transform:translateY(6px);opacity:0}15%{opacity:1}100%{transform:translateY(-26px);opacity:0}}\n#err{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-size:16px;color:var(--chalk);z-index:40}\n\n@container kt (max-width:760px) or (max-height:500px){\n  #shop{top:auto;width:100%;height:78%;border-left:0;border-top:2px solid #000;transform:translateY(105%)}\n  #shop.open{transform:none}\n  #hudL{min-width:0;width:150px;box-sizing:border-box;padding:7px 11px}\n  #bagbar{min-width:30px}\n  #money{font-size:18px}\n  #hudR{padding:7px 11px;max-width:calc(100% - 32px - 158px);box-sizing:border-box}\n  #roomName{font-size:18px}\n  #depthbar{width:100px}\n  .chip{font-size:7px;padding:1px 3px 0}\n  .findgrid{grid-template-columns:1fr}\n}\n#game.touch #bar{left:50%;right:auto;top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;transform:translateX(-50%);padding:0;gap:6px;width:auto;flex-wrap:nowrap;align-items:stretch}\n#game.touch .toolset{padding:3px}\n#game.touch .tool{width:46px;height:46px}\n#game.touch .act{height:44px;min-width:0;padding:0 10px}\n#game.touch .act .t{font-size:15px}\n#game.touch #hint{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:13px;max-width:min(420px,calc(100% - 260px))}\n#game.touch #combo{display:none}\n#game.touch #toast{top:calc(70px + env(safe-area-inset-top,0px))}\n@container kt (max-width:900px){ #game.touch #hudR .chip, #game.touch #hudR #layers{display:none} #game.touch #roomName{font-size:16px} #game.touch #hudL, #game.touch #hudR{padding:6px 10px} #game.touch #hudL{width:132px} #game.touch #hudR{max-width:200px} #game.touch #depthbar{width:90px} }\n@media (prefers-reduced-motion:reduce){ .gain{animation-duration:.01s} }\n/* health */\n.hprow{display:flex;align-items:center;gap:8px}\n#hpbar{flex:1;height:9px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#hpfill{position:absolute;inset:0 auto 0 0;width:100%;background:#58c26b;transition:width .15s}\n#hpbar.mid #hpfill{background:var(--hazard)}\n#hpbar.low #hpfill{background:var(--alarm)}\n#hptxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:24px;text-align:right}\n#ko .big span{color:var(--alarm)}\n\n/* short frames, like a game embedded in a page: tighten the menus so the buttons stay in view */\n@container kt (max-height:640px){\n  .ov{padding-top:14px;padding-bottom:14px}\n  .big{margin:4px 0 8px}\n  .lede{font-size:15px;line-height:1.4;margin-bottom:10px}\n  .keys{gap:3px 12px;font-size:12.5px;margin-bottom:12px}\n  .keys kbd{font-size:9px;padding:2px 5px 1px}\n  .go{font-size:21px;padding:9px 20px 7px}\n  .stats{gap:6px 14px;margin-bottom:12px}\n  .stats b{font-size:15px}\n}\n@container kt (max-height:430px){ .keys{display:none} }\n";
-const KT_HTML = "<div id=\"game\">\n  <canvas id=\"gl\" aria-label=\"First-person view of a tunnel. Walk up to the rock and punch it.\"></canvas>\n  <canvas id=\"ov2d\"></canvas>\n\n  <div id=\"hudL\" class=\"plate\">\n    <div class=\"lbl\">Cash</div>\n    <div id=\"money\">$0</div>\n    <div class=\"hprow\"><span class=\"lbl\">Health</span><div id=\"hpbar\"><div id=\"hpfill\"></div></div><span id=\"hptxt\">100</span></div>\n    <div class=\"bagrow\"><span class=\"lbl\">Bag</span><div id=\"bagbar\"><div id=\"bagfill\"></div></div><span id=\"bagtxt\">0/25</span></div>\n  </div>\n\n  <div id=\"hudR\" class=\"plate\">\n    <div id=\"roomNo\">THE DEEP</div>\n    <div id=\"roomName\">Drywall</div>\n    <div id=\"layers\"></div>\n    <div id=\"depthRow\"><div id=\"depthTxt\">0 m / 2,500 m</div><div id=\"depthbar\"><div id=\"depthfill\"></div></div></div>\n    <div id=\"needleRow\" hidden></div>\n    <div class=\"tools\"><button id=\"muteBtn\" class=\"mini\" type=\"button\">SOUND ON</button></div>\n  </div>\n\n  <div id=\"hint\" hidden></div>\n  <div id=\"resume\" hidden>CLICK TO LOOK AROUND</div>\n  <div id=\"toast\" style=\"opacity:0\"></div>\n  <div id=\"combo\" style=\"opacity:0\"><span class=\"lbl\">Rhythm</span><span class=\"bar\"><i></i></span><span class=\"v\">\u00d71.00</span></div>\n\n  <div id=\"touch\" hidden>\n    <div id=\"stick\"><i></i></div>\n    <button class=\"tbtn big\" id=\"tPunch\" type=\"button\">PUNCH</button>\n    <button class=\"tbtn\" id=\"tJump\" type=\"button\">JUMP</button>\n  </div>\n\n  <div id=\"bar\">\n    <div class=\"toolset plate\" role=\"toolbar\" aria-label=\"Tools\">\n      <button class=\"tool on\" id=\"t0\" type=\"button\" aria-label=\"Fists (1)\"><span class=\"k\">1</span><img alt=\"\"><span class=\"n\">FISTS</span></button>\n      <button class=\"tool\" id=\"t1\" type=\"button\" aria-label=\"Vacuum (2)\"><span class=\"k\">2</span><img alt=\"\"><span class=\"n\">VACUUM</span></button>\n      <button class=\"tool locked\" id=\"t2\" type=\"button\" aria-label=\"Drill (3)\"><span class=\"k\">3</span><img alt=\"\"><span class=\"n\">LOCKED</span></button>\n    </div>\n    <button class=\"act\" id=\"sellBtn\" type=\"button\"><span class=\"t\">SELL</span><span class=\"s\" id=\"sellTxt\">E \u00b7 bag empty</span></button>\n    <button class=\"act\" id=\"shopBtn\" type=\"button\"><span class=\"t\">UPGRADES</span><span class=\"s\" id=\"shopKey\">TAB</span><span class=\"badge\" id=\"badge\" hidden>0</span></button>\n  </div>\n\n  <aside id=\"shop\" aria-label=\"Upgrades\">\n    <header><div><h2>UPGRADES</h2><div class=\"cash\" id=\"shopCash\">$0</div></div><button class=\"mini\" id=\"shopClose\" type=\"button\">CLOSE \u00b7 TAB</button></header>\n    <div id=\"shopList\"></div>\n    <footer><div class=\"lbl\">Progress saves in this browser.</div><button class=\"mini\" id=\"wipeBtn\" type=\"button\">START OVER</button></footer>\n  </aside>\n\n  <div id=\"intro\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">A game about bare hands</div>\n      <div class=\"big\">Knuckle<br><span>Through</span></div>\n      <p class=\"lede\">You wake up in a cell cut into the base of a mountain. No door, no tools. The far side is two and a half kilometres of rock away. Start punching.</p>\n      <div class=\"keys\" id=\"keys\">\n        <kbd>WASD</kbd><span>Walk. Mouse to look, Space to jump, Shift to run.</span>\n        <kbd>CLICK</kbd><span>Punch the rock in front of you. Hold to keep swinging.</span>\n        <kbd>2</kbd><span>Vacuum. Hold it near the rubble on the floor.</span>\n        <kbd>E</kbd><span>Sell your bag of rubble for cash.</span>\n        <kbd>TAB</kbd><span>Upgrades: harder hands, a dig crew, metal detectors.</span>\n        <kbd>CRACKS</kbd><span>Creaking rock that trickles dust is about to fall. Get out from under it. It hurts.</span>\n      </div>\n      <div class=\"row\"><button class=\"go\" id=\"startBtn\" type=\"button\">Start digging</button><span id=\"prog\"></span></div>\n    </div>\n  </div>\n\n  <div id=\"card\" class=\"ov\" style=\"opacity:0\">\n    <div><div class=\"no\" id=\"cardNo\"></div><div class=\"nm\" id=\"cardNm\"></div><div class=\"nt\" id=\"cardNt\"></div><div class=\"mt\" id=\"cardMt\"></div></div>\n  </div>\n\n  <div id=\"ko\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Knocked out</div>\n      <div class=\"big\">Lights<br><span>out.</span></div>\n      <p class=\"lede\" id=\"koText\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"koBtn\" type=\"button\">Get up</button></div>\n    </div>\n  </div>\n  <div id=\"ending\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Escaped</div>\n      <div class=\"big\">Day<span>light.</span></div>\n      <p class=\"lede\">Two and a half kilometres of mountain, bare knuckles. The air outside smells like rain.</p>\n      <div class=\"stats\" id=\"stats\"></div>\n      <div class=\"row\"><button class=\"go\" id=\"endBtn\" type=\"button\">Look around</button></div>\n    </div>\n  </div>\n  <div id=\"err\" hidden></div>\n</div>";
+const KT_CSS = "/* Layout: full-bleed first-person 3D view of a tunnel; HUD pinned to the corners like stencilled plates bolted to rock. Single dark look by design. */\n:host{\n  --ink:#0d0e0f;\n  --plate:#18191b;\n  --plate-2:#222427;\n  --rule:#393c40;\n  --chalk:#ece5d8;\n  --dim:#a39d92;\n  --hazard:#f2b233;\n  --hazard-ink:#1b1404;\n  --jumpsuit:#e0662a;\n  --alarm:#e5533d;\n  --f-stencil:\"Big Shoulders Stencil Display\", Impact, \"Arial Narrow\", sans-serif;\n  --f-body:\"IBM Plex Sans Condensed\", \"Arial Narrow\", system-ui, sans-serif;\n  --f-pixel:\"Silkscreen\", ui-monospace, \"Courier New\", monospace;\n  color-scheme: dark;\n}\n[hidden]{display:none!important}\n#game{position:absolute;inset:0;overflow:hidden;background:#070708;color:var(--chalk);font-family:var(--f-body);font-size:15px;line-height:normal;text-align:left;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;container-type:size;container-name:kt}\n#game button{margin:0}\n#gl,#ov2d{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}\n#gl{touch-action:none}\n#ov2d{pointer-events:none}\nbutton{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}\nbutton:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}\n\n.plate{background:color-mix(in srgb,var(--plate) 88%,transparent);border:1px solid var(--rule);box-shadow:0 2px 0 #000,inset 0 1px 0 rgba(255,255,255,.05);border-radius:3px;position:relative}\n.plate::before,.plate::after{content:\"\";position:absolute;top:5px;width:4px;height:4px;border-radius:50%;background:#55595e;box-shadow:inset -1px -1px 0 #2a2c2f}\n.plate::before{left:5px}.plate::after{right:5px}\n#hudL{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));padding:10px 16px;min-width:150px;display:grid;gap:6px;pointer-events:none}\n#money{font-family:var(--f-pixel);font-size:24px;line-height:1;color:var(--hazard);font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #000}\n.lbl{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}\n.bagrow{display:flex;align-items:center;gap:8px}\n#bagbar{flex:1;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#bagfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--chalk)}\n#bagbar.full #bagfill{background:var(--alarm)}\n#bagtxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}\n\n#hudR{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));padding:9px 16px 10px;display:grid;gap:5px;justify-items:end;text-align:right;max-width:46%;pointer-events:none}\n#roomNo{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim)}\n#roomName{font-family:var(--f-stencil);font-weight:900;font-size:24px;line-height:.95;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}\n#layers{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}\n.chip{font-family:var(--f-pixel);font-size:8px;padding:2px 4px 1px;border:1px solid rgba(0,0,0,.6);color:#111;white-space:nowrap}\n#depthRow{display:grid;gap:3px;justify-items:end;width:100%}\n#depthbar{width:150px;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative}\n#depthfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--hazard)}\n#depthTxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums}\n#needleRow{font-family:var(--f-pixel);font-size:9px;letter-spacing:.08em;color:var(--dim)}\n#needleRow b{font-weight:400;color:#bfefff}\n#hudR .tools{display:flex;gap:4px;pointer-events:auto}\n.mini{font-family:var(--f-pixel);font-size:9px;padding:4px 6px 3px;border:1px solid var(--rule);background:var(--plate-2);color:var(--dim)}\n.mini:hover{color:var(--chalk)}\n\n#hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top,0px));max-width:min(560px,calc(100% - 32px));padding:7px 14px 6px;background:rgba(10,10,11,.82);border:1px dashed var(--hazard);color:var(--chalk);font-size:14px;line-height:1.3;text-align:center;pointer-events:none;text-wrap:balance}\n#hint b{color:var(--hazard);font-family:var(--f-pixel);font-weight:400;font-size:11px;padding:0 3px;border:1px solid var(--hazard);margin:0 2px;white-space:nowrap}\n#resume{position:absolute;left:50%;top:50%;transform:translate(-50%,40px);font-family:var(--f-pixel);font-size:11px;letter-spacing:.1em;color:var(--chalk);background:rgba(10,10,11,.8);border:1px solid var(--rule);padding:8px 12px 7px;pointer-events:none}\n\n#bar{position:absolute;left:0;right:0;bottom:0;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;justify-content:center;align-items:flex-end;gap:10px;pointer-events:none;flex-wrap:wrap}\n#bar>*{pointer-events:auto}\n.toolset{display:flex;gap:4px;padding:4px}\n.tool{width:52px;height:52px;position:relative;background:var(--plate-2);border:1px solid var(--rule);display:grid;place-items:center}\n.tool img{width:32px;height:32px;image-rendering:pixelated}\n.tool .k{position:absolute;left:3px;top:2px;font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.tool .n{position:absolute;left:0;right:0;bottom:2px;font-family:var(--f-pixel);font-size:7px;color:var(--dim);text-align:center}\n.tool.on{background:#3a2f12;border-color:var(--hazard);box-shadow:inset 0 0 0 1px var(--hazard)}\n.tool.on .k,.tool.on .n{color:var(--hazard)}\n.tool.locked{opacity:.38;cursor:not-allowed}\n.act{height:52px;padding:0 14px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;background:var(--plate-2);border:1px solid var(--rule);box-shadow:0 2px 0 #000;position:relative;min-width:96px}\n.act .t{font-family:var(--f-stencil);font-weight:900;font-size:19px;line-height:1;letter-spacing:.04em}\n.act .s{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.act:active{transform:translateY(1px);box-shadow:none}\n#sellBtn.ready{border-color:var(--hazard)}\n#sellBtn.ready .t{color:var(--hazard)}\n#shopBtn .badge{position:absolute;right:-6px;top:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--hazard);color:var(--hazard-ink);font-family:var(--f-pixel);font-size:10px;display:grid;place-items:center;box-shadow:0 1px 0 #000}\n#combo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;pointer-events:none;transition:opacity .2s}\n#combo .v{font-family:var(--f-pixel);font-size:13px;color:var(--hazard);text-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n#combo .bar{width:90px;height:5px;background:rgba(0,0,0,.6);border:1px solid #3b3f43}\n#combo .bar i{display:block;height:100%;width:0;background:var(--hazard)}\n\n/* touch controls */\n#touch{position:absolute;inset:0;pointer-events:none}\n#stick{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(236,229,216,.25);background:rgba(10,10,11,.25);transform:translate(-50%,-50%);display:none}\n#stick i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(242,178,51,.55);border:2px solid #000}\n.tbtn{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:rgba(24,25,27,.8);border:2px solid var(--rule);font-family:var(--f-stencil);font-weight:900;font-size:17px;letter-spacing:.04em;color:var(--chalk);touch-action:none}\n.tbtn.big{width:96px;height:96px;font-size:20px;border-color:var(--hazard);color:var(--hazard)}\n#tPunch{right:max(20px,env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px))}\n#tJump{right:calc(max(20px,env(safe-area-inset-right,0px)) + 104px);bottom:calc(84px + env(safe-area-inset-bottom,0px))}\n\n#shop{position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--plate);border-left:2px solid #000;box-shadow:-12px 0 30px rgba(0,0,0,.5);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:20;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\n#shop.open{transform:none}\n#shop header{display:flex;align-items:center;justify-content:space-between;padding:14px max(16px,env(safe-area-inset-right,0px)) 12px 18px;border-bottom:1px solid var(--rule);background:repeating-linear-gradient(-45deg,#1d1f21 0 8px,#191a1c 8px 16px)}\n#shop h2{margin:0;font-family:var(--f-stencil);font-weight:900;font-size:30px;letter-spacing:.05em;line-height:1}\n#shop .cash{font-family:var(--f-pixel);color:var(--hazard);font-size:13px}\n#shopList{overflow-y:auto;padding:6px max(16px,env(safe-area-inset-right,0px)) 18px 18px;flex:1;-webkit-overflow-scrolling:touch}\n.grp{font-family:var(--f-pixel);font-size:9px;letter-spacing:.16em;color:var(--dim);padding:14px 0 6px;border-bottom:1px solid var(--rule);margin-bottom:2px;text-transform:uppercase}\n.up{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px dashed #2c2f32;align-items:center}\n.up .nm{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:baseline;min-width:0}\n.up .lv{font-family:var(--f-pixel);font-size:9px;color:var(--dim);white-space:nowrap}\n.up .ds{grid-column:1;color:var(--dim);font-size:13px;line-height:1.3}\n.up .ef{grid-column:1;font-family:var(--f-pixel);font-size:9px;color:var(--chalk);font-variant-numeric:tabular-nums}\n.up .ef em{font-style:normal;color:var(--hazard)}\n.buy{grid-column:2;grid-row:1 / span 3;min-width:86px;padding:9px 10px 8px;background:#2b2e31;border:1px solid #44484d;font-family:var(--f-pixel);font-size:11px;color:var(--dim);box-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n.buy.can{background:var(--hazard);color:var(--hazard-ink);border-color:#000}\n.buy.can:hover{filter:brightness(1.08)}\n.buy:active{transform:translateY(1px);box-shadow:none}\n.buy.max{background:transparent;box-shadow:none;border-style:dashed}\n.up.flash{animation:upf .5s}\n@keyframes upf{0%{background:rgba(242,178,51,.25)}100%{background:transparent}}\n.buy.no{animation:shake .25s}\n@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}\n#shop footer{padding:10px max(16px,env(safe-area-inset-right,0px)) 14px 18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:10px}\n.findgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 0}\n.find{border:1px dashed #34373a;padding:8px 9px 7px;display:grid;gap:2px;min-width:0}\n.find .fn{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}\n.find .fn i{width:8px;height:8px;display:inline-block;box-shadow:0 0 0 1px #000}\n.find .fc{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.find.unk{opacity:.55}\n.find.unk .fn{color:var(--dim)}\n\n.ov{position:absolute;inset:0;display:grid;place-items:start center;z-index:30;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}\n.ov.dim{background:radial-gradient(ellipse at center,rgba(8,8,9,.55),rgba(8,8,9,.92))}\n.sheet{max-width:600px;width:100%;text-align:left;margin:auto 0}\n.kicker{font-family:var(--f-pixel);font-size:10px;letter-spacing:.2em;color:var(--hazard);text-transform:uppercase}\n.big{font-family:var(--f-stencil);font-weight:900;text-transform:uppercase;font-size:clamp(34px,min(11cqw,13cqh),104px);line-height:.86;letter-spacing:.01em;margin:8px 0 14px;text-shadow:0 4px 0 #000;text-wrap:balance}\n.big span{color:var(--hazard)}\n.lede{font-size:18px;line-height:1.45;max-width:48ch;color:var(--chalk);margin:0 0 18px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 22px;font-size:14px;color:var(--dim);max-width:460px}\n.keys kbd{font-family:var(--f-pixel);font-size:10px;color:var(--chalk);border:1px solid var(--rule);background:var(--plate-2);padding:3px 6px 2px;white-space:nowrap;justify-self:start}\n.go{font-family:var(--f-stencil);font-weight:900;font-size:26px;letter-spacing:.06em;text-transform:uppercase;color:var(--hazard-ink);background:var(--hazard);padding:12px 26px 10px;border:2px solid #000;box-shadow:0 4px 0 #000}\n.go:active{transform:translateY(2px);box-shadow:0 2px 0 #000}\n.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}\n#prog{font-family:var(--f-pixel);font-size:10px;color:var(--dim);letter-spacing:.06em}\n#card{pointer-events:none;place-items:center;text-align:center;transition:opacity .6s}\n#card>div{padding:34px 44px;background:radial-gradient(closest-side,rgba(8,8,9,.85) 40%,rgba(8,8,9,0))}\n#card .no{font-family:var(--f-pixel);font-size:12px;letter-spacing:.25em;color:var(--hazard)}\n#card .nm{font-family:var(--f-stencil);font-weight:900;font-size:clamp(36px,10cqw,92px);line-height:.9;text-transform:uppercase;text-shadow:0 4px 0 #000;margin:6px 0 10px;text-wrap:balance}\n#card .nt{font-size:17px;color:var(--chalk);text-shadow:0 2px 0 #000;max-width:40ch;margin:0 auto}\n#card .mt{font-family:var(--f-pixel);font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:.06em}\n.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:0 0 22px;max-width:440px}\n.stats div{border-top:1px solid var(--rule);padding-top:6px}\n.stats b{display:block;font-family:var(--f-pixel);font-weight:400;font-size:18px;color:var(--hazard);font-variant-numeric:tabular-nums}\n#toast{position:absolute;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-pixel);font-size:12px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;transition:opacity .4s;max-width:calc(100% - 32px);text-align:center}\n.gain{position:absolute;font-family:var(--f-pixel);font-size:14px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;animation:gain 1.1s ease-out forwards;white-space:nowrap;z-index:5}\n@keyframes gain{0%{transform:translateY(6px);opacity:0}15%{opacity:1}100%{transform:translateY(-26px);opacity:0}}\n#err{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-size:16px;color:var(--chalk);z-index:40}\n\n@container kt (max-width:760px) or (max-height:500px){\n  #shop{top:auto;width:100%;height:78%;border-left:0;border-top:2px solid #000;transform:translateY(105%)}\n  #shop.open{transform:none}\n  #hudL{min-width:0;width:150px;box-sizing:border-box;padding:7px 11px}\n  #bagbar{min-width:30px}\n  #money{font-size:18px}\n  #hudR{padding:7px 11px;max-width:calc(100% - 32px - 158px);box-sizing:border-box}\n  #roomName{font-size:18px}\n  #depthbar{width:100px}\n  .chip{font-size:7px;padding:1px 3px 0}\n  .findgrid{grid-template-columns:1fr}\n}\n#game.touch #bar{left:50%;right:auto;top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;transform:translateX(-50%);padding:0;gap:6px;width:auto;flex-wrap:nowrap;align-items:stretch}\n#game.touch .toolset{padding:3px}\n#game.touch .tool{width:46px;height:46px}\n#game.touch .act{height:44px;min-width:0;padding:0 10px}\n#game.touch .act .t{font-size:15px}\n#game.touch #hint{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:13px;max-width:min(420px,calc(100% - 260px))}\n#game.touch #combo{display:none}\n#game.touch #toast{top:calc(70px + env(safe-area-inset-top,0px))}\n@container kt (max-width:900px){ #game.touch #hudR .chip, #game.touch #hudR #layers{display:none} #game.touch #roomName{font-size:16px} #game.touch #hudL, #game.touch #hudR{padding:6px 10px} #game.touch #hudL{width:132px} #game.touch #hudR{max-width:200px} #game.touch #depthbar{width:90px} }\n@media (prefers-reduced-motion:reduce){ .gain{animation-duration:.01s} }\n/* health */\n.hprow{display:flex;align-items:center;gap:8px}\n#hpbar{flex:1;height:9px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#hpfill{position:absolute;inset:0 auto 0 0;width:100%;background:#58c26b;transition:width .15s}\n#hpbar.mid #hpfill{background:var(--hazard)}\n#hpbar.low #hpfill{background:var(--alarm)}\n#hptxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:24px;text-align:right}\n#ko .big span{color:var(--alarm)}\n\n/* short frames, like a game embedded in a page: tighten the menus so the buttons stay in view */\n@container kt (max-height:640px){\n  .ov{padding-top:14px;padding-bottom:14px}\n  .big{margin:4px 0 8px}\n  .lede{font-size:15px;line-height:1.4;margin-bottom:10px}\n  .keys{gap:3px 12px;font-size:12.5px;margin-bottom:12px}\n  .keys kbd{font-size:9px;padding:2px 5px 1px}\n  .go{font-size:21px;padding:9px 20px 7px}\n  .stats{gap:6px 14px;margin-bottom:12px}\n  .stats b{font-size:15px}\n}\n@container kt (max-height:430px){ .keys{display:none} }\n\n#game.touch .tool{width:40px;height:44px}\n#game.touch .tool img{width:24px;height:24px}\n";
+const KT_HTML = "<div id=\"game\">\n  <canvas id=\"gl\" aria-label=\"First-person view of a tunnel. Walk up to the rock and punch it.\"></canvas>\n  <canvas id=\"ov2d\"></canvas>\n\n  <div id=\"hudL\" class=\"plate\">\n    <div class=\"lbl\">Cash</div>\n    <div id=\"money\">$0</div>\n    <div class=\"hprow\"><span class=\"lbl\">Health</span><div id=\"hpbar\"><div id=\"hpfill\"></div></div><span id=\"hptxt\">100</span></div>\n    <div class=\"bagrow\"><span class=\"lbl\">Bag</span><div id=\"bagbar\"><div id=\"bagfill\"></div></div><span id=\"bagtxt\">0/25</span></div>\n  </div>\n\n  <div id=\"hudR\" class=\"plate\">\n    <div id=\"roomNo\">THE DEEP</div>\n    <div id=\"roomName\">Drywall</div>\n    <div id=\"layers\"></div>\n    <div id=\"depthRow\"><div id=\"depthTxt\">0 m / 2,500 m</div><div id=\"depthbar\"><div id=\"depthfill\"></div></div></div>\n    <div id=\"needleRow\" hidden></div>\n    <div class=\"tools\"><button id=\"muteBtn\" class=\"mini\" type=\"button\">SOUND ON</button></div>\n  </div>\n\n  <div id=\"hint\" hidden></div>\n  <div id=\"resume\" hidden>CLICK TO LOOK AROUND</div>\n  <div id=\"toast\" style=\"opacity:0\"></div>\n  <div id=\"combo\" style=\"opacity:0\"><span class=\"lbl\">Rhythm</span><span class=\"bar\"><i></i></span><span class=\"v\">\u00d71.00</span></div>\n\n  <div id=\"touch\" hidden>\n    <div id=\"stick\"><i></i></div>\n    <button class=\"tbtn big\" id=\"tPunch\" type=\"button\">PUNCH</button>\n    <button class=\"tbtn\" id=\"tJump\" type=\"button\">JUMP</button>\n  </div>\n\n  <div id=\"bar\">\n    <div class=\"toolset plate\" role=\"toolbar\" aria-label=\"Tools\">\n      <button class=\"tool on\" id=\"t0\" type=\"button\" aria-label=\"Fists (1)\"><span class=\"k\">1</span><img alt=\"\"><span class=\"n\">FISTS</span></button>\n      <button class=\"tool\" id=\"t1\" type=\"button\" aria-label=\"Vacuum (2)\"><span class=\"k\">2</span><img alt=\"\"><span class=\"n\">VACUUM</span></button>\n      <button class=\"tool\" id=\"t2\" type=\"button\" aria-label=\"Drill (3)\" hidden><span class=\"k\">3</span><img alt=\"\"><span class=\"n\">DRILL</span></button><button class=\"tool\" id=\"t3\" type=\"button\" aria-label=\"Sledgehammer (4)\" hidden><span class=\"k\">4</span><img alt=\"\"><span class=\"n\">SLEDGE</span></button><button class=\"tool\" id=\"t4\" type=\"button\" aria-label=\"Dynamite (5)\" hidden><span class=\"k\">5</span><img alt=\"\"><span class=\"n\">DYNAMITE</span></button><button class=\"tool\" id=\"t5\" type=\"button\" aria-label=\"Mining laser (6)\" hidden><span class=\"k\">6</span><img alt=\"\"><span class=\"n\">LASER</span></button>\n    </div>\n    <button class=\"act\" id=\"sellBtn\" type=\"button\"><span class=\"t\">SELL</span><span class=\"s\" id=\"sellTxt\">E \u00b7 bag empty</span></button>\n    <button class=\"act\" id=\"shopBtn\" type=\"button\"><span class=\"t\">UPGRADES</span><span class=\"s\" id=\"shopKey\">TAB</span><span class=\"badge\" id=\"badge\" hidden>0</span></button>\n  </div>\n\n  <aside id=\"shop\" aria-label=\"Upgrades\">\n    <header><div><h2>UPGRADES</h2><div class=\"cash\" id=\"shopCash\">$0</div></div><button class=\"mini\" id=\"shopClose\" type=\"button\">CLOSE \u00b7 TAB</button></header>\n    <div id=\"shopList\"></div>\n    <footer><div class=\"lbl\">Progress saves in this browser.</div><button class=\"mini\" id=\"wipeBtn\" type=\"button\">START OVER</button></footer>\n  </aside>\n\n  <div id=\"intro\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">A game about bare hands</div>\n      <div class=\"big\">Knuckle<br><span>Through</span></div>\n      <p class=\"lede\">You wake up in a cell cut into the base of a mountain. No door, no tools. The far side is two and a half kilometres of rock away. Start punching.</p>\n      <div class=\"keys\" id=\"keys\">\n        <kbd>WASD</kbd><span>Walk. Mouse to look, Space to jump, Shift to run.</span>\n        <kbd>CLICK</kbd><span>Punch the rock in front of you. Hold to keep swinging.</span>\n        <kbd>2</kbd><span>Vacuum. Hold it near the rubble on the floor.</span>\n        <kbd>E</kbd><span>Sell your bag of rubble for cash.</span>\n        <kbd>TAB</kbd><span>Upgrades: new tools, machines that dig for you, a dig crew, radar.</span>\n        <kbd>3 TO 6</kbd><span>Drill, sledgehammer, dynamite and mining laser, once you buy them.</span>\n        <kbd>CRACKS</kbd><span>Creaking rock that trickles dust is about to fall. Get out from under it. It hurts.</span>\n      </div>\n      <div class=\"row\"><button class=\"go\" id=\"startBtn\" type=\"button\">Start digging</button><span id=\"prog\"></span></div>\n    </div>\n  </div>\n\n  <div id=\"card\" class=\"ov\" style=\"opacity:0\">\n    <div><div class=\"no\" id=\"cardNo\"></div><div class=\"nm\" id=\"cardNm\"></div><div class=\"nt\" id=\"cardNt\"></div><div class=\"mt\" id=\"cardMt\"></div></div>\n  </div>\n\n  <div id=\"ko\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Knocked out</div>\n      <div class=\"big\">Lights<br><span>out.</span></div>\n      <p class=\"lede\" id=\"koText\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"koBtn\" type=\"button\">Get up</button></div>\n    </div>\n  </div>\n  <div id=\"ending\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Escaped</div>\n      <div class=\"big\">Day<span>light.</span></div>\n      <p class=\"lede\">Two and a half kilometres of mountain, bare knuckles. The air outside smells like rain.</p>\n      <div class=\"stats\" id=\"stats\"></div>\n      <div class=\"row\"><button class=\"go\" id=\"endBtn\" type=\"button\">Look around</button></div>\n    </div>\n  </div>\n  <div id=\"err\" hidden></div>\n</div>";
 // Knuckle Through: a first-person digging game. Mounts into `host` inside its own shadow root, so it works
 // full-page or inside a site's game frame. env: { THREE, audio(), muted(), best(m), saveKey, data }
 function KnuckleThrough(host, env) {
@@ -181,22 +182,54 @@ const UPG = [
   { id: 'crit',     grp: 'Hands', name: 'Pressure Points', desc: 'Chance to land a 5× critical punch.', cost: L => 1440 * Math.pow(1.6, L), max: 15, show: L => (L * 2) + '% crit' },
   { id: 'combo',    grp: 'Hands', name: 'Rhythm', desc: 'Keep swinging to build a damage multiplier.', cost: L => 3600 * Math.pow(1.8, L), max: 12, show: L => '×' + (1.2 + 0.15 * L).toFixed(2) + ' max' },
   { id: 'reach',    grp: 'Hands', name: 'Long Arms', desc: 'Punch rock from farther away.', cost: L => 400 * Math.pow(2.4, L), max: 8, show: L => ((6 + 0.5 * L) / 2).toFixed(2) + ' m reach' },
-  { id: 'drill',    grp: 'Hands', name: 'Hammer Drill', desc: 'Unlocks tool 3. Hold it on one voxel to grind through fast.', cost: () => 2e5, max: 1, show: L => L ? 'Owned' : 'Not owned' },
-  { id: 'torque',   grp: 'Hands', name: 'Drill Torque', desc: 'More damage per drill bite.', cost: L => 4e5 * Math.pow(1.9, L), max: 400, req: 'drill', show: L => '×' + (0.22 * (1 + 0.4 * L)).toFixed(2) + ' punch' },
+  { id: 'drill',    grp: 'Tools', name: 'Hammer Drill', desc: 'Unlocks tool 3. Hold it on one voxel to grind through fast.', cost: () => 2e5, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'torque',   grp: 'Tools', name: 'Drill Torque', desc: 'More damage per drill bite.', cost: L => 4e5 * Math.pow(1.9, L), max: 400, req: 'drill', show: L => '×' + (0.22 * (1 + 0.4 * L)).toFixed(2) + ' punch' },
+  { id: 'sledge',   grp: 'Tools', name: 'Sledgehammer', desc: 'Unlocks tool 4. Hold to wind up, let go to smash a whole ball of rock at once.', cost: () => 2.5e4, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'weight',   grp: 'Tools', name: 'Heavier Head', desc: 'Sledgehammer hits land harder and spread wider.', cost: L => 6e4 * Math.pow(2.3, L), max: 40, req: 'sledge', show: L => '×' + fmt(sledgeMul(L)) + ' punch · ' + sledgeR(L).toFixed(1) + ' radius' },
+  { id: 'dynamite', grp: 'Tools', name: 'Dynamite', desc: 'Unlocks tool 5. Throw a lit stick and get clear. The blast can hurt you too.', cost: () => 4e5, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'caps',     grp: 'Tools', name: 'Blasting Caps', desc: 'Bigger, stronger blasts.', cost: L => 1e6 * Math.pow(2.5, L), max: 30, req: 'dynamite', show: L => blastR(L).toFixed(1) + ' radius · ×' + fmt(blastMul(L)) + ' punch' },
+  { id: 'sticks',   grp: 'Tools', name: 'Powder Magazine', desc: 'Carry more sticks of dynamite, and get them back faster.', cost: L => 8e5 * Math.pow(3, L), max: 8, req: 'dynamite', show: L => stickMax(L) + ' sticks · one every ' + Math.round(stickT(L)) + ' s' },
+  { id: 'laser',    grp: 'Tools', name: 'Mining Laser', desc: 'Unlocks tool 6. A long-range beam that cuts whatever it touches, until it overheats.', cost: () => 2e8, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'focus',    grp: 'Tools', name: 'Laser Focus', desc: 'A hotter beam that also runs cooler.', cost: L => 5e8 * Math.pow(2.2, L), max: 40, req: 'laser', show: L => '×' + fmt(laserMul(L)) + ' punch per second' },
   { id: 'helmet',   grp: 'Safety', name: 'Hard Hat', desc: 'Falling rock and flying debris do less damage.', cost: L => 800 * Math.pow(3.2, L), max: 6, show: L => (L ? '-' + Math.round(hatCut(L) * 100) + '%' : 'No') + ' rock damage' },
   { id: 'vitality', grp: 'Safety', name: 'Thick Skin', desc: 'More health, and you heal faster once you are out of danger.', cost: L => 500 * Math.pow(2.6, L), max: 12, show: L => maxHPof(L) + ' health' },
+  { id: 'bolts',    grp: 'Safety', name: 'Roof Bolter', desc: 'Bolts the ceiling as you go. Rock spans farther before it sags, and loose rock comes down less often.', cost: L => 3e4 * Math.pow(2.6, L), max: 8, show: L => '+' + L + ' span · ' + Math.round(100 * Math.pow(0.75, L)) + '% loose rock' },
   { id: 'boots',    grp: 'Haul', name: 'Work Boots', desc: 'Walk and run faster through your own tunnel.', cost: L => 250 * Math.pow(3, L), max: 6, show: L => Math.round(100 + 15 * L) + '% speed' },
   { id: 'suction',  grp: 'Haul', name: 'Shop-Vac Motor', desc: 'The vacuum reaches farther and pulls harder.', cost: L => 30 * Math.pow(1.55, L), max: 20, show: L => Math.round(100 + 17 * L) + '% reach' },
   { id: 'bag',      grp: 'Haul', name: 'Duffel Bag', desc: 'Carry more rubble before you have to sell.', cost: L => 45 * Math.pow(1.45, L), max: 60, show: L => fmt(bagCap(L)) + ' chunks' },
   { id: 'fence',    grp: 'Haul', name: 'Fence Contacts', desc: 'Every chunk sells for more.', cost: L => 900 * Math.pow(3.238, L), max: 1000, show: L => '×' + fmt(fenceMul(L)) + ' price' },
   { id: 'ghost',    grp: 'Automation', name: 'Phantom Fist', desc: 'A second pair of fists that punches the face on its own.', cost: L => 4500 * Math.pow(1.927, L), max: 3000, show: L => (0.35 * L).toFixed(2) + ' punches/s' },
   { id: 'crew',     grp: 'Automation', name: 'Dig Crew', desc: 'Hired hands chip at the shallowest rock around the clock, even while you are away. They hit as hard as you do.', cost: L => 24000 * Math.pow(1.927, L), max: 3000, show: L => fmt(1.5 * L * baseDmg()) + ' dmg/s' },
+  { id: 'rigs',     grp: 'Automation', name: 'Drill Rig', desc: 'A self-driving drill that clamps onto the face and bores into the shallowest rock. Each level adds another rig.', cost: L => 2e5 * Math.pow(2.4, L), max: 12, show: L => L + ' rig' + (L === 1 ? '' : 's') + ' · ' + fmt(rigDps() * L) + ' dmg/s' },
+  { id: 'crusher',  grp: 'Automation', name: 'Rock Crusher', desc: 'A crusher on tracks that follows you, swallows nearby rubble and sells it at a premium.', cost: () => 1.2e6, max: 1, show: L => L ? 'Running' : 'Not built' },
+  { id: 'rollers',  grp: 'Automation', name: 'Crusher Rollers', desc: 'The crusher pays more and reaches farther.', cost: L => 3e6 * Math.pow(2.6, L), max: 20, req: 'crusher', show: L => '×' + crushMul(L).toFixed(2) + ' price · ' + Math.round(crushR(L) / 2) + ' m reach' },
+  { id: 'tbm',      grp: 'Automation', name: 'Tunnel Boring Machine', desc: 'A giant spinning cutterhead that grinds the middle of the face forward on its own, day and night.', cost: () => 5e10, max: 1, show: L => L ? 'Boring' : 'Not built' },
+  { id: 'cutter',   grp: 'Automation', name: 'TBM Cutterhead', desc: 'Harder teeth on the boring machine.', cost: L => 1.5e11 * Math.pow(2.4, L), max: 40, req: 'tbm', show: L => '×' + fmt(tbmMul(L)) + ' punch per second, per voxel' },
   { id: 'drone',    grp: 'Automation', name: 'Robot Vacuum', desc: 'Little robots roll around the tunnel sweeping rubble into your bag.', cost: L => 3600 * Math.pow(2.1, L), max: 12, show: L => L ? droneCount(L) + ' bot' + (droneCount(L) > 1 ? 's' : '') + ' · speed ' + Math.round(droneSpeed(L) * 10) : 'None' },
   { id: 'conveyor', grp: 'Automation', name: 'Rubble Chute', desc: 'Rubble that comes to rest gets sucked down a chute into your bag.', cost: () => 6e4, max: 1, show: L => L ? 'Running' : 'Not installed' },
   { id: 'pawn',     grp: 'Automation', name: 'Pawn Ticket', desc: 'Sells your bag automatically whenever it fills up.', cost: () => 15000, max: 1, show: L => L ? 'On' : 'Off' },
   { id: 'detector', grp: 'Finds', name: 'Metal Detector', desc: 'Somewhere in this mountain is one sewing needle. Each level hears it from farther away.', cost: L => [1e5, 1e9, 1e14][L], max: 3, show: L => ['Off', 'Hears it within 150 m', 'Hears it within 750 m', 'Shows exactly where it is within 20 m'][L] },
 ];
+{ const ORDER = ['Hands', 'Tools', 'Safety', 'Haul', 'Automation', 'Finds']; UPG.sort((a, b) => ORDER.indexOf(a.grp) - ORDER.indexOf(b.grp)); }
+UPG.push(
+  { id: 'radar', grp: 'Finds', name: 'Ground Radar', desc: 'Pings buried finds through solid rock near you, so you know where to dig.', cost: L => [5e4, 5e6, 5e8][L], max: 3, show: L => L ? 'Sees ' + radarR(L) / 2 + ' m into the rock' : 'Off' },
+  { id: 'geo', grp: 'Finds', name: 'Geologist', desc: 'Knows what finds are worth. Every find pays more.', cost: L => 1e4 * Math.pow(3, L), max: 12, show: L => '×' + fmt(Math.pow(1.6, L)) + ' find value' });
 const UPGM = Object.fromEntries(UPG.map(u => [u.id, u]));
+// tool and machine strength, all as multiples of a punch so they keep up as you upgrade
+const sledgeMul = L => 4 * (1 + 0.6 * L) * Math.pow(1.05, L);
+const sledgeR = L => 1.6 + Math.min(1.6, 0.08 * L);
+const blastMul = L => 30 * (1 + 0.6 * L) * Math.pow(1.06, L);
+const blastR = L => 2.4 + Math.min(2.6, 0.12 * L);
+const stickMax = L => 2 + L;
+const stickT = L => 12 / (1 + 0.3 * L);
+const laserMul = L => 10 * (1 + 0.5 * L) * Math.pow(1.05, L);
+const rigDps = () => 2.5 * baseDmg();
+const crushMul = L => 1.3 + 0.15 * L;
+const crushR = L => 7 + 0.5 * L;
+const tbmMul = L => 2 * (1 + 0.5 * L) * Math.pow(1.05, L);
+const radarR = L => [0, 6, 10, 16][L];
+const TOOL_REQ = [null, null, 'drill', 'sledge', 'dynamite', 'laser'];
+const TOOL_NAME = ['fists', 'vacuum', 'drill', 'sledgehammer', 'dynamite', 'mining laser'];
 const hatCut = L => Math.min(0.72, 0.12 * L);
 const maxHPof = L => 100 + 25 * L;
 const maxHP = () => maxHPof(lv('vitality'));
@@ -652,6 +685,10 @@ function buildIcons() {
   Q('#3a2a06', 1, 4, 9, 6); Q('#e3a91f', 2, 5, 7, 4); Q('#f6cf5a', 2, 5, 7, 1); Q('#1a1a1a', 5, 5, 1, 4);
   Q('#24272a', 5, 10, 4, 5); Q('#3a3e42', 6, 10, 2, 4); Q('#2a2d30', 10, 5, 2, 4); Q('#9aa3aa', 12, 6, 3, 2); Q('#5c646b', 13, 6, 1, 2); Q('#c9d0d5', 15, 6, 1, 2);
   $('#t2 img').src = d.toDataURL();
+  const pix = (k, draw) => { const cv = mk(16, 16), g = cv.getContext('2d'); draw((c, x, y, w, h) => { g.fillStyle = c; g.fillRect(x, y, w, h); }); $('#t' + k + ' img').src = cv.toDataURL(); };
+  pix(3, Q => { for (let i = 0; i < 9; i++) Q('#6a4426', 3 + i, 13 - i, 2, 2); Q('#16181a', 8, 1, 7, 7); Q('#5c646b', 9, 2, 5, 5); Q('#9aa3aa', 9, 2, 2, 5); });
+  pix(4, Q => { Q('#3a0d06', 5, 5, 6, 10); Q('#c8341f', 6, 5, 4, 9); Q('#e8644a', 6, 5, 1, 9); Q('#e8dcc0', 6, 9, 4, 2); Q('#5a4a3a', 8, 2, 1, 3); Q('#ffd060', 8, 1, 1, 1); Q('#ff8a30', 9, 0, 1, 1); });
+  pix(5, Q => { Q('#101214', 1, 5, 12, 5); Q('#4a5560', 2, 6, 10, 3); Q('#7a8894', 2, 6, 10, 1); Q('#3fd6e0', 12, 6, 3, 3); Q('#2b3138', 4, 10, 3, 5); Q('#ff6a3a', 15, 7, 1, 1); });
 }
 
 /* ================= audio ================= */
@@ -678,6 +715,11 @@ function aInit() {
   A.drO.connect(lp).connect(A.drG).connect(A.master); A.drO.start(); A.srcs.push(A.drO);
   const gn = c.createBufferSource(); gn.buffer = b; gn.loop = true; const hp2 = c.createBiquadFilter(); hp2.type = 'highpass'; hp2.frequency.value = 2600;
   A.grG = c.createGain(); A.grG.gain.value = 0; gn.connect(hp2).connect(A.grG).connect(A.master); gn.start(); A.srcs.push(gn);
+  // mining laser hum and the boring machine's rumble
+  A.lzO = c.createOscillator(); A.lzO.type = 'sawtooth'; A.lzO.frequency.value = 220; const lzF = c.createBiquadFilter(); lzF.type = 'bandpass'; lzF.frequency.value = 1800; lzF.Q.value = 2;
+  A.lzG = c.createGain(); A.lzG.gain.value = 0; A.lzO.connect(lzF).connect(A.lzG).connect(A.master); A.lzO.start(); A.srcs.push(A.lzO);
+  const tn = c.createBufferSource(); tn.buffer = b; tn.loop = true; const tnF = c.createBiquadFilter(); tnF.type = 'lowpass'; tnF.frequency.value = 220;
+  A.tbG = c.createGain(); A.tbG.gain.value = 0; tn.connect(tnF).connect(A.tbG).connect(A.master); tn.start(); A.srcs.push(tn);
 }
 function ok(key, gap) { if (!A.ctx || isMuted()) return false; const t = performance.now(); if ((A.last[key] || 0) + gap > t) return false; A.last[key] = t; return true; }
 function envG(t0, a, peak, dec) { const g = A.ctx.createGain(); g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + dec); return g; }
@@ -721,8 +763,13 @@ function sCrash(dist) { if (!ok('crash', 70)) return; const t = A.ctx.currentTim
 function sClack(kind, sp) { if (!ok('clack', 30)) return; const t = A.ctx.currentTime, k = clamp(sp / 9, 0.03, 0.45); if (kind === 'metal') tone(t, 'triangle', 800 + rnd(700), 760, 0.2 * k, 0.14); else if (kind === 'glass') tone(t, 'sine', 2100 + rnd(1000), 1900, 0.16 * k, 0.1); else if (kind === 'soft') noiseBurst(t, 'lowpass', 900, 0.8, 0.4 * k, 0.05); else noiseBurst(t, 'bandpass', 2300 + rnd(1600), 2.2, 0.55 * k, 0.04); }
 function sHurt(dmg) { if (!ok('hurt', 120)) return; const t = A.ctx.currentTime, k = clamp(dmg / 40, 0.3, 1); tone(t, 'sine', 95, 38, 0.9 * k, 0.25); noiseBurst(t, 'lowpass', 900, 0.8, 0.6 * k, 0.12); const c = A.ctx, o = c.createOscillator(), f = c.createBiquadFilter(), g = envG(t + 0.02, 0.01, 0.22 * k, 0.2); o.type = 'sawtooth'; o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(110, t + 0.22); f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 3; o.connect(f).connect(g).connect(A.master); o.start(t); o.stop(t + 0.3); }
 function sBeat() { if (!ok('beat', 400)) return; const t = A.ctx.currentTime; tone(t, 'sine', 62, 45, 0.5, 0.12); tone(t + 0.18, 'sine', 58, 42, 0.38, 0.12); }
+function sBoom(dist) { if (!A.ctx || isMuted()) return; const t = A.ctx.currentTime, k = clamp(1 - dist / 70, 0.08, 1); noiseBurst(t, 'lowpass', 500, 0.6, 1.0 * k, 1.1); noiseBurst(t, 'bandpass', 1400, 0.8, 0.6 * k, 0.5); tone(t, 'sine', 60, 24, 1.0 * k, 0.9); tone(t + 0.02, 'square', 90, 30, 0.25 * k, 0.4); }
+function sSwing(p) { if (!ok('swing', 120)) return; const t = A.ctx.currentTime; noiseBurst(t, 'bandpass', 700 + p * 900, 1.5, 0.25 + 0.2 * p, 0.18); }
+function sSmash(p) { if (!ok('smash', 80)) return; const t = A.ctx.currentTime; tone(t, 'sine', 85, 30, 0.9, 0.35); noiseBurst(t, 'lowpass', 1400, 0.7, 0.7 * p + 0.3, 0.3); noiseBurst(t + 0.01, 'highpass', 3500, 0.7, 0.3, 0.12); }
+function sThrow() { if (!ok('throw', 120)) return; const t = A.ctx.currentTime; noiseBurst(t, 'bandpass', 1200, 1.2, 0.2, 0.15); tone(t, 'triangle', 300, 600, 0.05, 0.1); }
+function sFuse() { if (!ok('fuse', 90)) return; noiseBurst(A.ctx.currentTime, 'highpass', 5000, 0.8, 0.06, 0.08); }
 function sEscape() { if (!A.ctx || isMuted()) return; const t = A.ctx.currentTime; [261.6, 329.6, 392, 523.3].forEach((fq, k) => tone(t + k * 0.08, 'triangle', fq, fq, 0.16, 1.6, 0.05)); }
-function setLoops(vac, vacPull, drill, grind) {
+function setLoops(vac, vacPull, drill, grind, laserOn, tbmLvl) {
   if (!A.ctx) return;
   const t = A.ctx.currentTime;
   A.vacG.gain.setTargetAtTime(isMuted() ? 0 : vac ? 0.28 : 0, t, 0.05);
@@ -730,6 +777,8 @@ function setLoops(vac, vacPull, drill, grind) {
   A.drG.gain.setTargetAtTime(isMuted() ? 0 : drill ? 0.09 : 0, t, 0.03);
   A.drO.frequency.setTargetAtTime(grind ? 58 : 76, t, 0.05);
   A.grG.gain.setTargetAtTime(isMuted() ? 0 : grind ? 0.12 : 0, t, 0.03);
+  if (A.lzG) { A.lzG.gain.setTargetAtTime(isMuted() ? 0 : laserOn ? 0.07 : 0, t, 0.03); A.lzO.frequency.setTargetAtTime(laserOn ? 220 + 160 * laserHeat : 180, t, 0.05); }
+  if (A.tbG) A.tbG.gain.setTargetAtTime(isMuted() ? 0 : tbmLvl * 0.5, t, 0.2);
 }
 
 /* ================= player ================= */
@@ -890,7 +939,7 @@ function analyzeSupport() {
     if (!sol[i]) continue;
     const zl = (i / N) | 0, rem = i - zl * N, y = (rem / GX) | 0, x = rem - y * GX, z = z0 + zl;
     const mi = STRATA[strataIdx(z)].m;
-    if (cost[i] <= SPAN[mi] * 2) continue;
+    if (cost[i] <= (SPAN[mi] + lv('bolts')) * 2) continue;
     const k = vkey(x, y, z);
     if (stressed.has(k)) continue;
     stressed.set(k, rnd(0.35, 1.5) + Math.min(1.5, (cost[i] === 255 ? 0 : 0.02 * cost[i])));
@@ -926,11 +975,13 @@ function landBlock(b, impact) {
 function rewardFind(f, z, x, y, zz) {
   const first = !S.finds[f.id];
   S.finds[f.id] = (S.finds[f.id] || 0) + 1;
-  const gain = valDeep(z) * f.mult * valueMul();
+  const gain = valDeep(z) * f.mult * valueMul() * Math.pow(1.6, lv('geo'));
   S.money += gain; S.stats.earned += gain;
   if (x !== undefined) {
     for (let k = 0; k < 30 && parts.length < PMAX; k++) parts.push({ k: 2, x: x + 0.5, y: y + 0.5, z: zz + 0.5, vx: rnd(-5, 5), vy: rnd(0, 7), vz: rnd(-5, 5), life: rnd(0.6, 1.2), max: 1.2, c: f.C });
-    floatText(x + 0.5, y + 1.2, zz + 0.5, f.name.toUpperCase(), f.C, true);
+    const near = Math.hypot(x + 0.5 - player.x, zz + 0.5 - player.z) < 12;
+    if (!near && !first && f !== NEEDLE) return gain;
+    if (near) floatText(x + 0.5, y + 1.2, zz + 0.5, f.name.toUpperCase(), f.C, true);
     sFind(f === NEEDLE);
     gainPop('+' + money(gain));
     if (f === NEEDLE) toast('You found the needle. Damage ×3 and rubble sells for double, forever.', 6000);
@@ -945,7 +996,7 @@ function breakVoxel(x, y, z, src, n, power) {
   stressed.delete(vkey(x, y, z));
   shatter(x, y, z, mi, valDeep(z), n, power, src);
   requestSupport(z);
-  if (y + 1 < GY && breakable(x, y + 1, z) && Math.random() < LOOSE[MATS[mi].snd] * (src === 'crew' ? 0.35 : 1)) loosen(x, y + 1, z);
+  if (y + 1 < GY && breakable(x, y + 1, z) && Math.random() < LOOSE[MATS[mi].snd] * (src === 'crew' ? 0.35 : 1) * Math.pow(0.75, lv('bolts'))) loosen(x, y + 1, z);
   burst(x + 0.5, y + 0.5, z + 0.5, mi, src === 'crew' ? 2 : src === 'ghost' ? 4 : 8, power, n[0], n[1], n[2]);
   sBreak(MATS[mi].snd, src === 'ghost' || src === 'crew');
   if (f) rewardFind(f, z, x, y, z);
@@ -954,7 +1005,7 @@ function breakVoxel(x, y, z, src, n, power) {
 // overflow damage keeps going into the rock along the punch direction, up to 4 voxels
 // Fragments leave faster the more energy is left over after the voxel fails, and each voxel the blow
 // punches through soaks some of it up.
-const SRC_POWER = { p: 1, drill: 0.45, ghost: 0.7, crew: 0.4 };
+const SRC_POWER = { p: 1, drill: 0.45, ghost: 0.7, crew: 0.4, sledge: 1.3, blast: 2, laser: 0.5 };
 function damageVoxel(x, y, z, amt, dir, src) {
   let a = amt, b = 0;
   const out = [-dir[0], -dir[1], -dir[2]];
@@ -1003,6 +1054,265 @@ function impact(src) {
   sThud(1, r.crit);
   floatText(r.px, r.py + 0.4, r.pz, fmt(r.d) + (r.crit ? '!' : ''), r.crit ? [242, 178, 51] : [236, 229, 216], r.crit);
   trauma = Math.min(1, trauma + (r.crit ? 0.5 : 0.18) + r.broke * 0.04);
+}
+// ---- sledgehammer, dynamite, mining laser ----
+// Damage every breakable voxel inside a sphere, strongest at the centre. Each voxel is pushed away from the centre.
+function areaDamage(cx, cy, cz, R, dmg, src) {
+  let broke = 0;
+  const x0 = Math.floor(cx - R), x1 = Math.floor(cx + R), y0 = Math.floor(cy - R), y1 = Math.floor(cy + R), z0 = Math.floor(cz - R), z1 = Math.floor(cz + R);
+  for (let z = z0; z <= z1; z++) for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    if (!breakable(x, y, z)) continue;
+    const dx = x + 0.5 - cx, dy = y + 0.5 - cy, dz = z + 0.5 - cz, d = Math.hypot(dx, dy, dz);
+    if (d > R) continue;
+    const ax = Math.abs(dx), ay = Math.abs(dy), az = Math.abs(dz);
+    const dir = ax >= ay && ax >= az ? [Math.sign(dx) || 1, 0, 0] : ay >= az ? [0, Math.sign(dy) || 1, 0] : [0, 0, Math.sign(dz) || 1];
+    broke += damageVoxel(x, y, z, dmg * (1 - 0.65 * d / R), dir, src);
+  }
+  return broke;
+}
+const sledge = { charge: 0, swing: 0, pend: 0, cd: 0 };
+function sledgeHit(power) {
+  const d = lookDir(), h = raycast(camera.position.x, camera.position.y, camera.position.z, d[0], d[1], d[2], reach() + 1);
+  if (!h) { sWhiff(); return; }
+  const L = lv('weight');
+  const R = sledgeR(L) * (0.6 + 0.4 * power), dmg = baseDmg() * combo * sledgeMul(L) * (0.35 + 0.65 * power);
+  const cx = h.x + 0.5 - h.nx * 0.35, cy = h.y + 0.5 - h.ny * 0.35, cz = h.z + 0.5 - h.nz * 0.35;
+  const broke = areaDamage(cx, cy, cz, R, dmg, 'sledge');
+  combo = Math.min(1.2 + 0.15 * lv('combo'), combo + 0.08); lastHit = clock; S.stats.punches++;
+  sSmash(power);
+  burst(cx + h.nx * 0.6, cy + h.ny * 0.6, cz + h.nz * 0.6, matFor(h.x, h.y, h.z), 14, 1.2, h.nx, h.ny, h.nz);
+  dust(cx + h.nx * 0.6, cy, cz + h.nz * 0.6, MATS[matFor(h.x, h.y, h.z)].P[2], 8, [h.nx, h.ny, h.nz], 1.2);
+  floatText(cx + h.nx, cy + 0.6, cz + h.nz, fmt(dmg) + (broke ? '  ×' + broke : ''), [242, 178, 51], power > 0.8);
+  trauma = Math.min(1, trauma + 0.25 + 0.45 * power);
+}
+let sticksOut = [], dynT = 0, boomT = 0;
+const stickGeo = new THREE.CylinderGeometry(0.11, 0.11, 0.62, 8), stickMat = new THREE.MeshLambertMaterial({ color: 0xc8341f });
+const boomLight = new THREE.PointLight(0xffb060, 0, 40, 1.4); scene.add(boomLight);
+function throwStick() {
+  if ((S.sticks || 0) <= 0) { sDeny(); toast('Out of dynamite. A new stick comes every ' + Math.round(stickT(lv('sticks'))) + ' s.', 1800); return; }
+  S.sticks--;
+  const d = lookDir(), cp = camera.position;
+  const m = new THREE.Mesh(stickGeo, stickMat); scene.add(m);
+  sticksOut.push({ x: cp.x + d[0] * 0.8, y: cp.y - 0.2 + d[1] * 0.8, z: cp.z + d[2] * 0.8, vx: d[0] * 13 + player.vx, vy: d[1] * 13 + 3, vz: d[2] * 13 + player.vz, fuse: 2.6, m, rest: false, wx: rnd(-8, 8), wz: rnd(-8, 8) });
+  sThrow();
+}
+function sticksTick(dt) {
+  const mx = stickMax(lv('sticks'));
+  if (S.sticks == null) S.sticks = mx;
+  if (S.sticks < mx) { dynT += dt; if (dynT >= stickT(lv('sticks'))) { dynT = 0; S.sticks++; } } else dynT = 0;
+  for (let k = sticksOut.length - 1; k >= 0; k--) {
+    const st = sticksOut[k];
+    st.fuse -= dt;
+    if (!st.rest) {
+      st.vy -= 30 * dt;
+      const nx = st.x + st.vx * dt, nz = st.z + st.vz * dt, ny = st.y + st.vy * dt;
+      if (solid(Math.floor(nx), Math.floor(st.y), Math.floor(st.z))) st.vx *= -0.35; else st.x = nx;
+      if (solid(Math.floor(st.x), Math.floor(st.y), Math.floor(nz))) st.vz *= -0.35; else st.z = nz;
+      if (st.vy < 0 && solid(Math.floor(st.x), Math.floor(ny - 0.12), Math.floor(st.z))) { st.y = Math.floor(ny - 0.12) + 1.12; st.vy *= -0.3; st.vx *= 0.6; st.vz *= 0.6; if (Math.abs(st.vy) < 1) { st.vy = 0; if (Math.hypot(st.vx, st.vz) < 0.3) st.rest = true; } }
+      else if (st.vy > 0 && solid(Math.floor(st.x), Math.floor(ny + 0.12), Math.floor(st.z))) st.vy *= -0.3;
+      else st.y = ny;
+      st.m.rotation.x += st.wx * dt; st.m.rotation.z += st.wz * dt;
+    } else if (!solid(Math.floor(st.x), Math.floor(st.y - 0.2), Math.floor(st.z))) st.rest = false;
+    st.m.position.set(st.x, st.y, st.z);
+    if (parts.length < PMAX) parts.push({ k: 1, x: st.x, y: st.y + 0.3, z: st.z, vx: rnd(-1.5, 1.5), vy: rnd(0.5, 3), vz: rnd(-1.5, 1.5), life: rnd(0.1, 0.25), max: 0.25, c: [255, 200, 90] });
+    if (Math.random() < dt * 12) sFuse();
+    if (st.fuse <= 0) { scene.remove(st.m); sticksOut.splice(k, 1); explode(st.x, st.y, st.z); }
+  }
+  if (boomT > 0) { boomT -= dt; boomLight.intensity = Math.max(0, boomT / 0.35) * 4; } else boomLight.intensity = 0;
+}
+function explode(x, y, z) {
+  const L = lv('caps'), R = blastR(L), dmg = baseDmg() * blastMul(L);
+  const broke = areaDamage(x, y, z, R, dmg, 'blast');
+  boomLight.position.set(x, y, z); boomT = 0.35;
+  const dist = Math.hypot(x - player.x, y - player.y - 1.6, z - player.z);
+  sBoom(dist);
+  for (let k = 0; k < 60 && parts.length < PMAX; k++) { const a = rnd(6.28), b = rnd(-1, 1), sp = rnd(4, 14); parts.push({ k: 1, x, y, z, vx: Math.cos(a) * sp * Math.sqrt(1 - b * b), vy: b * sp + 2, vz: Math.sin(a) * sp * Math.sqrt(1 - b * b), life: rnd(0.2, 0.6), max: 0.6, c: [255, 170 + rnd(60), 70] }); }
+  dust(x, y, z, [140, 130, 120], 40, null, 2.5);
+  if (broke) floatText(x, y + 1, z, 'BOOM  ×' + broke, [255, 150, 60], true);
+  trauma = Math.min(1, trauma + Math.max(0.2, 1.1 - dist * 0.04));
+  // the blast reaches you too, softened by a hard hat
+  const reachR = R * 1.7;
+  if (dist < reachR) {
+    hurt((1 - dist / reachR) * 75 * (1 - hatCut(lv('helmet')) * 0.6), 'blast');
+    const k = (1 - dist / reachR) * 14 / Math.max(dist, 0.5);
+    player.vx += (player.x - x) * k; player.vz += (player.z - z) * k; player.vy = Math.max(player.vy, 6 * (1 - dist / reachR));
+  }
+  for (const st of sticksOut) if (Math.hypot(st.x - x, st.y - y, st.z - z) < R) st.fuse = Math.min(st.fuse, 0.15);
+}
+let laserHeat = 0, laserHot = false, laserHit = null;
+const beamGeo = new THREE.BufferGeometry(); beamGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
+const beam = new THREE.Line(beamGeo, new THREE.LineBasicMaterial({ color: 0xff5a36, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+beam.frustumCulled = false; beam.visible = false; scene.add(beam);
+const beam2 = new THREE.Line(beamGeo, new THREE.LineBasicMaterial({ color: 0xffe0a0, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+beam2.frustumCulled = false; beam2.visible = false; scene.add(beam2);
+const laserLight = new THREE.PointLight(0xff6a3a, 0, 9, 1.6); scene.add(laserLight);
+const beamGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xff4a20, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+const beamCore = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1, 6, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff0c8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+beamGlow.visible = beamCore.visible = false; scene.add(beamGlow); scene.add(beamCore);
+const UP = new THREE.Vector3(0, 1, 0), beamDir = new THREE.Vector3();
+function laserTick(dt, firing) {
+  const L = lv('focus');
+  let on = false;
+  if (firing && !laserHot) {
+    on = true;
+    laserHeat += dt * 0.3 / (1 + 0.06 * L);
+    if (laserHeat >= 1) { laserHot = true; toast('Laser overheated. Let it cool.', 1500); }
+    const d = lookDir(), cp = camera.position;
+    const h = raycast(cp.x, cp.y, cp.z, d[0], d[1], d[2], 26);
+    const rx = Math.cos(player.yaw), rz = -Math.sin(player.yaw);
+    const sx = cp.x + rx * 0.32 + d[0] * 0.5, sy = cp.y - 0.28 + d[1] * 0.5, sz = cp.z + rz * 0.32 + d[2] * 0.5;
+    const ex = h ? h.x + 0.5 + h.nx * 0.5 : cp.x + d[0] * 26, ey = h ? h.y + 0.5 + h.ny * 0.5 : cp.y + d[1] * 26, ez = h ? h.z + 0.5 + h.nz * 0.5 : cp.z + d[2] * 26;
+    const pa = beamGeo.attributes.position; pa.setXYZ(0, sx, sy, sz); pa.setXYZ(1, ex, ey, ez); pa.needsUpdate = true;
+    beam.visible = beam2.visible = true;
+    beamDir.set(ex - sx, ey - sy, ez - sz); const blen = beamDir.length(); beamDir.normalize();
+    for (const bm of [beamGlow, beamCore]) { bm.visible = true; bm.position.set((sx + ex) / 2, (sy + ey) / 2, (sz + ez) / 2); bm.quaternion.setFromUnitVectors(UP, beamDir); bm.scale.set(1, blen, 1); }
+    beamGlow.scale.x = beamGlow.scale.z = 0.8 + 0.4 * Math.random();
+    beam.material.opacity = 0.7 + 0.3 * Math.random();
+    laserLight.position.set(ex, ey, ez); laserLight.intensity = 1.6 + Math.random() * 0.6;
+    if (h && breakable(h.x, h.y, h.z)) {
+      damageVoxel(h.x, h.y, h.z, baseDmg() * laserMul(L) * dt, [-h.nx, -h.ny, -h.nz], 'laser');
+      for (let k = 0; k < 3 && parts.length < PMAX; k++) parts.push({ k: 1, x: ex, y: ey, z: ez, vx: rnd(-5, 5) + h.nx * 3, vy: rnd(0, 5), vz: rnd(-5, 5) + h.nz * 3, life: rnd(0.1, 0.3), max: 0.3, c: [255, 140 + rnd(80), 60] });
+      if (Math.random() < dt * 8) dust(ex, ey, ez, [120, 110, 100], 1, [h.nx, h.ny, h.nz], 0.5);
+    }
+  } else {
+    laserHeat = Math.max(0, laserHeat - dt * 0.45);
+    if (laserHot && laserHeat < 0.35) laserHot = false;
+  }
+  if (!on) { beam.visible = beam2.visible = beamGlow.visible = beamCore.visible = false; laserLight.intensity = 0; }
+  return on;
+}
+// ---- machines ----
+let rigList = [];
+const rigBodyGeo = new THREE.BoxGeometry(0.8, 0.8, 1.0), rigStripeGeo = new THREE.BoxGeometry(0.82, 0.16, 1.02), rigBitGeo = new THREE.ConeGeometry(0.17, 0.75, 8);
+const rigMat = new THREE.MeshLambertMaterial({ color: 0xe3a91f }), darkMat = new THREE.MeshLambertMaterial({ color: 0x24272a }), steelMat = new THREE.MeshLambertMaterial({ color: 0x9aa3aa }), ledMatR = new THREE.MeshBasicMaterial({ color: 0xff4030 });
+function syncRigs() {
+  const n = lv('rigs');
+  while (rigList.length < n) {
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(rigBodyGeo, rigMat));
+    g.add(new THREE.Mesh(rigStripeGeo, darkMat));
+    const bit = new THREE.Mesh(rigBitGeo, steelMat); bit.rotation.x = Math.PI / 2; bit.position.z = 0.85; g.add(bit);
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), ledMatR); led.position.set(0.3, 0.42, -0.3); g.add(led);
+    g.position.set(player.x, player.y + 2, player.z + 2); scene.add(g);
+    rigList.push({ g, bit, c: -1, t: 0 });
+  }
+  while (rigList.length > n) scene.remove(rigList.pop().g);
+}
+function rigsTick(dt) {
+  if (!rigList.length) return;
+  const dps = rigDps();
+  for (const rg of rigList) {
+    if (rg.c < 0 || front[rg.c] >= DEEP || front[rg.c] > faceDepth + 3) {
+      const used = new Set(rigList.map(q => q.c));
+      const pool = shallow.filter(c => !used.has(c));
+      rg.c = pool.length ? pool[(Math.random() * pool.length) | 0] : (shallow[0] ?? -1);
+      if (rg.c < 0) continue;
+    }
+    const x = rg.c % GX, y = (rg.c / GX) | 0, z = front[rg.c];
+    const tp = tmpV.set(x + 0.5, y + 0.5, z - 0.62);
+    rg.g.position.lerp(tp, Math.min(1, dt * 4));
+    rg.bit.rotation.y += dt * 30;
+    if (rg.g.position.distanceTo(tp) < 0.4 && breakable(x, y, z)) {
+      damageVoxel(x, y, z, dps * dt, [0, 0, 1], 'crew');
+      rg.t -= dt;
+      if (rg.t <= 0 && parts.length < PMAX) { rg.t = 0.08; parts.push({ k: 1, x: x + 0.5, y: y + 0.5, z: z - 0.05, vx: rnd(-3, 3), vy: rnd(0, 4), vz: rnd(-3, -0.5), life: 0.2, max: 0.2, c: [255, 220, 150] }); }
+    }
+  }
+}
+let crusher = null, crushGain = 0, crushT = 0;
+function syncCrusher() {
+  if (!lv('crusher') || crusher) return;
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshLambertMaterial({ color: 0x3f5a46 })); body.position.y = 0.9; g.add(body);
+  const hop = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 0.7, 0.9, 4, 1, true), new THREE.MeshLambertMaterial({ color: 0xe3a91f, side: THREE.DoubleSide })); hop.rotation.y = Math.PI / 4; hop.position.y = 1.95; g.add(hop);
+  const rollers = [];
+  for (const sx of [-0.28, 0.28]) { const ro = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 1.3, 10), darkMat); ro.rotation.z = Math.PI / 2; ro.position.set(0, 1.55, sx); g.add(ro); rollers.push(ro); }
+  for (const sx of [-0.95, 0.95]) { const tr = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.35, 2.0), darkMat); tr.position.set(sx, 0.18, 0); g.add(tr); }
+  g.position.set(player.x, player.y, player.z - 3); scene.add(g);
+  crusher = { g, rollers, x: g.position.x, y: g.position.y, z: g.position.z };
+}
+function crusherTick(dt) {
+  if (!crusher) return;
+  // trundle along behind you, on the far side of the tunnel
+  let tx = player.x < GX / 2 ? clamp(player.x + 5, 1.5, GX - 1.5) : clamp(player.x - 5, 1.5, GX - 1.5), tz = player.z - 2.5;
+  if (solid(Math.floor(tx), Math.floor(Math.max(0, player.y)) , Math.floor(tz)) || solid(Math.floor(tx), Math.floor(Math.max(0, player.y)) + 1, Math.floor(tz))) { tx = player.x; tz = player.z - 4; }
+  const dx = tx - crusher.x, dz = tz - crusher.z, d = Math.hypot(dx, dz);
+  if (d > 0.3) { const sp = Math.min(d, 6 * dt * Math.max(1, d / 6)); crusher.x += dx / d * sp; crusher.z += dz / d * sp; crusher.g.rotation.y = lerp(crusher.g.rotation.y, Math.atan2(dx, dz), Math.min(1, dt * 3)); }
+  crusher.y = lerp(crusher.y, floorBelow(crusher.x, GY - 1, crusher.z), Math.min(1, dt * 8));
+  crusher.g.position.set(crusher.x, crusher.y, crusher.z);
+  for (const ro of crusher.rollers) ro.rotation.x += dt * 9;
+  const L = lv('rollers'), R = crushR(L), mul = crushMul(L), mx = crusher.x, my = crusher.y + 2.3, mz = crusher.z;
+  for (let k = rubble.length - 1; k >= 0; k--) {
+    const r = rubble[k];
+    if (r.suck) continue;
+    if (!r.crush) { if (r.rest && Math.abs(r.x - mx) + Math.abs(r.z - mz) < R) { r.crush = true; r.rest = false; } else continue; }
+    const ddx = mx - r.x, ddy = my - r.y, ddz = mz - r.z, dd = Math.hypot(ddx, ddy, ddz);
+    const sp = Math.min(dd, (5 + 10 / (dd + 0.5)) * dt);
+    r.x += ddx / dd * sp; r.y += ddy / dd * sp + Math.sin(dd) * 0.02; r.z += ddz / dd * sp; spinFrag(r, dt);
+    r.shrink = clamp(dd / 2, 0.3, 1);
+    if (dd < 0.5) { const g = r.v * r.n * valueMul() * mul; S.money += g; S.stats.earned += g; crushGain += g; rubble.splice(k, 1); sPop(); if (parts.length < PMAX) parts.push({ k: 1, x: mx, y: my - 0.3, z: mz, vx: rnd(-1, 1), vy: rnd(1, 3), vz: rnd(-1, 1), life: 0.3, max: 0.3, c: MATS[r.m].P[2] }); }
+  }
+  crushT -= dt;
+  if (crushT <= 0) { crushT = 2.5; if (crushGain > 0) { gainPop('+' + money(crushGain) + ' crushed'); crushGain = 0; } }
+}
+const TBM_COLS = [];
+for (let y = 0; y < GY; y++) for (let x = 0; x < GX; x++) if ((x + 0.5 - 10) ** 2 + (y + 0.5 - 6) ** 2 <= 4.3 * 4.3) TBM_COLS.push(y * GX + x);
+let tbm = null;
+function syncTbm() {
+  if (!lv('tbm') || tbm) return;
+  const g = new THREE.Group(), head = new THREE.Group();
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.4, 0.5, 28), new THREE.MeshLambertMaterial({ color: 0x3b4148 })); disc.rotation.x = Math.PI / 2; head.add(disc);
+  const toothGeo = new THREE.BoxGeometry(0.35, 0.35, 0.5), toothMat = new THREE.MeshLambertMaterial({ color: 0xd06a2a });
+  for (let k = 0; k < 3; k++) for (let a = 0; a < 6 + k * 6; a++) { const t = new THREE.Mesh(toothGeo, toothMat), ang = a / (6 + k * 6) * Math.PI * 2 + k; t.position.set(Math.cos(ang) * (1.2 + k * 1.35), Math.sin(ang) * (1.2 + k * 1.35), 0.35); head.add(t); }
+  const hub = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.0, 12), toothMat); hub.rotation.x = Math.PI / 2; hub.position.z = 0.5; head.add(hub);
+  g.add(head);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(4.0, 4.0, 5, 28, 1, true), new THREE.MeshLambertMaterial({ color: 0xd9a21f, side: THREE.DoubleSide })); body.rotation.x = Math.PI / 2; body.position.z = -2.8; g.add(body);
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(4.05, 4.05, 0.5, 28, 1, true), darkMat); band.rotation.x = Math.PI / 2; band.position.z = -1.2; g.add(band);
+  g.position.set(10, 6, -20); scene.add(g);
+  tbm = { g, head, z: 0 };
+}
+function tbmTick(dt) {
+  if (!tbm) return 0;
+  let zf = DEEP; for (const c of TBM_COLS) if (front[c] < zf) zf = front[c];
+  if (zf >= DEEP) { tbm.g.visible = false; return 0; }
+  tbm.g.visible = true;
+  tbm.z = lerp(tbm.z || zf, zf - 0.3, Math.min(1, dt * 2));
+  tbm.g.position.set(10, 6, tbm.z);
+  tbm.head.rotation.z += dt * 1.6;
+  const dps = baseDmg() * tbmMul(lv('cutter'));
+  for (const c of TBM_COLS) {
+    const z = front[c]; if (z > zf + 1 || z >= DEEP) continue;
+    damageVoxel(c % GX, (c / GX) | 0, z, dps * dt, [0, 0, 1], 'crew');
+  }
+  if (Math.random() < dt * 20 && parts.length < PMAX) { const a = rnd(6.28); parts.push({ k: 1, x: 10 + Math.cos(a) * 4.3, y: 6 + Math.sin(a) * 4.3, z: zf - 0.1, vx: rnd(-2, 2), vy: rnd(0, 3), vz: rnd(-3, -1), life: 0.3, max: 0.3, c: [255, 210, 140] }); }
+  if (Math.random() < dt * 4) dust(10 + rnd(-4, 4), 6 + rnd(-4, 4), zf - 0.2, MATS[STRATA[strataIdx(zf)].m].P[2], 1, [0, 0, -1], 0.6);
+  return clamp(1 - Math.abs(player.z - zf) / 40, 0, 1);
+}
+// ---- radar: buried finds near you, seen through rock ----
+const radarMarks = [];
+for (let k = 0; k < 30; k++) { const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.22), new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false, transparent: true, opacity: 0.85, fog: false })); m.renderOrder = 999; m.visible = false; scene.add(m); radarMarks.push(m); }
+let radarT = 0, radarHits = [];
+function radarTick(dt) {
+  const L = lv('radar');
+  if (!L) return;
+  radarT -= dt;
+  if (radarT <= 0) {
+    radarT = 0.6; radarHits = [];
+    const R = radarR(L), px = Math.floor(player.x), py = Math.floor(player.y + 1.5), pz = Math.floor(player.z);
+    for (let z = Math.max(0, pz - R); z <= Math.min(DEEP - 1, pz + R); z++) for (let y = 0; y < GY; y++) for (let x = 0; x < GX; x++) {
+      if (Math.abs(x - px) > R || Math.abs(y - py) > R) continue;
+      if (!breakable(x, y, z)) continue;
+      const f = findAt(x, y, z);
+      if (f) radarHits.push([x, y, z, f, Math.hypot(x - px, y - py, z - pz)]);
+    }
+    radarHits.sort((a, b) => a[4] - b[4]); radarHits.length = Math.min(radarHits.length, radarMarks.length);
+  }
+  for (let k = 0; k < radarMarks.length; k++) {
+    const m = radarMarks[k], hgt = radarHits[k];
+    if (!hgt || !breakable(hgt[0], hgt[1], hgt[2])) { m.visible = false; continue; }
+    m.visible = true; m.position.set(hgt[0] + 0.5, hgt[1] + 0.5, hgt[2] + 0.5); m.material.color.setRGB(hgt[3].C[0] / 255, hgt[3].C[1] / 255, hgt[3].C[2] / 255);
+    const s = 1 + 0.25 * Math.sin(clock * 6 + k); m.scale.set(s, s, s); m.rotation.y += dt * 2;
+  }
 }
 function tryPunch() {
   if (clock - lastPunch < 0.07) return;
@@ -1059,10 +1369,12 @@ function sell(auto) {
   sCoins(n);
   gainPop('+' + money(gain));
 }
+let popN = 0;
 function gainPop(txt) {
   const m = $('#money').getBoundingClientRect(), hr = host.getBoundingClientRect();
   const el = document.createElement('div'); el.className = 'gain'; el.textContent = txt;
-  el.style.left = (m.left - hr.left) + 'px'; el.style.top = (m.bottom - hr.top + 4) + 'px';
+  const plate = $('#hudL').getBoundingClientRect();
+  el.style.left = (plate.right - hr.left + 8) + 'px'; el.style.top = (m.top - hr.top + 2 + (popN++ % 3) * 16) + 'px';
   $('#game').appendChild(el);
   setTimeout(() => el.remove(), 1200);
 }
@@ -1109,7 +1421,7 @@ function runOffline() {
   if (away < 60) return;
   const secs = Math.min(away, 8 * 3600);
   const splash = 1 + (PATTERNS[lv('spread')].length - 1) * 0.5;
-  const dps = 1.5 * lv('crew') * baseDmg() + 0.35 * lv('ghost') * baseDmg() * splash;
+  const dps = 1.5 * lv('crew') * baseDmg() + 0.35 * lv('ghost') * baseDmg() * splash + rigDps() * lv('rigs') + (lv('tbm') ? baseDmg() * tbmMul(lv('cutter')) * TBM_COLS.length * 0.5 : 0);
   if (dps <= 0) return;
   const r = offlineDig(dps * secs * 0.5);
   if (!r.broken) return;
@@ -1178,7 +1490,7 @@ on(window, 'keydown', e => {
   if (k === 'escape') { closeShop(); return; }
   if (k === ' ' || k.startsWith('arrow')) e.preventDefault();
   K[k] = true; if (e.shiftKey) K.shift = true;
-  if (k === '1') setTool(0); else if (k === '2') setTool(1); else if (k === '3') setTool(2);
+  if (k >= '1' && k <= '6' && k.length === 1) setTool(+k - 1);
   else if (k === 'e') sell(false);
   else if (k === 'm') toggleMute();
   else if (k === 'f' && !e.repeat) { mouseDown = true; if (S.tool === 0) { tryPunch(); holdT = 0.2; } }
@@ -1206,7 +1518,7 @@ function knockOut(why) {
   mouseDown = false; punchHeld = false;
   const lostN = Math.floor(S.bagN), lostV = S.bagV * valueMul();
   S.bagN = 0; S.bagV = 0;
-  const what = why === 'fall' ? 'You landed badly after a long drop.' : why === 'debris' ? 'Flying debris from a cave-in caught you.' : 'A falling block caught you on the head.';
+  const what = why === 'blast' ? 'You were too close to your own dynamite.' : why === 'fall' ? 'You landed badly after a long drop.' : why === 'debris' ? 'Flying debris from a cave-in caught you.' : 'A falling block caught you on the head.';
   $('#koText').textContent = `${what} Somebody dragged you back down the tunnel to safety. ${lostN ? `The ${fmt(lostN)} chunks in your bag (${money(lostV)}) are gone.` : 'Your bag was empty, so you lost nothing.'}${lv('helmet') < 6 ? ' A Hard Hat takes the edge off falling rock.' : ''}`;
   $('#ko').hidden = false;
   S.stats.knockouts = (S.stats.knockouts || 0) + 1;
@@ -1242,7 +1554,7 @@ function looseRockTick(dt) {
   looseT -= dt;
   if (looseT > 0) return;
   const snd = MATS[STRATA[strataIdx(Math.floor(player.z))].m].snd;
-  looseT = rnd(18, 45) * (snd === 'soft' ? 0.7 : snd === 'metal' ? 2.5 : 1);
+  looseT = rnd(18, 45) * (snd === 'soft' ? 0.7 : snd === 'metal' ? 2.5 : 1) * (1 + 0.4 * lv('bolts'));
   for (let tries = 0; tries < 40; tries++) {
     const x = Math.floor(player.x + rnd(-5, 5)), z = Math.floor(player.z + rnd(-4, 7));
     if (x < 0 || x >= GX || z < 0) continue;
@@ -1305,12 +1617,28 @@ function update(dt) {
       trauma = Math.min(0.3, trauma + dt * 1.2);
     }
   }
+  // sledgehammer: hold to wind up, release to swing
+  if (S.tool === 3 && lv('sledge') && act) {
+    if (held && sledge.cd <= 0 && sledge.swing <= 0) { const was = sledge.charge; sledge.charge = Math.min(1, sledge.charge + dt / 0.9); if (was < 1 && sledge.charge >= 1) sTool(); }
+    else if (!held && sledge.charge > 0) { if (sledge.charge > 0.1) { sledge.pend = sledge.charge; sledge.swing = 0.16; sSwing(sledge.charge); } sledge.charge = 0; }
+  } else sledge.charge = 0;
+  if (sledge.swing > 0) { sledge.swing -= dt; if (sledge.swing <= 0 && sledge.pend) { sledgeHit(sledge.pend); sledge.pend = 0; sledge.cd = 0.3; } }
+  sledge.cd -= dt;
+  // dynamite: one stick per press
+  if (S.tool === 4 && lv('dynamite') && held && !prevHeld) throwStick();
+  prevHeld = held;
+  if (lv('dynamite')) sticksTick(dt);
+  const laserOn = laserTick(dt, act && held && S.tool === 5 && !!lv('laser'));
   if (act) {
     ghostAcc += dt * 0.35 * lv('ghost');
     let gk = 0; while (ghostAcc >= 1 && gk++ < 30) { ghostAcc--; ghostPunch(); }
     ghostAcc = Math.min(ghostAcc, 3);
     crewTick(dt);
+    rigsTick(dt);
+    crusherTick(dt);
   }
+  const tbmLvl = act ? tbmTick(dt) : 0;
+  radarTick(dt);
   // strata & detector
   const si = strataIdx(faceDepth);
   if (si > (S.seen.strat || 0)) { S.seen.strat = si; stratumCard(si); }
@@ -1402,7 +1730,7 @@ function update(dt) {
   for (const d of drones) {
     if (!d.tgt || !rubble.includes(d.tgt) || d.tgt.suck) {
       d.tgt = null; let bd = 1e9;
-      if (!full) for (const r of rubble) if (r.rest) { const q = Math.hypot(r.x - d.x, r.z - d.z) + Math.abs(r.y - d.y) * 3; if (q < bd) { bd = q; d.tgt = r; } }
+      if (!full) for (const r of rubble) if (r.rest && !r.crush) { const q = Math.hypot(r.x - d.x, r.z - d.z) + Math.abs(r.y - d.y) * 3; if (q < bd) { bd = q; d.tgt = r; } }
     }
     let tx = player.x + 2, tz = player.z;
     if (d.tgt) { tx = d.tgt.x; tz = d.tgt.z; }
@@ -1455,11 +1783,15 @@ function update(dt) {
   }
   glintMat.opacity = 0.55 + 0.45 * Math.sin(clock * 5);
   // target highlight
-  const h = act && S.tool !== 1 ? aim() : null;
+  const h = act && S.tool !== 1 && S.tool !== 4 ? (S.tool === 5 ? raycast(camera.position.x, camera.position.y, camera.position.z, lookDir()[0], lookDir()[1], lookDir()[2], 26) : aim()) : null;
   targetBox.visible = !!h && breakable(h.x, h.y, h.z);
   for (const b of splashBoxes) b.visible = false;
   if (targetBox.visible) {
     targetBox.position.set(h.x + 0.5, h.y + 0.5, h.z + 0.5);
+    if (S.tool === 3) {
+      const R = sledgeR(lv('weight')); let j = 0;
+      for (let dz = -2; dz <= 2; dz++) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { if (!dx && !dy && !dz) continue; const x = h.x + dx, y = h.y + dy, z = h.z + dz; if (Math.hypot(dx - h.nx * 0.35, dy - h.ny * 0.35, dz - h.nz * 0.35) <= R && breakable(x, y, z) && j < splashBoxes.length) { splashBoxes[j].visible = true; splashBoxes[j++].position.set(x + 0.5, y + 0.5, z + 0.5); } }
+    }
     if (S.tool === 0) {
       const [u, v] = planeAxes([h.nx, h.ny, h.nz]); let j = 0;
       for (const [a, b] of PATTERNS[lv('spread')]) { if (!a && !b) continue; const x = h.x + u[0] * a + v[0] * b, y = h.y + u[1] * a + v[1] * b, z = h.z + u[2] * a + v[2] * b; if (breakable(x, y, z) && j < splashBoxes.length) { splashBoxes[j].visible = true; splashBoxes[j++].position.set(x + 0.5, y + 0.5, z + 0.5); } }
@@ -1467,9 +1799,9 @@ function update(dt) {
   }
   hoverInfo = h && breakable(h.x, h.y, h.z) ? h : null;
   if (Math.floor(player.z / CH) !== lastChunkZ || dirty.size) { lastChunkZ = Math.floor(player.z / CH); refreshChunks(false); }
-  setLoops(vacOn, pulling, drilling, grinding);
+  setLoops(vacOn, pulling, drilling, grinding, laserOn, tbmLvl);
 }
-let lastChunkZ = -999, hoverInfo = null;
+let lastChunkZ = -999, hoverInfo = null, prevHeld = false;
 function spinFrag(r, dt) {
   const w = Math.hypot(r.wx, r.wy, r.wz);
   if (w > 1e-3) { tmpV.set(r.wx / w, r.wy / w, r.wz / w); tmpQ.setFromAxisAngle(tmpV, w * dt); r.q.premultiply(tmpQ); }
@@ -1580,6 +1912,64 @@ function drawDrill(active) {
   g2.restore();
   const hs = fistSpr[1][3]; g2.drawImage(hs.c, Math.round(grip[0] - hs.kx), Math.round(grip[1] - hs.ky - 2 * k));
 }
+function drawSledge() {
+  const k = fistH / 46, ch = sledge.charge, sw = sledge.swing > 0 ? 1 - sledge.swing / 0.16 : 0;
+  const gx = W / 2 + fistH * 0.85, gy = H + fistH * 0.15;
+  let hx = W / 2 + fistH * 0.95 + Math.sin(clock * 2) * 2, hy = H - fistH * 0.55;
+  if (ch > 0) { hx = lerp(hx, W / 2 + fistH * 1.35, ch) + rnd(-1, 1) * ch; hy = lerp(hy, H - fistH * 1.35, ch) + rnd(-1, 1) * ch; }
+  if (sw > 0) { hx = lerp(W / 2 + fistH * 1.35, W / 2 + fistH * 0.1, sw); hy = lerp(H - fistH * 1.35, H / 2 + fistH * 0.25, sw); }
+  const a = Math.atan2(hy - gy, hx - gx), L = Math.hypot(hx - gx, hy - gy);
+  g2.save(); g2.translate(gx, gy); g2.rotate(a);
+  g2.fillStyle = '#2a1a0c'; g2.fillRect(0, -2.6 * k, L, 5.2 * k); g2.fillStyle = '#8a5a30'; g2.fillRect(0, -2 * k, L, 4 * k); g2.fillStyle = '#b07a44'; g2.fillRect(0, -2 * k, L, 1.2 * k);
+  g2.translate(L, 0);
+  g2.fillStyle = '#16181a'; g2.fillRect(-7 * k, -11 * k, 14 * k, 22 * k); g2.fillStyle = '#5c646b'; g2.fillRect(-6 * k, -10 * k, 12 * k, 20 * k); g2.fillStyle = '#9aa3aa'; g2.fillRect(-6 * k, -10 * k, 4 * k, 20 * k);
+  g2.restore();
+  const hs = fistSpr[1][2]; g2.drawImage(hs.c, Math.round(lerp(gx, hx, 0.18) - hs.kx), Math.round(lerp(gy, hy, 0.18) - hs.ky));
+}
+function drawDynamite() {
+  const k = fistH / 46, has = (S.sticks || 0) > 0, x = W / 2 + fistH * 0.85, y = H - fistH * 0.5 + Math.sin(clock * 1.7) * 1.5;
+  if (has) {
+    g2.fillStyle = '#3a0d06'; g2.fillRect(x - 3.5 * k, y - 22 * k, 7 * k, 22 * k); g2.fillStyle = '#c8341f'; g2.fillRect(x - 3 * k, y - 21.5 * k, 6 * k, 21 * k); g2.fillStyle = '#e8644a'; g2.fillRect(x - 3 * k, y - 21.5 * k, 2 * k, 21 * k);
+    g2.fillStyle = '#e8dcc0'; g2.fillRect(x - 3 * k, y - 15 * k, 6 * k, 3 * k);
+    g2.strokeStyle = '#5a4a3a'; g2.lineWidth = Math.max(1, k * 0.8); g2.beginPath(); g2.moveTo(x, y - 22 * k); g2.quadraticCurveTo(x + 3 * k, y - 27 * k, x + 1 * k, y - 30 * k); g2.stroke();
+  }
+  const hs = fistSpr[1][1]; g2.drawImage(hs.c, Math.round(x - hs.kx), Math.round(y - hs.ky + 6 * k));
+}
+function drawLaser(firing) {
+  const k = fistH / 46, jx = firing ? rnd(-0.6, 0.6) : 0;
+  const tx = W / 2 + fistH * 0.3 + jx, ty = H / 2 + fistH * 0.45, pvx = W / 2 + W * 0.3, pvy = H + fistH * 0.5;
+  const a = Math.atan2(pvy - ty, pvx - tx), ca = Math.cos(a), sa = Math.sin(a);
+  const grip = [tx + 30 * k * ca - 9 * k * sa, ty + 30 * k * sa + 9 * k * ca];
+  drawArm(pvx, pvy + fistH * 0.4, grip[0], grip[1] + 6 * k, fistH * 0.55, fistH * 0.3);
+  g2.save(); g2.translate(tx, ty); g2.rotate(a);
+  const R = (c, x, y, w, h) => { g2.fillStyle = c; g2.fillRect(x, y, w, h); };
+  R('#101214', 0, -3.5 * k, 38 * k, 7 * k); R('#4a5560', 1, -3 * k, 36 * k, 6 * k); R('#7a8894', 1, -3 * k, 36 * k, 1.5 * k);
+  R(laserHot ? '#ff3a20' : firing ? '#ffd0a0' : '#3fd6e0', 0, -1.5 * k, 3 * k, 3 * k);
+  R('#101214', 12 * k, -6 * k, 14 * k, 3 * k); R('#2b3138', 26 * k, 3 * k, 6 * k, 12 * k);
+  for (let i = 0; i < 4; i++) R(laserHeat > (i + 1) / 5 ? '#ff6a3a' : '#20262c', 14 * k + i * 3 * k, -5.4 * k, 2 * k, 1.8 * k);
+  g2.restore();
+  if (firing) { g2.save(); g2.globalCompositeOperation = 'lighter'; const gr = g2.createRadialGradient(tx, ty, 0, tx, ty, 14 * k); gr.addColorStop(0, 'rgba(255,170,110,.9)'); gr.addColorStop(1, 'rgba(255,90,40,0)'); g2.fillStyle = gr; g2.fillRect(tx - 14 * k, ty - 14 * k, 28 * k, 28 * k); g2.restore(); }
+  const hs = fistSpr[1][3]; g2.drawImage(hs.c, Math.round(grip[0] - hs.kx), Math.round(grip[1] - hs.ky - 2 * k));
+}
+// small readout under the crosshair: sledge wind-up, sticks left, laser heat
+function toolMeter() {
+  const cx = W >> 1, cy = (H >> 1) + 26;
+  g2.textAlign = 'center'; g2.font = '8px Silkscreen, monospace';
+  if (S.tool === 3 && sledge.charge > 0) {
+    g2.strokeStyle = 'rgba(0,0,0,.6)'; g2.lineWidth = 3; g2.beginPath(); g2.arc(cx, H >> 1, 9, 0, 7); g2.stroke();
+    g2.strokeStyle = sledge.charge >= 1 ? '#ff6a3a' : '#f2b233'; g2.lineWidth = 2; g2.beginPath(); g2.arc(cx, H >> 1, 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sledge.charge); g2.stroke();
+  }
+  if (S.tool === 4) {
+    const mx = stickMax(lv('sticks')), n = S.sticks || 0;
+    for (let i = 0; i < mx; i++) { g2.fillStyle = 'rgba(0,0,0,.7)'; g2.fillRect(cx - mx * 4 + i * 8, cy - 1, 6, 10); g2.fillStyle = i < n ? '#c8341f' : '#3a3e42'; g2.fillRect(cx - mx * 4 + i * 8 + 1, cy, 4, 8); }
+    if (n < mx) { g2.fillStyle = 'rgba(0,0,0,.7)'; g2.fillRect(cx - 17, cy + 12, 34, 3); g2.fillStyle = '#f2b233'; g2.fillRect(cx - 16, cy + 13, Math.round(32 * dynT / stickT(lv('sticks'))), 1); }
+  }
+  if (S.tool === 5 && (laserHeat > 0.01 || laserHot)) {
+    g2.fillStyle = 'rgba(0,0,0,.75)'; g2.fillRect(cx - 21, cy, 42, 5);
+    g2.fillStyle = laserHot ? '#e5533d' : laserHeat > 0.7 ? '#f2b233' : '#58c26b'; g2.fillRect(cx - 20, cy + 1, Math.round(40 * laserHeat), 3);
+    if (laserHot) { g2.fillStyle = '#000'; g2.fillText('OVERHEATED', cx + 1, cy + 15); g2.fillStyle = '#e5533d'; g2.fillText('OVERHEATED', cx, cy + 14); }
+  }
+}
 const pv = new THREE.Vector3();
 function draw2D() {
   g2.clearRect(0, 0, W, H);
@@ -1614,13 +2004,17 @@ function draw2D() {
   drawFist(fists[0]);
   if (S.tool === 0) drawFist(fists[1]);
   else if (S.tool === 1) drawVacuum(held);
-  else drawDrill(held && lv('drill'));
+  else if (S.tool === 2) drawDrill(held && lv('drill'));
+  else if (S.tool === 3) drawSledge();
+  else if (S.tool === 4) drawDynamite();
+  else drawLaser(beam.visible);
+  toolMeter();
 }
 
 /* ================= DOM UI ================= */
 const el = { money: $('#money'), bagfill: $('#bagfill'), bagbar: $('#bagbar'), bagtxt: $('#bagtxt'), roomNo: $('#roomNo'), roomName: $('#roomName'), layers: $('#layers'), hint: $('#hint'), sellTxt: $('#sellTxt'), sellBtn: $('#sellBtn'), badge: $('#badge'), shop: $('#shop'), shopList: $('#shopList'), shopCash: $('#shopCash'), combo: $('#combo'), comboV: $('#combo .v'), comboBar: $('#combo .bar i'), toast: $('#toast'), mute: $('#muteBtn'), depthTxt: $('#depthTxt'), depthFill: $('#depthfill'), needleRow: $('#needleRow'), resume: $('#resume') };
 if (coarse) { $('#shopKey').textContent = 'TAP TO OPEN'; $('#shopClose').textContent = 'CLOSE'; $('#touch').hidden = false;
-  $('#keys').innerHTML = '<kbd>LEFT THUMB</kbd><span>Walk with the stick that appears under your thumb.</span><kbd>RIGHT THUMB</kbd><span>Drag to look around.</span><kbd>PUNCH</kbd><span>Hold to keep swinging at the rock you are looking at.</span><kbd>TOOLS</kbd><span>Switch to the vacuum to pick up rubble, then sell it for upgrades.</span>'; }
+  $('#keys').innerHTML = '<kbd>LEFT THUMB</kbd><span>Walk with the stick that appears under your thumb.</span><kbd>RIGHT THUMB</kbd><span>Drag to look around.</span><kbd>PUNCH</kbd><span>Hold to keep swinging at the rock you are looking at.</span><kbd>TOOLS</kbd><span>Switch to the vacuum to pick up rubble, then sell it for upgrades. New tools and machines unlock in Upgrades.</span>'; }
 const shopRows = {};
 let findsBox = null;
 function buildShop() {
@@ -1657,6 +2051,12 @@ function buy(id) {
   r.row.classList.remove('flash'); void r.row.offsetWidth; r.row.classList.add('flash');
   if (id === 'drone') syncDrones();
   if (id === 'drill') { setTool(2); toast('Hammer drill unlocked. Hold it on one voxel.'); }
+  if (id === 'sledge') { setTool(3); toast('Sledgehammer unlocked (4). Hold to wind up, let go to smash.', 3200); }
+  if (id === 'dynamite') { setTool(4); S.sticks = stickMax(lv('sticks')); toast('Dynamite unlocked (5). Throw it, then get back.', 3200); }
+  if (id === 'laser') { setTool(5); toast('Mining laser unlocked (6). Mind the heat.', 3200); }
+  if (id === 'rigs') { syncRigs(); if (lv('rigs') === 1) toast('Your first drill rig is clamping onto the face.', 3000); }
+  if (id === 'crusher') { syncCrusher(); toast('The rock crusher is rolling in behind you.', 3000); }
+  if (id === 'tbm') { syncTbm(); toast('The boring machine is on its way to the face.', 3200); }
   if (id === 'crew' && lv('crew') === 1) toast('Your crew is on the clock. They keep digging while you are away.', 3500);
   uiTick(true);
 }
@@ -1678,7 +2078,7 @@ function uiTick(force) {
     if (!shopOpen && !force) continue;
     r.lv.textContent = u.max === 1 ? '' : 'LV ' + L;
     r.btn.className = 'buy' + (can ? ' can' : '') + (!isFinite(c) ? ' max' : '');
-    r.btn.textContent = locked2 ? 'NEEDS DRILL' : !isFinite(c) ? (u.max === 1 ? 'OWNED' : 'MAXED') : money(c);
+    r.btn.textContent = locked2 ? 'NEEDS ' + UPGM[u.req].name.toUpperCase() : !isFinite(c) ? (u.max === 1 ? 'OWNED' : 'MAXED') : money(c);
     r.ef.innerHTML = !isFinite(c) || locked2 ? u.show(L) : `${u.show(L)} → <em>${u.show(L + 1)}</em>`;
   }
   if (shopOpen || force) renderFinds();
@@ -1698,7 +2098,7 @@ function uiTick(force) {
   const h = hintText();
   if (h) { el.hint.innerHTML = h; el.hint.hidden = false; } else el.hint.hidden = true;
   el.resume.hidden = coarse || locked || lockFailed || !playing();
-  const t2 = $('#t2'); t2.classList.toggle('locked', !lv('drill')); t2.querySelector('.n').textContent = lv('drill') ? 'DRILL' : 'LOCKED';
+  for (let k = 2; k < 6; k++) $('#t' + k).hidden = !lv(TOOL_REQ[k]);
   el.mute.textContent = isMuted() ? 'SOUND OFF' : 'SOUND ON';
 }
 const Kb = s => `<b>${s}</b>`;
@@ -1719,9 +2119,9 @@ function hintText() {
 let toastT = 0;
 function toast(s, ms) { if (!s) return; el.toast.textContent = s; el.toast.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => el.toast.style.opacity = 0, ms || 2600); }
 function setTool(t) {
-  if (t === 2 && !lv('drill')) { sDeny(); toast('The drill unlocks in Upgrades.'); return; }
-  S.tool = t; sTool();
-  for (let k = 0; k < 3; k++) $('#t' + k).classList.toggle('on', k === t);
+  if (TOOL_REQ[t] && !lv(TOOL_REQ[t])) { sDeny(); toast('The ' + TOOL_NAME[t] + ' unlocks in Upgrades.'); return; }
+  S.tool = t; sTool(); sledge.charge = 0;
+  for (let k = 0; k < 6; k++) $('#t' + k).classList.toggle('on', k === t);
 }
 function openShop() { el.shop.classList.add('open'); if (document.exitPointerLock && locked) document.exitPointerLock(); mouseDown = false; uiTick(true); }
 function closeShop() { el.shop.classList.remove('open'); }
@@ -1740,7 +2140,7 @@ function showEnding() {
   $('#ending').hidden = false;
 }
 
-for (let k = 0; k < 3; k++) $('#t' + k).addEventListener('click', () => { aInit(); setTool(k); });
+for (let k = 0; k < 6; k++) $('#t' + k).addEventListener('click', () => { aInit(); setTool(k); });
 $('#sellBtn').addEventListener('click', () => { aInit(); sell(false); });
 $('#shopBtn').addEventListener('click', () => { aInit(); toggleShop(); });
 $('#shopClose').addEventListener('click', closeShop);
@@ -1792,6 +2192,10 @@ function resetWorld() {
   slices = new Map(); hpMap = new Map(); front = new Uint16Array(N); maxDug = -1; damaged = []; rubble = []; parts = []; texts = []; dusts = []; stressed.clear(); for (const b of falling) scene.remove(b.mesh); falling = [];
   Object.assign(player, { x: 10, y: 0, z: -8, vx: 0, vy: 0, vz: 0, yaw: Math.PI, pitch: 0 });
   combo = 1; crewAcc = 0; ghostAcc = 0; lastChunkZ = -999;
+  for (const rg of rigList) scene.remove(rg.g); rigList = [];
+  if (crusher) { scene.remove(crusher.g); crusher = null; }
+  if (tbm) { scene.remove(tbm.g); tbm = null; }
+  for (const st of sticksOut) scene.remove(st.m); sticksOut = [];
   recomputeFront(); syncDrones(); buildShop(); setTool(0); refreshChunks(true); uiTick(true);
 }
 function apply(d) {
@@ -1828,7 +2232,7 @@ function start(data) {
   const d = data && data.v === 3 ? data : load();
   if (d) { apply(d); pendingAway = !(data && data.v === 3); if (pendingAway) awayFrom = d.lastSeen || 0; }
   else recomputeFront();
-  syncDrones(); setTool(S.tool === 2 && !lv('drill') ? 0 : S.tool || 0);
+  syncDrones(); syncRigs(); syncCrusher(); syncTbm(); setTool(TOOL_REQ[S.tool || 0] && !lv(TOOL_REQ[S.tool || 0]) ? 0 : S.tool || 0);
   refreshChunks(true); updateCamera(); uiTick(true);
   if (data && data.v === 3) $('#intro').hidden = true; else showIntro();
   let last = performance.now(), uiAcc = 0;
