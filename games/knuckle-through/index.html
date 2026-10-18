@@ -278,6 +278,8 @@ const lv = id => S.up[id] || 0;
 
 // dug voxels: one 240-byte slice per depth that has been touched; damaged voxels keep their HP in a map
 let slices = new Map(), hpMap = new Map();
+// the save keeps each slice already encoded and only re-encodes the depths dug since the last save
+let saveDug = {}, saveDirtyZ = new Set();
 let front = new Uint16Array(N);   // first solid z in each column
 let faceDepth = 0, minFront = 0, maxDug = -1, frontDirty = true, shallow = [];
 const vkey = (x, y, z) => z * N + y * GX + x;
@@ -309,15 +311,17 @@ function setDug(x, y, z) {
   let s = slices.get(z);
   if (!s) { s = new Uint8Array(N); slices.set(z, s); }
   s[y * GX + x] = 1;
+  saveDirtyZ.add(z);
   hpMap.delete(vkey(x, y, z));
   if (z > maxDug) maxDug = z;
   const c = y * GX + x;
   if (front[c] === z) { let f = z; while (f < DEEP && isDug(x, y, f)) f++; front[c] = f; frontDirty = true; }
   markDirty(z);
 }
+const frontSorted = new Uint16Array(N);
 function recomputeFront() {
   frontDirty = false;
-  const sorted = Array.from(front).sort((a, b) => a - b);
+  const sorted = frontSorted; sorted.set(front); sorted.sort();
   minFront = sorted[0]; faceDepth = sorted[Math.floor(N * 0.2)];
   shallow.length = 0;
   const lim = minFront + 1;
@@ -390,12 +394,24 @@ if (HQ) {
   };
 }
 
+// Render scale for High graphics. If the game runs under ~36 fps for 3 seconds while you play, the 3D view drops
+// 10% in resolution (down to 60%); after 20 smooth seconds it tries one step back up, and stays put if that was too much.
+let renderScale = 1, rsFrames = 0, rsTime = 0, rsSmooth = 0, rsRaised = false, rsLocked = false;
+function watchSpeed(dt, raw) {
+  if (!HQ || !playing() || raw > 250) { rsFrames = rsTime = 0; return; }
+  rsFrames++; rsTime += raw;
+  if (rsTime < 3000) return;
+  const avg = rsTime / rsFrames; rsFrames = rsTime = 0;
+  if (avg > 28 && renderScale > 0.65) { if (rsRaised) rsLocked = true; rsRaised = false; rsSmooth = 0; renderScale = Math.round((renderScale - 0.1) * 10) / 10; layout(); }
+  else if (avg < 18 && renderScale < 1 && !rsLocked) { rsSmooth += 3; if (rsSmooth >= 20) { rsSmooth = 0; rsRaised = true; renderScale = Math.round((renderScale + 0.1) * 10) / 10; layout(); } }
+  else rsSmooth = 0;
+}
 function layout() {
   const vw = Math.max(1, host.clientWidth), vh = Math.max(1, host.clientHeight);
   PXS = clamp(Math.round(vh / 330), 2, 5);
   W = Math.ceil(vw / PXS); H = Math.ceil(vh / PXS);
   // the world renders at screen resolution (capped), the hands and numbers on top stay chunky pixel art
-  if (HQ) { const dpr = Math.min(window.devicePixelRatio || 1, 1.5), k = Math.min(1, Math.sqrt(2.6e6 / (vw * dpr * vh * dpr))); GW = Math.max(2, Math.round(vw * dpr * k)); GH = Math.max(2, Math.round(vh * dpr * k)); }
+  if (HQ) { const dpr = Math.min(window.devicePixelRatio || 1, 1.5), k = Math.min(1, Math.sqrt(2.6e6 / (vw * dpr * vh * dpr))) * renderScale; GW = Math.max(2, Math.round(vw * dpr * k)); GH = Math.max(2, Math.round(vh * dpr * k)); }
   else { GW = W; GH = H; }
   renderer.setSize(GW, GH, false);
   if (post) post.size(GW, GH);
@@ -709,7 +725,7 @@ function blockGeo(mi) {
 }
 let falling = [];
 const stressed = new Map();
-let supZ0 = 1e9, supZ1 = -1, supT = 0;
+const supZs = new Set(); let supT = 0;
 
 const PMAX = 1600;
 const pPos = new Float32Array(PMAX * 3), pCol = new Float32Array(PMAX * 3);
@@ -976,7 +992,11 @@ let combo = 1, lastHit = -9, trauma = 0, clock = 0, ghostAcc = 0, drillAcc = 0, 
 let texts = [];
 const fists = [{ side: 0, st: 0, t: 0, x: 0, y: 0, sc: 1 }, { side: 1, st: 0, t: 0, x: 0, y: 0, sc: 1 }];
 function floatText(wx, wy, wz, s, col, big) { if (texts.length > 40) texts.shift(); texts.push({ wx, wy, wz, s, col, big, life: big ? 1.2 : 0.8, max: big ? 1.2 : 0.8, rise: 0 }); }
+// effects past the fog can't be seen, so machines working far away don't spawn any
+let fxRange = 90;
+const fxHidden = z => Math.abs(z - player.z) > fxRange;
 function burst(x, y, z, mi, n, power, nx, ny, nz) {
+  if (fxHidden(z)) return;
   const m = MATS[mi];
   for (let k = 0; k < n && parts.length < PMAX; k++) {
     const sp = rnd(2, 6) * power;
@@ -1022,8 +1042,8 @@ function mergeOldest() {
   if (best) { best.v = (best.v * best.n + r.v * r.n) / (best.n + r.n); best.n += r.n; best.s = Math.min(0.95, Math.cbrt(best.s ** 3 + r.s ** 3)); }
 }
 function dust(x, y, z, col, n, out, power) {
+  if (fxHidden(z)) return;
   for (let k = 0; k < n; k++) {
-    if (dusts.length >= DMAX) dusts.shift();
     const sp = rnd(0.4, 2.2) * (power || 1);
     dusts.push({ x: x + rnd(-0.45, 0.45), y: y + rnd(-0.45, 0.45), z: z + rnd(-0.45, 0.45), vx: (out ? out[0] : 0) * sp + rnd(-0.7, 0.7), vy: rnd(-0.1, 0.9), vz: (out ? out[2] : 0) * sp + rnd(-0.7, 0.7), life: rnd(1.4, 3.6), c: [col[0] / 255, col[1] / 255, col[2] / 255] });
   }
@@ -1031,26 +1051,41 @@ function dust(x, y, z, col, n, out, power) {
 // Structural support. Load travels down through solid rock to the ground for free; hanging from rock above costs a
 // little, and reaching sideways through an unsupported span costs more. Each material can only span so far
 // (SPAN): anything past its limit cracks, trickles dust for a moment, then breaks loose and falls.
-function requestSupport(z) { if (z < supZ0) supZ0 = z; if (z > supZ1) supZ1 = z; }
+// Each depth that changed is checked with 6 layers of padding. Nearby depths are merged into one window, but
+// machines digging far apart are checked as separate small windows instead of one span covering everything between.
+function requestSupport(z) { supZs.add(z); }
 function analyzeSupport() {
-  const z0 = Math.max(0, supZ0 - 6), z1 = Math.min(DEEP - 1, supZ1 + 6);
-  supZ0 = 1e9; supZ1 = -1;
-  const L = z1 - z0 + 1, size = L * N, MAXC = 48;
-  const cost = new Uint8Array(size).fill(255), sol = new Uint8Array(size);
-  const buckets = []; for (let c = 0; c <= MAXC; c++) buckets.push([]);
+  const zs = Array.from(supZs).sort((a, b) => a - b); supZs.clear();
+  let a = zs[0], b = zs[0];
+  for (let k = 1; k <= zs.length; k++) {
+    if (k < zs.length && zs[k] - b <= 13) { b = zs[k]; continue; }
+    supportWindow(Math.max(0, a - 6), Math.min(DEEP - 1, b + 6));
+    if (k < zs.length) a = b = zs[k];
+  }
+}
+// scratch buffers, grown as needed and reused so the solver makes no garbage
+let supCost = new Uint8Array(0), supSol = new Uint8Array(0);
+const SUP_MAXC = 48, supBuckets = []; for (let c = 0; c <= SUP_MAXC; c++) supBuckets.push([]);
+const SUP_NB = [1, 0, 0, 2, -1, 0, 0, 2, 0, 0, 1, 2, 0, 0, -1, 2, 0, 1, 0, 0, 0, -1, 0, 1];
+function supportWindow(z0, z1) {
+  const L = z1 - z0 + 1, size = L * N, MAXC = SUP_MAXC;
+  if (supCost.length < size) { supCost = new Uint8Array(size); supSol = new Uint8Array(size); }
+  const cost = supCost, sol = supSol, buckets = supBuckets;
+  cost.fill(255, 0, size); sol.fill(0, 0, size);
+  for (const b of buckets) b.length = 0;
   for (let z = z0; z <= z1; z++) for (let y = 0; y < GY; y++) for (let x = 0; x < GX; x++) {
     if (isDug(x, y, z)) continue;
     const i = (z - z0) * N + y * GX + x; sol[i] = 1;
     if (y === 0 || x === 0 || x === GX - 1 || y === GY - 1 || (z === z1 && solid(x, y, z + 1)) || (z === z0 && z > 0 && solid(x, y, z - 1))) { cost[i] = 0; buckets[0].push(i); }
   }
-  const NB = [[1, 0, 0, 2], [-1, 0, 0, 2], [0, 0, 1, 2], [0, 0, -1, 2], [0, 1, 0, 0], [0, -1, 0, 1]];
+  const NB = SUP_NB;
   for (let c = 0; c <= MAXC; c++) {
     const b = buckets[c];
     for (let q = 0; q < b.length; q++) {
       const i = b[q]; if (cost[i] !== c) continue;
       const zl = (i / N) | 0, rem = i - zl * N, y = (rem / GX) | 0, x = rem - y * GX;
-      for (const [dx, dy, dz, step] of NB) {
-        const nx = x + dx, ny = y + dy, nz = zl + dz;
+      for (let e = 0; e < 24; e += 4) {
+        const nx = x + NB[e], ny = y + NB[e + 1], nz = zl + NB[e + 2], step = NB[e + 3];
         if (nx < 0 || nx >= GX || ny < 0 || ny >= GY || nz < 0 || nz >= L) continue;
         const j = nz * N + ny * GX + nx;
         if (!sol[j]) continue;
@@ -1459,9 +1494,10 @@ function rigsTick(dt) {
   const dps = rigDps();
   for (const rg of rigList) {
     if (rg.c < 0 || front[rg.c] >= DEEP || front[rg.c] > faceDepth + 3) {
-      const used = new Set(rigList.map(q => q.c));
-      const pool = shallow.filter(c => !used.has(c));
-      rg.c = pool.length ? pool[(Math.random() * pool.length) | 0] : (shallow[0] ?? -1);
+      // pick a random shallow column no other rig is on, without building lists every frame
+      let free = 0, pickC = -1;
+      for (const c of shallow) { if (rigList.some(q => q.c === c)) continue; if (Math.random() * ++free < 1) pickC = c; }
+      rg.c = pickC >= 0 ? pickC : (shallow[0] ?? -1);
       if (rg.c < 0) continue;
     }
     const x = rg.c % GX, y = (rg.c / GX) | 0, z = front[rg.c];
@@ -2077,7 +2113,7 @@ function update(dt) {
   const open = maxDug >= DEEP - 1;
   skyPlane.visible = open || nearEnd > 0.6;
   const daylight = open ? clamp(1 - (DEEP - player.z) / 120, 0.15, 1) : 0;
-  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03 - 0.0015 * lv('lamp'), 0.004, daylight);
+  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03 - 0.0015 * lv('lamp'), 0.004, daylight); fxRange = 2.6 / scene.fog.density;
   beamLamp.intensity = lv('lamp') ? 0.6 + 0.15 * lv('lamp') : 0; beamLamp.distance = lampRange(lv('lamp'));
   sun.intensity = daylight * 1.1; ambient.intensity = 0.26 + daylight * 0.5;
 
@@ -2146,16 +2182,21 @@ function update(dt) {
     const nt = t - dt;
     if (nt <= 0) { stressed.delete(key); detach(key); continue; }
     stressed.set(key, nt);
-    if (Math.random() < dt * 7) { const mi = STRATA[strataIdx(z)].m; parts.push({ k: 0, x: x + rnd(0.1, 0.9), y: y + 0.02, z: z + rnd(0.1, 0.9), vx: 0, vy: -0.5, vz: 0, life: 0.9, max: 0.9, c: MATS[mi].P[2] }); if (Math.random() < 0.4) dust(x + 0.5, y, z + 0.5, MATS[mi].P[2], 1, null, 0.2); }
+    if (Math.random() < dt * 7 && !fxHidden(z) && parts.length < PMAX) { const mi = STRATA[strataIdx(z)].m; parts.push({ k: 0, x: x + rnd(0.1, 0.9), y: y + 0.02, z: z + rnd(0.1, 0.9), vx: 0, vy: -0.5, vz: 0, life: 0.9, max: 0.9, c: MATS[mi].P[2] }); if (Math.random() < 0.4) dust(x + 0.5, y, z + 0.5, MATS[mi].P[2], 1, null, 0.2); }
   }
-  if (wOn) { supT -= dt; if (supZ1 >= 0 && supT <= 0) { analyzeSupport(); supT = 0.12; } }
+  if (wOn) { supT -= dt; if (supZs.size && supT <= 0) { analyzeSupport(); supT = 0.12; } }
   // dust drifts, spreads and slowly settles
-  for (let k = dusts.length - 1; k >= 0; k--) {
-    const d = dusts[k]; d.life -= dt;
-    if (d.life <= 0) { dusts.splice(k, 1); continue; }
-    const drag = Math.exp(-dt * 1.6); d.vx *= drag; d.vz *= drag; d.vy = d.vy * drag - 0.35 * dt;
-    d.x += d.vx * dt; d.y += d.vy * dt; d.z += d.vz * dt;
-    if (solid(Math.floor(d.x), Math.floor(d.y), Math.floor(d.z))) { d.y += 0.02; d.vy = 0; }
+  { const drag = Math.exp(-dt * 1.6); let w = 0;
+    for (let k = 0; k < dusts.length; k++) {
+      const d = dusts[k]; d.life -= dt;
+      if (d.life <= 0) continue;
+      d.vx *= drag; d.vz *= drag; d.vy = d.vy * drag - 0.35 * dt;
+      d.x += d.vx * dt; d.y += d.vy * dt; d.z += d.vz * dt;
+      if (solid(Math.floor(d.x), Math.floor(d.y), Math.floor(d.z))) { d.y += 0.02; d.vy = 0; }
+      dusts[w++] = d;
+    }
+    dusts.length = w;
+    if (w > DMAX) dusts.splice(0, w - DMAX);
   }
   // robot vacuums: drive to rubble, suck up everything around them, hover up to ledges.
   // When your bag is full they fill their own hoppers and tip them into the bag after you sell.
@@ -2217,15 +2258,19 @@ function update(dt) {
   }
   for (let sh = 0; sh < SHAPES; sh++) { const m = fragMeshes[sh]; m.count = counts[sh]; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
   let dn = 0;
-  for (const d of dusts) { dPos[dn * 3] = d.x; dPos[dn * 3 + 1] = d.y; dPos[dn * 3 + 2] = d.z; dCol[dn * 3] = d.c[0]; dCol[dn * 3 + 1] = d.c[1]; dCol[dn * 3 + 2] = d.c[2]; if (++dn >= DMAX) break; }
+  for (let k = Math.max(0, dusts.length - DMAX); k < dusts.length; k++) { const d = dusts[k]; dPos[dn * 3] = d.x; dPos[dn * 3 + 1] = d.y; dPos[dn * 3 + 2] = d.z; dCol[dn * 3] = d.c[0]; dCol[dn * 3 + 1] = d.c[1]; dCol[dn * 3 + 2] = d.c[2]; if (++dn >= DMAX) break; }
   dGeo.setDrawRange(0, dn); dGeo.attributes.position.needsUpdate = true; dGeo.attributes.color.needsUpdate = true;
   // particles
   let n = 0;
-  for (let k = parts.length - 1; k >= 0; k--) {
-    const p = parts[k]; p.life -= dt;
-    if (p.life <= 0) { parts.splice(k, 1); continue; }
-    p.vy -= (p.k === 2 ? 6 : 22) * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
-    if (p.k === 2) { p.vx *= 0.97; p.vz *= 0.97; }
+  { let w = 0;
+    for (let k = 0; k < parts.length; k++) {
+      const p = parts[k]; p.life -= dt;
+      if (p.life <= 0) continue;
+      p.vy -= (p.k === 2 ? 6 : 22) * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+      if (p.k === 2) { p.vx *= 0.97; p.vz *= 0.97; }
+      parts[w++] = p;
+    }
+    parts.length = w;
   }
   if (vacOn && parts.length < PMAX - 4) for (let k = 0; k < 3; k++) { const a = rnd(Math.PI * 2), r0 = rnd(1, R); parts.push({ k: 3, x: nozzle[0] + Math.cos(a) * r0, y: nozzle[1] + rnd(-1, 1), z: nozzle[2] + Math.sin(a) * r0, vx: 0, vy: 0, vz: 0, life: 0.25, max: 0.25, tx: nozzle, c: [220, 215, 205] }); }
   for (const p of parts) {
@@ -2581,13 +2626,15 @@ function buildShop() {
   const g = document.createElement('div'); g.className = 'grp'; g.textContent = 'Collection · each new find adds 10% damage'; el.shopList.appendChild(g);
   findsBox = document.createElement('div'); findsBox.className = 'findgrid'; el.shopList.appendChild(findsBox);
 }
+// the HUD refreshes 10 times a second: only touch the page when the text actually changed
+function setHTML(e, v) { if (e._h !== v) { e._h = v; e.innerHTML = v; } }
 function renderFinds() {
   const all = FINDS.concat([Object.assign({ from: 900, to: 4600 }, NEEDLE)]);
-  findsBox.innerHTML = all.map(f => {
+  setHTML(findsBox, all.map(f => {
     const n = S.finds[f.id] || 0;
     return n ? `<div class="find"><span class="fn"><i style="background:${f.col}"></i>${f.name}</span><span class="fc">× ${fmt(n)}${f.id === 'needle' ? ' · DAMAGE ×3' : ''}</span></div>`
       : `<div class="find unk"><span class="fn"><i style="background:#2a2c2f"></i>???</span><span class="fc">${f.id === 'needle' ? 'ONE IN THE WHOLE MOUNTAIN' : `AROUND ${meters(f.from)}–${meters(f.to)} M`}</span></div>`;
-  }).join('');
+  }).join(''));
 }
 function upCost(u) { const L = lv(u.id); if (L >= u.max) return Infinity; const c = u.cost(L); return c === undefined ? Infinity : Math.ceil(c); }
 function buy(id) {
@@ -2635,7 +2682,7 @@ function uiTick(force) {
     r.lv.textContent = u.max === 1 ? '' : 'LV ' + L;
     r.btn.className = 'buy' + (can ? ' can' : '') + (!isFinite(c) ? ' max' : '');
     r.btn.textContent = locked2 ? 'NEEDS ' + UPGM[u.req].name.toUpperCase() : !isFinite(c) ? (u.max === 1 ? 'OWNED' : 'MAXED') : money(c);
-    r.ef.innerHTML = !isFinite(c) || locked2 ? u.show(L) : `${u.show(L)} → <em>${u.show(L + 1)}</em>`;
+    setHTML(r.ef, !isFinite(c) || locked2 ? u.show(L) : `${u.show(L)} → <em>${u.show(L + 1)}</em>`);
   }
   if (shopOpen || force) renderFinds();
   el.badge.hidden = afford === 0; el.badge.textContent = afford;
@@ -2643,16 +2690,16 @@ function uiTick(force) {
   const si = strataIdx(Math.max(0, Math.floor(player.z))), nx = STRATA[si + 1];
   el.roomNo.textContent = player.z < 0 ? 'YOUR CELL' : `THE DEEP · STRATUM ${si + 1} / ${STRATA.length}`;
   el.roomName.textContent = player.z < 0 ? 'Cell 14-B' : player.z >= DEEP ? 'Outside' : MATS[STRATA[si].m].name;
-  el.layers.innerHTML = nx ? `<span class="chip" style="background:${MATS[nx.m].pal[2]};color:${['obsidian', 'neutron', 'magma', 'basalt'].includes(MATS[nx.m].tex) ? '#eee' : '#111'}">NEXT · ${MATS[nx.m].name.toUpperCase()} @ ${meters(nx.at)} M</span>` : `<span class="chip" style="background:#cfe6ff">DAYLIGHT @ ${meters(DEEP)} M</span>`;
+  setHTML(el.layers, nx ? `<span class="chip" style="background:${MATS[nx.m].pal[2]};color:${['obsidian', 'neutron', 'magma', 'basalt'].includes(MATS[nx.m].tex) ? '#eee' : '#111'}">NEXT · ${MATS[nx.m].name.toUpperCase()} @ ${meters(nx.at)} M</span>` : `<span class="chip" style="background:#cfe6ff">DAYLIGHT @ ${meters(DEEP)} M</span>`);
   el.depthTxt.textContent = `FACE ${meters(faceDepth)} M / ${meters(DEEP)} M${maxDug > faceDepth + 4 ? ` · DEEPEST ${meters(maxDug + 1)} M` : ''}`;
   el.depthFill.style.width = Math.min(100, faceDepth / DEEP * 100) + '%';
   if (lv('detector') || S.finds.needle) {
     el.needleRow.hidden = false;
-    if (S.finds.needle) el.needleRow.innerHTML = 'NEEDLE · <b>FOUND</b>';
-    else { const s = needleSignal(); const bars = Math.round(s * 5); el.needleRow.innerHTML = s > 0 ? `NEEDLE · <b>${'▮'.repeat(bars)}${'▯'.repeat(5 - bars)}</b>${lv('detector') >= 3 && Math.abs(S.needle.z - player.z) < 40 ? ` · ${meters(S.needle.z)} M, ${S.needle.x < 10 ? 'LEFT' : 'RIGHT'} ${S.needle.y < 6 ? 'LOW' : 'HIGH'}` : ''}` : 'NEEDLE · NO SIGNAL'; }
+    if (S.finds.needle) setHTML(el.needleRow, 'NEEDLE · <b>FOUND</b>');
+    else { const s = needleSignal(); const bars = Math.round(s * 5); setHTML(el.needleRow, s > 0 ? `NEEDLE · <b>${'▮'.repeat(bars)}${'▯'.repeat(5 - bars)}</b>${lv('detector') >= 3 && Math.abs(S.needle.z - player.z) < 40 ? ` · ${meters(S.needle.z)} M, ${S.needle.x < 10 ? 'LEFT' : 'RIGHT'} ${S.needle.y < 6 ? 'LOW' : 'HIGH'}` : ''}` : 'NEEDLE · NO SIGNAL'); }
   } else el.needleRow.hidden = true;
   const h = hintText();
-  if (h) { el.hint.innerHTML = h; el.hint.hidden = false; } else el.hint.hidden = true;
+  if (h) { setHTML(el.hint, h); el.hint.hidden = false; } else el.hint.hidden = true;
   el.resume.hidden = coarse || locked || lockFailed || !playing();
   for (let k = 2; k < 9; k++) $('#t' + k).hidden = !lv(TOOL_REQ[k]);
   el.mute.textContent = isMuted() ? 'SOUND OFF' : 'SOUND ON';
@@ -2730,14 +2777,16 @@ $('#koBtn').addEventListener('click', () => { aInit(); respawn(); });
 function b64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]); return btoa(s); }
 function unb64(str) { const s = atob(str), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
 function serialize() {
-  const dug = {};
-  for (const [z, s] of slices) {
-    let n = 0; for (let i = 0; i < N; i++) n += s[i];
-    if (!n) continue;
+  const dug = saveDug;
+  for (const z of saveDirtyZ) {
+    const s = slices.get(z);
+    let n = 0; if (s) for (let i = 0; i < N; i++) n += s[i];
+    if (!n) { delete dug[z]; continue; }
     if (n === N) { dug[z] = 1; continue; }
     const bits = new Uint8Array(N / 8); for (let i = 0; i < N; i++) if (s[i]) bits[i >> 3] |= 1 << (i & 7);
     dug[z] = b64(bits);
   }
+  saveDirtyZ.clear();
   const hpArr = []; for (const [k, h] of hpMap) { if (hpArr.length > 3000) break; hpArr.push([k, +h.toPrecision(6)]); }
   return Object.assign({}, S, { lastSeen: Date.now(), dug, hp: hpArr, player: { x: +player.x.toFixed(2), y: +player.y.toFixed(2), z: +player.z.toFixed(2), yaw: +player.yaw.toFixed(3), pitch: +player.pitch.toFixed(3) }, rubble: rubble.filter(r => r.rest).slice(0, 400).map(r => [+r.x.toFixed(2), +r.y.toFixed(2), +r.z.toFixed(2), r.m, r.v, +r.n.toFixed(4), +r.s.toFixed(3), r.shape]) });
 }
@@ -2745,7 +2794,7 @@ function save() { S.lastSeen = Date.now(); store.set(KEY, JSON.stringify(seriali
 function load() { const s = store.get(KEY); if (!s) return null; try { return JSON.parse(s); } catch (_) { return null; } }
 function resetWorld() {
   for (const g of chunks3.values()) disposeGroup(g); chunks3.clear(); dirty.clear();
-  slices = new Map(); hpMap = new Map(); front = new Uint16Array(N); maxDug = -1; damaged = []; rubble = []; parts = []; texts = []; dusts = []; stressed.clear(); for (const b of falling) scene.remove(b.mesh); falling = [];
+  slices = new Map(); hpMap = new Map(); saveDug = {}; saveDirtyZ.clear(); front = new Uint16Array(N); maxDug = -1; damaged = []; rubble = []; parts = []; texts = []; dusts = []; stressed.clear(); for (const b of falling) scene.remove(b.mesh); falling = [];
   Object.assign(player, { x: 10, y: 0, z: -8, vx: 0, vy: 0, vz: 0, yaw: Math.PI, pitch: 0 });
   combo = 1; crewAcc = 0; ghostAcc = 0; lastChunkZ = -999;
   for (const rg of rigList) scene.remove(rg.g); rigList = [];
@@ -2765,11 +2814,11 @@ function apply(d) {
   if (!S.needle) S.needle = f.needle;
   if (S.hp == null || S.hp <= 0) S.hp = maxHP();
   for (const g of chunks3.values()) disposeGroup(g); chunks3.clear(); dirty.clear();
-  slices = new Map(); hpMap = new Map(); maxDug = -1;
+  slices = new Map(); hpMap = new Map(); saveDug = {}; saveDirtyZ.clear(); maxDug = -1;
   for (const zs in d.dug || {}) {
     const z = +zs, v = d.dug[zs], s = new Uint8Array(N);
     if (v === 1) s.fill(1); else { const bits = unb64(v); for (let i = 0; i < N; i++) s[i] = (bits[i >> 3] >> (i & 7)) & 1; }
-    slices.set(z, s); if (z > maxDug) maxDug = z;
+    slices.set(z, s); saveDug[z] = v; if (z > maxDug) maxDug = z;
   }
   for (const [k, h] of d.hp || []) hpMap.set(k, h);
   for (let c = 0; c < N; c++) { const x = c % GX, y = (c / GX) | 0; let z = 0; while (z < DEEP && isDug(x, y, z)) z++; front[c] = z; }
@@ -2780,7 +2829,9 @@ function apply(d) {
   rubble = (d.rubble || []).map(r => { const K2 = KIND[MATS[r[3]].snd]; return { x: r[0], y: r[1], z: r[2], m: r[3], v: r[4], n: r[5], s: r[6] || 0.3, shape: r[7] || 0, sx: K2.sh[0], sy: K2.sh[1], sz2: K2.sh[2], e: K2.e, flat: K2.flat, col: MATS[r[3]].P[2].map(c => c / 255), q: new THREE.Quaternion().setFromEuler(tmpE.set(0, rnd(6.28), 0)), wx: 0, wy: 0, wz: 0, vx: 0, vy: 0, vz: 0, rest: false, restT: 0, suck: false, belt: 0, shrink: 1 }; });
   delete S.dug; delete S.hp; delete S.player; delete S.rubble;
 }
-const saveIv = setInterval(() => { if (alive && !document.hidden && S.seen.started) save(); }, 5000);
+// autosave every 15 s when the browser has a spare moment; closing, hiding or leaving the game always saves straight away
+const idle = window.requestIdleCallback ? f => window.requestIdleCallback(f, { timeout: 2000 }) : f => setTimeout(f, 0);
+const saveIv = setInterval(() => { if (alive && !document.hidden && S.seen.started) idle(() => { if (alive) save(); }); }, 15000);
 on(window, 'pagehide', () => { if (S.seen.started) save(); });
 on(document, 'visibilitychange', () => { if (document.hidden && S.seen.started) save(); });
 
@@ -2797,8 +2848,9 @@ function start(data) {
   if (data && data.v === 3) $('#intro').hidden = true; else showIntro();
   let last = performance.now(), uiAcc = 0;
   function frame(now) {
-    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    const raw = now - last, dt = Math.min(0.05, raw / 1000); last = now;
     update(dt);
+    watchSpeed(dt, raw);
     motesTick(dt);
     if (post) post.render(); else renderer.render(scene, camera);
     draw2D();
@@ -2835,7 +2887,7 @@ function dispose() {
   renderer.dispose(); try { renderer.forceContextLoss(); } catch (_) {}
   shadow.innerHTML = '';
 }
-dispose.serialize = () => serialize();
+dispose.serialize = () => { const o = serialize(); o.dug = Object.assign({}, o.dug); return o; };
 return dispose;
 }
 G.push({id:'knuckle',name:'Knuckle Through',kind:'game',wide:true,big:true,tags:['digging','tycoon','3D'],tint:'#f2b233',
