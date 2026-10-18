@@ -122,6 +122,12 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
   - 15 mobile-style games.
   - Moonblade art upgrade.
 
+### Analytics and the homepage first screen (Oct 2026)
+
+- **Tracking (`TRACK` in `js/app.js`, right after `HIST`):** sends GA4 events through the page's `gtag` when present: `game_open`, `game_start` (first click, tap or key in the game), `game_time` (visible seconds, sent on hide/close/pagehide with beacon transport), `new_best` (at most once a minute per game), `random_game`, `home_pick` (first-screen cards, `source` continue/top), `filter`. User properties `visit_number` (counted on the device, a new visit after 30 min away; a wiped device shows as 1 again) and `device_kind` (chromebook/phone/tablet/computer from the user agent). The owner has to register custom dimensions in GA (event: `game_id`, `source`; user: `visit_number`, `device_kind`) and a custom metric `seconds` for these to show in reports.
+- **Homepage first screen:** `#heroGames` under the headline, filled by `renderHero()`: Continue playing (the 3 most recent games in this device's `HIST`) and Top games from `TOP_PICKS` (6 for first-time visitors). Headline and sign were made smaller so the cards fit above the fold.
+- **Random button:** players with fewer than 5 games in their history get a game from `TOP_PICKS` (was `CORE`).
+
 ### Removed from the site (hidden, pages kept, `noindex`)
 
 **In the `HIDDEN` set in `js/app.js` (50):**
