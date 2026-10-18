@@ -387,7 +387,7 @@ function face(id, size = 28) {
   let u = PORT_URL.get(id); if (!u) { u = portrait(id).toDataURL(); PORT_URL.set(id, u); }
   return `<img class="pf" src="${u}" width="${size}" height="${size}" alt="">`;
 }
-{ const st = document.createElement('style'); st.textContent = '.pf{border-radius:50%;vertical-align:middle;display:inline-block;flex:none}.card .face .pf{width:52px;height:52px}.chip .pf{margin:-4px 2px -4px -4px}'; shadow.append(st); }
+{ const st = document.createElement('style'); st.textContent = '.pf{border-radius:50%;vertical-align:middle;display:inline-block;flex:none}.card .face .pf{width:52px;height:52px}.chip .pf{margin:-4px 2px -4px -4px}.prow{display:flex;align-items:center;gap:4px}.plab{font-size:14px;font-weight:700;min-width:74px}.seg{font:inherit;font-size:14px;font-weight:700;min-width:50px;height:38px;padding:0 8px;border:2px solid rgba(0,0,0,.2);background:#f4f1ea;border-radius:6px;cursor:pointer;color:#3a332d}.seg.on{background:#2f6b2f;border-color:#2f6b2f;color:#fff}.seg:disabled{opacity:.35;cursor:not-allowed}.card .acts{flex-direction:column;align-items:stretch;gap:6px}.tog.med{width:auto;min-width:0}.meter{display:flex;align-items:center;gap:6px;font-size:12px;color:#5a514a;margin-top:3px}.meter span:first-child{width:40px}.mbar{flex:1;max-width:150px;height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden}.mbar i{display:block;height:100%;background:#2f6b2f}.mbar i.mid{background:#c98a12}.mbar i.low{background:#b3261e}@media (max-width:560px){.prow{width:100%}.seg{flex:1}}'; shadow.append(st); }
 function drawCharacter(c, who, t) {
   // who: { kind:'player'|'fam', ... }
   if (who.dog) drawDog(c, who.x, who.y, who.right, who.ph, who.moving, t, who.excited);
@@ -1221,11 +1221,15 @@ const addItem = (k, n = 1) => { S.inv[k] = (S.inv[k] || 0) + n; };
 const takeItem = (k, n = 1) => { const t = Math.min(S.inv[k] || 0, n); S.inv[k] -= t; return t; };
 const E = k => ITEMS[k].e;
 const name = p => p.id === 'you' ? 'You' : p.name;
-const canGo = p => p.status === 'home' && p.kind !== 'dog' && p.kind !== 'kid' && !p.ill && p.thirst < 3 && p.hunger < 5;
+const canGo = p => p.status === 'home' && p.kind !== 'dog' && p.kind !== 'kid' && !p.ill && p.water >= 40 && p.food >= 30;
+// Food and water are meters from 0 to 100 that drain every night. A full can or bottle refills part of the meter; half portions refill half as much.
+const NEED = { food: { per: 50, drain: { adult: 12, teen: 11, kid: 9, dog: 10 } }, water: { per: 60, drain: { adult: 20, teen: 19, kid: 16, dog: 18 } } };
+const PORTIONS = [0, .5, 1];
+const amt = n => { const w = Math.floor(n + 1e-9), h = n - w > .25; return w ? w + (h ? '½' : '') : h ? '½' : '0'; };
 
 function startSurvival(famDefs, inv) {
   mode = 'survival'; hideAll(); Snd.stopSiren();
-  const mk = d => ({ id: d.id, name: d.name, e: d.e, kind: d.kind, hunger: 0, thirst: 0, ill: null, status: 'home', away: 0, gear: [], cause: '' });
+  const mk = d => ({ id: d.id, name: d.name, e: d.e, kind: d.kind, food: 100, water: 100, dry: 0, starve: 0, ill: null, status: 'home', away: 0, gear: [], cause: '' });
   S = {
     day: 1, inv: Object.assign(Object.fromEntries(INV_ORDER.map(k => [k, 0])), inv),
     people: [mk(YOU)].concat(famDefs.map(mk)),
@@ -1234,7 +1238,7 @@ function startSurvival(famDefs, inv) {
   };
   const n = S.people.length;
   S.log.push({ t: `The hatch is sealed. Through a foot of steel and concrete we heard the world roar, then go quiet. There ${n === 1 ? 'is just me' : `are ${n} of us`} down here.`, c: '' });
-  S.log.push({ t: 'Nobody knows how long we will have to wait. Ration carefully: everyone needs water every few days, and food too.', c: '' });
+  S.log.push({ t: 'Nobody knows how long we will have to wait. Ration carefully: a can or a bottle can be shared, and water runs out faster than food.', c: '' });
   if (has('radio')) S.log.push({ t: `We have the ${E('radio')} radio. If anyone is out there, that's how we'll hear about it.`, c: 'good' });
   else S.log.push({ t: 'We have no radio. If help comes, we may never hear it coming…', c: 'bad' });
   SV.classList.remove('hidden'); SV.scrollTop = 0;
@@ -1409,25 +1413,27 @@ function beginDay() {
 }
 
 function clampRations() {
-  let soup = S.inv.soup, water = S.inv.water;
+  const left = { soup: S.inv.soup, water: S.inv.water };
   for (const p of home()) {
     const r = S.rations[p.id]; if (!r) continue;
-    if (r.soup) { if (soup > 0) soup--; else r.soup = false; }
-    if (r.water) { if (water > 0) water--; else r.water = false; }
+    for (const k of ['soup', 'water']) { const want = r[k] || 0, give = Math.min(want, Math.floor(left[k] * 2) / 2); r[k] = give; left[k] -= give; }
   }
 }
-function allocated(k) { return home().reduce((a, p) => a + (S.rations[p.id] && S.rations[p.id][k] ? 1 : 0), 0); }
+function allocated(k) { return home().reduce((a, p) => a + ((S.rations[p.id] && S.rations[p.id][k]) || 0), 0); }
 
 const STEP_NAMES = { morning: 'Morning', care: 'Food & water', out: 'Scavenge' };
 function needText(p) {
   const out = [];
   if (p.ill) out.push(['d', p.ill.type === 'injured' ? (p.ill.days >= 3 ? 'Badly hurt, getting worse' : 'Injured') : (p.ill.days >= 3 ? 'Very sick, getting worse' : 'Sick')]);
-  if (p.thirst >= 4) out.push(['d', 'Will die without water today']);
-  else if (p.thirst >= 3) out.push(['w', 'Parched']);
-  else if (p.thirst >= 2) out.push(['w', 'Thirsty']);
-  if (p.hunger >= 7) out.push(['d', 'Will starve without food today']);
-  else if (p.hunger >= 5) out.push(['w', 'Starving']);
-  else if (p.hunger >= 3) out.push(['w', 'Hungry']);
+  const dw = NEED.water.drain[p.kind], df = NEED.food.drain[p.kind];
+  if (p.water <= 0 || (p.dry && p.water < dw)) out.push(['d', 'Will die without water today']);
+  else if (p.water < dw) out.push(['d', 'Out of water by tonight']);
+  else if (p.water < 30) out.push(['w', 'Parched']);
+  else if (p.water < 55) out.push(['w', 'Thirsty']);
+  if (p.food <= 0 && p.starve >= 2) out.push(['d', 'Will starve without food today']);
+  else if (p.food <= 0) out.push(['d', 'Starving']);
+  else if (p.food < 25) out.push(['w', 'Very hungry']);
+  else if (p.food < 50) out.push(['w', 'Hungry']);
   if (!out.length) out.push(['ok', 'Doing okay']);
   return out.slice(0, 2).map(([c, t]) => `<span class="${c}">${t}</span>`).join(' · ');
 }
@@ -1450,7 +1456,7 @@ function renderDay() {
   if (!steps.includes(S.step)) S.step = steps[0];
   const idx = steps.indexOf(S.step), ev = S.event, blocking = !!(ev && !ev.done);
   // header: day, essentials, morale, gear
-  const stat = (k, label) => `<div class="stat ${S.inv[k] ? '' : 'zero'}"><span class="ic">${E(k)}</span><b>${S.inv[k] || 0}</b><span class="lbl">${label}</span></div>`;
+  const stat = (k, label) => `<div class="stat ${S.inv[k] ? '' : 'zero'}"><span class="ic">${E(k)}</span><b>${amt(S.inv[k] || 0)}</b><span class="lbl">${label}</span></div>`;
   const mc = S.morale >= 50 ? '' : S.morale >= 25 ? 'mid' : 'low';
   const gear = INV_ORDER.filter(k => !['soup', 'water', 'meds'].includes(k) && S.inv[k]);
   let html = `<header class="top"><div class="day">DAY ${S.day}</div>
@@ -1469,15 +1475,17 @@ function renderDay() {
       html += '</div>';
     }
   } else if (S.step === 'care') {
-    html += `<h2>Food &amp; water</h2><p class="help">Pick who eats and drinks today. Not everyone needs it every day: water every 2–3 days, food every 4–5.</p>`;
+    html += `<h2>Food &amp; water</h2><p class="help">Choose how much each person gets today: nothing, half or a full portion. One can or bottle can be split between two people. Water runs out faster than food.</p>`;
+    html += `<p class="help" style="margin-top:-8px"><b>Left after today:</b> ${E('soup')} ${amt(S.inv.soup - allocated('soup'))} food · ${E('water')} ${amt(S.inv.water - allocated('water'))} water</p>`;
     if (S.note) html += `<p class="note">${S.note}</p>`;
     const freeS = S.inv.soup - allocated('soup'), freeW = S.inv.water - allocated('water');
     html += '<div class="crew">' + home().map(p => {
       const r = S.rations[p.id] || {};
-      let acts = `<button class="tog ${r.soup ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="soup" ${!r.soup && freeS <= 0 ? 'disabled' : ''}>${E('soup')} Food</button>
-        <button class="tog ${r.water ? 'on' : ''}" data-act="ration" data-id="${p.id}" data-k="water" ${!r.water && freeW <= 0 ? 'disabled' : ''}>${E('water')} Water</button>`;
-      if (p.ill && has('meds')) acts += `<button class="tog med" data-act="treat" data-id="${p.id}">${E('meds')} Treat</button>`;
-      return `<div class="card"><div class="face">${face(p.id, 52)}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div></div><div class="acts">${acts}</div></div>`;
+      const meter = (k, v) => { const pct = clamp(v, 0, 100); return `<div class="meter"><span>${k === 'food' ? 'Food' : 'Water'}</span><span class="mbar"><i class="${pct < 25 ? 'low' : pct < 55 ? 'mid' : ''}" style="width:${pct}%"></i></span></div>`; };
+      const row = (k, label) => `<div class="prow"><span class="plab">${E(k)} ${label}</span>${PORTIONS.map(v => { const cur = r[k] || 0, free = (k === 'soup' ? freeS : freeW) + cur; return `<button class="seg ${cur === v ? 'on' : ''}" data-act="portion" data-id="${p.id}" data-k="${k}" data-v="${v}" ${v > cur && v > free + 1e-9 ? 'disabled' : ''}>${v === 0 ? 'None' : v === .5 ? '½' : 'Full'}</button>`; }).join('')}</div>`;
+      let acts = row('soup', 'Food') + row('water', 'Water');
+      if (p.ill && has('meds')) acts += `<button class="tog med" data-act="treat" data-id="${p.id}">${E('meds')} Give medicine</button>`;
+      return `<div class="card"><div class="face">${face(p.id, 52)}</div><div class="info"><b>${p.id === 'you' ? p.name + ' (you)' : p.name}</b><div class="st">${needText(p)}</div>${meter('food', p.food)}${meter('water', p.water)}</div><div class="acts">${acts}</div></div>`;
     }).join('') + '</div>';
     html += awayLine();
     const gone = S.people.filter(p => p.status === 'dead' || p.status === 'lost');
@@ -1513,9 +1521,9 @@ SV.addEventListener('click', e => {
   if (act === 'choice') {
     const c = S.event.choices[+b.dataset.i]; if (c.req && !has(c.req)) return;
     Snd.click(); S.event.result = c.run(); S.event.done = true;
-  } else if (act === 'ration') {
-    const r = S.rations[b.dataset.id] || (S.rations[b.dataset.id] = {}); const k = b.dataset.k;
-    if (!r[k] && S.inv[k] - allocated(k) <= 0) return; r[k] = !r[k]; Snd.click();
+  } else if (act === 'portion') {
+    const r = S.rations[b.dataset.id] || (S.rations[b.dataset.id] = {}), k = b.dataset.k, v = +b.dataset.v, cur = r[k] || 0;
+    if (v > cur && S.inv[k] - allocated(k) + cur < v - 1e-9) return; r[k] = v; Snd.click();
   } else if (act === 'treat') {
     const p = byId(b.dataset.id); if (p && p.ill && takeItem('meds')) { p.ill = null; S.note = `${name(p)} took the medicine and ${p.id === 'you' ? 'feel' : 'feels'} much better.`; Snd.good(); }
   } else if (act === 'who') {
@@ -1540,15 +1548,17 @@ function endDay() {
   // 1. rations and needs
   for (const p of home()) {
     const r = S.rations[p.id] || {};
-    if (r.soup && takeItem('soup')) p.hunger = 0; else p.hunger++;
-    if (r.water && takeItem('water')) p.thirst = 0; else p.thirst++;
+    const ate = takeItem('soup', r.soup || 0), drank = takeItem('water', r.water || 0);
+    p.food = clamp(p.food + ate * NEED.food.per - NEED.food.drain[p.kind], 0, 100);
+    p.water = clamp(p.water + drank * NEED.water.per - NEED.water.drain[p.kind], 0, 100);
+    p.dry = p.water <= 0 ? p.dry + 1 : 0; p.starve = p.food <= 0 ? p.starve + 1 : 0;
     if (p.ill) p.ill.days++;
-    else if ((p.thirst >= 3 || p.hunger >= 5) && Math.random() < .2) { makeIll(p, 'sick'); log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} weak and feverish from going without.`, c: 'bad' }); }
-    if (p.thirst >= 5) die(p, 'died of thirst', log);
-    else if (p.hunger >= 8) die(p, 'starved to death', log);
+    else if ((p.water < 25 || p.food < 20) && Math.random() < .18) { makeIll(p, 'sick'); log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} weak and feverish from going without.`, c: 'bad' }); }
+    if (p.dry >= 2) die(p, 'died of thirst', log);
+    else if (p.starve >= 3) die(p, 'starved to death', log);
     else if (p.ill && p.ill.days >= 5) die(p, p.ill.type === 'injured' ? 'did not survive the injury' : 'lost the fight with the fever', log);
-    else if (p.thirst === 4) log.push({ t: `${name(p)} can barely speak. Water is needed <b>tomorrow</b> or it\'s over.`, c: 'bad' });
-    else if (p.hunger === 7) log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} skin and bone. Food is needed <b>tomorrow</b>.`, c: 'bad' });
+    else if (p.dry === 1) log.push({ t: `${name(p)} can barely speak. Water is needed <b>today</b> or it\'s over.`, c: 'bad' });
+    else if (p.starve === 2) log.push({ t: `${name(p)} ${p.id === 'you' ? 'are' : 'is'} skin and bone. Food is needed <b>today</b>.`, c: 'bad' });
   }
   // 2. departures
   const ex = S.exp;
@@ -1574,7 +1584,7 @@ function endDay() {
       log.push({ t: `Day after day we waited. ${name(p)} never came back.`, c: 'bad' });
       continue;
     }
-    p.status = 'home'; p.hunger += 1; p.thirst += 1;
+    p.status = 'home'; p.food = clamp(p.food - 10, 0, 100); p.water = clamp(p.water - 12, 0, 100);
     if (g('axe') && Math.random() < .1) { p.gear = p.gear.filter(k => k !== 'axe'); log.push({ t: `The ${E('axe')} axe was lost outside.`, c: 'bad' }); }
     p.gear.forEach(k => addItem(k)); p.gear = [];
     if (roll < risk) {
