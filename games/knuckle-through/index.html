@@ -204,6 +204,7 @@ const UPG = [
   { id: 'helmet',   grp: 'Safety', name: 'Hard Hat', desc: 'Falling rock and flying debris do less damage.', cost: L => 800 * Math.pow(3.2, L), max: 6, show: L => (L ? '-' + Math.round(hatCut(L) * 100) + '%' : 'No') + ' rock damage' },
   { id: 'vitality', grp: 'Safety', name: 'Thick Skin', desc: 'More health, and you heal faster once you are out of danger.', cost: L => 500 * Math.pow(2.6, L), max: 12, show: L => maxHPof(L) + ' health' },
   { id: 'bolts',    grp: 'Safety', name: 'Roof Bolter', desc: 'Bolts the ceiling as you go. Rock spans farther before it sags, and loose rock comes down less often.', cost: L => 3e4 * Math.pow(2.6, L), max: 8, show: L => '+' + L + ' span · ' + Math.round(100 * Math.pow(0.75, L)) + '% loose rock' },
+  { id: 'lamp',     grp: 'Safety', name: 'Headlamp', desc: 'A helmet beam that throws light farther down the tunnel. Each level is brighter and reaches farther.', cost: L => 300 * Math.pow(3.4, L), max: 6, show: L => L ? Math.round(lampRange(L) / 2) + ' m beam' : 'No beam yet' },
   { id: 'boots',    grp: 'Haul', name: 'Work Boots', desc: 'Walk and run faster through your own tunnel.', cost: L => 250 * Math.pow(3, L), max: 6, show: L => Math.round(100 + 15 * L) + '% speed' },
   { id: 'suction',  grp: 'Haul', name: 'Shop-Vac Motor', desc: 'The vacuum reaches farther and pulls harder.', cost: L => 30 * Math.pow(1.55, L), max: 20, show: L => Math.round(100 + 17 * L) + '% reach' },
   { id: 'bag',      grp: 'Haul', name: 'Duffel Bag', desc: 'Carry more rubble before you have to sell.', cost: L => 45 * Math.pow(1.45, L), max: 60, show: L => fmt(bagCap(L)) + ' chunks' },
@@ -251,6 +252,7 @@ const singMul = L => 60 * (1 + 0.5 * L) * Math.pow(1.06, L);
 const singR = L => 2.6 + Math.min(1.8, 0.08 * L);
 const singCd = L => 30 / (1 + 0.1 * L);
 const excMul = L => 10 * (1 + 0.5 * L) * Math.pow(1.05, L);
+const lampRange = L => 34 + 10 * L;
 const turDps = () => baseDmg() * laserMul(lv('focus')) * 0.6;
 const TOOL_REQ = [null, null, 'drill', 'sledge', 'dynamite', 'laser', 'saw', 'cryo', 'singularity'];
 const TOOL_NAME = ['fists', 'vacuum', 'drill', 'sledgehammer', 'dynamite', 'mining laser', 'rock saw', 'cryo sprayer', 'singularity'];
@@ -337,6 +339,8 @@ camera.rotation.order = 'YXZ';
 scene.add(camera);
 const ambient = new THREE.AmbientLight(0x8a8478, 0.26); scene.add(ambient);
 const headlamp = new THREE.PointLight(0xffe2b0, 0.95, 30, 1.6); camera.add(headlamp); headlamp.position.set(0.4, 0.2, 0);
+// the Headlamp upgrade: a forward beam that is off until you buy it
+const beamLamp = new THREE.SpotLight(0xfff0d6, 0, 34, 0.55, 0.55, 1.2); camera.add(beamLamp); beamLamp.position.set(0.3, 0.25, 0); camera.add(beamLamp.target); beamLamp.target.position.set(0, -0.05, -1);
 const cellBulb = new THREE.PointLight(0xffd29a, 0.9, 26, 1.8); cellBulb.position.set(10, 10.4, -7); scene.add(cellBulb);
 const sun = new THREE.DirectionalLight(0xfff2d8, 0); sun.position.set(-20, 60, DEEP + 40); scene.add(sun);
 
@@ -2073,7 +2077,8 @@ function update(dt) {
   const open = maxDug >= DEEP - 1;
   skyPlane.visible = open || nearEnd > 0.6;
   const daylight = open ? clamp(1 - (DEEP - player.z) / 120, 0.15, 1) : 0;
-  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03, 0.004, daylight);
+  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03 - 0.0015 * lv('lamp'), 0.004, daylight);
+  beamLamp.intensity = lv('lamp') ? 0.6 + 0.15 * lv('lamp') : 0; beamLamp.distance = lampRange(lv('lamp'));
   sun.intensity = daylight * 1.1; ambient.intensity = 0.26 + daylight * 0.5;
 
   // vacuum
