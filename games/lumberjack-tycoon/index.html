@@ -1,0 +1,256 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<script>try{if(localStorage.getItem("unb_theme")==="\"light\"")document.documentElement.dataset.theme="light"}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lumberjack Tycoon | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#121019">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="stylesheet" href="/css/fonts.css">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="lumber"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg><span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Lumberjack Tycoon</h1><p>Chop trees, sell the logs and build a timber empire. Hire a crew, buy a mill and a truck, unlock five forests and sell the company for permanent bonuses.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog-lite.js"></script>
+<script src="/js/lib/mob.js"></script>
+<script src="/js/lib/tycoon.js"></script>
+<script>
+/* ===================== Lumberjack Tycoon: game code ===================== */
+G.push({id:'lumber',name:'Lumberjack Tycoon',kind:'sim',wide:true,tint:'#cfe8b8',blurb:'Chop trees, sell the logs and build a timber empire. Hire a crew, buy a mill and a truck, unlock five forests and sell the company for permanent bonuses.',
+fmt:b=>{const u=['','K','M','B','T','Qa','Qi'];let i=0;while(b>=1000&&i<6){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]},
+art:'<rect width="120" height="72" fill="#9fd8ff"/><path d="M0 46L30 30L60 44L90 26L120 40V72H0Z" fill="#7fa8c8"/><rect y="52" width="120" height="20" fill="#7cbf5a"/><path d="M24 54V40" stroke="#6b4423" stroke-width="5"/><path d="M24 14L36 40H12Z" fill="#2f7a3a" stroke="#1D1A2F" stroke-width="2"/><path d="M24 24L38 46H10Z" fill="#3a9a48" stroke="#1D1A2F" stroke-width="2"/><rect x="62" y="34" width="12" height="20" rx="3" fill="#c0392b" stroke="#1D1A2F" stroke-width="2"/><circle cx="68" cy="28" r="6" fill="#f1c27d" stroke="#1D1A2F" stroke-width="2"/><path d="M74 38L88 22" stroke="#7a5232" stroke-width="3"/><path d="M84 18L94 22L88 28Z" fill="#c8d0d8" stroke="#1D1A2F" stroke-width="1.5"/><g fill="#b07a48" stroke="#1D1A2F" stroke-width="1.5"><circle cx="96" cy="62" r="5"/><circle cx="106" cy="62" r="5"/><circle cx="101" cy="54" r="5"/></g>',
+run(root,c){const W=960,H=540,SW=640,PX=648,PW=304;const {cv,x}=MOB.canvas(root,W,H);cv.style.width='min(100%,calc(72vh*1.7778))';
+  const INK='#1D1A2F',GY=410,ROAD=488;
+
+  /* ---------- data ---------- */
+  const AREAS=[
+    {name:'Pine Forest',tree:'pine',hp:10,logs:2,price:1,unlock:0,sky:['#8fd3ff','#e8f6ff'],far:'#7fa8c8',hill:'#6aa860',ground:'#7cbf5a',ground2:'#5a9a42'},
+    {name:'Birch Woods',tree:'birch',hp:45,logs:3,price:3.7,unlock:2500,sky:['#a8dcff','#f4fbff'],far:'#9bb8cf',hill:'#8cc070',ground:'#9ccf6a',ground2:'#7aae4e'},
+    {name:'Redwood Grove',tree:'redwood',hp:200,logs:4,price:15,unlock:6e4,sky:['#ffd9a8','#fff4e0'],far:'#c99a7a',hill:'#7a9a5a',ground:'#6f9a4a',ground2:'#56803a'},
+    {name:'Snowy Taiga',tree:'snow',hp:900,logs:5,price:66,unlock:2e6,sky:['#bcd6ee','#f2f8ff'],far:'#a9c2dc',hill:'#e2edf6',ground:'#f2f7fb',ground2:'#cddce8',snow:1},
+    {name:'Ancient Jungle',tree:'jungle',hp:4000,logs:6,price:300,unlock:8e7,sky:['#9fe0c8','#e8fff4'],far:'#6aa890',hill:'#3f8f5a',ground:'#4f9a3a',ground2:'#3a7a2c'}];
+  const DEF={money:0,life:0,lifeAll:0,logs:0,planks:0,axe:1,sharp:0,workers:0,skill:1,mill:0,truck:0,area:0,areas:1,acorns:0,chops:0,trees:0,rate:0,seen:0};
+  const KEY='ty_lumber';
+  let st=TY.load(KEY,DEF);
+
+  /* ---------- formulas ---------- */
+  const A=()=>AREAS[st.area];
+  const mult=()=>1+.05*st.acorns;
+  const axeDmg=()=>Math.pow(1.38,st.axe-1);
+  const critChance=()=>Math.min(.5,st.sharp*.05);
+  const maxWorkers=()=>2+2*st.areas;
+  const workerDps=()=>1.5*Math.pow(1.35,st.skill-1);
+  const millRate=()=>st.mill?.8*Math.pow(1.6,st.mill-1):0;
+  const plankMul=()=>2.5*(1+.2*Math.max(0,st.mill-1));
+  const truckCap=()=>Math.floor(20*Math.pow(1.55,st.truck-1));
+  const tripTime=()=>Math.max(4,12*Math.pow(.9,st.truck-1));
+  const logPrice=()=>A().price*mult(),plankPrice=()=>A().price*plankMul()*mult();
+  const acornsFor=life=>Math.floor(Math.sqrt(life/1e5));
+  const UPG=[
+    {id:'axe',name:'Upgrade Axe',icon:'axe',lvl:()=>'Lv. '+st.axe,sub:()=>TY.fmt(axeDmg())+' damage per chop',cost:()=>TY.cost(12,1.6,st.axe-1),buy:()=>st.axe++},
+    {id:'sharp',name:'Whetstone',icon:'stone',lvl:()=>'Lv. '+st.sharp,sub:()=>Math.round(critChance()*100)+'% chance of a 5x chop',cost:()=>TY.cost(500,2.2,st.sharp),buy:()=>st.sharp++,max:()=>st.sharp>=10},
+    {id:'worker',name:'Hire Worker',icon:'worker',lvl:()=>st.workers+' / '+maxWorkers(),sub:()=>'Chops '+TY.fmt(workerDps())+' a second',cost:()=>TY.cost(40,1.42,st.workers),buy:()=>st.workers++,max:()=>st.workers>=maxWorkers(),maxLabel:'FULL'},
+    {id:'skill',name:'Crew Training',icon:'hat',lvl:()=>'Lv. '+st.skill,sub:()=>'Workers chop 35% faster',cost:()=>TY.cost(150,1.7,st.skill-1),buy:()=>st.skill++,need:()=>st.workers>0},
+    {id:'truck',name:'Truck',icon:'truck',lvl:()=>st.truck?'Lv. '+st.truck:'Not owned',sub:()=>st.truck?'Hauls '+truckCap()+' every '+tripTime().toFixed(1)+'s':'Sells your wood for you',cost:()=>TY.cost(250,1.9,st.truck),buy:()=>st.truck++},
+    {id:'mill',name:'Lumber Mill',icon:'mill',lvl:()=>st.mill?'Lv. '+st.mill:'Not built',sub:()=>st.mill?'Planks worth '+plankMul().toFixed(1)+'x a log':'Turns logs into planks',cost:()=>TY.cost(800,2.1,st.mill),buy:()=>st.mill++}];
+
+  /* ---------- runtime ---------- */
+  const slots=[{x:330,player:1},{x:150},{x:232},{x:420},{x:505},{x:590}].map(s=>Object.assign(s,{hp:0,max:1,fall:-1,grow:1}));
+  function resetTrees(){for(const s of slots){s.max=A().hp*(s.player?1:1.2);s.hp=s.max;s.fall=-1;s.grow=1}}
+  resetTrees();
+  let t=0,tab='shop',swing=0,parts=[],floats=[],flying=[],acc=0,truck={x:170,phase:'wait',t:0,load:0},confirm=0,welcome=TY.offline(st),saveT=0,bestT=0,millAcc=0,banner=null;
+  const M=TY.meter(6);
+  if(welcome){st.money+=welcome.amt;st.life+=welcome.amt;st.lifeAll+=welcome.amt}
+  function earn(v,px,py){v*=1;st.money+=v;st.life+=v;st.lifeAll+=v;M.add(v);if(px!=null)floats.push({s:'+'+TY.money(v),x:px,y:py,t:0,c:'#ffe066',big:1})}
+  function addFloat(s,px,py,col){floats.push({s,x:px,y:py,t:0,c:col})}
+  function chips(px,py,n,cols){for(let i=0;i<n;i++){const a=Math.random()*6.28,v=1+Math.random()*3;parts.push({x:px,y:py,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2,g:.18,t:0,l:500+Math.random()*300,c:cols[i%cols.length],r:2+Math.random()*2.5})}}
+
+  function hit(s,dmg,crit){if(s.fall>=0||s.grow<1)return;s.hp-=dmg;
+    if(s.player){chips(s.x-10,GY-30,crit?14:6,['#c08a52','#e8c28a','#8a5a2e']);addFloat((crit?'CRIT ':'')+'-'+TY.fmt(dmg),s.x+(Math.random()*30-15),GY-80,crit?'#ff8a3a':'#fff')}
+    if(s.hp<=0){s.fall=0;st.trees++;const n=A().logs;st.logs+=n;beep(110,.15,'triangle',.07);
+      for(let i=0;i<n;i++)flying.push({x:s.x,y:GY-20,tx:70+Math.random()*80,ty:470,t:-i*.08});
+      if(s.player)addFloat('+'+n+' logs',s.x,GY-110,'#ffd23f')}}
+  function chop(){if(welcome||banner)return;const s=slots[0];if(s.fall>=0||s.grow<1){swing=1;return}
+    const crit=Math.random()<critChance(),dmg=axeDmg()*(crit?5:1);swing=1;st.chops++;beep(crit?240:170,.05,'square',.05);hit(s,dmg,crit)}
+  function sellAll(){if(!st.logs&&!st.planks)return;const v=st.logs*logPrice()+st.planks*plankPrice();st.logs=0;st.planks=0;earn(v,120,430);beep(880,.08,'sine',.06);setTimeout(()=>beep(1180,.08,'sine',.06),70)}
+  function buy(u){const cst=u.cost();if(st.money<cst)return;st.money-=cst;u.buy();beep(660,.06,'triangle',.07);beep(990,.08,'triangle',.06);if(u.id==='axe'||u.id==='skill')resetTreesSoft();save()}
+  function resetTreesSoft(){}
+  function travel(i){if(i===st.area)return;st.area=i;resetTrees();banner={s:AREAS[i].name,t:0};beep(520,.1,'sine',.06);save()}
+  function unlock(i){const a=AREAS[i];if(st.money<a.unlock)return;st.money-=a.unlock;st.areas=Math.max(st.areas,i+1);travel(i)}
+  function prestige(){const gain=acornsFor(st.lifeAll)-st.acorns;if(gain<=0)return;if(!confirm){confirm=3000;return}
+    const keep={acorns:st.acorns+gain,lifeAll:st.lifeAll,chops:st.chops,trees:st.trees};st=Object.assign(JSON.parse(JSON.stringify(DEF)),keep);resetTrees();confirm=0;tab='shop';
+    banner={s:'+'+gain+' Golden Acorns',t:0};c.best(Math.floor(st.lifeAll));save();beep(1320,.3,'sine',.08)}
+  function save(){st.rate=M.rate();TY.save(KEY,st)}
+
+  const U=TY.ui(c,cv,W,H,p=>{if(p.x<SW)chop()});
+  c.on(document,'keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key===' '||e.key==='Enter'){e.preventDefault();if(welcome){welcome=null;return}chop()}else if(e.key==='1')tab='shop';else if(e.key==='2')tab='areas';else if(e.key==='3')tab='company';else if(e.key==='s')sellAll()});
+
+  /* ---------- drawing: scenery ---------- */
+  const fill=(col,fn)=>{x.fillStyle=col;x.beginPath();fn();x.fill()};
+  function bg(){const a=A(),g=x.createLinearGradient(0,0,0,GY);g.addColorStop(0,a.sky[0]);g.addColorStop(1,a.sky[1]);x.fillStyle=g;x.fillRect(0,0,SW,H);
+    x.fillStyle='rgba(255,246,200,.9)';x.beginPath();x.arc(540,70,30,0,7);x.fill();
+    for(let i=0;i<4;i++){const cx=((i*190+t*.008*(1+i%2))%(SW+160))-80,cy=50+i*22%60;x.fillStyle='rgba(255,255,255,.85)';for(const[dx,dy,r]of[[0,0,16],[18,-8,20],[38,0,15]]){x.beginPath();x.arc(cx+dx,cy+dy,r,0,7);x.fill()}}
+    fill(a.far,()=>{x.moveTo(0,GY);for(let sx=0;sx<=SW;sx+=20)x.lineTo(sx,250+Math.sin(sx/70)*40+Math.sin(sx/23)*12);x.lineTo(SW,GY)});
+    fill('rgba(255,255,255,.55)',()=>{for(const px of[80,300,470]){const py=250+Math.sin(px/70)*40+Math.sin(px/23)*12;x.moveTo(px-18,py+16);x.lineTo(px,py-2);x.lineTo(px+18,py+16)}});
+    fill(a.hill,()=>{x.moveTo(0,GY);for(let sx=0;sx<=SW;sx+=16)x.lineTo(sx,320+Math.sin(sx/110+1)*20);x.lineTo(SW,GY)});
+    // distant forest silhouette
+    x.fillStyle='rgba(30,70,40,.35)';for(let i=0;i<22;i++){const px=i*31+8,py=330+Math.sin(i*1.7)*8;x.beginPath();x.moveTo(px,py-26);x.lineTo(px+11,py+4);x.lineTo(px-11,py+4);x.fill()}
+    fill(a.ground,()=>{x.rect(0,GY-4,SW,H-GY+4)});x.fillStyle=a.ground2;x.fillRect(0,GY+40,SW,H-GY-40);
+    x.fillStyle='#8a6a48';x.fillRect(0,ROAD-16,SW,34);x.fillStyle='rgba(255,255,255,.35)';for(let rx=0;rx<SW;rx+=46)x.fillRect(rx+((t*.0)%46),ROAD,22,3);
+    if(a.snow){x.fillStyle='rgba(255,255,255,.9)';for(let i=0;i<50;i++){const sx=(i*73+t*.02*(1+i%3))%SW,sy=(i*41+t*.04*(1+i%2))%GY;x.beginPath();x.arc(sx,sy,1.6,0,7);x.fill()}}}
+  function cabin(px,py){TY.box(x,px,py-46,74,46,3,'#9a6a3a',INK,2);x.strokeStyle='rgba(0,0,0,.25)';x.lineWidth=2;for(let i=1;i<5;i++){x.beginPath();x.moveTo(px,py-46+i*9);x.lineTo(px+74,py-46+i*9);x.stroke()}
+    x.fillStyle='#7a3a2a';x.beginPath();x.moveTo(px-8,py-44);x.lineTo(px+37,py-74);x.lineTo(px+82,py-44);x.closePath();x.fill();x.lineWidth=2;x.strokeStyle=INK;x.stroke();
+    TY.box(x,px+30,py-26,14,26,2,'#5a3a1e',INK,1.5);TY.box(x,px+52,py-36,14,12,2,'#ffe9a0',INK,1.5);TY.box(x,px+56,py-84,8,16,1,'#6a6a6a',INK,1.5);
+    for(let i=0;i<3;i++){x.globalAlpha=.35-i*.1;x.fillStyle='#ddd';x.beginPath();x.arc(px+60+Math.sin(t/600+i)*4,py-92-i*12-(t/40%12),5+i*2,0,7);x.fill()}x.globalAlpha=1}
+  function mill(px,py){TY.box(x,px,py-60,96,60,3,'#b07a48',INK,2);x.fillStyle='#8a3a2a';x.beginPath();x.moveTo(px-6,py-58);x.lineTo(px+48,py-86);x.lineTo(px+102,py-58);x.closePath();x.fill();x.lineWidth=2;x.strokeStyle=INK;x.stroke();
+    TY.box(x,px+10,py-36,28,36,2,'#4a2a14',INK,1.5);TY.txt(x,'MILL',px+70,py-42,11,'#fff4d0');
+    x.save();x.translate(px+70,py-18);x.rotate(t/120);x.fillStyle='#c8d0d8';x.beginPath();for(let i=0;i<16;i++){const a=i*Math.PI/8,r=i%2?10:13;x.lineTo(Math.cos(a)*r,Math.sin(a)*r)}x.closePath();x.fill();x.lineWidth=1.5;x.strokeStyle=INK;x.stroke();x.restore()}
+  function logPile(px,py){const n=Math.min(36,Math.ceil(st.logs/Math.max(1,A().logs)));let k=0;
+    for(let row=0;row<6&&k<n;row++)for(let i=0;i<8-row&&k<n;i++,k++){const lx=px+i*15+row*7.5,ly=py-row*12;x.beginPath();x.arc(lx,ly,7,0,7);x.fillStyle='#b07a48';x.fill();x.lineWidth=1.5;x.strokeStyle=INK;x.stroke();x.beginPath();x.arc(lx,ly,3.5,0,7);x.strokeStyle='#7a5232';x.stroke()}
+    if(st.mill){const m=Math.min(14,Math.ceil(st.planks/3));for(let i=0;i<m;i++)TY.box(x,px+128,py+4-i*5,44,5,1,i%2?'#e8c28a':'#d8b07a',INK,1)}}
+  function truckDraw(px,py,load){x.save();x.translate(px,py);
+    TY.box(x,-64,-24,84,16,3,'#5a6a7a',INK,2);
+    const n=Math.min(9,Math.ceil(load/Math.max(1,truckCap())*9));for(let i=0;i<n;i++){x.beginPath();x.arc(-56+(i%5)*15,-30-Math.floor(i/5)*11,6,0,7);x.fillStyle=i%2?'#c08a52':'#b07a48';x.fill();x.lineWidth=1.3;x.strokeStyle=INK;x.stroke()}
+    TY.box(x,20,-44,38,36,6,'#2f6fd8',INK,2);TY.box(x,32,-38,20,14,3,'#bfe3fa',INK,1.5);
+    for(const wx of[-44,-4,40]){x.beginPath();x.arc(wx,-6,9,0,7);x.fillStyle='#222';x.fill();x.beginPath();x.arc(wx,-6,4,0,7);x.fillStyle='#aaa';x.fill()}x.restore()}
+  /* trees: base at (px, GY). fall: 0..1 tipping over to the right. */
+  function treeDraw(kind,px,s,mark){x.save();x.translate(px,GY);const k=s.grow<1?.25+.75*s.grow:1;
+    if(s.fall>=0){x.rotate(Math.min(1.45,s.fall*1.8));x.globalAlpha=Math.max(0,1-Math.max(0,s.fall-.6)/.4)}x.scale(k,k);
+    const ol=()=>{x.lineWidth=2;x.strokeStyle=INK;x.stroke()};
+    const tri=(y,w,h,col)=>{x.beginPath();x.moveTo(0,y-h);x.lineTo(w,y);x.lineTo(-w,y);x.closePath();x.fillStyle=col;x.fill();ol()};
+    if(kind==='pine'||kind==='snow'){TY.box(x,-8,-50,16,52,3,'#7a5232',INK,2);tri(-40,40,46,'#2f7a3a');tri(-72,32,42,'#3a9a48');tri(-102,22,38,'#4fb05a');
+      if(kind==='snow'){x.fillStyle='#fff';for(const[y,w]of[[-86,18],[-114,14],[-140,10]]){x.beginPath();x.moveTo(0,y);x.lineTo(w,y+12);x.lineTo(-w,y+12);x.closePath();x.fill()}}}
+    else if(kind==='birch'){TY.box(x,-7,-90,14,92,4,'#f2efe6',INK,2);x.fillStyle=INK;for(let i=0;i<6;i++)x.fillRect(-7+(i%2)*6,-80+i*13,6,2.5);
+      for(const[dx,dy,r,col]of[[-20,-96,24,'#9ccf4a'],[20,-100,24,'#9ccf4a'],[0,-122,28,'#b4dc5a'],[0,-92,26,'#8cc03a']]){x.beginPath();x.arc(dx,dy,r,0,7);x.fillStyle=col;x.fill();ol()}}
+    else if(kind==='redwood'){TY.box(x,-14,-120,28,122,4,'#9a4a2a',INK,2);x.strokeStyle='rgba(0,0,0,.2)';x.lineWidth=2;for(let i=0;i<4;i++){x.beginPath();x.moveTo(-8+i*5,-115);x.lineTo(-8+i*5,-5);x.stroke()}
+      tri(-100,30,40,'#2a6a3a');tri(-130,24,40,'#357a44');tri(-158,18,36,'#428a4e')}
+    else{x.strokeStyle='#7a5a3a';x.lineWidth=16;x.lineCap='round';x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(-14,-60,6,-128);x.stroke();x.lineWidth=2;x.strokeStyle=INK;x.lineCap='butt';
+      for(let i=0;i<6;i++){const a=-Math.PI/2+(i-2.5)*.55;x.save();x.translate(6,-128);x.rotate(a);x.beginPath();x.ellipse(32,0,34,10,0,0,7);x.fillStyle=i%2?'#2f8a3a':'#3fa048';x.fill();ol();x.restore()}
+      x.strokeStyle='#2f6a2a';x.lineWidth=2;x.beginPath();x.moveTo(-20,-110);x.quadraticCurveTo(-24,-70,-18,-40);x.stroke()}
+    if(mark>0&&s.fall<0){x.fillStyle='#e8c28a';x.beginPath();const d=Math.min(1,mark)*9;x.moveTo(-9,-14);x.lineTo(-9+d,-10);x.lineTo(-9,-6);x.closePath();x.fill()}
+    x.restore();
+    if(s.fall<0&&s.grow>=1&&s.hp<s.max){const bw=46;TY.box(x,px-bw/2,GY+8,bw,6,3,'rgba(0,0,0,.35)');TY.box(x,px-bw/2,GY+8,bw*Math.max(0,s.hp/s.max),6,3,'#ffd23f')}}
+  /* people: feet at (px,py), facing right toward their tree */
+  function person(px,py,s,ang,look){x.save();x.translate(px,py);x.scale(s,s);x.lineCap='round';
+    x.strokeStyle=INK;x.lineWidth=8;x.beginPath();x.moveTo(-5,-22);x.lineTo(-7,0);x.moveTo(5,-22);x.lineTo(8,0);x.stroke();
+    x.strokeStyle=look.pants;x.lineWidth=5;x.beginPath();x.moveTo(-5,-22);x.lineTo(-7,-2);x.moveTo(5,-22);x.lineTo(8,-2);x.stroke();
+    TY.box(x,-11,-4,13,6,3,'#3a2a1a');TY.box(x,3,-4,13,6,3,'#3a2a1a');
+    TY.box(x,-12,-50,24,30,7,look.shirt,INK,2.5);
+    if(look.plaid){x.save();MOB.rr(x,-12,-50,24,30,7);x.clip();x.fillStyle='rgba(0,0,0,.28)';for(let i=-12;i<12;i+=7)x.fillRect(i,-50,3,30);for(let j=-48;j<-20;j+=7)x.fillRect(-12,j,24,3);x.restore()}
+    if(look.vest){x.fillStyle='#ff8a1a';x.fillRect(-12,-48,8,26);x.fillRect(4,-48,8,26);x.fillStyle='#fff3a0';x.fillRect(-12,-36,24,3)}
+    x.beginPath();x.arc(0,-62,12,0,7);x.fillStyle='#f1c27d';x.fill();x.lineWidth=2.5;x.strokeStyle=INK;x.stroke();
+    x.beginPath();x.arc(6,-63,2,0,7);x.fillStyle=INK;x.fill();
+    if(look.beard){x.fillStyle='#7a4a2a';x.beginPath();x.moveTo(-6,-58);x.quadraticCurveTo(4,-44,12,-58);x.lineTo(11,-62);x.quadraticCurveTo(4,-56,-4,-62);x.closePath();x.fill();x.lineWidth=1.5;x.stroke()}
+    if(look.hat==='beanie'){x.fillStyle='#3a3a44';x.beginPath();x.arc(0,-66,12.5,Math.PI,0);x.closePath();x.fill();x.lineWidth=2;x.stroke();TY.box(x,-13,-68,26,5,2,'#55555f')}
+    else{x.fillStyle='#ffd23f';x.beginPath();x.arc(0,-66,13,Math.PI,0);x.closePath();x.fill();x.lineWidth=2;x.stroke();TY.box(x,-15,-67,30,4,2,'#f2b81f',INK,1.5)}
+    // arms + axe
+    x.save();x.translate(2,-44);x.rotate(ang);x.strokeStyle='#f1c27d';x.lineWidth=5;x.beginPath();x.moveTo(0,0);x.lineTo(14,0);x.stroke();
+    x.strokeStyle='#7a5232';x.lineWidth=4;x.beginPath();x.moveTo(8,0);x.lineTo(36,0);x.stroke();
+    x.fillStyle='#c8d0d8';x.beginPath();x.moveTo(30,-2);x.lineTo(40,-12);x.quadraticCurveTo(46,0,40,10);x.lineTo(30,4);x.closePath();x.fill();x.lineWidth=1.8;x.strokeStyle=INK;x.stroke();x.restore();
+    x.restore()}
+  const JACK={shirt:'#c0392b',pants:'#2f4a7a',plaid:1,beard:1,hat:'beanie'},CREW={shirt:'#5a7a9a',pants:'#3a3a4a',vest:1,hat:'helmet'};
+  function swingAng(q){return q<=0?-.75:q<.4?-.75-(q/.4)*1.55:-2.3+((q-.4)/.6)*3.05}
+
+  /* ---------- drawing: icons ---------- */
+  function icon(kind){return(x,r)=>{x.lineCap='round';x.lineJoin='round';
+    if(kind==='axe'){x.rotate(-.7);x.strokeStyle='#a87444';x.lineWidth=r*.28;x.beginPath();x.moveTo(-r,0);x.lineTo(r*.9,0);x.stroke();x.fillStyle='#d8e0e8';x.beginPath();x.moveTo(r*.4,-r*.15);x.lineTo(r*.9,-r*.85);x.quadraticCurveTo(r*1.3,0,r*.9,r*.6);x.lineTo(r*.4,r*.15);x.fill()}
+    else if(kind==='stone'){x.fillStyle='#8a96a2';x.beginPath();x.ellipse(0,0,r,r*.5,-.3,0,7);x.fill();x.strokeStyle='#ffe066';x.lineWidth=2;x.beginPath();x.moveTo(-r*.3,-r*.9);x.lineTo(r*.1,-r*.4);x.moveTo(r*.5,-r*.95);x.lineTo(r*.4,-r*.5);x.stroke()}
+    else if(kind==='worker'){x.fillStyle='#f1c27d';x.beginPath();x.arc(0,-r*.1,r*.45,0,7);x.fill();x.fillStyle='#ffd23f';x.beginPath();x.arc(0,-r*.3,r*.5,Math.PI,0);x.fill();x.fillStyle='#ff8a1a';x.fillRect(-r*.6,r*.4,r*1.2,r*.6)}
+    else if(kind==='hat'){x.fillStyle='#ffd23f';x.beginPath();x.arc(0,r*.2,r*.8,Math.PI,0);x.fill();x.fillRect(-r,r*.15,r*2,r*.25);x.fillStyle='#fff';x.font='900 '+Math.round(r*.8)+'px Figtree';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#1f7a3a';x.fillText('+',0,-r*.15)}
+    else if(kind==='truck'){x.fillStyle='#2f6fd8';x.fillRect(r*.1,-r*.6,r*.8,r*.9);x.fillStyle='#8a9aa8';x.fillRect(-r,-r*.2,r*1.1,r*.5);x.fillStyle='#222';for(const wx of[-r*.6,r*.5]){x.beginPath();x.arc(wx,r*.45,r*.25,0,7);x.fill()}}
+    else if(kind==='mill'){x.fillStyle='#b07a48';x.fillRect(-r*.8,-r*.3,r*1.6,r*.9);x.fillStyle='#8a3a2a';x.beginPath();x.moveTo(-r,-r*.3);x.lineTo(0,-r);x.lineTo(r,-r*.3);x.fill();x.fillStyle='#d8e0e8';x.beginPath();x.arc(r*.3,r*.2,r*.32,0,7);x.fill()}
+    else if(kind==='pin'){x.fillStyle='#34c25a';x.beginPath();x.arc(0,-r*.2,r*.6,0,7);x.fill();x.beginPath();x.moveTo(-r*.45,0);x.lineTo(0,r);x.lineTo(r*.45,0);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(0,-r*.2,r*.25,0,7);x.fill()}
+    else if(kind==='lock'){x.strokeStyle='#9fb6cc';x.lineWidth=3;x.beginPath();x.arc(0,-r*.3,r*.4,Math.PI,0);x.stroke();x.fillStyle='#9fb6cc';x.fillRect(-r*.55,-r*.3,r*1.1,r*.85)}
+    else if(kind==='acorn'){x.fillStyle='#d8a020';x.beginPath();x.ellipse(0,r*.15,r*.55,r*.65,0,0,7);x.fill();x.fillStyle='#8a5a2e';x.beginPath();x.ellipse(0,-r*.35,r*.7,r*.35,0,0,7);x.fill();x.strokeStyle='#8a5a2e';x.lineWidth=2;x.beginPath();x.moveTo(0,-r*.6);x.lineTo(r*.2,-r*.95);x.stroke()}}}
+
+  /* ---------- drawing: panel ---------- */
+  function panel(){TY.box(x,PX,8,PW,H-16,14,'#0f1a26','rgba(255,255,255,.1)',1.5);
+    const tabs=[['shop','Upgrades'],['areas','Forests'],['company','Company']];const tw=(PW-24)/3;
+    tabs.forEach(([id,lab],i)=>{const bx=PX+12+i*tw,on=tab===id;TY.box(x,bx,18,tw-6,32,9,on?'#34c25a':'rgba(255,255,255,.07)');TY.txt(x,lab,bx+(tw-6)/2,35,13,on?'#fff':'#9fb6cc');U.btn(bx,18,tw-6,32,()=>{tab=id;confirm=0})});
+    const top=60,hgt=H-top-20,sc=U.scroll(tab,PX+8,top,PW-16,hgt),clip={x:PX+8,y:top,w:PW-16,h:hgt};
+    x.save();x.beginPath();x.rect(clip.x,clip.y,clip.w,clip.h);x.clip();let y=top-sc.off;const cw=PW-24,ch=70;
+    if(tab==='shop'){for(const u of UPG){if(u.need&&!u.need()){continue}const cst=u.cost(),mx=u.max&&u.max();
+        TY.card(x,U,clip,{px:PX+12,py:y,w:cw,h:ch,icon:icon(u.icon),name:u.name,lvl:u.lvl(),sub:u.sub(),cost:cst,can:!mx&&st.money>=cst,fn:()=>buy(u),max:mx,maxLabel:u.maxLabel});y+=ch+8}}
+    else if(tab==='areas'){AREAS.forEach((a,i)=>{const open=i<st.areas,next=i===st.areas,here=i===st.area;
+        if(!open&&!next){TY.card(x,U,clip,{px:PX+12,py:y,w:cw,h:ch,icon:icon('lock'),name:'???',lvl:'Unlock '+AREAS[i-1].name+' first',max:1,maxLabel:'LOCKED'});y+=ch+8;return}
+        TY.card(x,U,clip,{px:PX+12,py:y,w:cw,h:ch,icon:icon(open?'pin':'lock'),name:a.name,lvl:'Trees: '+TY.fmt(a.hp)+' HP',sub:'$'+TY.fmt(a.logs*a.price*mult())+' of logs a tree',
+          cost:a.unlock,can:here?false:open?true:st.money>=a.unlock,label:here?'HERE':open?'GO':TY.money(a.unlock),max:here,maxLabel:'HERE',fn:()=>open?travel(i):unlock(i)});y+=ch+8})}
+    else{const gain=acornsFor(st.lifeAll)-st.acorns,nextAt=Math.pow(acornsFor(st.lifeAll)+1,2)*1e5;
+      const rows=[['Earned this run',TY.money(st.life)],['Earned all time',TY.money(st.lifeAll)],['Trees felled',TY.fmt(st.trees)],['Axe swings',TY.fmt(st.chops)],['Golden Acorns',st.acorns+'  (+'+(st.acorns*5)+'% income)']];
+      TY.box(x,PX+12,y,cw,rows.length*26+16,12,'rgba(18,30,44,.92)');rows.forEach(([k,v],i)=>{TY.txt(x,k,PX+26,y+20+i*26,12.5,'#9fb6cc','left','700 ');TY.txt(x,v,PX+cw,y+20+i*26,13,'#fff','right')});y+=rows.length*26+28;
+      TY.box(x,PX+12,y,cw,170,12,'rgba(60,40,10,.6)','#d8a020',1.5);x.save();x.translate(PX+40,y+30);icon('acorn')(x,16);x.restore();
+      TY.txt(x,'Sell the company',PX+62,y+28,15,'#ffd23f','left');
+      const lines=['Start over with nothing but your','Golden Acorns. Each one adds 5%','to everything you earn, for good.'];lines.forEach((l,i)=>TY.txt(x,l,PX+26,y+56+i*17,11.5,'#e8dcc0','left','600 '));
+      TY.txt(x,gain>0?'You would get +'+gain+' acorns':'Next acorn at '+TY.money(nextAt)+' earned',PX+26,y+112,12,gain>0?'#7fd4a0':'#c9b88a','left');
+      const bw=cw-28;TY.box(x,PX+26,y+126,bw,34,9,gain>0?(confirm?'#d64933':'#d8a020'):'rgba(255,255,255,.1)');TY.txt(x,gain>0?(confirm?'Tap again to confirm':'Sell for '+gain+' acorns'):'Not yet',PX+26+bw/2,y+144,14,gain>0?'#1D1A2F':'#9fb6cc');
+      if(gain>0)U.btn(PX+26,y+126,bw,34,prestige,clip);y+=190}
+    x.restore();sc.content=y+sc.off-top;
+    if(sc.content>sc.h){const bh=sc.h*sc.h/sc.content;TY.box(x,PX+PW-10,top+sc.off/sc.content*sc.h,4,bh,2,'rgba(255,255,255,.25)')}}
+
+  /* ---------- update ---------- */
+  function update(dt){const s=dt/1000;t+=dt;swing=Math.max(0,swing-s*4);if(confirm)confirm=Math.max(0,confirm-dt);
+    // trees: falling and regrowing
+    for(const sl of slots){if(sl.fall>=0){sl.fall+=s*1.4;if(sl.fall>=1){sl.fall=-1;sl.grow=0;sl.max=A().hp*(sl.player?1:1.2);sl.hp=sl.max}}else if(sl.grow<1)sl.grow=Math.min(1,sl.grow+s*(sl.player?2.4:1.2))}
+    // workers chop
+    const vis=Math.min(st.workers,5);if(vis){const per=st.workers*workerDps()/vis;for(let i=1;i<=vis;i++)hit(slots[i],per*s,false)}
+    // mill
+    if(st.mill&&st.logs>0){millAcc+=millRate()*s;const n=Math.min(st.logs,Math.floor(millAcc));if(n>0){st.logs-=n;st.planks+=n;millAcc-=n}}
+    // truck
+    if(st.truck){const tt=tripTime();truck.t+=s;
+      if(truck.phase==='wait'&&truck.t>=Math.min(2,tt*.25)&&(st.logs+st.planks)>0){const cap=truckCap();const p=Math.min(cap,st.planks),l=Math.min(cap-p,st.logs);st.planks-=p;st.logs-=l;truck.load=p+l;truck.val=p*plankPrice()+l*logPrice();truck.phase='go';truck.t=0;beep(140,.2,'sawtooth',.03)}
+      else if(truck.phase==='go'){truck.x=170+Math.pow(truck.t/(tt*.5),2)*560;if(truck.t>=tt*.5){earn(truck.val,SW-80,ROAD-70);truck.load=0;truck.phase='back';truck.t=0;beep(900,.08,'sine',.05)}}
+      else if(truck.phase==='back'){truck.x=730-(truck.t/(tt*.5))*560;if(truck.t>=tt*.5){truck.x=170;truck.phase='wait';truck.t=0}}}
+    for(const p of parts){p.t+=dt;p.x+=p.vx*dt/16;p.y+=p.vy*dt/16;p.vy+=p.g*dt/16}parts=parts.filter(p=>p.t<p.l);
+    for(const f of floats){f.t+=dt;f.y-=dt*.04}floats=floats.filter(f=>f.t<1100);
+    for(const f of flying)f.t+=s*2.2;flying=flying.filter(f=>f.t<1);
+    if(banner){banner.t+=dt;if(banner.t>2200)banner=null}
+    saveT+=dt;if(saveT>8000){saveT=0;save()}bestT+=dt;if(bestT>60000){bestT=0;if(st.lifeAll>=1)c.best(Math.floor(st.lifeAll))}
+    c.stat(TY.money(st.money)+' · '+A().name)}
+
+  /* ---------- draw ---------- */
+  function draw(){U.begin();x.fillStyle='#0a121a';x.fillRect(0,0,W,H);x.save();x.beginPath();x.rect(0,0,SW,H);x.clip();
+    bg();cabin(26,GY-10);if(st.mill)mill(520,GY-14);
+    const a=A(),vis=Math.min(st.workers,5);
+    for(let i=1;i<slots.length;i++){const sl=slots[i];treeDraw(a.tree,sl.x,sl,1-sl.hp/sl.max);if(i<=vis&&sl.fall<0)person(sl.x-38,GY+2,.82,swingAng(((t/520+i*.37)%1)),CREW)}
+    treeDraw(a.tree,slots[0].x,slots[0],1-slots[0].hp/slots[0].max);person(slots[0].x-46,GY+4,1,swingAng(swing>0?1-swing:0),JACK);
+    logPile(36,ROAD-26);if(st.truck)truckDraw(truck.x,ROAD+14,truck.load);
+    for(const f of flying){if(f.t<0)continue;const k=f.t,px=330+(f.tx-330)*k,py=GY-20+(f.ty-GY+20)*k-Math.sin(k*Math.PI)*60;x.beginPath();x.arc(px,py,6,0,7);x.fillStyle='#b07a48';x.fill();x.lineWidth=1.5;x.strokeStyle=INK;x.stroke()}
+    for(const p of parts){x.globalAlpha=Math.max(0,1-p.t/p.l);x.fillStyle=p.c;x.fillRect(p.x,p.y,p.r,p.r)}x.globalAlpha=1;
+    for(const f of floats){x.globalAlpha=Math.max(0,1-f.t/1100);x.font='800 '+(f.big?18:15)+'px Figtree';x.textAlign='center';x.lineWidth=4;x.strokeStyle='rgba(0,0,0,.55)';x.strokeText(f.s,f.x,f.y);TY.txt(x,f.s,f.x,f.y,f.big?18:15,f.c)}x.globalAlpha=1;
+    // HUD
+    TY.box(x,12,12,206,56,12,'rgba(15,26,38,.85)');TY.coin(x,34,32,11);TY.txt(x,TY.money(st.money),52,32,24,'#fff','left');TY.txt(x,'+'+TY.money(M.rate())+'/s',52,55,13,'#7fd4a0','left');
+    TY.box(x,SW/2-80,14,160,26,13,'rgba(15,26,38,.7)');TY.txt(x,a.name,SW/2,27,13,'#fff');
+    TY.box(x,12,H-56,200,44,10,'rgba(15,26,38,.85)');TY.txt(x,'Logs: '+TY.fmt(st.logs)+(st.mill?'  Planks: '+TY.fmt(st.planks):''),24,H-41,13,'#fff','left');TY.txt(x,'Worth '+TY.money(st.logs*logPrice()+st.planks*plankPrice()),24,H-23,11,'#9fb6cc','left','600 ');
+    const sv=st.logs+st.planks>0;TY.box(x,220,H-52,70,36,9,sv?'#34c25a':'#3a4a5a');TY.txt(x,'SELL',255,H-33,14,sv?'#fff':'#8fa0b0');U.btn(220,H-52,70,36,sellAll);
+    if(st.chops<6){x.globalAlpha=.65+.35*Math.sin(t/200);TY.box(x,slots[0].x-90,GY-200,180,30,15,'rgba(15,26,38,.85)');TY.txt(x,'Tap the tree to chop!',slots[0].x,GY-185,14,'#ffd23f');x.globalAlpha=1}
+    else if(st.logs>0&&!st.truck&&st.trees<6){TY.box(x,300,H-50,220,30,15,'rgba(15,26,38,.8)');TY.txt(x,'Sell your logs, then buy upgrades',410,H-35,12,'#ffd23f')}
+    if(banner){const k=Math.min(1,banner.t/300)*Math.min(1,(2200-banner.t)/300);x.globalAlpha=k;TY.box(x,SW/2-170,H/2-40,340,70,16,'rgba(15,26,38,.88)');TY.title(x,banner.s,SW/2,H/2-5,26,'#ffd23f');x.globalAlpha=1}
+    x.restore();panel();
+    if(welcome){x.fillStyle='rgba(0,0,0,.55)';x.fillRect(0,0,W,H);TY.box(x,W/2-200,H/2-110,400,220,18,'#0f1a26','#34c25a',2);TY.title(x,'Welcome back!',W/2,H/2-66,30,'#ffd23f');
+      TY.txt(x,'Your crew kept working for '+TY.dur(welcome.secs)+'.',W/2,H/2-24,15,'#e8f0f8','center','600 ');TY.coin(x,W/2-70,H/2+14,13);TY.txt(x,'+'+TY.money(welcome.amt),W/2+10,H/2+14,24,'#7fd4a0');
+      TY.box(x,W/2-80,H/2+48,160,42,10,'#34c25a');TY.txt(x,'Collect',W/2,H/2+70,17,'#fff');U.btn(W/2-80,H/2+48,160,42,()=>{welcome=null;beep(880,.1,'sine',.06)})}}
+
+  c.loop(dt=>{update(dt);draw()});
+  return()=>save()}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>
