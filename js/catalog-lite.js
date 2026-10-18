@@ -273,5 +273,7 @@ G.push(
 {"id":"m_spiral","name":"Spiral Drop","kind":"arcade","tint":"#e8e0ff","url":"/games/spiral-drop/","levels":true,"fmt":b=>'level '+b},
 {"id":"m_wordwheel","name":"Word Wheel","kind":"puzzle","tint":"#e8f0ff","url":"/games/word-wheel/","fmt":b=>b+' puzzles'},
 {"id":"bunker","name":"Bunker Down","kind":"game","tint":"#ffd9a0","url":"/games/bunker-down/","levels":true,"wide":true,"fmt":b=>b+' days'},
-{"id":"knuckle","name":"Knuckle Through","kind":"game","tint":"#f2b233","url":"/games/knuckle-through/","wide":true,"big":true,"tags":["digging","tycoon","3D"],"fmt":b=>b+' m'}
+{"id":"knuckle","name":"Knuckle Through","kind":"game","tint":"#f2b233","url":"/games/knuckle-through/","wide":true,"big":true,"tags":["digging","tycoon","3D"],"fmt":b=>b+' m'},
+{"id":"lumber","name":"Lumberjack Tycoon","kind":"sim","tint":"#cfe8b8","url":"/games/lumberjack-tycoon/","wide":true,"fmt":b=>{const u=['','K','M','B','T','Qa','Qi'];let i=0;while(b>=1000&&i<6){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
+{"id":"fishtycoon","name":"Fishing Tycoon","kind":"sim","tint":"#bfe6ff","url":"/games/fishing-tycoon/","wide":true,"fmt":b=>{const u=['','K','M','B','T','Qa','Qi'];let i=0;while(b>=1000&&i<6){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}}
 );

@@ -15,6 +15,7 @@ Each game is its own page. There is no build step: edit a file, refresh the brow
 | `js/catalog.js` | Every game's listing: name, blurb, card art, section, score format and page address. The homepage is built from this. |
 | `js/lib/*.js` | Code shared by a family of games (e.g. `havoc.js` for Havoc Unleashed and Overlord, `bk.js` for the big story games). A game page loads only the ones it needs. |
 | `js/lib/mob.js` | Helpers for the portrait, touch-first mobile games (sharp canvas, swipe and drag input, particles). |
+| `js/lib/tycoon.js` | Shared code for the idle tycoon games (Lumberjack Tycoon, Fishing Tycoon): big-number formatting, canvas buttons and scrolling shop lists, income meter, saves with offline earnings. Needs mob.js. |
 | `js/lib/qchar.js` | Animated glTF characters (CC0 Quaternius models and motion clips): pick an outfit, cloth colour, hair and headwear, then play clips like `Walk_Loop` or `Sword_Attack`. Used by Moonblade. The asset build scripts are in `tools/assets/`. |
 | `js/app.js` | The game player (top bar, difficulty, leaderboards, full screen, "Another detourr") and the homepage grid. The top section's order is the `TOP` list here. |
 | `css/site.css` | Shared styles. |

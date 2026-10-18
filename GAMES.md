@@ -282,3 +282,5 @@ All pages also load `css/site.css`, `js/core.js`, `js/catalog.js` and `js/app.js
 | Spiral Drop | `/games/spiral-drop/` | mob | none |
 | Word Wheel | `/games/word-wheel/` | mob | none |
 | Knuckle Through | `/games/knuckle-through/` | none | three.js (local, CDN fallback), assets/fonts/ (Big Shoulders Stencil Display, IBM Plex Sans Condensed, Silkscreen) |
+| Lumberjack Tycoon | `/games/lumberjack-tycoon/` | mob, tycoon | none |
+| Fishing Tycoon | `/games/fishing-tycoon/` | mob, tycoon | none |

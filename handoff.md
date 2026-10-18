@@ -138,6 +138,8 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 | Game | What it needs |
 |---|---|
+| Lumberjack Tycoon | New idle game (chop, crew, mill, truck, five forests, Golden Acorn prestige, offline earnings). Needs balance testing over a long session |
+| Fishing Tycoon | New idle game (cast and hook, 30 fish in five waters, Fishdex, crew, nets, Auto Fisher, five boats, Pearl prestige). Needs balance testing over a long session |
 | Neon Harbor | Open-world crime game; heavy, and the theme isn't classroom-friendly |
 | The Hollow | Survival horror; heavy |
 | Silent Contract | Unfinished |
