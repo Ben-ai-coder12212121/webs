@@ -2,7 +2,7 @@
 <script>try{if(localStorage.getItem("unb_theme")==="\"light\"")document.documentElement.dataset.theme="light"}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Knuckle Through: Play Free Online, No Download | Detourr</title>
-<meta name="description" content="Punch your way out of a cell and through 2.5 km of mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.">
+<meta name="description" content="Punch your way out of a cell and through mountain after mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.">
 <link rel="canonical" href="https://detourr.net/games/knuckle-through/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#121019">
@@ -27,7 +27,7 @@
 </div>
 <div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
 <div class="seo">
-<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Knuckle Through</h1><p>Punch your way out of a cell and through 2.5 km of mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.</p></div></main></div>
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>Knuckle Through</h1><p>Punch your way out of a cell and through mountain after mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.</p></div></main></div>
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
@@ -35,7 +35,7 @@
 <script>
 /* ===================== Knuckle Through: game code ===================== */
 const KT_CSS = "/* Layout: full-bleed first-person 3D view of a tunnel; HUD pinned to the corners like stencilled plates bolted to rock. Single dark look by design. */\n:host{\n  --ink:#0d0e0f;\n  --plate:#18191b;\n  --plate-2:#222427;\n  --rule:#393c40;\n  --chalk:#ece5d8;\n  --dim:#a39d92;\n  --hazard:#f2b233;\n  --hazard-ink:#1b1404;\n  --jumpsuit:#e0662a;\n  --alarm:#e5533d;\n  --f-stencil:\"Big Shoulders Stencil Display\", Impact, \"Arial Narrow\", sans-serif;\n  --f-body:\"IBM Plex Sans Condensed\", \"Arial Narrow\", system-ui, sans-serif;\n  --f-pixel:\"Silkscreen\", ui-monospace, \"Courier New\", monospace;\n  color-scheme: dark;\n}\n[hidden]{display:none!important}\n#game{position:absolute;inset:0;overflow:hidden;background:#070708;color:var(--chalk);font-family:var(--f-body);font-size:15px;line-height:normal;text-align:left;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;container-type:size;container-name:kt}\n#game button{margin:0}\n#gl,#ov2d{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}\n#gl{touch-action:none}\n#ov2d{pointer-events:none}\nbutton{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}\nbutton:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}\n\n.plate{background:color-mix(in srgb,var(--plate) 88%,transparent);border:1px solid var(--rule);box-shadow:0 2px 0 #000,inset 0 1px 0 rgba(255,255,255,.05);border-radius:3px;position:relative}\n.plate::before,.plate::after{content:\"\";position:absolute;top:5px;width:4px;height:4px;border-radius:50%;background:#55595e;box-shadow:inset -1px -1px 0 #2a2c2f}\n.plate::before{left:5px}.plate::after{right:5px}\n#hudL{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));padding:10px 16px;min-width:150px;display:grid;gap:6px;pointer-events:none}\n#money{font-family:var(--f-pixel);font-size:24px;line-height:1;color:var(--hazard);font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #000}\n.lbl{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}\n.bagrow{display:flex;align-items:center;gap:8px}\n#bagbar{flex:1;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#bagfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--chalk)}\n#bagbar.full #bagfill{background:var(--alarm)}\n#bagtxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}\n\n#hudR{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));padding:9px 16px 10px;display:grid;gap:5px;justify-items:end;text-align:right;max-width:46%;pointer-events:none}\n#roomNo{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim)}\n#roomName{font-family:var(--f-stencil);font-weight:900;font-size:24px;line-height:.95;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}\n#layers{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}\n.chip{font-family:var(--f-pixel);font-size:8px;padding:2px 4px 1px;border:1px solid rgba(0,0,0,.6);color:#111;white-space:nowrap}\n#depthRow{display:grid;gap:3px;justify-items:end;width:100%}\n#depthbar{width:150px;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative}\n#depthfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--hazard)}\n#depthTxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums}\n#needleRow{font-family:var(--f-pixel);font-size:9px;letter-spacing:.08em;color:var(--dim)}\n#needleRow b{font-weight:400;color:#bfefff}\n#hudR .tools{display:flex;gap:4px;pointer-events:auto}\n.mini{font-family:var(--f-pixel);font-size:9px;padding:4px 6px 3px;border:1px solid var(--rule);background:var(--plate-2);color:var(--dim)}\n.mini:hover{color:var(--chalk)}\n\n#hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top,0px));max-width:min(560px,calc(100% - 32px));padding:7px 14px 6px;background:rgba(10,10,11,.82);border:1px dashed var(--hazard);color:var(--chalk);font-size:14px;line-height:1.3;text-align:center;pointer-events:none;text-wrap:balance}\n#hint b{color:var(--hazard);font-family:var(--f-pixel);font-weight:400;font-size:11px;padding:0 3px;border:1px solid var(--hazard);margin:0 2px;white-space:nowrap}\n#resume{position:absolute;left:50%;top:50%;transform:translate(-50%,40px);font-family:var(--f-pixel);font-size:11px;letter-spacing:.1em;color:var(--chalk);background:rgba(10,10,11,.8);border:1px solid var(--rule);padding:8px 12px 7px;pointer-events:none}\n\n#bar{position:absolute;left:0;right:0;bottom:0;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;justify-content:center;align-items:flex-end;gap:10px;pointer-events:none;flex-wrap:wrap}\n#bar>*{pointer-events:auto}\n.toolset{display:flex;gap:4px;padding:4px}\n.tool{width:52px;height:52px;position:relative;background:var(--plate-2);border:1px solid var(--rule);display:grid;place-items:center}\n.tool img{width:32px;height:32px;image-rendering:pixelated}\n.tool .k{position:absolute;left:3px;top:2px;font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.tool .n{position:absolute;left:0;right:0;bottom:2px;font-family:var(--f-pixel);font-size:7px;color:var(--dim);text-align:center}\n.tool.on{background:#3a2f12;border-color:var(--hazard);box-shadow:inset 0 0 0 1px var(--hazard)}\n.tool.on .k,.tool.on .n{color:var(--hazard)}\n.tool.locked{opacity:.38;cursor:not-allowed}\n.act{height:52px;padding:0 14px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;background:var(--plate-2);border:1px solid var(--rule);box-shadow:0 2px 0 #000;position:relative;min-width:96px}\n.act .t{font-family:var(--f-stencil);font-weight:900;font-size:19px;line-height:1;letter-spacing:.04em}\n.act .s{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.act:active{transform:translateY(1px);box-shadow:none}\n#sellBtn.ready{border-color:var(--hazard)}\n#sellBtn.ready .t{color:var(--hazard)}\n#shopBtn .badge{position:absolute;right:-6px;top:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--hazard);color:var(--hazard-ink);font-family:var(--f-pixel);font-size:10px;display:grid;place-items:center;box-shadow:0 1px 0 #000}\n#combo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;pointer-events:none;transition:opacity .2s}\n#combo .v{font-family:var(--f-pixel);font-size:13px;color:var(--hazard);text-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n#combo .bar{width:90px;height:5px;background:rgba(0,0,0,.6);border:1px solid #3b3f43}\n#combo .bar i{display:block;height:100%;width:0;background:var(--hazard)}\n\n/* touch controls */\n#touch{position:absolute;inset:0;pointer-events:none}\n#stick{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(236,229,216,.25);background:rgba(10,10,11,.25);transform:translate(-50%,-50%);display:none}\n#stick i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(242,178,51,.55);border:2px solid #000}\n.tbtn{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:rgba(24,25,27,.8);border:2px solid var(--rule);font-family:var(--f-stencil);font-weight:900;font-size:17px;letter-spacing:.04em;color:var(--chalk);touch-action:none}\n.tbtn.big{width:96px;height:96px;font-size:20px;border-color:var(--hazard);color:var(--hazard)}\n#tPunch{right:max(20px,env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px))}\n#tJump{right:calc(max(20px,env(safe-area-inset-right,0px)) + 104px);bottom:calc(84px + env(safe-area-inset-bottom,0px))}\n\n#shop{position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--plate);border-left:2px solid #000;box-shadow:-12px 0 30px rgba(0,0,0,.5);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:20;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\n#shop.open{transform:none}\n#shop header{display:flex;align-items:center;justify-content:space-between;padding:14px max(16px,env(safe-area-inset-right,0px)) 12px 18px;border-bottom:1px solid var(--rule);background:repeating-linear-gradient(-45deg,#1d1f21 0 8px,#191a1c 8px 16px)}\n#shop h2{margin:0;font-family:var(--f-stencil);font-weight:900;font-size:30px;letter-spacing:.05em;line-height:1}\n#shop .cash{font-family:var(--f-pixel);color:var(--hazard);font-size:13px}\n#shopList{overflow-y:auto;padding:6px max(16px,env(safe-area-inset-right,0px)) 18px 18px;flex:1;-webkit-overflow-scrolling:touch}\n.grp{font-family:var(--f-pixel);font-size:9px;letter-spacing:.16em;color:var(--dim);padding:14px 0 6px;border-bottom:1px solid var(--rule);margin-bottom:2px;text-transform:uppercase}\n.up{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px dashed #2c2f32;align-items:center}\n.up .nm{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:baseline;min-width:0}\n.up .lv{font-family:var(--f-pixel);font-size:9px;color:var(--dim);white-space:nowrap}\n.up .ds{grid-column:1;color:var(--dim);font-size:13px;line-height:1.3}\n.up .ef{grid-column:1;font-family:var(--f-pixel);font-size:9px;color:var(--chalk);font-variant-numeric:tabular-nums}\n.up .ef em{font-style:normal;color:var(--hazard)}\n.buy{grid-column:2;grid-row:1 / span 3;min-width:86px;padding:9px 10px 8px;background:#2b2e31;border:1px solid #44484d;font-family:var(--f-pixel);font-size:11px;color:var(--dim);box-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n.buy.can{background:var(--hazard);color:var(--hazard-ink);border-color:#000}\n.buy.can:hover{filter:brightness(1.08)}\n.buy:active{transform:translateY(1px);box-shadow:none}\n.buy.max{background:transparent;box-shadow:none;border-style:dashed}\n.up.flash{animation:upf .5s}\n@keyframes upf{0%{background:rgba(242,178,51,.25)}100%{background:transparent}}\n.buy.no{animation:shake .25s}\n@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}\n#shop footer{padding:10px max(16px,env(safe-area-inset-right,0px)) 14px 18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:10px}\n.findgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 0}\n.find{border:1px dashed #34373a;padding:8px 9px 7px;display:grid;gap:2px;min-width:0}\n.find .fn{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}\n.find .fn i{width:8px;height:8px;display:inline-block;box-shadow:0 0 0 1px #000}\n.find .fc{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.find.unk{opacity:.55}\n.find.unk .fn{color:var(--dim)}\n\n.ov{position:absolute;inset:0;display:grid;place-items:start center;z-index:30;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}\n.ov.dim{background:radial-gradient(ellipse at center,rgba(8,8,9,.55),rgba(8,8,9,.92))}\n.sheet{max-width:600px;width:100%;text-align:left;margin:auto 0}\n.kicker{font-family:var(--f-pixel);font-size:10px;letter-spacing:.2em;color:var(--hazard);text-transform:uppercase}\n.big{font-family:var(--f-stencil);font-weight:900;text-transform:uppercase;font-size:clamp(34px,min(11cqw,13cqh),104px);line-height:.86;letter-spacing:.01em;margin:8px 0 14px;text-shadow:0 4px 0 #000;text-wrap:balance}\n.big span{color:var(--hazard)}\n.lede{font-size:18px;line-height:1.45;max-width:48ch;color:var(--chalk);margin:0 0 18px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 22px;font-size:14px;color:var(--dim);max-width:460px}\n.keys kbd{font-family:var(--f-pixel);font-size:10px;color:var(--chalk);border:1px solid var(--rule);background:var(--plate-2);padding:3px 6px 2px;white-space:nowrap;justify-self:start}\n.go{font-family:var(--f-stencil);font-weight:900;font-size:26px;letter-spacing:.06em;text-transform:uppercase;color:var(--hazard-ink);background:var(--hazard);padding:12px 26px 10px;border:2px solid #000;box-shadow:0 4px 0 #000}\n.go:active{transform:translateY(2px);box-shadow:0 2px 0 #000}\n.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}\n#prog{font-family:var(--f-pixel);font-size:10px;color:var(--dim);letter-spacing:.06em}\n#card{pointer-events:none;place-items:center;text-align:center;transition:opacity .6s}\n#card>div{padding:34px 44px;background:radial-gradient(closest-side,rgba(8,8,9,.85) 40%,rgba(8,8,9,0))}\n#card .no{font-family:var(--f-pixel);font-size:12px;letter-spacing:.25em;color:var(--hazard)}\n#card .nm{font-family:var(--f-stencil);font-weight:900;font-size:clamp(36px,10cqw,92px);line-height:.9;text-transform:uppercase;text-shadow:0 4px 0 #000;margin:6px 0 10px;text-wrap:balance}\n#card .nt{font-size:17px;color:var(--chalk);text-shadow:0 2px 0 #000;max-width:40ch;margin:0 auto}\n#card .mt{font-family:var(--f-pixel);font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:.06em}\n.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:0 0 22px;max-width:440px}\n.stats div{border-top:1px solid var(--rule);padding-top:6px}\n.stats b{display:block;font-family:var(--f-pixel);font-weight:400;font-size:18px;color:var(--hazard);font-variant-numeric:tabular-nums}\n#toast{position:absolute;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-pixel);font-size:12px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;transition:opacity .4s;max-width:calc(100% - 32px);text-align:center}\n.gain{position:absolute;font-family:var(--f-pixel);font-size:14px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;animation:gain 1.1s ease-out forwards;white-space:nowrap;z-index:5}\n@keyframes gain{0%{transform:translateY(6px);opacity:0}15%{opacity:1}100%{transform:translateY(-26px);opacity:0}}\n#err{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-size:16px;color:var(--chalk);z-index:40}\n\n@container kt (max-width:760px) or (max-height:500px){\n  #shop{top:auto;width:100%;height:78%;border-left:0;border-top:2px solid #000;transform:translateY(105%)}\n  #shop.open{transform:none}\n  #hudL{min-width:0;width:150px;box-sizing:border-box;padding:7px 11px}\n  #bagbar{min-width:30px}\n  #money{font-size:18px}\n  #hudR{padding:7px 11px;max-width:calc(100% - 32px - 158px);box-sizing:border-box}\n  #roomName{font-size:18px}\n  #depthbar{width:100px}\n  .chip{font-size:7px;padding:1px 3px 0}\n  .findgrid{grid-template-columns:1fr}\n}\n#game.touch #bar{left:50%;right:auto;top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;transform:translateX(-50%);padding:0;gap:6px;width:auto;flex-wrap:nowrap;align-items:stretch}\n#game.touch .toolset{padding:3px}\n#game.touch .tool{width:46px;height:46px}\n#game.touch .act{height:44px;min-width:0;padding:0 10px}\n#game.touch .act .t{font-size:15px}\n#game.touch #hint{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:13px;max-width:min(420px,calc(100% - 260px))}\n#game.touch #combo{display:none}\n#game.touch #toast{top:calc(70px + env(safe-area-inset-top,0px))}\n@container kt (max-width:900px){ #game.touch #hudR .chip, #game.touch #hudR #layers{display:none} #game.touch #roomName{font-size:16px} #game.touch #hudL, #game.touch #hudR{padding:6px 10px} #game.touch #hudL{width:132px} #game.touch #hudR{max-width:200px} #game.touch #depthbar{width:90px} }\n@media (prefers-reduced-motion:reduce){ .gain{animation-duration:.01s} }\n/* health */\n.hprow{display:flex;align-items:center;gap:8px}\n#hpbar{flex:1;height:9px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#hpfill{position:absolute;inset:0 auto 0 0;width:100%;background:#58c26b;transition:width .15s}\n#hpbar.mid #hpfill{background:var(--hazard)}\n#hpbar.low #hpfill{background:var(--alarm)}\n#hptxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:24px;text-align:right}\n#ko .big span{color:var(--alarm)}\n\n/* short frames, like a game embedded in a page: tighten the menus so the buttons stay in view */\n@container kt (max-height:640px){\n  .ov{padding-top:14px;padding-bottom:14px}\n  .big{margin:4px 0 8px}\n  .lede{font-size:15px;line-height:1.4;margin-bottom:10px}\n  .keys{gap:3px 12px;font-size:12.5px;margin-bottom:12px}\n  .keys kbd{font-size:9px;padding:2px 5px 1px}\n  .go{font-size:21px;padding:9px 20px 7px}\n  .stats{gap:6px 14px;margin-bottom:12px}\n  .stats b{font-size:15px}\n}\n@container kt (max-height:430px){ .keys{display:none} }\n\n#game.touch .tool{width:40px;height:44px}\n#game.touch .tool img{width:24px;height:24px}\n@container kt (max-width:700px){ #game.touch .toolset{max-width:calc(100cqw - 200px);overflow-x:auto;scrollbar-width:none} #game.touch .tool{flex:none} }\n\n.go.alt{background:transparent;color:var(--chalk);border-color:var(--rule);box-shadow:0 4px 0 #000}\n.lede.next{color:var(--chalk);border-left:3px solid var(--hazard);padding-left:12px}\n.lede.next b{color:var(--hazard)}\n";
-const KT_HTML = "<div id=\"game\">\n  <canvas id=\"gl\" aria-label=\"First-person view of a tunnel. Walk up to the rock and punch it.\"></canvas>\n  <canvas id=\"ov2d\"></canvas>\n\n  <div id=\"hudL\" class=\"plate\">\n    <div class=\"lbl\">Cash</div>\n    <div id=\"money\">$0</div>\n    <div class=\"hprow\"><span class=\"lbl\">Health</span><div id=\"hpbar\"><div id=\"hpfill\"></div></div><span id=\"hptxt\">100</span></div>\n    <div class=\"bagrow\"><span class=\"lbl\">Bag</span><div id=\"bagbar\"><div id=\"bagfill\"></div></div><span id=\"bagtxt\">0/25</span></div>\n  </div>\n\n  <div id=\"hudR\" class=\"plate\">\n    <div id=\"roomNo\">THE DEEP</div>\n    <div id=\"roomName\">Drywall</div>\n    <div id=\"layers\"></div>\n    <div id=\"depthRow\"><div id=\"depthTxt\">0 m / 2,500 m</div><div id=\"depthbar\"><div id=\"depthfill\"></div></div></div>\n    <div id=\"needleRow\" hidden></div>\n    <div class=\"tools\"><button id=\"muteBtn\" class=\"mini\" type=\"button\">SOUND ON</button></div>\n  </div>\n\n  <div id=\"hint\" hidden></div>\n  <div id=\"resume\" hidden>CLICK TO LOOK AROUND</div>\n  <div id=\"toast\" style=\"opacity:0\"></div>\n  <div id=\"combo\" style=\"opacity:0\"><span class=\"lbl\">Rhythm</span><span class=\"bar\"><i></i></span><span class=\"v\">×1.00</span></div>\n\n  <div id=\"touch\" hidden>\n    <div id=\"stick\"><i></i></div>\n    <button class=\"tbtn big\" id=\"tPunch\" type=\"button\">PUNCH</button>\n    <button class=\"tbtn\" id=\"tJump\" type=\"button\">JUMP</button>\n  </div>\n\n  <div id=\"bar\">\n    <div class=\"toolset plate\" role=\"toolbar\" aria-label=\"Tools\">\n      <button class=\"tool on\" id=\"t0\" type=\"button\" aria-label=\"Fists (1)\"><span class=\"k\">1</span><img alt=\"\"><span class=\"n\">FISTS</span></button>\n      <button class=\"tool\" id=\"t1\" type=\"button\" aria-label=\"Vacuum (2)\"><span class=\"k\">2</span><img alt=\"\"><span class=\"n\">VACUUM</span></button>\n      <button class=\"tool\" id=\"t2\" type=\"button\" aria-label=\"Drill (3)\" hidden><span class=\"k\">3</span><img alt=\"\"><span class=\"n\">DRILL</span></button><button class=\"tool\" id=\"t3\" type=\"button\" aria-label=\"Sledgehammer (4)\" hidden><span class=\"k\">4</span><img alt=\"\"><span class=\"n\">SLEDGE</span></button><button class=\"tool\" id=\"t4\" type=\"button\" aria-label=\"Dynamite (5)\" hidden><span class=\"k\">5</span><img alt=\"\"><span class=\"n\">DYNAMITE</span></button><button class=\"tool\" id=\"t5\" type=\"button\" aria-label=\"Mining laser (6)\" hidden><span class=\"k\">6</span><img alt=\"\"><span class=\"n\">LASER</span></button><button class=\"tool\" id=\"t6\" type=\"button\" aria-label=\"Rock saw (7)\" hidden><span class=\"k\">7</span><img alt=\"\"><span class=\"n\">SAW</span></button><button class=\"tool\" id=\"t7\" type=\"button\" aria-label=\"Cryo sprayer (8)\" hidden><span class=\"k\">8</span><img alt=\"\"><span class=\"n\">CRYO</span></button><button class=\"tool\" id=\"t8\" type=\"button\" aria-label=\"Singularity (9)\" hidden><span class=\"k\">9</span><img alt=\"\"><span class=\"n\">VOID</span></button>\n    </div>\n    <button class=\"act\" id=\"sellBtn\" type=\"button\"><span class=\"t\">SELL</span><span class=\"s\" id=\"sellTxt\">E · bag empty</span></button>\n    <button class=\"act\" id=\"shopBtn\" type=\"button\"><span class=\"t\">UPGRADES</span><span class=\"s\" id=\"shopKey\">TAB</span><span class=\"badge\" id=\"badge\" hidden>0</span></button>\n  </div>\n\n  <aside id=\"shop\" aria-label=\"Upgrades\">\n    <header><div><h2>UPGRADES</h2><div class=\"cash\" id=\"shopCash\">$0</div></div><button class=\"mini\" id=\"shopClose\" type=\"button\">CLOSE · TAB</button></header>\n    <div id=\"shopList\"></div>\n    <footer><div class=\"lbl\">Progress saves in this browser.</div><button class=\"mini\" id=\"nextBtn2\" type=\"button\" hidden>NEXT MOUNTAIN</button><button class=\"mini\" id=\"wipeBtn\" type=\"button\">START OVER</button></footer>\n  </aside>\n\n  <div id=\"intro\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">A game about bare hands</div>\n      <div class=\"big\">Knuckle<br><span>Through</span></div>\n      <p class=\"lede\">You wake up in a cell cut into the base of a mountain. No door, no tools. The far side is two and a half kilometres of rock away. Start punching.</p>\n      <div class=\"keys\" id=\"keys\">\n        <kbd>WASD</kbd><span>Walk. Mouse to look, Space to jump, Shift to run.</span>\n        <kbd>CLICK</kbd><span>Punch the rock in front of you. Hold to keep swinging.</span>\n        <kbd>2</kbd><span>Vacuum. Hold it near the rubble on the floor.</span>\n        <kbd>E</kbd><span>Sell your bag of rubble for cash.</span>\n        <kbd>TAB</kbd><span>Upgrades: new tools, machines that dig for you, a dig crew, radar.</span>\n        <kbd>3 TO 9</kbd><span>More tools once you buy them: drill, sledgehammer, dynamite, laser, rock saw, cryo sprayer, singularity.</span>\n        <kbd>CRACKS</kbd><span>Creaking rock that trickles dust is about to fall. Get out from under it. It hurts.</span>\n      </div>\n      <div class=\"row\"><button class=\"go\" id=\"startBtn\" type=\"button\">Start digging</button><span id=\"prog\"></span></div>\n    </div>\n  </div>\n\n  <div id=\"card\" class=\"ov\" style=\"opacity:0\">\n    <div><div class=\"no\" id=\"cardNo\"></div><div class=\"nm\" id=\"cardNm\"></div><div class=\"nt\" id=\"cardNt\"></div><div class=\"mt\" id=\"cardMt\"></div></div>\n  </div>\n\n  <div id=\"ko\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Knocked out</div>\n      <div class=\"big\">Lights<br><span>out.</span></div>\n      <p class=\"lede\" id=\"koText\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"koBtn\" type=\"button\">Get up</button></div>\n    </div>\n  </div>\n  <div id=\"ending\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Escaped</div>\n      <div class=\"big\">Day<span>light.</span></div>\n      <p class=\"lede\">Two and a half kilometres of mountain, bare knuckles. The air outside smells like rain.</p>\n      <div class=\"stats\" id=\"stats\"></div>\n      <p class=\"lede next\" id=\"nextTxt\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"nextBtn\" type=\"button\">Next mountain</button><button class=\"go alt\" id=\"endBtn\" type=\"button\">Look around</button></div>\n    </div>\n  </div>\n  <div id=\"err\" hidden></div>\n</div>";
+const KT_HTML = "<div id=\"game\">\n  <canvas id=\"gl\" aria-label=\"First-person view of a tunnel. Walk up to the rock and punch it.\"></canvas>\n  <canvas id=\"ov2d\"></canvas>\n\n  <div id=\"hudL\" class=\"plate\">\n    <div class=\"lbl\">Cash</div>\n    <div id=\"money\">$0</div>\n    <div class=\"hprow\"><span class=\"lbl\">Health</span><div id=\"hpbar\"><div id=\"hpfill\"></div></div><span id=\"hptxt\">100</span></div>\n    <div class=\"bagrow\"><span class=\"lbl\">Bag</span><div id=\"bagbar\"><div id=\"bagfill\"></div></div><span id=\"bagtxt\">0/25</span></div>\n  </div>\n\n  <div id=\"hudR\" class=\"plate\">\n    <div id=\"roomNo\">THE DEEP</div>\n    <div id=\"roomName\">Drywall</div>\n    <div id=\"layers\"></div>\n    <div id=\"depthRow\"><div id=\"depthTxt\">0 m / 2,500 m</div><div id=\"depthbar\"><div id=\"depthfill\"></div></div></div>\n    <div id=\"needleRow\" hidden></div>\n    <div class=\"tools\"><button id=\"muteBtn\" class=\"mini\" type=\"button\">SOUND ON</button></div>\n  </div>\n\n  <div id=\"hint\" hidden></div>\n  <div id=\"resume\" hidden>CLICK TO LOOK AROUND</div>\n  <div id=\"toast\" style=\"opacity:0\"></div>\n  <div id=\"combo\" style=\"opacity:0\"><span class=\"lbl\">Rhythm</span><span class=\"bar\"><i></i></span><span class=\"v\">×1.00</span></div>\n\n  <div id=\"touch\" hidden>\n    <div id=\"stick\"><i></i></div>\n    <button class=\"tbtn big\" id=\"tPunch\" type=\"button\">PUNCH</button>\n    <button class=\"tbtn\" id=\"tJump\" type=\"button\">JUMP</button>\n  </div>\n\n  <div id=\"bar\">\n    <div class=\"toolset plate\" role=\"toolbar\" aria-label=\"Tools\">\n      <button class=\"tool on\" id=\"t0\" type=\"button\" aria-label=\"Fists (1)\"><span class=\"k\">1</span><img alt=\"\"><span class=\"n\">FISTS</span></button>\n      <button class=\"tool\" id=\"t1\" type=\"button\" aria-label=\"Vacuum (2)\"><span class=\"k\">2</span><img alt=\"\"><span class=\"n\">VACUUM</span></button>\n      <button class=\"tool\" id=\"t2\" type=\"button\" aria-label=\"Drill (3)\" hidden><span class=\"k\">3</span><img alt=\"\"><span class=\"n\">DRILL</span></button><button class=\"tool\" id=\"t3\" type=\"button\" aria-label=\"Sledgehammer (4)\" hidden><span class=\"k\">4</span><img alt=\"\"><span class=\"n\">SLEDGE</span></button><button class=\"tool\" id=\"t4\" type=\"button\" aria-label=\"Dynamite (5)\" hidden><span class=\"k\">5</span><img alt=\"\"><span class=\"n\">DYNAMITE</span></button><button class=\"tool\" id=\"t5\" type=\"button\" aria-label=\"Mining laser (6)\" hidden><span class=\"k\">6</span><img alt=\"\"><span class=\"n\">LASER</span></button><button class=\"tool\" id=\"t6\" type=\"button\" aria-label=\"Rock saw (7)\" hidden><span class=\"k\">7</span><img alt=\"\"><span class=\"n\">SAW</span></button><button class=\"tool\" id=\"t7\" type=\"button\" aria-label=\"Cryo sprayer (8)\" hidden><span class=\"k\">8</span><img alt=\"\"><span class=\"n\">CRYO</span></button><button class=\"tool\" id=\"t8\" type=\"button\" aria-label=\"Singularity (9)\" hidden><span class=\"k\">9</span><img alt=\"\"><span class=\"n\">VOID</span></button>\n    </div>\n    <button class=\"act\" id=\"sellBtn\" type=\"button\"><span class=\"t\">SELL</span><span class=\"s\" id=\"sellTxt\">E · bag empty</span></button>\n    <button class=\"act\" id=\"shopBtn\" type=\"button\"><span class=\"t\">UPGRADES</span><span class=\"s\" id=\"shopKey\">TAB</span><span class=\"badge\" id=\"badge\" hidden>0</span></button>\n  </div>\n\n  <aside id=\"shop\" aria-label=\"Upgrades\">\n    <header><div><h2>UPGRADES</h2><div class=\"cash\" id=\"shopCash\">$0</div></div><button class=\"mini\" id=\"shopClose\" type=\"button\">CLOSE · TAB</button></header>\n    <div id=\"shopList\"></div>\n    <footer><div class=\"lbl\">Progress saves in this browser.</div><button class=\"mini\" id=\"wipeBtn\" type=\"button\">START OVER</button></footer>\n  </aside>\n\n  <div id=\"intro\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">A game about bare hands</div>\n      <div class=\"big\">Knuckle<br><span>Through</span></div>\n      <p class=\"lede\">You wake up in a cell cut into the base of a mountain. No door, no tools. The far side is two and a half kilometres of rock away, and there are more mountains behind it. Start punching.</p>\n      <div class=\"keys\" id=\"keys\">\n        <kbd>WASD</kbd><span>Walk. Mouse to look, Space to jump, Shift to run.</span>\n        <kbd>CLICK</kbd><span>Punch the rock in front of you. Hold to keep swinging.</span>\n        <kbd>2</kbd><span>Vacuum. Hold it near the rubble on the floor.</span>\n        <kbd>E</kbd><span>Sell your bag of rubble for cash.</span>\n        <kbd>TAB</kbd><span>Upgrades: new tools, machines that dig for you, a dig crew, radar.</span>\n        <kbd>3 TO 9</kbd><span>More tools once you buy them: drill, sledgehammer, dynamite, laser, rock saw, cryo sprayer, singularity.</span>\n        <kbd>CRACKS</kbd><span>Creaking rock that trickles dust is about to fall. Get out from under it. It hurts.</span>\n      </div>\n      <div class=\"row\"><button class=\"go\" id=\"startBtn\" type=\"button\">Start digging</button><span id=\"prog\"></span></div>\n    </div>\n  </div>\n\n  <div id=\"card\" class=\"ov\" style=\"opacity:0\">\n    <div><div class=\"no\" id=\"cardNo\"></div><div class=\"nm\" id=\"cardNm\"></div><div class=\"nt\" id=\"cardNt\"></div><div class=\"mt\" id=\"cardMt\"></div></div>\n  </div>\n\n  <div id=\"ko\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Knocked out</div>\n      <div class=\"big\">Lights<br><span>out.</span></div>\n      <p class=\"lede\" id=\"koText\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"koBtn\" type=\"button\">Get up</button></div>\n    </div>\n  </div>\n  <div id=\"ending\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Escaped</div>\n      <div class=\"big\">Day<span>light.</span></div>\n      <p class=\"lede\">Two and a half kilometres of mountain, bare knuckles. The air outside smells like rain.</p>\n      <div class=\"stats\" id=\"stats\"></div>\n      <p class=\"lede next\" id=\"nextTxt\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"endBtn\" type=\"button\">Keep digging</button></div>\n    </div>\n  </div>\n  <div id=\"err\" hidden></div>\n</div>";
 // Knuckle Through: a first-person digging game. Mounts into `host` inside its own shadow root, so it works
 // full-page or inside a site's game frame. env: { THREE, audio(), muted(), best(m), saveKey, data }
 function KnuckleThrough(host, env) {
@@ -91,7 +91,8 @@ function dur(sec) { const m = Math.floor(sec / 60), h = Math.floor(m / 60); retu
 
 /* ================= world data ================= */
 // One voxel is half a metre. The diggable rock is 20 wide, 12 tall and 5,000 deep.
-const GX = 20, GY = 12, N = GX * GY, DEEP = 5000, CELL_Z = -14;
+// One tunnel through mountain after mountain: each MTN slices (2.5 km) is one mountain, DEEP is the end of the world.
+const GX = 20, GY = 12, N = GX * GY, MTN = 5000, DEEP = MTN * 20, CELL_Z = -14;
 const MATS = [
   { name: 'Drywall',        tex: 'drywall',   snd: 'soft',  pal: ['#7f7a72', '#a8a397', '#c6c1b4', '#dedacd'] },
   { name: 'Lath & Plaster', tex: 'plaster',   snd: 'soft',  pal: ['#8a7356', '#ad9672', '#c9b48e', '#e0cfaa'] },
@@ -134,28 +135,36 @@ const STRATA = [
   { at: 2900, m: 8,  note: 'More vault. Whoever built this had money.' },
   { at: 3400, m: 9,  note: 'Volcanic glass. Sharp, and it rings.' },
   { at: 3900, m: 16, note: 'Warm to the touch. The cracks glow orange.' },
-  { at: 4500, m: 10, note: 'The heart of the mountain. Daylight is close.' },
+  { at: 4500, m: 10, note: 'The heart of the mountain. The far side is close.' },
 ];
-const STRAT_OF = new Uint8Array(DEEP);
-for (let z = 0, k = 0; z < DEEP; z++) { while (k + 1 < STRATA.length && z >= STRATA[k + 1].at) k++; STRAT_OF[z] = k; }
-// After the first mountain, every new mountain keeps the prison layers and the heart at the far end but deals the
-// layers in between in a new order (the same order every time for that mountain).
-const STRATA_BASE = STRATA.map(s => ({ m: s.m, note: s.note }));
-function buildStrata(mtn) {
-  const mid = STRATA_BASE.slice(6, 16);
-  if (mtn > 0) { let sd = 7919 * mtn + 13; const R = () => (sd = (Math.imul(sd, 1103515245) + 12345) | 0, ((sd >>> 8) & 0xffff) / 65536); for (let i = mid.length - 1; i > 0; i--) { const j = (R() * (i + 1)) | 0; [mid[i], mid[j]] = [mid[j], mid[i]]; } }
-  STRATA.forEach((st, i) => { const src = i >= 6 && i < 16 ? mid[i - 6] : STRATA_BASE[i]; st.m = src.m; st.note = src.note; });
-}
-// each mountain past the first: rock 8x tougher, everything worth 6x more
-let HPK = 1, VALK = 1;
-const MTN_NAMES = ['Cell 14-B', 'Supermax', 'The Ironback', 'Old Grey', 'The Anvil', 'Frostpeak', 'The Furnace', 'Black Spire', 'Hollow Crown', 'The Last Wall'];
+// Past the first mountain the tunnel runs straight into the next one. Each later mountain deals the mountain
+// layers (not the prison ones) in its own order, always ending in its heart, and the rock keeps getting harder.
+const MTN_NAMES = ['the first mountain', 'Supermax Ridge', 'The Ironback', 'Old Grey', 'The Anvil', 'Frostpeak', 'The Furnace', 'Black Spire', 'Hollow Crown', 'The Last Wall'];
 const mtnName = m => m < MTN_NAMES.length ? MTN_NAMES[m] : 'Mountain ' + (m + 1);
-function applyMountain() { const m = S.mtn || 0; HPK = Math.pow(8, m); VALK = Math.pow(6, m); buildStrata(m); }
+STRATA.forEach(st => { st.mtn = 0; });
+(() => {
+  const mid = STRATA.slice(6, 16).map(st => ({ m: st.m, note: st.note })), heart = STRATA[16].m;
+  const OFFS = [0, 400, 800, 1150, 1550, 2000, 2400, 2900, 3400, 3900, 4500];
+  for (let k = 1; k < DEEP / MTN; k++) {
+    const deck = mid.slice(); let sd = 7919 * k + 13;
+    const R = () => (sd = (Math.imul(sd, 1103515245) + 12345) | 0, ((sd >>> 8) & 0xffff) / 65536);
+    for (let i = deck.length - 1; i > 0; i--) { const j = (R() * (i + 1)) | 0; [deck[i], deck[j]] = [deck[j], deck[i]]; }
+    deck.push({ m: heart, note: 'The heart of this mountain. The next one is close.' });
+    deck.forEach((d, i) => STRATA.push({ at: k * MTN + OFFS[i], m: d.m, note: i === 0 ? `You broke into ${mtnName(k)}. The rock only gets harder from here.` : d.note, mtn: k }));
+  }
+  // position of each layer inside its own mountain, for the cards and the HUD
+  const count = {}; for (const st of STRATA) count[st.mtn] = (count[st.mtn] || 0) + 1;
+  const seen = {}; for (const st of STRATA) { st.j = seen[st.mtn] = (seen[st.mtn] || 0) + 1; st.of = count[st.mtn]; }
+})();
+const STRAT_OF = new Uint16Array(DEEP);
+for (let z = 0, k = 0; z < DEEP; z++) { while (k + 1 < STRATA.length && z >= STRATA[k + 1].at) k++; STRAT_OF[z] = k; }
 const strataIdx = z => STRAT_OF[clamp(z | 0, 0, DEEP - 1)];
 // HP per voxel by depth: an inverse-designed curve (log10 HP every 100 slices) so each slice takes a little longer than the last.
 const KNOTS = [0, 0.2, 0.84, 1.126, 1.414, 1.819, 2.115, 2.289, 2.548, 3.199, 3.379, 3.549, 3.767, 3.915, 4.075, 4.217, 4.551, 4.689, 4.835, 4.969, 5.099, 5.252, 5.668, 5.754, 5.928, 6.003, 6.134, 6.255, 6.375, 6.502, 6.62, 6.737, 6.861, 6.976, 7.392, 7.512, 7.625, 7.738, 7.809, 7.921, 8.037, 8.147, 8.256, 8.371, 8.479, 8.587, 8.7, 9.107, 9.214, 9.32, 9.431, 9.631];
-const hpDeep = d => { const i = Math.min(KNOTS.length - 2, Math.floor(d / 100)), f = (d - i * 100) / 100; return Math.pow(10, KNOTS[i] + (KNOTS[i + 1] - KNOTS[i]) * f) * HPK; };
-const valDeep = d => Math.pow(1.008, d) * VALK;
+// past the end of the designed curve rock keeps getting harder at a steady 10^0.14 per 100 slices
+const KN_END = (KNOTS.length - 1) * 100;
+const hpDeep = d => { if (d >= KN_END) return Math.pow(10, KNOTS[KNOTS.length - 1] + 0.14 * (d - KN_END) / 100); const i = Math.floor(d / 100), f = (d - i * 100) / 100; return Math.pow(10, KNOTS[i] + (KNOTS[i + 1] - KNOTS[i]) * f); };
+const valDeep = d => Math.pow(1.008, d);
 const FIND_P = 0.0025;
 const FINDS = [
   { id: 'spoon',     name: 'Rusty Spoon',   from: 0,    to: 320,  w: 5, col: '#c07a3c', mult: 40 },
@@ -194,6 +203,8 @@ const bagCap = L => Math.floor(25 * Math.pow(1.3, L));
 const fenceMul = L => Math.pow(1.12, L);
 const valueMul = () => fenceMul(lv('fence')) * needleVal();
 const reach = () => 6 + 0.5 * lv('reach');
+// +15% per level for the first six, then +30% per level
+const bootsMul = L => 1 + 0.15 * Math.min(L, 6) + 0.3 * Math.max(0, L - 6);
 const droneCount = L => L ? Math.min(6, 1 + Math.floor(L / 2)) : 0;
 const droneSpeed = L => 4 + 0.9 * L;
 const UPG = [
@@ -221,12 +232,12 @@ const UPG = [
   { id: 'vitality', grp: 'Safety', name: 'Thick Skin', desc: 'More health, and you heal faster once you are out of danger.', cost: L => 500 * Math.pow(2.6, L), max: 12, show: L => maxHPof(L) + ' health' },
   { id: 'bolts',    grp: 'Safety', name: 'Roof Bolter', desc: 'Bolts the ceiling as you go. Rock spans farther before it sags, and loose rock comes down less often.', cost: L => 3e4 * Math.pow(2.6, L), max: 8, show: L => '+' + L + ' span · ' + Math.round(100 * Math.pow(0.75, L)) + '% loose rock' },
   { id: 'lamp',     grp: 'Safety', name: 'Headlamp', desc: 'A helmet beam that throws light farther down the tunnel. Each level is brighter and reaches farther.', cost: L => 300 * Math.pow(3.4, L), max: 6, show: L => L ? Math.round(lampRange(L) / 2) + ' m beam' : 'No beam yet' },
-  { id: 'boots',    grp: 'Haul', name: 'Work Boots', desc: 'Walk and run faster through your own tunnel.', cost: L => 250 * Math.pow(3, L), max: 6, show: L => Math.round(100 + 15 * L) + '% speed' },
+  { id: 'boots',    grp: 'Haul', name: 'Work Boots', desc: 'Walk and run faster through your own tunnel, so you can keep up with the face.', cost: L => 250 * Math.pow(3, L), max: 20, show: L => Math.round(100 * bootsMul(L)) + '% speed' },
   { id: 'suction',  grp: 'Haul', name: 'Shop-Vac Motor', desc: 'The vacuum reaches farther and pulls harder.', cost: L => 30 * Math.pow(1.55, L), max: 20, show: L => Math.round(100 + 17 * L) + '% reach' },
   { id: 'bag',      grp: 'Haul', name: 'Duffel Bag', desc: 'Carry more rubble before you have to sell.', cost: L => 45 * Math.pow(1.45, L), max: 60, show: L => fmt(bagCap(L)) + ' chunks' },
   { id: 'fence',    grp: 'Haul', name: 'Fence Contacts', desc: 'Every chunk sells for more.', cost: L => 900 * Math.pow(3.238, L), max: 1000, show: L => '×' + fmt(fenceMul(L)) + ' price' },
   { id: 'ghost',    grp: 'Automation', name: 'Phantom Fist', desc: 'A second pair of fists that punches the face on its own.', cost: L => 4500 * Math.pow(1.927, L), max: 3000, show: L => (0.35 * L).toFixed(2) + ' punches/s' },
-  { id: 'crew',     grp: 'Automation', name: 'Dig Crew', desc: 'Hired hands chip at the shallowest rock around the clock, even while you are away. They hit as hard as you do.', cost: L => 24000 * Math.pow(1.927, L), max: 3000, show: L => fmt(1.5 * L * baseDmg()) + ' dmg/s' },
+  { id: 'crew',     grp: 'Automation', name: 'Dig Crew', desc: 'Hired hands chip at the shallowest rock while you play. They hit as hard as you do.', cost: L => 24000 * Math.pow(1.927, L), max: 3000, show: L => fmt(1.5 * L * baseDmg()) + ' dmg/s' },
   { id: 'rigs',     grp: 'Automation', name: 'Drill Rig', desc: 'A self-driving drill that clamps onto the face and bores into the shallowest rock. Each level adds another rig.', cost: L => 2e5 * Math.pow(2.4, L), max: 12, show: L => L + ' rig' + (L === 1 ? '' : 's') + ' · ' + fmt(rigDps() * L) + ' dmg/s' },
   { id: 'crusher',  grp: 'Automation', name: 'Rock Crusher', desc: 'A crusher on tracks that follows you, swallows nearby rubble and sells it at a premium.', cost: () => 1.2e6, max: 1, show: L => L ? 'Running' : 'Not built' },
   { id: 'rollers',  grp: 'Automation', name: 'Crusher Rollers', desc: 'The crusher pays more and reaches farther.', cost: L => 3e6 * Math.pow(2.6, L), max: 20, req: 'crusher', show: L => '×' + crushMul(L).toFixed(2) + ' price · ' + Math.round(crushR(L) / 2) + ' m reach' },
@@ -286,9 +297,10 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch (_) { ret
 let MUTED = store.get(MUTE_KEY) === '1';
 const isMuted = () => env.muted ? !!env.muted() : MUTED;
 let S = fresh();
-function newNeedle() { return { x: (Math.random() * GX) | 0, y: (Math.random() * GY) | 0, z: 900 + ((Math.random() * 3600) | 0), got: false }; }
+// one needle per mountain, always somewhere ahead of the face
+function newNeedle(k, face) { k = k || 0; const z = Math.max(k * MTN + 900 + ((Math.random() * 3600) | 0), (face || 0) + 60 + ((Math.random() * 400) | 0)); return { x: (Math.random() * GX) | 0, y: (Math.random() * GY) | 0, z: Math.min(DEEP - 10, z), got: false, k }; }
 function fresh() {
-  return { v: 3, mtn: 0, mtnT: 0, escapes: [], money: 0, bagN: 0, bagV: 0, up: Object.fromEntries(UPG.map(u => [u.id, 0])), stats: { punches: 0, broken: 0, earned: 0, time: 0 }, seen: {}, won: false, tool: 0, finds: {}, hp: 100,
+  return { v: 3, mtnDone: 0, mtnT: 0, escapes: [], money: 0, bagN: 0, bagV: 0, up: Object.fromEntries(UPG.map(u => [u.id, 0])), stats: { punches: 0, broken: 0, earned: 0, time: 0 }, seen: {}, won: false, tool: 0, finds: {}, hp: 100,
     needle: newNeedle(), lastSeen: Date.now() };
 }
 const lv = id => S.up[id] || 0;
@@ -297,7 +309,7 @@ const lv = id => S.up[id] || 0;
 let slices = new Map(), hpMap = new Map();
 // the save keeps each slice already encoded and only re-encodes the depths dug since the last save
 let saveDug = {}, saveDirtyZ = new Set();
-let front = new Uint16Array(N);   // first solid z in each column
+let front = new Uint32Array(N);   // first solid z in each column
 let faceDepth = 0, minFront = 0, maxDug = -1, frontDirty = true, shallow = [];
 const vkey = (x, y, z) => z * N + y * GX + x;
 function isDug(x, y, z) { const s = slices.get(z); return s ? s[y * GX + x] === 1 : false; }
@@ -318,10 +330,11 @@ function findAt(x, y, z) {
   if (n && !n.got && n.x === x && n.y === y && n.z === z) return NEEDLE;
   const c = y * GX + x;
   if (hash(c, z, 7771) >= FIND_P) return null;
-  let tot = 0; for (const f of FINDS) if (z >= f.from && z < f.to) tot += f.w;
+  const zl = z % MTN;
+  let tot = 0; for (const f of FINDS) if (zl >= f.from && zl < f.to) tot += f.w;
   if (!tot) return null;
   let r = hash(c, z, 7772) * tot;
-  for (const f of FINDS) if (z >= f.from && z < f.to) { r -= f.w; if (r <= 0) return f; }
+  for (const f of FINDS) if (zl >= f.from && zl < f.to) { r -= f.w; if (r <= 0) return f; }
   return null;
 }
 function setDug(x, y, z) {
@@ -335,7 +348,7 @@ function setDug(x, y, z) {
   if (front[c] === z) { let f = z; while (f < DEEP && isDug(x, y, f)) f++; front[c] = f; frontDirty = true; }
   markDirty(z);
 }
-const frontSorted = new Uint16Array(N);
+const frontSorted = new Uint32Array(N);
 function recomputeFront() {
   frontDirty = false;
   const sorted = frontSorted; sorted.set(front); sorted.sort();
@@ -951,16 +964,17 @@ function movePlayer(dt) {
   const keysF = (K.w || K.arrowup ? 1 : 0) - (K.s || K.arrowdown ? 1 : 0) + stick.y;
   const keysR = (K.d ? 1 : 0) - (K.a ? 1 : 0) + stick.x;
   const len = Math.hypot(keysF, keysR) || 1, m = Math.min(1, Math.hypot(keysF, keysR));
-  const speed = 6.2 * (1 + 0.15 * lv('boots')) * (K.shift ? 1.6 : 1);
+  const speed = 6.2 * bootsMul(lv('boots')) * (K.shift ? 1.6 : 1);
   const fx = -Math.sin(player.yaw), fz = -Math.cos(player.yaw), rx = Math.cos(player.yaw), rz = -Math.sin(player.yaw);
   const wx = (fx * keysF + rx * keysR) / len * m * speed, wz = (fz * keysF + rz * keysR) / len * m * speed;
   const acc = player.onGround ? 14 : 4;
   player.vx = lerp(player.vx, wx, Math.min(1, dt * acc)); player.vz = lerp(player.vz, wz, Math.min(1, dt * acc));
   player.vy -= 38 * dt;
   if ((K[' '] || jumpHeld) && player.onGround) { player.vy = 12.5; player.onGround = false; }
-  // x then z with a one-voxel step-up, then y
-  for (const ax of ['x', 'z']) {
-    const d = (ax === 'x' ? player.vx : player.vz) * dt;
+  // x then z with a one-voxel step-up, then y; fast movement goes in steps of under half a voxel so it never skips a wall
+  const sub = Math.max(1, Math.ceil(Math.max(Math.abs(player.vx), Math.abs(player.vz)) * dt / 0.4));
+  for (let st = 0; st < sub; st++) for (const ax of ['x', 'z']) {
+    const d = (ax === 'x' ? player.vx : player.vz) * dt / sub;
     if (!d) continue;
     const nx = ax === 'x' ? player.x + d : player.x, nz = ax === 'z' ? player.z + d : player.z;
     if (!boxHits(nx, player.y, nz)) { player.x = nx; player.z = nz; }
@@ -1862,47 +1876,6 @@ function groundAt(x, y, z) {
 const tunnelY = () => Math.max(0, player.y) + 2;
 function floorBelow(x, y, z) { const xi = Math.floor(x), zi = Math.floor(z); for (let yy = Math.floor(y); yy >= -1; yy--) if (solid(xi, yy, zi)) return yy + 1; return 0; }
 
-/* ================= offline progress ================= */
-function offlineDig(budget) {
-  let broken = 0, value = 0, finds = 0;
-  const start = faceDepth;
-  let guard = 0;
-  while (budget > 0 && guard++ < 200000) {
-    let lo = 1e9; for (let c = 0; c < N; c++) if (front[c] < lo) lo = front[c];
-    if (lo >= DEEP - 1) break;
-    let any = false;
-    for (let c = 0; c < N && budget > 0; c++) {
-      if (front[c] !== lo) continue;
-      any = true;
-      const x = c % GX, y = (c / GX) | 0, z = lo, h = getHP(x, y, z);
-      if (budget >= h) {
-        budget -= h;
-        value += valDeep(z);
-        const f = findAt(x, y, z); if (f) { value += rewardFind(f, z) / valueMul(); finds++; }
-        setDug(x, y, z); broken++;
-      } else { hpMap.set(vkey(x, y, z), h - budget); budget = 0; }
-    }
-    if (!any) break;
-  }
-  recomputeFront();
-  return { broken, value: value * valueMul(), finds, slices: faceDepth - start };
-}
-let awayFrom = 0;
-function runOffline() {
-  if (!awayFrom) return;
-  const away = (Date.now() - awayFrom) / 1000; awayFrom = 0;
-  if (away < 60) return;
-  const secs = Math.min(away, 8 * 3600);
-  const splash = 1 + (PATTERNS[lv('spread')].length - 1) * 0.5;
-  const dps = 1.5 * lv('crew') * baseDmg() + 0.35 * lv('ghost') * baseDmg() * splash + rigDps() * lv('rigs') + (lv('tbm') ? baseDmg() * tbmMul(lv('cutter')) * TBM_COLS.length * 0.5 : 0)
-    + (lv('excav') ? 9 * baseDmg() * excMul(lv('bucket')) / 1.6 : 0) + turDps() * lv('turret') + lv('bdrone') * baseDmg() * blastMul(lv('caps')) * 0.7 * 12 / 12;
-  if (dps <= 0) return;
-  const r = offlineDig(dps * secs * 0.5);
-  if (!r.broken) return;
-  S.money += r.value; S.stats.earned += r.value;
-  showCard('', { no: 'WHILE YOU WERE AWAY · ' + dur(away).toUpperCase(), nm: '+' + money(r.value), nt: `Your crew broke ${fmt(r.broken)} voxels${r.finds ? `, turned up ${r.finds} find${r.finds > 1 ? 's' : ''},` : ''} and sold the rubble.`, mt: r.slices > 0 ? `The face moved ${(r.slices / 2).toFixed(1)} m deeper.` : '', ms: 5200 });
-}
-
 /* ================= input ================= */
 const K = {};
 let locked = false, lockFailed = false, mouseDown = false, jumpHeld = false, punchHeld = false;
@@ -2126,11 +2099,15 @@ function update(dt) {
   if (si > (S.seen.strat || 0)) { S.seen.strat = si; stratumCard(si); }
   if (lv('detector') && !S.needle.got && act) { const s = needleSignal(); if (s > 0) { beepT -= dt; if (beepT <= 0) { sBeep(s); beepT = lerp(1.8, 0.25, s); } } }
   // escape: walk out into daylight
-  if (!S.won && player.z > DEEP + 1.5) { S.won = true; sEscape(); save(); showEnding(); }
-  const nearEnd = clamp((Math.max(maxDug, player.z) - (DEEP - 60)) / 60, 0, 1);
-  const open = maxDug >= DEEP - 1;
-  skyPlane.visible = open || nearEnd > 0.6;
-  const daylight = open ? clamp(1 - (DEEP - player.z) / 120, 0.15, 1) : 0;
+  // broke through the last slice of a mountain: celebrate, then keep digging into the next one
+  const thru = Math.min(DEEP / MTN - 1, Math.floor((maxDug + 1) / MTN));
+  if (thru > (S.mtnDone || 0)) {
+    S.escapes = S.escapes.concat([{ m: thru - 1, t: Math.round(S.stats.time - (S.mtnT || 0)) }]).slice(-100);
+    S.mtnDone = thru; S.mtnT = S.stats.time; S.won = true; sEscape(); save(); showEnding(thru);
+  }
+  if (S.needle.got && faceDepth >= (S.needle.k + 1) * MTN) { S.needle = newNeedle(Math.floor(faceDepth / MTN), faceDepth); toast('A new needle is hidden somewhere in this mountain.', 3600); }
+  skyPlane.visible = false;
+  const daylight = 0;
   scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03 - 0.0015 * lv('lamp'), 0.004, daylight); fxRange = 2.6 / scene.fog.density;
   beamLamp.intensity = lv('lamp') ? 0.6 + 0.15 * lv('lamp') : 0; beamLamp.distance = lampRange(lv('lamp'));
   sun.intensity = daylight * 1.1; ambient.intensity = 0.26 + daylight * 0.5;
@@ -2704,14 +2681,14 @@ function uiTick(force) {
   }
   if (shopOpen || force) renderFinds();
   el.badge.hidden = afford === 0; el.badge.textContent = afford;
-  $('#nextBtn2').hidden = !S.won;
   el.shopCash.textContent = money(S.money);
   const si = strataIdx(Math.max(0, Math.floor(player.z))), nx = STRATA[si + 1];
-  el.roomNo.textContent = (S.mtn ? `MOUNTAIN ${S.mtn + 1} · ` : '') + (player.z < 0 ? 'YOUR CELL' : `THE DEEP · STRATUM ${si + 1} / ${STRATA.length}`);
-  el.roomName.textContent = player.z < 0 ? (S.mtn ? 'Cell under ' + mtnName(S.mtn) : 'Cell 14-B') : player.z >= DEEP ? 'Outside' : MATS[STRATA[si].m].name;
+  el.roomNo.textContent = player.z < 0 ? 'YOUR CELL' : (STRATA[si].mtn ? `MOUNTAIN ${STRATA[si].mtn + 1}` : 'THE DEEP') + ` · STRATUM ${STRATA[si].j} / ${STRATA[si].of}`;
+  el.roomName.textContent = player.z < 0 ? 'Cell 14-B' : MATS[STRATA[si].m].name;
   setHTML(el.layers, nx ? `<span class="chip" style="background:${MATS[nx.m].pal[2]};color:${['obsidian', 'neutron', 'magma', 'basalt'].includes(MATS[nx.m].tex) ? '#eee' : '#111'}">NEXT · ${MATS[nx.m].name.toUpperCase()} @ ${meters(nx.at)} M</span>` : `<span class="chip" style="background:#cfe6ff">DAYLIGHT @ ${meters(DEEP)} M</span>`);
-  el.depthTxt.textContent = `FACE ${meters(faceDepth)} M / ${meters(DEEP)} M${maxDug > faceDepth + 4 ? ` · DEEPEST ${meters(maxDug + 1)} M` : ''}`;
-  el.depthFill.style.width = Math.min(100, faceDepth / DEEP * 100) + '%';
+  const mk = Math.min(DEEP / MTN - 1, Math.floor(faceDepth / MTN));
+  el.depthTxt.textContent = `FACE ${meters(faceDepth)} M / ${meters((mk + 1) * MTN)} M${maxDug > faceDepth + 4 ? ` · DEEPEST ${meters(maxDug + 1)} M` : ''}`;
+  el.depthFill.style.width = Math.min(100, (faceDepth - mk * MTN) / MTN * 100) + '%';
   if (lv('detector') || S.needle.got) {
     el.needleRow.hidden = false;
     if (S.needle.got) setHTML(el.needleRow, 'NEEDLE · <b>FOUND</b>');
@@ -2733,8 +2710,6 @@ function hintText() {
   const cheapest = Math.min(...UPG.filter(u => !u.req).map(upCost));
   if (!S.seen.bought && S.money >= cheapest) return `Open upgrades ${coarse ? '' : Kb('TAB')} and make your punches heavier.`;
   if (S.bagN >= cap && !lv('pawn')) return `Bag full. Sell ${coarse ? '' : Kb('E')} to keep collecting.`;
-  if (maxDug >= DEEP - 1 && !S.won) return 'Daylight. Walk out.';
-  if (S.won && player.z > DEEP - 30) return 'You made it out. Open the shop to start the next mountain.';
   if (S.seen.bought && faceDepth < 6) return 'Tunnel forward. Glinting voxels hide finds worth a fortune.';
   if (!lv('crew') && S.money >= upCost(UPGM.crew) * 0.6) return 'Save up for a Dig Crew. They keep digging even while this tab is closed.';
   return '';
@@ -2754,13 +2729,14 @@ function showCard(_, o) {
   $('#cardNo').textContent = o.no || ''; $('#cardNm').textContent = o.nm || ''; $('#cardNt').textContent = o.nt || ''; $('#cardMt').textContent = o.mt || '';
   const c = $('#card'); c.style.opacity = 1; clearTimeout(cardT); cardT = setTimeout(() => c.style.opacity = 0, o.ms || 3400);
 }
-function stratumCard(si) { const st = STRATA[si]; showCard('', { no: `${meters(st.at)} M IN · STRATUM ${si + 1} / ${STRATA.length}`, nm: MATS[st.m].name, nt: st.note, mt: si === 0 ? `The far side is ${meters(DEEP)} m away.` : '' }); }
-function showEnding() {
-  const st = S.stats, n = (S.mtn || 0) + 1;
-  $('#nextTxt').innerHTML = `<b>Next up: ${mtnName(n)}.</b> They caught you again and locked you under a bigger mountain. The rock is 8× tougher and pays 6× more, the layers come in a new order, and a new needle is hidden in it. You keep your cash, upgrades, machines and finds.`;
-  const rows = [['Punches thrown', fmt(st.punches)], ['Voxels broken', fmt(st.broken)], ['Cash earned', money(st.earned)], ['Time inside', dur(st.time)], ['Finds dug up', fmt(Object.values(S.finds).reduce((a, b) => a + b, 0))], ['Knocked out', fmt(S.stats.knockouts || 0) + ' times'], ['The needle', S.needle.got ? 'Found' : 'Still in there']];
-  rows.unshift(['This mountain', `${mtnName(S.mtn || 0)} in ${dur(st.time - (S.mtnT || 0))}`]);
-  if (S.escapes.length) rows.push(['Mountains escaped', fmt(S.escapes.length + 1)]);
+function stratumCard(si) { const st = STRATA[si]; showCard('', { no: `${meters(st.at)} M IN · ${st.mtn ? `MOUNTAIN ${st.mtn + 1} · ` : ''}STRATUM ${st.j} / ${st.of}`, nm: MATS[st.m].name, nt: st.note, mt: si === 0 ? `The far side is ${meters(DEEP)} m away.` : '' }); }
+function showEnding(n) {
+  const st = S.stats, last = S.escapes[S.escapes.length - 1];
+  $('#ending .kicker').textContent = 'Broke through';
+  $('#ending .big').innerHTML = `Mountain <span>${n}.</span>`;
+  $('#ending .lede').textContent = n === 1 ? 'Two and a half kilometres of mountain, bare knuckles. For one second you smell rain. Then your fist hits rock again: there is another mountain right behind the first.' : `Another ${meters(MTN)} m of mountain, gone. And behind it, more rock.`;
+  $('#nextTxt').innerHTML = n >= DEEP / MTN - 1 ? '<b>One mountain left.</b> The last wall in the world. Keep going.' : `<b>Next up: ${mtnName(n)}.</b> The rock keeps getting harder from here, the layers come in a new order and a new needle is hidden in it. Everything you own keeps working.`;
+  const rows = [['This mountain', last ? dur(last.t) : '-'], ['Mountains broken', fmt(n)], ['Punches thrown', fmt(st.punches)], ['Voxels broken', fmt(st.broken)], ['Cash earned', money(st.earned)], ['Time inside', dur(st.time)], ['Finds dug up', fmt(Object.values(S.finds).reduce((a, b) => a + b, 0))], ['Needles found', fmt(S.finds.needle || 0)]];
   $('#stats').innerHTML = rows.map(([a, b]) => `<div><span class="lbl">${a}</span><b>${b}</b></div>`).join('');
   clearTimeout(cardT); $('#card').style.opacity = 0;
   if (document.exitPointerLock && locked) document.exitPointerLock();
@@ -2781,33 +2757,16 @@ $('#wipeBtn').addEventListener('click', () => {
   setTimeout(() => { b.textContent = 'START OVER'; }, 3000);
 });
 $('#endBtn').addEventListener('click', () => { $('#ending').hidden = true; requestLock(); });
-$('#nextBtn').addEventListener('click', () => { aInit(); nextMountain(); });
-$('#nextBtn2').addEventListener('click', () => { aInit(); closeShop(); nextMountain(); });
-// Start the next mountain: a fresh wall and a new needle, everything you bought stays.
-function nextMountain() {
-  if (!S.won) return;
-  S.escapes = S.escapes.concat([{ m: S.mtn || 0, t: Math.round(S.stats.time - (S.mtnT || 0)) }]).slice(-100);
-  S.mtn = (S.mtn || 0) + 1; S.mtnT = S.stats.time; S.won = false;
-  S.needle = newNeedle(); S.seen.strat = 0; S.hp = maxHP();
-  resetWorld(); syncRigs(); syncCrusher(); syncTbm(); syncExcav(); syncBdrones(); syncTurrets();
-  setTool(TOOL_REQ[S.tool || 0] && !lv(TOOL_REQ[S.tool || 0]) ? 0 : S.tool || 0);
-  save();
-  $('#ending').hidden = true;
-  showCard('', { no: `MOUNTAIN ${S.mtn + 1}`, nm: mtnName(S.mtn), nt: 'Rock 8× tougher. Pays 6× more. A new needle is in here somewhere.', mt: `The far side is ${meters(DEEP)} m away.`, ms: 5200 });
-  requestLock();
-}
 function showIntro() {
   $('#startBtn').textContent = S.seen.started ? 'Keep digging' : 'Start digging';
-  $('#prog').textContent = S.seen.started ? (S.mtn ? `MOUNTAIN ${S.mtn + 1} · ` : '') + (S.won ? 'ESCAPED · THE MOUNTAIN IS YOURS' : `FACE AT ${meters(faceDepth)} M · ${money(S.money)}`) : '';
+  $('#prog').textContent = S.seen.started ? (S.mtnDone ? `MOUNTAIN ${Math.min(DEEP / MTN, Math.floor(faceDepth / MTN) + 1)} · ` : '') + `FACE AT ${meters(faceDepth)} M · ${money(S.money)}` : '';
   $('#intro').hidden = false;
 }
-let pendingAway = false;
 function startGame() {
   aInit();
   $('#intro').hidden = true;
   requestLock();
   if (!S.seen.started) { S.seen.started = 1; stratumCard(0); }
-  else if (pendingAway) { pendingAway = false; runOffline(); }
 }
 $('#startBtn').addEventListener('click', startGame);
 $('#koBtn').addEventListener('click', () => { aInit(); respawn(); });
@@ -2826,15 +2785,18 @@ function serialize() {
     dug[z] = b64(bits);
   }
   saveDirtyZ.clear();
+  // fully dug slices go out as [first, last] runs (integer keys iterate in ascending order)
+  const part = {}, runs = []; let ra = -1, rb = -2;
+  for (const k in dug) { const z = +k; if (dug[k] === 1) { if (z === rb + 1) rb = z; else { if (ra >= 0) runs.push([ra, rb]); ra = rb = z; } } else part[k] = dug[k]; }
+  if (ra >= 0) runs.push([ra, rb]);
   const hpArr = []; for (const [k, h] of hpMap) { if (hpArr.length > 3000) break; hpArr.push([k, +h.toPrecision(6)]); }
-  return Object.assign({}, S, { lastSeen: Date.now(), dug, hp: hpArr, player: { x: +player.x.toFixed(2), y: +player.y.toFixed(2), z: +player.z.toFixed(2), yaw: +player.yaw.toFixed(3), pitch: +player.pitch.toFixed(3) }, rubble: rubble.filter(r => r.rest).slice(0, 400).map(r => [+r.x.toFixed(2), +r.y.toFixed(2), +r.z.toFixed(2), r.m, r.v, +r.n.toFixed(4), +r.s.toFixed(3), r.shape]) });
+  return Object.assign({}, S, { lastSeen: Date.now(), dug: part, dugFull: runs, hp: hpArr, player: { x: +player.x.toFixed(2), y: +player.y.toFixed(2), z: +player.z.toFixed(2), yaw: +player.yaw.toFixed(3), pitch: +player.pitch.toFixed(3) }, rubble: rubble.filter(r => r.rest).slice(0, 400).map(r => [+r.x.toFixed(2), +r.y.toFixed(2), +r.z.toFixed(2), r.m, r.v, +r.n.toFixed(4), +r.s.toFixed(3), r.shape]) });
 }
 function save() { S.lastSeen = Date.now(); store.set(KEY, JSON.stringify(serialize())); }
 function load() { const s = store.get(KEY); if (!s) return null; try { return JSON.parse(s); } catch (_) { return null; } }
 function resetWorld() {
-  applyMountain();
   for (const g of chunks3.values()) disposeGroup(g); chunks3.clear(); dirty.clear();
-  slices = new Map(); hpMap = new Map(); saveDug = {}; saveDirtyZ.clear(); front = new Uint16Array(N); maxDug = -1; damaged = []; rubble = []; parts = []; texts = []; dusts = []; stressed.clear(); for (const b of falling) scene.remove(b.mesh); falling = [];
+  slices = new Map(); hpMap = new Map(); saveDug = {}; saveDirtyZ.clear(); front = new Uint32Array(N); maxDug = -1; damaged = []; rubble = []; parts = []; texts = []; dusts = []; stressed.clear(); for (const b of falling) scene.remove(b.mesh); falling = [];
   Object.assign(player, { x: 10, y: 0, z: -8, vx: 0, vy: 0, vz: 0, yaw: Math.PI, pitch: 0 });
   combo = 1; crewAcc = 0; ghostAcc = 0; lastChunkZ = -999;
   for (const rg of rigList) scene.remove(rg.g); rigList = [];
@@ -2852,25 +2814,35 @@ function apply(d) {
   S = Object.assign(f, d);
   S.up = Object.assign(f.up, d.up || {}); S.stats = Object.assign(f.stats, d.stats || {}); S.seen = Object.assign({}, d.seen || {}); S.finds = Object.assign({}, d.finds || {});
   if (!S.needle) S.needle = f.needle;
-  if (S.needle.got == null) S.needle.got = !(S.mtn > 0) && !!S.finds.needle;   // saves from before there were several mountains
+  if (S.needle.got == null) S.needle.got = !(d.mtn > 0) && !!S.finds.needle;   // saves from before there were several mountains
   if (!Array.isArray(S.escapes)) S.escapes = [];
-  applyMountain();
+  // A short-lived version started each new mountain on a fresh wall (save field mtn). Put that run back on the
+  // end of the one long tunnel: the earlier mountains count as dug out and the current wall moves along behind them.
+  const shift = (d.mtn || 0) * MTN; delete S.mtn;
   if (S.hp == null || S.hp <= 0) S.hp = maxHP();
   for (const g of chunks3.values()) disposeGroup(g); chunks3.clear(); dirty.clear();
   slices = new Map(); hpMap = new Map(); saveDug = {}; saveDirtyZ.clear(); maxDug = -1;
+  const full = z => { const s = new Uint8Array(N); s.fill(1); slices.set(z, s); saveDug[z] = 1; if (z > maxDug) maxDug = z; };
+  for (let z = 0; z < shift; z++) full(z);
+  for (const [a, b] of d.dugFull || []) for (let z = a; z <= b; z++) full(z + shift);
   for (const zs in d.dug || {}) {
-    const z = +zs, v = d.dug[zs], s = new Uint8Array(N);
+    const z = +zs + shift, v = d.dug[zs], s = new Uint8Array(N);
     if (v === 1) s.fill(1); else { const bits = unb64(v); for (let i = 0; i < N; i++) s[i] = (bits[i >> 3] >> (i & 7)) & 1; }
     slices.set(z, s); saveDug[z] = v; if (z > maxDug) maxDug = z;
   }
-  for (const [k, h] of d.hp || []) hpMap.set(k, h);
+  for (const [k, h] of d.hp || []) hpMap.set(k + shift * N, h);
+  if (shift) { S.needle.z += shift; S.needle.k = d.mtn; }
+  if (S.needle.k == null) S.needle.k = 0;
+  S.mtnDone = Math.max(S.mtnDone || 0, Math.min(DEEP / MTN - 1, Math.floor((maxDug + 1) / MTN)));
+  if (S.mtnDone) S.won = true;
   for (let c = 0; c < N; c++) { const x = c % GX, y = (c / GX) | 0; let z = 0; while (z < DEEP && isDug(x, y, z)) z++; front[c] = z; }
   recomputeFront();
-  if (d.player) Object.assign(player, d.player, { vx: 0, vy: 0, vz: 0 });
-  if (boxHits(player.x, player.y, player.z)) Object.assign(player, { x: 10, y: 0, z: -8 });
+  if (d.player) Object.assign(player, d.player, { vx: 0, vy: 0, vz: 0, z: d.player.z + shift });
+  // standing inside rock (an old save from outside the old exit): drop back into the tunnel just behind the face
+  if (boxHits(player.x, player.y, player.z)) Object.assign(player, { x: 10, y: 0, z: minFront >= 3 ? minFront - 2 : -8 });
   requestSupport(Math.max(0, Math.floor(player.z)) + 4);
-  rubble = (d.rubble || []).map(r => { const K2 = KIND[MATS[r[3]].snd]; return { x: r[0], y: r[1], z: r[2], m: r[3], v: r[4], n: r[5], s: r[6] || 0.3, shape: r[7] || 0, sx: K2.sh[0], sy: K2.sh[1], sz2: K2.sh[2], e: K2.e, flat: K2.flat, col: MATS[r[3]].P[2].map(c => c / 255), q: new THREE.Quaternion().setFromEuler(tmpE.set(0, rnd(6.28), 0)), wx: 0, wy: 0, wz: 0, vx: 0, vy: 0, vz: 0, rest: false, restT: 0, suck: false, belt: 0, shrink: 1 }; });
-  delete S.dug; delete S.hp; delete S.player; delete S.rubble;
+  rubble = (d.rubble || []).map(r => { const K2 = KIND[MATS[r[3]].snd]; return { x: r[0], y: r[1], z: r[2] + shift, m: r[3], v: r[4], n: r[5], s: r[6] || 0.3, shape: r[7] || 0, sx: K2.sh[0], sy: K2.sh[1], sz2: K2.sh[2], e: K2.e, flat: K2.flat, col: MATS[r[3]].P[2].map(c => c / 255), q: new THREE.Quaternion().setFromEuler(tmpE.set(0, rnd(6.28), 0)), wx: 0, wy: 0, wz: 0, vx: 0, vy: 0, vz: 0, rest: false, restT: 0, suck: false, belt: 0, shrink: 1 }; });
+  delete S.dug; delete S.dugFull; delete S.hp; delete S.player; delete S.rubble;
 }
 // autosave every 15 s when the browser has a spare moment; closing, hiding or leaving the game always saves straight away
 const idle = window.requestIdleCallback ? f => window.requestIdleCallback(f, { timeout: 2000 }) : f => setTimeout(f, 0);
@@ -2884,7 +2856,7 @@ const ro = new ResizeObserver(() => { clearTimeout(rsT); rsT = setTimeout(() => 
 function start(data) {
   layout(); buildFists(); buildIcons(); buildShop();
   const d = data && data.v === 3 ? data : load();
-  if (d) { apply(d); pendingAway = !(data && data.v === 3); if (pendingAway) awayFrom = d.lastSeen || 0; }
+  if (d) apply(d);
   else recomputeFront();
   syncDrones(); syncRigs(); syncCrusher(); syncTbm(); syncExcav(); syncBdrones(); syncTurrets(); setTool(TOOL_REQ[S.tool || 0] && !lv(TOOL_REQ[S.tool || 0]) ? 0 : S.tool || 0);
   refreshChunks(true); updateCamera(); uiTick(true);
@@ -2912,7 +2884,7 @@ function start(data) {
 let bestSent = 0, bestT = 0;
 function reportBest() {
   if (!env.best) return;
-  const m = Math.floor(((S.mtn || 0) * DEEP + faceDepth) / 2);
+  const m = Math.floor(faceDepth / 2);
   if (m > bestSent && performance.now() - bestT > 5000) { bestSent = m; bestT = performance.now(); try { env.best(m); } catch (_) {} }
 }
 start(env.data || {});
@@ -2930,11 +2902,11 @@ function dispose() {
   renderer.dispose(); try { renderer.forceContextLoss(); } catch (_) {}
   shadow.innerHTML = '';
 }
-dispose.serialize = () => { const o = serialize(); o.dug = Object.assign({}, o.dug); return o; };
+dispose.serialize = () => serialize();
 return dispose;
 }
 G.push({id:'knuckle',name:'Knuckle Through',kind:'game',wide:true,big:true,tags:['digging','tycoon','3D'],tint:'#f2b233',
-blurb:'Punch your way out of a cell and through 2.5 km of mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.',
+blurb:'Punch your way out of a cell and through mountain after mountain. Hire a dig crew, hunt buried treasure and get out from under falling rock.',
 fmt:b=>b+' m',
 art:"<rect width=\"120\" height=\"72\" fill=\"#2a2420\"/><path d=\"M0 0H120L92 18H28Z\" fill=\"#3b342d\"/><path d=\"M0 72H120L92 54H28Z\" fill=\"#51463c\"/><path d=\"M0 0L28 18V54L0 72Z\" fill=\"#332c26\"/><path d=\"M120 0L92 18V54L120 72Z\" fill=\"#2d2721\"/><rect x=\"28\" y=\"18\" width=\"64\" height=\"36\" fill=\"#a89c88\" stroke=\"#1D1A2F\" stroke-width=\"2\"/><path d=\"M44 18V54M60 18V54M76 18V54M28 30H92M28 42H92\" stroke=\"#8a7f6d\" stroke-width=\"1.2\"/><rect x=\"60\" y=\"30\" width=\"16\" height=\"12\" fill=\"#ffe7ad\"/><path d=\"M60 30L64 34M76 30L72 35\" stroke=\"#5a4e40\" stroke-width=\"2\"/><path d=\"M44 30L50 36L47 41M76 42L82 47\" stroke=\"#1D1A2F\" stroke-width=\"1.6\" fill=\"none\"/><rect x=\"40\" y=\"58\" width=\"6\" height=\"5\" fill=\"#b8ad98\" stroke=\"#1D1A2F\" stroke-width=\"1.2\" transform=\"rotate(18 43 60)\"/><rect x=\"50\" y=\"61\" width=\"4\" height=\"4\" fill=\"#8a7f6d\" stroke=\"#1D1A2F\" stroke-width=\"1\"/><rect x=\"84\" y=\"62\" width=\"16\" height=\"10\" fill=\"#e0662a\" stroke=\"#1D1A2F\" stroke-width=\"2.5\"/><rect x=\"80\" y=\"46\" width=\"24\" height=\"18\" rx=\"5\" fill=\"#e8a780\" stroke=\"#1D1A2F\" stroke-width=\"2.5\"/><path d=\"M86 46V52M92 46V52M98 46V52\" stroke=\"#1D1A2F\" stroke-width=\"2\"/><path d=\"M80 56H104\" stroke=\"#f3eee4\" stroke-width=\"3\"/>",
 run(root,c){
