@@ -30,7 +30,7 @@ Every page loads, in order: `css/site.css`, `css/fonts.css`, `js/core.js`, the c
 
 Fonts and the big libraries (three.js, Matter.js, d3) are served from this site (`assets/fonts/`, `assets/lib/`), because school networks sometimes block outside CDNs.
 
-**Hiding a game:** add its id to `HIDDEN` in `js/app.js` (its page and links keep working), then run `node tools/allgames.cjs`. **Homepage tags** (session length, needs sound, keyboard-only, not classroom-friendly) are in `META_RAW` in `js/app.js`; the core 75 are in `CORE`.
+**Hiding a game:** add its id to `HIDDEN` in `js/app.js` (its page and links keep working), then run `node tools/allgames.cjs`. **Top games filter:** the standouts are listed, in display order, in `TOP_PICKS` in `js/app.js`. **Homepage tags** (session length, needs sound, keyboard-only, not classroom-friendly) are in `META_RAW` in `js/app.js`; the core 75 are in `CORE`.
 
 ### Editing
 
