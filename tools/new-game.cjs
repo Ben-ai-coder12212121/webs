@@ -1,13 +1,15 @@
 // Creates a new game page and its catalog entry.
-// Usage: node tools/new-game.cjs <game-code.js> [--wip] [--libs=online,io]
+// Usage: node tools/new-game.cjs <game-code.js> [--libs=online,io]
 // The code file must contain one G.push({id:'...',name:'...',kind:'...',tint:'...',blurb:'...',art:'...',fmt:...,run(root,c){...}}).
 // The page is written to games/<slug>/index.html (from the name) and the listing is added to js/catalog.js.
-// With --wip the game also goes into WIP_IDS in js/app.js (the "In progress" section) and is kept out of search engines.
+// Owner rule: every NEW game goes into WIP_IDS in js/app.js (the "In progress" section, kept out of search engines)
+// until the owner checks it and says it's done; then tools/release-game.cjs moves it out. Re-running this for a game
+// that is already in the catalog keeps its current place (live or in progress). --wip forces In progress.
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith('--'));
-const wip = args.includes('--wip');
+const wipFlag = args.includes('--wip');
 const libs = ((args.find(a => a.startsWith('--libs=')) || '').slice(7)).split(',').filter(Boolean);
 const code = fs.readFileSync(file, 'utf8').trim();
 
@@ -16,6 +18,9 @@ const got = [];
 new Function('G', 'el', 'S', code)({ push: g => got.push(g) }, () => ({}), { get: (k, d) => d, set() {} });
 if (got.length !== 1) throw new Error('expected exactly one G.push in ' + file);
 const g = got[0];
+const known = fs.readFileSync(path.join(ROOT, 'js/catalog.js'), 'utf8').includes('{"id":' + JSON.stringify(g.id) + ',');
+const inWip = /const WIP_IDS=\[([^\]]*)\]/.exec(fs.readFileSync(path.join(ROOT, 'js/app.js'), 'utf8'))[1].includes("'" + g.id + "'");
+const wip = wipFlag || !known || inWip;
 for (const k of ['id', 'name', 'kind', 'tint', 'blurb', 'art']) if (!g[k]) throw new Error('missing ' + k);
 const slug = g.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 const url = '/games/' + slug + '/';
