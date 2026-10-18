@@ -153,7 +153,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 | Game | What it needs |
 |---|---|
 | Lumberjack Tycoon | Rebuilt as a 3D open-world game in the style the owner asked for (the old Roblox lumber game, all original): `TimberTycoon(host, env)`, save key `unb_lumber3d_save`. Chop trees with visible notches until they topple into physics logs, cut and drag pieces, load the pickup, tip the bed onto the buyer's belt. 7 axes, 3 sawmill tiers, belts, land plots with a build mode, toll bridges to snow and swamp, a ferry to a glowing island, day/night. Needs a real-device fps check and an hour of play to tune prices; belts are straight only, one plot per player |
-| Fishing Tycoon | New idle game (cast and hook, 30 fish in five waters, Fishdex, crew, nets, Auto Fisher, five boats, Pearl prestige). Needs balance testing over a long session |
+| Fishing Tycoon | Rebuilt as a 3D island fishing adventure in the style the owner asked for (the popular Roblox fishing games, all original): `TideCaster(host, env)`, save key `unb_fish3d_save`. Six islands, 61 drawn fish across 7 zones and 7 rarities (some only at night, in rain or fog), special variants, charge cast, shake and reel minigame shaped by rod stats, 10 rods, 6 baits, backpack upgrades, 3 boats you drive, a journal, bounties, day/night and weather. Leaderboard stays total money earned (matches the old board). Needs a real-device fps check and longer balance play |
 | Neon Harbor | Open-world crime game; heavy, and the theme isn't classroom-friendly |
 | The Hollow | Survival horror; heavy |
 | Silent Contract | Unfinished |
