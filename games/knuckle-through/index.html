@@ -34,8 +34,8 @@
 <script src="/js/catalog-lite.js"></script>
 <script>
 /* ===================== Knuckle Through: game code ===================== */
-const KT_CSS = "/* Layout: full-bleed first-person 3D view of a tunnel; HUD pinned to the corners like stencilled plates bolted to rock. Single dark look by design. */\n:host{\n  --ink:#0d0e0f;\n  --plate:#18191b;\n  --plate-2:#222427;\n  --rule:#393c40;\n  --chalk:#ece5d8;\n  --dim:#a39d92;\n  --hazard:#f2b233;\n  --hazard-ink:#1b1404;\n  --jumpsuit:#e0662a;\n  --alarm:#e5533d;\n  --f-stencil:\"Big Shoulders Stencil Display\", Impact, \"Arial Narrow\", sans-serif;\n  --f-body:\"IBM Plex Sans Condensed\", \"Arial Narrow\", system-ui, sans-serif;\n  --f-pixel:\"Silkscreen\", ui-monospace, \"Courier New\", monospace;\n  color-scheme: dark;\n}\n[hidden]{display:none!important}\n#game{position:absolute;inset:0;overflow:hidden;background:#070708;color:var(--chalk);font-family:var(--f-body);font-size:15px;line-height:normal;text-align:left;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;container-type:size;container-name:kt}\n#game button{margin:0}\n#gl,#ov2d{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}\n#gl{touch-action:none}\n#ov2d{pointer-events:none}\nbutton{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}\nbutton:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}\n\n.plate{background:color-mix(in srgb,var(--plate) 88%,transparent);border:1px solid var(--rule);box-shadow:0 2px 0 #000,inset 0 1px 0 rgba(255,255,255,.05);border-radius:3px;position:relative}\n.plate::before,.plate::after{content:\"\";position:absolute;top:5px;width:4px;height:4px;border-radius:50%;background:#55595e;box-shadow:inset -1px -1px 0 #2a2c2f}\n.plate::before{left:5px}.plate::after{right:5px}\n#hudL{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));padding:10px 16px;min-width:150px;display:grid;gap:6px;pointer-events:none}\n#money{font-family:var(--f-pixel);font-size:24px;line-height:1;color:var(--hazard);font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #000}\n.lbl{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}\n.bagrow{display:flex;align-items:center;gap:8px}\n#bagbar{flex:1;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#bagfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--chalk)}\n#bagbar.full #bagfill{background:var(--alarm)}\n#bagtxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}\n\n#hudR{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));padding:9px 16px 10px;display:grid;gap:5px;justify-items:end;text-align:right;max-width:46%;pointer-events:none}\n#roomNo{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim)}\n#roomName{font-family:var(--f-stencil);font-weight:900;font-size:24px;line-height:.95;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}\n#layers{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}\n.chip{font-family:var(--f-pixel);font-size:8px;padding:2px 4px 1px;border:1px solid rgba(0,0,0,.6);color:#111;white-space:nowrap}\n#depthRow{display:grid;gap:3px;justify-items:end;width:100%}\n#depthbar{width:150px;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative}\n#depthfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--hazard)}\n#depthTxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums}\n#needleRow{font-family:var(--f-pixel);font-size:9px;letter-spacing:.08em;color:var(--dim)}\n#needleRow b{font-weight:400;color:#bfefff}\n#hudR .tools{display:flex;gap:4px;pointer-events:auto}\n.mini{font-family:var(--f-pixel);font-size:9px;padding:4px 6px 3px;border:1px solid var(--rule);background:var(--plate-2);color:var(--dim)}\n.mini:hover{color:var(--chalk)}\n\n#hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top,0px));max-width:min(560px,calc(100% - 32px));padding:7px 14px 6px;background:rgba(10,10,11,.82);border:1px dashed var(--hazard);color:var(--chalk);font-size:14px;line-height:1.3;text-align:center;pointer-events:none;text-wrap:balance}\n#hint b{color:var(--hazard);font-family:var(--f-pixel);font-weight:400;font-size:11px;padding:0 3px;border:1px solid var(--hazard);margin:0 2px;white-space:nowrap}\n#resume{position:absolute;left:50%;top:50%;transform:translate(-50%,40px);font-family:var(--f-pixel);font-size:11px;letter-spacing:.1em;color:var(--chalk);background:rgba(10,10,11,.8);border:1px solid var(--rule);padding:8px 12px 7px;pointer-events:none}\n\n#bar{position:absolute;left:0;right:0;bottom:0;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;justify-content:center;align-items:flex-end;gap:10px;pointer-events:none;flex-wrap:wrap}\n#bar>*{pointer-events:auto}\n.toolset{display:flex;gap:4px;padding:4px}\n.tool{width:52px;height:52px;position:relative;background:var(--plate-2);border:1px solid var(--rule);display:grid;place-items:center}\n.tool img{width:32px;height:32px;image-rendering:pixelated}\n.tool .k{position:absolute;left:3px;top:2px;font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.tool .n{position:absolute;left:0;right:0;bottom:2px;font-family:var(--f-pixel);font-size:7px;color:var(--dim);text-align:center}\n.tool.on{background:#3a2f12;border-color:var(--hazard);box-shadow:inset 0 0 0 1px var(--hazard)}\n.tool.on .k,.tool.on .n{color:var(--hazard)}\n.tool.locked{opacity:.38;cursor:not-allowed}\n.act{height:52px;padding:0 14px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;background:var(--plate-2);border:1px solid var(--rule);box-shadow:0 2px 0 #000;position:relative;min-width:96px}\n.act .t{font-family:var(--f-stencil);font-weight:900;font-size:19px;line-height:1;letter-spacing:.04em}\n.act .s{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.act:active{transform:translateY(1px);box-shadow:none}\n#sellBtn.ready{border-color:var(--hazard)}\n#sellBtn.ready .t{color:var(--hazard)}\n#shopBtn .badge{position:absolute;right:-6px;top:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--hazard);color:var(--hazard-ink);font-family:var(--f-pixel);font-size:10px;display:grid;place-items:center;box-shadow:0 1px 0 #000}\n#combo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;pointer-events:none;transition:opacity .2s}\n#combo .v{font-family:var(--f-pixel);font-size:13px;color:var(--hazard);text-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n#combo .bar{width:90px;height:5px;background:rgba(0,0,0,.6);border:1px solid #3b3f43}\n#combo .bar i{display:block;height:100%;width:0;background:var(--hazard)}\n\n/* touch controls */\n#touch{position:absolute;inset:0;pointer-events:none}\n#stick{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(236,229,216,.25);background:rgba(10,10,11,.25);transform:translate(-50%,-50%);display:none}\n#stick i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(242,178,51,.55);border:2px solid #000}\n.tbtn{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:rgba(24,25,27,.8);border:2px solid var(--rule);font-family:var(--f-stencil);font-weight:900;font-size:17px;letter-spacing:.04em;color:var(--chalk);touch-action:none}\n.tbtn.big{width:96px;height:96px;font-size:20px;border-color:var(--hazard);color:var(--hazard)}\n#tPunch{right:max(20px,env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px))}\n#tJump{right:calc(max(20px,env(safe-area-inset-right,0px)) + 104px);bottom:calc(84px + env(safe-area-inset-bottom,0px))}\n\n#shop{position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--plate);border-left:2px solid #000;box-shadow:-12px 0 30px rgba(0,0,0,.5);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:20;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\n#shop.open{transform:none}\n#shop header{display:flex;align-items:center;justify-content:space-between;padding:14px max(16px,env(safe-area-inset-right,0px)) 12px 18px;border-bottom:1px solid var(--rule);background:repeating-linear-gradient(-45deg,#1d1f21 0 8px,#191a1c 8px 16px)}\n#shop h2{margin:0;font-family:var(--f-stencil);font-weight:900;font-size:30px;letter-spacing:.05em;line-height:1}\n#shop .cash{font-family:var(--f-pixel);color:var(--hazard);font-size:13px}\n#shopList{overflow-y:auto;padding:6px max(16px,env(safe-area-inset-right,0px)) 18px 18px;flex:1;-webkit-overflow-scrolling:touch}\n.grp{font-family:var(--f-pixel);font-size:9px;letter-spacing:.16em;color:var(--dim);padding:14px 0 6px;border-bottom:1px solid var(--rule);margin-bottom:2px;text-transform:uppercase}\n.up{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px dashed #2c2f32;align-items:center}\n.up .nm{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:baseline;min-width:0}\n.up .lv{font-family:var(--f-pixel);font-size:9px;color:var(--dim);white-space:nowrap}\n.up .ds{grid-column:1;color:var(--dim);font-size:13px;line-height:1.3}\n.up .ef{grid-column:1;font-family:var(--f-pixel);font-size:9px;color:var(--chalk);font-variant-numeric:tabular-nums}\n.up .ef em{font-style:normal;color:var(--hazard)}\n.buy{grid-column:2;grid-row:1 / span 3;min-width:86px;padding:9px 10px 8px;background:#2b2e31;border:1px solid #44484d;font-family:var(--f-pixel);font-size:11px;color:var(--dim);box-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n.buy.can{background:var(--hazard);color:var(--hazard-ink);border-color:#000}\n.buy.can:hover{filter:brightness(1.08)}\n.buy:active{transform:translateY(1px);box-shadow:none}\n.buy.max{background:transparent;box-shadow:none;border-style:dashed}\n.up.flash{animation:upf .5s}\n@keyframes upf{0%{background:rgba(242,178,51,.25)}100%{background:transparent}}\n.buy.no{animation:shake .25s}\n@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}\n#shop footer{padding:10px max(16px,env(safe-area-inset-right,0px)) 14px 18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:10px}\n.findgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 0}\n.find{border:1px dashed #34373a;padding:8px 9px 7px;display:grid;gap:2px;min-width:0}\n.find .fn{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}\n.find .fn i{width:8px;height:8px;display:inline-block;box-shadow:0 0 0 1px #000}\n.find .fc{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.find.unk{opacity:.55}\n.find.unk .fn{color:var(--dim)}\n\n.ov{position:absolute;inset:0;display:grid;place-items:start center;z-index:30;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}\n.ov.dim{background:radial-gradient(ellipse at center,rgba(8,8,9,.55),rgba(8,8,9,.92))}\n.sheet{max-width:600px;width:100%;text-align:left;margin:auto 0}\n.kicker{font-family:var(--f-pixel);font-size:10px;letter-spacing:.2em;color:var(--hazard);text-transform:uppercase}\n.big{font-family:var(--f-stencil);font-weight:900;text-transform:uppercase;font-size:clamp(34px,min(11cqw,13cqh),104px);line-height:.86;letter-spacing:.01em;margin:8px 0 14px;text-shadow:0 4px 0 #000;text-wrap:balance}\n.big span{color:var(--hazard)}\n.lede{font-size:18px;line-height:1.45;max-width:48ch;color:var(--chalk);margin:0 0 18px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 22px;font-size:14px;color:var(--dim);max-width:460px}\n.keys kbd{font-family:var(--f-pixel);font-size:10px;color:var(--chalk);border:1px solid var(--rule);background:var(--plate-2);padding:3px 6px 2px;white-space:nowrap;justify-self:start}\n.go{font-family:var(--f-stencil);font-weight:900;font-size:26px;letter-spacing:.06em;text-transform:uppercase;color:var(--hazard-ink);background:var(--hazard);padding:12px 26px 10px;border:2px solid #000;box-shadow:0 4px 0 #000}\n.go:active{transform:translateY(2px);box-shadow:0 2px 0 #000}\n.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}\n#prog{font-family:var(--f-pixel);font-size:10px;color:var(--dim);letter-spacing:.06em}\n#card{pointer-events:none;place-items:center;text-align:center;transition:opacity .6s}\n#card>div{padding:34px 44px;background:radial-gradient(closest-side,rgba(8,8,9,.85) 40%,rgba(8,8,9,0))}\n#card .no{font-family:var(--f-pixel);font-size:12px;letter-spacing:.25em;color:var(--hazard)}\n#card .nm{font-family:var(--f-stencil);font-weight:900;font-size:clamp(36px,10cqw,92px);line-height:.9;text-transform:uppercase;text-shadow:0 4px 0 #000;margin:6px 0 10px;text-wrap:balance}\n#card .nt{font-size:17px;color:var(--chalk);text-shadow:0 2px 0 #000;max-width:40ch;margin:0 auto}\n#card .mt{font-family:var(--f-pixel);font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:.06em}\n.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:0 0 22px;max-width:440px}\n.stats div{border-top:1px solid var(--rule);padding-top:6px}\n.stats b{display:block;font-family:var(--f-pixel);font-weight:400;font-size:18px;color:var(--hazard);font-variant-numeric:tabular-nums}\n#toast{position:absolute;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-pixel);font-size:12px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;transition:opacity .4s;max-width:calc(100% - 32px);text-align:center}\n.gain{position:absolute;font-family:var(--f-pixel);font-size:14px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;animation:gain 1.1s ease-out forwards;white-space:nowrap;z-index:5}\n@keyframes gain{0%{transform:translateY(6px);opacity:0}15%{opacity:1}100%{transform:translateY(-26px);opacity:0}}\n#err{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-size:16px;color:var(--chalk);z-index:40}\n\n@container kt (max-width:760px) or (max-height:500px){\n  #shop{top:auto;width:100%;height:78%;border-left:0;border-top:2px solid #000;transform:translateY(105%)}\n  #shop.open{transform:none}\n  #hudL{min-width:0;width:150px;box-sizing:border-box;padding:7px 11px}\n  #bagbar{min-width:30px}\n  #money{font-size:18px}\n  #hudR{padding:7px 11px;max-width:calc(100% - 32px - 158px);box-sizing:border-box}\n  #roomName{font-size:18px}\n  #depthbar{width:100px}\n  .chip{font-size:7px;padding:1px 3px 0}\n  .findgrid{grid-template-columns:1fr}\n}\n#game.touch #bar{left:50%;right:auto;top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;transform:translateX(-50%);padding:0;gap:6px;width:auto;flex-wrap:nowrap;align-items:stretch}\n#game.touch .toolset{padding:3px}\n#game.touch .tool{width:46px;height:46px}\n#game.touch .act{height:44px;min-width:0;padding:0 10px}\n#game.touch .act .t{font-size:15px}\n#game.touch #hint{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:13px;max-width:min(420px,calc(100% - 260px))}\n#game.touch #combo{display:none}\n#game.touch #toast{top:calc(70px + env(safe-area-inset-top,0px))}\n@container kt (max-width:900px){ #game.touch #hudR .chip, #game.touch #hudR #layers{display:none} #game.touch #roomName{font-size:16px} #game.touch #hudL, #game.touch #hudR{padding:6px 10px} #game.touch #hudL{width:132px} #game.touch #hudR{max-width:200px} #game.touch #depthbar{width:90px} }\n@media (prefers-reduced-motion:reduce){ .gain{animation-duration:.01s} }\n/* health */\n.hprow{display:flex;align-items:center;gap:8px}\n#hpbar{flex:1;height:9px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#hpfill{position:absolute;inset:0 auto 0 0;width:100%;background:#58c26b;transition:width .15s}\n#hpbar.mid #hpfill{background:var(--hazard)}\n#hpbar.low #hpfill{background:var(--alarm)}\n#hptxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:24px;text-align:right}\n#ko .big span{color:var(--alarm)}\n\n/* short frames, like a game embedded in a page: tighten the menus so the buttons stay in view */\n@container kt (max-height:640px){\n  .ov{padding-top:14px;padding-bottom:14px}\n  .big{margin:4px 0 8px}\n  .lede{font-size:15px;line-height:1.4;margin-bottom:10px}\n  .keys{gap:3px 12px;font-size:12.5px;margin-bottom:12px}\n  .keys kbd{font-size:9px;padding:2px 5px 1px}\n  .go{font-size:21px;padding:9px 20px 7px}\n  .stats{gap:6px 14px;margin-bottom:12px}\n  .stats b{font-size:15px}\n}\n@container kt (max-height:430px){ .keys{display:none} }\n\n#game.touch .tool{width:40px;height:44px}\n#game.touch .tool img{width:24px;height:24px}\n";
-const KT_HTML = "<div id=\"game\">\n  <canvas id=\"gl\" aria-label=\"First-person view of a tunnel. Walk up to the rock and punch it.\"></canvas>\n  <canvas id=\"ov2d\"></canvas>\n\n  <div id=\"hudL\" class=\"plate\">\n    <div class=\"lbl\">Cash</div>\n    <div id=\"money\">$0</div>\n    <div class=\"hprow\"><span class=\"lbl\">Health</span><div id=\"hpbar\"><div id=\"hpfill\"></div></div><span id=\"hptxt\">100</span></div>\n    <div class=\"bagrow\"><span class=\"lbl\">Bag</span><div id=\"bagbar\"><div id=\"bagfill\"></div></div><span id=\"bagtxt\">0/25</span></div>\n  </div>\n\n  <div id=\"hudR\" class=\"plate\">\n    <div id=\"roomNo\">THE DEEP</div>\n    <div id=\"roomName\">Drywall</div>\n    <div id=\"layers\"></div>\n    <div id=\"depthRow\"><div id=\"depthTxt\">0 m / 2,500 m</div><div id=\"depthbar\"><div id=\"depthfill\"></div></div></div>\n    <div id=\"needleRow\" hidden></div>\n    <div class=\"tools\"><button id=\"muteBtn\" class=\"mini\" type=\"button\">SOUND ON</button></div>\n  </div>\n\n  <div id=\"hint\" hidden></div>\n  <div id=\"resume\" hidden>CLICK TO LOOK AROUND</div>\n  <div id=\"toast\" style=\"opacity:0\"></div>\n  <div id=\"combo\" style=\"opacity:0\"><span class=\"lbl\">Rhythm</span><span class=\"bar\"><i></i></span><span class=\"v\">\u00d71.00</span></div>\n\n  <div id=\"touch\" hidden>\n    <div id=\"stick\"><i></i></div>\n    <button class=\"tbtn big\" id=\"tPunch\" type=\"button\">PUNCH</button>\n    <button class=\"tbtn\" id=\"tJump\" type=\"button\">JUMP</button>\n  </div>\n\n  <div id=\"bar\">\n    <div class=\"toolset plate\" role=\"toolbar\" aria-label=\"Tools\">\n      <button class=\"tool on\" id=\"t0\" type=\"button\" aria-label=\"Fists (1)\"><span class=\"k\">1</span><img alt=\"\"><span class=\"n\">FISTS</span></button>\n      <button class=\"tool\" id=\"t1\" type=\"button\" aria-label=\"Vacuum (2)\"><span class=\"k\">2</span><img alt=\"\"><span class=\"n\">VACUUM</span></button>\n      <button class=\"tool\" id=\"t2\" type=\"button\" aria-label=\"Drill (3)\" hidden><span class=\"k\">3</span><img alt=\"\"><span class=\"n\">DRILL</span></button><button class=\"tool\" id=\"t3\" type=\"button\" aria-label=\"Sledgehammer (4)\" hidden><span class=\"k\">4</span><img alt=\"\"><span class=\"n\">SLEDGE</span></button><button class=\"tool\" id=\"t4\" type=\"button\" aria-label=\"Dynamite (5)\" hidden><span class=\"k\">5</span><img alt=\"\"><span class=\"n\">DYNAMITE</span></button><button class=\"tool\" id=\"t5\" type=\"button\" aria-label=\"Mining laser (6)\" hidden><span class=\"k\">6</span><img alt=\"\"><span class=\"n\">LASER</span></button>\n    </div>\n    <button class=\"act\" id=\"sellBtn\" type=\"button\"><span class=\"t\">SELL</span><span class=\"s\" id=\"sellTxt\">E \u00b7 bag empty</span></button>\n    <button class=\"act\" id=\"shopBtn\" type=\"button\"><span class=\"t\">UPGRADES</span><span class=\"s\" id=\"shopKey\">TAB</span><span class=\"badge\" id=\"badge\" hidden>0</span></button>\n  </div>\n\n  <aside id=\"shop\" aria-label=\"Upgrades\">\n    <header><div><h2>UPGRADES</h2><div class=\"cash\" id=\"shopCash\">$0</div></div><button class=\"mini\" id=\"shopClose\" type=\"button\">CLOSE \u00b7 TAB</button></header>\n    <div id=\"shopList\"></div>\n    <footer><div class=\"lbl\">Progress saves in this browser.</div><button class=\"mini\" id=\"wipeBtn\" type=\"button\">START OVER</button></footer>\n  </aside>\n\n  <div id=\"intro\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">A game about bare hands</div>\n      <div class=\"big\">Knuckle<br><span>Through</span></div>\n      <p class=\"lede\">You wake up in a cell cut into the base of a mountain. No door, no tools. The far side is two and a half kilometres of rock away. Start punching.</p>\n      <div class=\"keys\" id=\"keys\">\n        <kbd>WASD</kbd><span>Walk. Mouse to look, Space to jump, Shift to run.</span>\n        <kbd>CLICK</kbd><span>Punch the rock in front of you. Hold to keep swinging.</span>\n        <kbd>2</kbd><span>Vacuum. Hold it near the rubble on the floor.</span>\n        <kbd>E</kbd><span>Sell your bag of rubble for cash.</span>\n        <kbd>TAB</kbd><span>Upgrades: new tools, machines that dig for you, a dig crew, radar.</span>\n        <kbd>3 TO 6</kbd><span>Drill, sledgehammer, dynamite and mining laser, once you buy them.</span>\n        <kbd>CRACKS</kbd><span>Creaking rock that trickles dust is about to fall. Get out from under it. It hurts.</span>\n      </div>\n      <div class=\"row\"><button class=\"go\" id=\"startBtn\" type=\"button\">Start digging</button><span id=\"prog\"></span></div>\n    </div>\n  </div>\n\n  <div id=\"card\" class=\"ov\" style=\"opacity:0\">\n    <div><div class=\"no\" id=\"cardNo\"></div><div class=\"nm\" id=\"cardNm\"></div><div class=\"nt\" id=\"cardNt\"></div><div class=\"mt\" id=\"cardMt\"></div></div>\n  </div>\n\n  <div id=\"ko\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Knocked out</div>\n      <div class=\"big\">Lights<br><span>out.</span></div>\n      <p class=\"lede\" id=\"koText\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"koBtn\" type=\"button\">Get up</button></div>\n    </div>\n  </div>\n  <div id=\"ending\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Escaped</div>\n      <div class=\"big\">Day<span>light.</span></div>\n      <p class=\"lede\">Two and a half kilometres of mountain, bare knuckles. The air outside smells like rain.</p>\n      <div class=\"stats\" id=\"stats\"></div>\n      <div class=\"row\"><button class=\"go\" id=\"endBtn\" type=\"button\">Look around</button></div>\n    </div>\n  </div>\n  <div id=\"err\" hidden></div>\n</div>";
+const KT_CSS = "/* Layout: full-bleed first-person 3D view of a tunnel; HUD pinned to the corners like stencilled plates bolted to rock. Single dark look by design. */\n:host{\n  --ink:#0d0e0f;\n  --plate:#18191b;\n  --plate-2:#222427;\n  --rule:#393c40;\n  --chalk:#ece5d8;\n  --dim:#a39d92;\n  --hazard:#f2b233;\n  --hazard-ink:#1b1404;\n  --jumpsuit:#e0662a;\n  --alarm:#e5533d;\n  --f-stencil:\"Big Shoulders Stencil Display\", Impact, \"Arial Narrow\", sans-serif;\n  --f-body:\"IBM Plex Sans Condensed\", \"Arial Narrow\", system-ui, sans-serif;\n  --f-pixel:\"Silkscreen\", ui-monospace, \"Courier New\", monospace;\n  color-scheme: dark;\n}\n[hidden]{display:none!important}\n#game{position:absolute;inset:0;overflow:hidden;background:#070708;color:var(--chalk);font-family:var(--f-body);font-size:15px;line-height:normal;text-align:left;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;container-type:size;container-name:kt}\n#game button{margin:0}\n#gl,#ov2d{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}\n#gl{touch-action:none}\n#ov2d{pointer-events:none}\nbutton{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}\nbutton:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}\n\n.plate{background:color-mix(in srgb,var(--plate) 88%,transparent);border:1px solid var(--rule);box-shadow:0 2px 0 #000,inset 0 1px 0 rgba(255,255,255,.05);border-radius:3px;position:relative}\n.plate::before,.plate::after{content:\"\";position:absolute;top:5px;width:4px;height:4px;border-radius:50%;background:#55595e;box-shadow:inset -1px -1px 0 #2a2c2f}\n.plate::before{left:5px}.plate::after{right:5px}\n#hudL{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));padding:10px 16px;min-width:150px;display:grid;gap:6px;pointer-events:none}\n#money{font-family:var(--f-pixel);font-size:24px;line-height:1;color:var(--hazard);font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #000}\n.lbl{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}\n.bagrow{display:flex;align-items:center;gap:8px}\n#bagbar{flex:1;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#bagfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--chalk)}\n#bagbar.full #bagfill{background:var(--alarm)}\n#bagtxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}\n\n#hudR{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));padding:9px 16px 10px;display:grid;gap:5px;justify-items:end;text-align:right;max-width:46%;pointer-events:none}\n#roomNo{font-family:var(--f-pixel);font-size:9px;letter-spacing:.12em;color:var(--dim)}\n#roomName{font-family:var(--f-stencil);font-weight:900;font-size:24px;line-height:.95;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}\n#layers{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}\n.chip{font-family:var(--f-pixel);font-size:8px;padding:2px 4px 1px;border:1px solid rgba(0,0,0,.6);color:#111;white-space:nowrap}\n#depthRow{display:grid;gap:3px;justify-items:end;width:100%}\n#depthbar{width:150px;height:7px;background:#0b0c0d;border:1px solid var(--rule);position:relative}\n#depthfill{position:absolute;inset:0 auto 0 0;width:0;background:var(--hazard)}\n#depthTxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums}\n#needleRow{font-family:var(--f-pixel);font-size:9px;letter-spacing:.08em;color:var(--dim)}\n#needleRow b{font-weight:400;color:#bfefff}\n#hudR .tools{display:flex;gap:4px;pointer-events:auto}\n.mini{font-family:var(--f-pixel);font-size:9px;padding:4px 6px 3px;border:1px solid var(--rule);background:var(--plate-2);color:var(--dim)}\n.mini:hover{color:var(--chalk)}\n\n#hint{position:absolute;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top,0px));max-width:min(560px,calc(100% - 32px));padding:7px 14px 6px;background:rgba(10,10,11,.82);border:1px dashed var(--hazard);color:var(--chalk);font-size:14px;line-height:1.3;text-align:center;pointer-events:none;text-wrap:balance}\n#hint b{color:var(--hazard);font-family:var(--f-pixel);font-weight:400;font-size:11px;padding:0 3px;border:1px solid var(--hazard);margin:0 2px;white-space:nowrap}\n#resume{position:absolute;left:50%;top:50%;transform:translate(-50%,40px);font-family:var(--f-pixel);font-size:11px;letter-spacing:.1em;color:var(--chalk);background:rgba(10,10,11,.8);border:1px solid var(--rule);padding:8px 12px 7px;pointer-events:none}\n\n#bar{position:absolute;left:0;right:0;bottom:0;padding:0 max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;justify-content:center;align-items:flex-end;gap:10px;pointer-events:none;flex-wrap:wrap}\n#bar>*{pointer-events:auto}\n.toolset{display:flex;gap:4px;padding:4px}\n.tool{width:52px;height:52px;position:relative;background:var(--plate-2);border:1px solid var(--rule);display:grid;place-items:center}\n.tool img{width:32px;height:32px;image-rendering:pixelated}\n.tool .k{position:absolute;left:3px;top:2px;font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.tool .n{position:absolute;left:0;right:0;bottom:2px;font-family:var(--f-pixel);font-size:7px;color:var(--dim);text-align:center}\n.tool.on{background:#3a2f12;border-color:var(--hazard);box-shadow:inset 0 0 0 1px var(--hazard)}\n.tool.on .k,.tool.on .n{color:var(--hazard)}\n.tool.locked{opacity:.38;cursor:not-allowed}\n.act{height:52px;padding:0 14px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;background:var(--plate-2);border:1px solid var(--rule);box-shadow:0 2px 0 #000;position:relative;min-width:96px}\n.act .t{font-family:var(--f-stencil);font-weight:900;font-size:19px;line-height:1;letter-spacing:.04em}\n.act .s{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.act:active{transform:translateY(1px);box-shadow:none}\n#sellBtn.ready{border-color:var(--hazard)}\n#sellBtn.ready .t{color:var(--hazard)}\n#shopBtn .badge{position:absolute;right:-6px;top:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--hazard);color:var(--hazard-ink);font-family:var(--f-pixel);font-size:10px;display:grid;place-items:center;box-shadow:0 1px 0 #000}\n#combo{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;pointer-events:none;transition:opacity .2s}\n#combo .v{font-family:var(--f-pixel);font-size:13px;color:var(--hazard);text-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n#combo .bar{width:90px;height:5px;background:rgba(0,0,0,.6);border:1px solid #3b3f43}\n#combo .bar i{display:block;height:100%;width:0;background:var(--hazard)}\n\n/* touch controls */\n#touch{position:absolute;inset:0;pointer-events:none}\n#stick{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid rgba(236,229,216,.25);background:rgba(10,10,11,.25);transform:translate(-50%,-50%);display:none}\n#stick i{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(242,178,51,.55);border:2px solid #000}\n.tbtn{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:rgba(24,25,27,.8);border:2px solid var(--rule);font-family:var(--f-stencil);font-weight:900;font-size:17px;letter-spacing:.04em;color:var(--chalk);touch-action:none}\n.tbtn.big{width:96px;height:96px;font-size:20px;border-color:var(--hazard);color:var(--hazard)}\n#tPunch{right:max(20px,env(safe-area-inset-right,0px));bottom:calc(96px + env(safe-area-inset-bottom,0px))}\n#tJump{right:calc(max(20px,env(safe-area-inset-right,0px)) + 104px);bottom:calc(84px + env(safe-area-inset-bottom,0px))}\n\n#shop{position:absolute;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--plate);border-left:2px solid #000;box-shadow:-12px 0 30px rgba(0,0,0,.5);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);z-index:20;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}\n#shop.open{transform:none}\n#shop header{display:flex;align-items:center;justify-content:space-between;padding:14px max(16px,env(safe-area-inset-right,0px)) 12px 18px;border-bottom:1px solid var(--rule);background:repeating-linear-gradient(-45deg,#1d1f21 0 8px,#191a1c 8px 16px)}\n#shop h2{margin:0;font-family:var(--f-stencil);font-weight:900;font-size:30px;letter-spacing:.05em;line-height:1}\n#shop .cash{font-family:var(--f-pixel);color:var(--hazard);font-size:13px}\n#shopList{overflow-y:auto;padding:6px max(16px,env(safe-area-inset-right,0px)) 18px 18px;flex:1;-webkit-overflow-scrolling:touch}\n.grp{font-family:var(--f-pixel);font-size:9px;letter-spacing:.16em;color:var(--dim);padding:14px 0 6px;border-bottom:1px solid var(--rule);margin-bottom:2px;text-transform:uppercase}\n.up{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:10px 0;border-bottom:1px dashed #2c2f32;align-items:center}\n.up .nm{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:baseline;min-width:0}\n.up .lv{font-family:var(--f-pixel);font-size:9px;color:var(--dim);white-space:nowrap}\n.up .ds{grid-column:1;color:var(--dim);font-size:13px;line-height:1.3}\n.up .ef{grid-column:1;font-family:var(--f-pixel);font-size:9px;color:var(--chalk);font-variant-numeric:tabular-nums}\n.up .ef em{font-style:normal;color:var(--hazard)}\n.buy{grid-column:2;grid-row:1 / span 3;min-width:86px;padding:9px 10px 8px;background:#2b2e31;border:1px solid #44484d;font-family:var(--f-pixel);font-size:11px;color:var(--dim);box-shadow:0 2px 0 #000;font-variant-numeric:tabular-nums}\n.buy.can{background:var(--hazard);color:var(--hazard-ink);border-color:#000}\n.buy.can:hover{filter:brightness(1.08)}\n.buy:active{transform:translateY(1px);box-shadow:none}\n.buy.max{background:transparent;box-shadow:none;border-style:dashed}\n.up.flash{animation:upf .5s}\n@keyframes upf{0%{background:rgba(242,178,51,.25)}100%{background:transparent}}\n.buy.no{animation:shake .25s}\n@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}\n#shop footer{padding:10px max(16px,env(safe-area-inset-right,0px)) 14px 18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:10px}\n.findgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 0}\n.find{border:1px dashed #34373a;padding:8px 9px 7px;display:grid;gap:2px;min-width:0}\n.find .fn{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}\n.find .fn i{width:8px;height:8px;display:inline-block;box-shadow:0 0 0 1px #000}\n.find .fc{font-family:var(--f-pixel);font-size:9px;color:var(--dim)}\n.find.unk{opacity:.55}\n.find.unk .fn{color:var(--dim)}\n\n.ov{position:absolute;inset:0;display:grid;place-items:start center;z-index:30;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}\n.ov.dim{background:radial-gradient(ellipse at center,rgba(8,8,9,.55),rgba(8,8,9,.92))}\n.sheet{max-width:600px;width:100%;text-align:left;margin:auto 0}\n.kicker{font-family:var(--f-pixel);font-size:10px;letter-spacing:.2em;color:var(--hazard);text-transform:uppercase}\n.big{font-family:var(--f-stencil);font-weight:900;text-transform:uppercase;font-size:clamp(34px,min(11cqw,13cqh),104px);line-height:.86;letter-spacing:.01em;margin:8px 0 14px;text-shadow:0 4px 0 #000;text-wrap:balance}\n.big span{color:var(--hazard)}\n.lede{font-size:18px;line-height:1.45;max-width:48ch;color:var(--chalk);margin:0 0 18px}\n.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 22px;font-size:14px;color:var(--dim);max-width:460px}\n.keys kbd{font-family:var(--f-pixel);font-size:10px;color:var(--chalk);border:1px solid var(--rule);background:var(--plate-2);padding:3px 6px 2px;white-space:nowrap;justify-self:start}\n.go{font-family:var(--f-stencil);font-weight:900;font-size:26px;letter-spacing:.06em;text-transform:uppercase;color:var(--hazard-ink);background:var(--hazard);padding:12px 26px 10px;border:2px solid #000;box-shadow:0 4px 0 #000}\n.go:active{transform:translateY(2px);box-shadow:0 2px 0 #000}\n.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}\n#prog{font-family:var(--f-pixel);font-size:10px;color:var(--dim);letter-spacing:.06em}\n#card{pointer-events:none;place-items:center;text-align:center;transition:opacity .6s}\n#card>div{padding:34px 44px;background:radial-gradient(closest-side,rgba(8,8,9,.85) 40%,rgba(8,8,9,0))}\n#card .no{font-family:var(--f-pixel);font-size:12px;letter-spacing:.25em;color:var(--hazard)}\n#card .nm{font-family:var(--f-stencil);font-weight:900;font-size:clamp(36px,10cqw,92px);line-height:.9;text-transform:uppercase;text-shadow:0 4px 0 #000;margin:6px 0 10px;text-wrap:balance}\n#card .nt{font-size:17px;color:var(--chalk);text-shadow:0 2px 0 #000;max-width:40ch;margin:0 auto}\n#card .mt{font-family:var(--f-pixel);font-size:10px;color:var(--dim);margin-top:10px;letter-spacing:.06em}\n.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin:0 0 22px;max-width:440px}\n.stats div{border-top:1px solid var(--rule);padding-top:6px}\n.stats b{display:block;font-family:var(--f-pixel);font-weight:400;font-size:18px;color:var(--hazard);font-variant-numeric:tabular-nums}\n#toast{position:absolute;left:50%;top:calc(130px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-pixel);font-size:12px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;transition:opacity .4s;max-width:calc(100% - 32px);text-align:center}\n.gain{position:absolute;font-family:var(--f-pixel);font-size:14px;color:var(--hazard);text-shadow:0 2px 0 #000;pointer-events:none;animation:gain 1.1s ease-out forwards;white-space:nowrap;z-index:5}\n@keyframes gain{0%{transform:translateY(6px);opacity:0}15%{opacity:1}100%{transform:translateY(-26px);opacity:0}}\n#err{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-size:16px;color:var(--chalk);z-index:40}\n\n@container kt (max-width:760px) or (max-height:500px){\n  #shop{top:auto;width:100%;height:78%;border-left:0;border-top:2px solid #000;transform:translateY(105%)}\n  #shop.open{transform:none}\n  #hudL{min-width:0;width:150px;box-sizing:border-box;padding:7px 11px}\n  #bagbar{min-width:30px}\n  #money{font-size:18px}\n  #hudR{padding:7px 11px;max-width:calc(100% - 32px - 158px);box-sizing:border-box}\n  #roomName{font-size:18px}\n  #depthbar{width:100px}\n  .chip{font-size:7px;padding:1px 3px 0}\n  .findgrid{grid-template-columns:1fr}\n}\n#game.touch #bar{left:50%;right:auto;top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;transform:translateX(-50%);padding:0;gap:6px;width:auto;flex-wrap:nowrap;align-items:stretch}\n#game.touch .toolset{padding:3px}\n#game.touch .tool{width:46px;height:46px}\n#game.touch .act{height:44px;min-width:0;padding:0 10px}\n#game.touch .act .t{font-size:15px}\n#game.touch #hint{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:13px;max-width:min(420px,calc(100% - 260px))}\n#game.touch #combo{display:none}\n#game.touch #toast{top:calc(70px + env(safe-area-inset-top,0px))}\n@container kt (max-width:900px){ #game.touch #hudR .chip, #game.touch #hudR #layers{display:none} #game.touch #roomName{font-size:16px} #game.touch #hudL, #game.touch #hudR{padding:6px 10px} #game.touch #hudL{width:132px} #game.touch #hudR{max-width:200px} #game.touch #depthbar{width:90px} }\n@media (prefers-reduced-motion:reduce){ .gain{animation-duration:.01s} }\n/* health */\n.hprow{display:flex;align-items:center;gap:8px}\n#hpbar{flex:1;height:9px;background:#0b0c0d;border:1px solid var(--rule);position:relative;min-width:70px}\n#hpfill{position:absolute;inset:0 auto 0 0;width:100%;background:#58c26b;transition:width .15s}\n#hpbar.mid #hpfill{background:var(--hazard)}\n#hpbar.low #hpfill{background:var(--alarm)}\n#hptxt{font-family:var(--f-pixel);font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:24px;text-align:right}\n#ko .big span{color:var(--alarm)}\n\n/* short frames, like a game embedded in a page: tighten the menus so the buttons stay in view */\n@container kt (max-height:640px){\n  .ov{padding-top:14px;padding-bottom:14px}\n  .big{margin:4px 0 8px}\n  .lede{font-size:15px;line-height:1.4;margin-bottom:10px}\n  .keys{gap:3px 12px;font-size:12.5px;margin-bottom:12px}\n  .keys kbd{font-size:9px;padding:2px 5px 1px}\n  .go{font-size:21px;padding:9px 20px 7px}\n  .stats{gap:6px 14px;margin-bottom:12px}\n  .stats b{font-size:15px}\n}\n@container kt (max-height:430px){ .keys{display:none} }\n\n#game.touch .tool{width:40px;height:44px}\n#game.touch .tool img{width:24px;height:24px}\n@container kt (max-width:700px){ #game.touch .toolset{max-width:calc(100cqw - 200px);overflow-x:auto;scrollbar-width:none} #game.touch .tool{flex:none} }\n";
+const KT_HTML = "<div id=\"game\">\n  <canvas id=\"gl\" aria-label=\"First-person view of a tunnel. Walk up to the rock and punch it.\"></canvas>\n  <canvas id=\"ov2d\"></canvas>\n\n  <div id=\"hudL\" class=\"plate\">\n    <div class=\"lbl\">Cash</div>\n    <div id=\"money\">$0</div>\n    <div class=\"hprow\"><span class=\"lbl\">Health</span><div id=\"hpbar\"><div id=\"hpfill\"></div></div><span id=\"hptxt\">100</span></div>\n    <div class=\"bagrow\"><span class=\"lbl\">Bag</span><div id=\"bagbar\"><div id=\"bagfill\"></div></div><span id=\"bagtxt\">0/25</span></div>\n  </div>\n\n  <div id=\"hudR\" class=\"plate\">\n    <div id=\"roomNo\">THE DEEP</div>\n    <div id=\"roomName\">Drywall</div>\n    <div id=\"layers\"></div>\n    <div id=\"depthRow\"><div id=\"depthTxt\">0 m / 2,500 m</div><div id=\"depthbar\"><div id=\"depthfill\"></div></div></div>\n    <div id=\"needleRow\" hidden></div>\n    <div class=\"tools\"><button id=\"muteBtn\" class=\"mini\" type=\"button\">SOUND ON</button></div>\n  </div>\n\n  <div id=\"hint\" hidden></div>\n  <div id=\"resume\" hidden>CLICK TO LOOK AROUND</div>\n  <div id=\"toast\" style=\"opacity:0\"></div>\n  <div id=\"combo\" style=\"opacity:0\"><span class=\"lbl\">Rhythm</span><span class=\"bar\"><i></i></span><span class=\"v\">\u00d71.00</span></div>\n\n  <div id=\"touch\" hidden>\n    <div id=\"stick\"><i></i></div>\n    <button class=\"tbtn big\" id=\"tPunch\" type=\"button\">PUNCH</button>\n    <button class=\"tbtn\" id=\"tJump\" type=\"button\">JUMP</button>\n  </div>\n\n  <div id=\"bar\">\n    <div class=\"toolset plate\" role=\"toolbar\" aria-label=\"Tools\">\n      <button class=\"tool on\" id=\"t0\" type=\"button\" aria-label=\"Fists (1)\"><span class=\"k\">1</span><img alt=\"\"><span class=\"n\">FISTS</span></button>\n      <button class=\"tool\" id=\"t1\" type=\"button\" aria-label=\"Vacuum (2)\"><span class=\"k\">2</span><img alt=\"\"><span class=\"n\">VACUUM</span></button>\n      <button class=\"tool\" id=\"t2\" type=\"button\" aria-label=\"Drill (3)\" hidden><span class=\"k\">3</span><img alt=\"\"><span class=\"n\">DRILL</span></button><button class=\"tool\" id=\"t3\" type=\"button\" aria-label=\"Sledgehammer (4)\" hidden><span class=\"k\">4</span><img alt=\"\"><span class=\"n\">SLEDGE</span></button><button class=\"tool\" id=\"t4\" type=\"button\" aria-label=\"Dynamite (5)\" hidden><span class=\"k\">5</span><img alt=\"\"><span class=\"n\">DYNAMITE</span></button><button class=\"tool\" id=\"t5\" type=\"button\" aria-label=\"Mining laser (6)\" hidden><span class=\"k\">6</span><img alt=\"\"><span class=\"n\">LASER</span></button><button class=\"tool\" id=\"t6\" type=\"button\" aria-label=\"Rock saw (7)\" hidden><span class=\"k\">7</span><img alt=\"\"><span class=\"n\">SAW</span></button><button class=\"tool\" id=\"t7\" type=\"button\" aria-label=\"Cryo sprayer (8)\" hidden><span class=\"k\">8</span><img alt=\"\"><span class=\"n\">CRYO</span></button><button class=\"tool\" id=\"t8\" type=\"button\" aria-label=\"Singularity (9)\" hidden><span class=\"k\">9</span><img alt=\"\"><span class=\"n\">VOID</span></button>\n    </div>\n    <button class=\"act\" id=\"sellBtn\" type=\"button\"><span class=\"t\">SELL</span><span class=\"s\" id=\"sellTxt\">E \u00b7 bag empty</span></button>\n    <button class=\"act\" id=\"shopBtn\" type=\"button\"><span class=\"t\">UPGRADES</span><span class=\"s\" id=\"shopKey\">TAB</span><span class=\"badge\" id=\"badge\" hidden>0</span></button>\n  </div>\n\n  <aside id=\"shop\" aria-label=\"Upgrades\">\n    <header><div><h2>UPGRADES</h2><div class=\"cash\" id=\"shopCash\">$0</div></div><button class=\"mini\" id=\"shopClose\" type=\"button\">CLOSE \u00b7 TAB</button></header>\n    <div id=\"shopList\"></div>\n    <footer><div class=\"lbl\">Progress saves in this browser.</div><button class=\"mini\" id=\"wipeBtn\" type=\"button\">START OVER</button></footer>\n  </aside>\n\n  <div id=\"intro\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">A game about bare hands</div>\n      <div class=\"big\">Knuckle<br><span>Through</span></div>\n      <p class=\"lede\">You wake up in a cell cut into the base of a mountain. No door, no tools. The far side is two and a half kilometres of rock away. Start punching.</p>\n      <div class=\"keys\" id=\"keys\">\n        <kbd>WASD</kbd><span>Walk. Mouse to look, Space to jump, Shift to run.</span>\n        <kbd>CLICK</kbd><span>Punch the rock in front of you. Hold to keep swinging.</span>\n        <kbd>2</kbd><span>Vacuum. Hold it near the rubble on the floor.</span>\n        <kbd>E</kbd><span>Sell your bag of rubble for cash.</span>\n        <kbd>TAB</kbd><span>Upgrades: new tools, machines that dig for you, a dig crew, radar.</span>\n        <kbd>3 TO 9</kbd><span>More tools once you buy them: drill, sledgehammer, dynamite, laser, rock saw, cryo sprayer, singularity.</span>\n        <kbd>CRACKS</kbd><span>Creaking rock that trickles dust is about to fall. Get out from under it. It hurts.</span>\n      </div>\n      <div class=\"row\"><button class=\"go\" id=\"startBtn\" type=\"button\">Start digging</button><span id=\"prog\"></span></div>\n    </div>\n  </div>\n\n  <div id=\"card\" class=\"ov\" style=\"opacity:0\">\n    <div><div class=\"no\" id=\"cardNo\"></div><div class=\"nm\" id=\"cardNm\"></div><div class=\"nt\" id=\"cardNt\"></div><div class=\"mt\" id=\"cardMt\"></div></div>\n  </div>\n\n  <div id=\"ko\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Knocked out</div>\n      <div class=\"big\">Lights<br><span>out.</span></div>\n      <p class=\"lede\" id=\"koText\"></p>\n      <div class=\"row\"><button class=\"go\" id=\"koBtn\" type=\"button\">Get up</button></div>\n    </div>\n  </div>\n  <div id=\"ending\" class=\"ov dim\" hidden>\n    <div class=\"sheet\">\n      <div class=\"kicker\">Escaped</div>\n      <div class=\"big\">Day<span>light.</span></div>\n      <p class=\"lede\">Two and a half kilometres of mountain, bare knuckles. The air outside smells like rain.</p>\n      <div class=\"stats\" id=\"stats\"></div>\n      <div class=\"row\"><button class=\"go\" id=\"endBtn\" type=\"button\">Look around</button></div>\n    </div>\n  </div>\n  <div id=\"err\" hidden></div>\n</div>";
 // Knuckle Through: a first-person digging game. Mounts into `host` inside its own shadow root, so it works
 // full-page or inside a site's game frame. env: { THREE, audio(), muted(), best(m), saveKey, data }
 function KnuckleThrough(host, env) {
@@ -113,6 +113,8 @@ const MATS = [
   { name: 'Grass',          tex: 'grass',     snd: 'soft',  pal: ['#2c4a1e', '#3f6a2a', '#5a8c38', '#86b44e'] },
 ];
 MATS.forEach(m => { m.P = m.pal.map(hex); });
+// dark rock gives back little of the lamp light, so lift it enough that the deep strata stay readable
+MATS.forEach(m => { const l = m.P.reduce((s, c) => s + (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255, 0) / 4; m.lift = clamp(0.38 / l, 1, 1.7); });
 const STRATA = [
   { at: 0,    m: 0,  note: 'The cell wall. Cheap, thin, and only the start.' },
   { at: 8,    m: 1,  note: 'Old lath and plaster. Someone patched this a century ago.' },
@@ -174,8 +176,8 @@ const bagCap = L => Math.floor(25 * Math.pow(1.3, L));
 const fenceMul = L => Math.pow(1.12, L);
 const valueMul = () => fenceMul(lv('fence')) * (S.finds.needle ? 2 : 1);
 const reach = () => 6 + 0.5 * lv('reach');
-const droneCount = L => L ? Math.min(4, 1 + Math.floor(L / 3)) : 0;
-const droneSpeed = L => 3 + 0.8 * L;
+const droneCount = L => L ? Math.min(6, 1 + Math.floor(L / 2)) : 0;
+const droneSpeed = L => 4 + 0.9 * L;
 const UPG = [
   { id: 'power',    grp: 'Hands', name: 'Knuckle Density', desc: 'Raw damage of every punch. Every 25 levels doubles it.', cost: L => 108 * Math.pow(1.5774, L), max: 3000, show: L => fmt(baseDmg(L)) + ' dmg' },
   { id: 'spread',   grp: 'Hands', name: 'Shockwave', desc: 'Punches crack the voxels around the impact for half damage.', cost: L => [720, 12600, 216e3, 4.5e6, 1.26e8, 5.4e9][L], max: 6, show: L => PAT_NAMES[L] + ' · ' + PATTERNS[L].length },
@@ -191,9 +193,16 @@ const UPG = [
   { id: 'sticks',   grp: 'Tools', name: 'Powder Magazine', desc: 'Carry more sticks of dynamite, and get them back faster.', cost: L => 8e5 * Math.pow(3, L), max: 8, req: 'dynamite', show: L => stickMax(L) + ' sticks · one every ' + Math.round(stickT(L)) + ' s' },
   { id: 'laser',    grp: 'Tools', name: 'Mining Laser', desc: 'Unlocks tool 6. A long-range beam that cuts whatever it touches, until it overheats.', cost: () => 2e8, max: 1, show: L => L ? 'Owned' : 'Not owned' },
   { id: 'focus',    grp: 'Tools', name: 'Laser Focus', desc: 'A hotter beam that also runs cooler.', cost: L => 5e8 * Math.pow(2.2, L), max: 40, req: 'laser', show: L => '×' + fmt(laserMul(L)) + ' punch per second' },
+  { id: 'saw',      grp: 'Tools', name: 'Rock Saw', desc: 'Unlocks tool 7. A diamond-tooth saw that cuts a tall slot straight down the face while you hold it.', cost: () => 3e6, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'blade',    grp: 'Tools', name: 'Diamond Blade', desc: 'Harder teeth and, every few levels, a longer cut.', cost: L => 7e6 * Math.pow(2.3, L), max: 40, req: 'saw', show: L => '×' + fmt(sawMul(L)) + ' punch per second · ' + sawLen(L) + ' voxels tall' },
+  { id: 'cryo',     grp: 'Tools', name: 'Cryo Sprayer', desc: 'Unlocks tool 8. Sprays liquid nitrogen. Frozen rock goes brittle, and everything hits it much harder for a while.', cost: () => 4e9, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'coolant',  grp: 'Tools', name: 'Colder Coolant', desc: 'Frozen rock gets more brittle, stays frozen longer, and the spray reaches farther.', cost: L => 1e10 * Math.pow(2.4, L), max: 30, req: 'cryo', show: L => '×' + freezeMul(L).toFixed(2) + ' damage on frozen rock · ' + Math.round(freezeT(L)) + ' s' },
+  { id: 'singularity', grp: 'Tools', name: 'Singularity Charge', desc: 'Unlocks tool 9. Fires a tiny black hole into the rock. It eats everything around it, swallows the rubble and pays you for it.', cost: () => 3e13, max: 1, show: L => L ? 'Owned' : 'Not owned' },
+  { id: 'mass',     grp: 'Tools', name: 'Collapsed Mass', desc: 'A heavier singularity: wider, hungrier, and quicker to recharge.', cost: L => 8e13 * Math.pow(2.5, L), max: 30, req: 'singularity', show: L => '×' + fmt(singMul(L)) + ' punch per second · ' + singR(L).toFixed(1) + ' radius · ' + Math.round(singCd(L)) + ' s recharge' },
   { id: 'helmet',   grp: 'Safety', name: 'Hard Hat', desc: 'Falling rock and flying debris do less damage.', cost: L => 800 * Math.pow(3.2, L), max: 6, show: L => (L ? '-' + Math.round(hatCut(L) * 100) + '%' : 'No') + ' rock damage' },
   { id: 'vitality', grp: 'Safety', name: 'Thick Skin', desc: 'More health, and you heal faster once you are out of danger.', cost: L => 500 * Math.pow(2.6, L), max: 12, show: L => maxHPof(L) + ' health' },
   { id: 'bolts',    grp: 'Safety', name: 'Roof Bolter', desc: 'Bolts the ceiling as you go. Rock spans farther before it sags, and loose rock comes down less often.', cost: L => 3e4 * Math.pow(2.6, L), max: 8, show: L => '+' + L + ' span · ' + Math.round(100 * Math.pow(0.75, L)) + '% loose rock' },
+  { id: 'lamp',     grp: 'Safety', name: 'Headlamp', desc: 'A brighter helmet beam that reaches farther down the tunnel. The deep rock is dark.', cost: L => 300 * Math.pow(3.4, L), max: 6, show: L => Math.round(lampRange(L) / 2) + ' m beam' },
   { id: 'boots',    grp: 'Haul', name: 'Work Boots', desc: 'Walk and run faster through your own tunnel.', cost: L => 250 * Math.pow(3, L), max: 6, show: L => Math.round(100 + 15 * L) + '% speed' },
   { id: 'suction',  grp: 'Haul', name: 'Shop-Vac Motor', desc: 'The vacuum reaches farther and pulls harder.', cost: L => 30 * Math.pow(1.55, L), max: 20, show: L => Math.round(100 + 17 * L) + '% reach' },
   { id: 'bag',      grp: 'Haul', name: 'Duffel Bag', desc: 'Carry more rubble before you have to sell.', cost: L => 45 * Math.pow(1.45, L), max: 60, show: L => fmt(bagCap(L)) + ' chunks' },
@@ -205,7 +214,11 @@ const UPG = [
   { id: 'rollers',  grp: 'Automation', name: 'Crusher Rollers', desc: 'The crusher pays more and reaches farther.', cost: L => 3e6 * Math.pow(2.6, L), max: 20, req: 'crusher', show: L => '×' + crushMul(L).toFixed(2) + ' price · ' + Math.round(crushR(L) / 2) + ' m reach' },
   { id: 'tbm',      grp: 'Automation', name: 'Tunnel Boring Machine', desc: 'A giant spinning cutterhead that grinds the middle of the face forward on its own, day and night.', cost: () => 5e10, max: 1, show: L => L ? 'Boring' : 'Not built' },
   { id: 'cutter',   grp: 'Automation', name: 'TBM Cutterhead', desc: 'Harder teeth on the boring machine.', cost: L => 1.5e11 * Math.pow(2.4, L), max: 40, req: 'tbm', show: L => '×' + fmt(tbmMul(L)) + ' punch per second, per voxel' },
-  { id: 'drone',    grp: 'Automation', name: 'Robot Vacuum', desc: 'Little robots roll around the tunnel sweeping rubble into your bag.', cost: L => 3600 * Math.pow(2.1, L), max: 12, show: L => L ? droneCount(L) + ' bot' + (droneCount(L) > 1 ? 's' : '') + ' · speed ' + Math.round(droneSpeed(L) * 10) : 'None' },
+  { id: 'excav',    grp: 'Automation', name: 'Excavator', desc: 'A tracked digger that parks near the face and tears out big bucketfuls of rock, day and night.', cost: () => 1.5e7, max: 1, show: L => L ? 'Digging' : 'Not built' },
+  { id: 'bucket',   grp: 'Automation', name: 'Excavator Bucket', desc: 'A bigger bucket with harder teeth.', cost: L => 4e7 * Math.pow(2.4, L), max: 40, req: 'excav', show: L => '×' + fmt(excMul(L)) + ' punch on 9 voxels a scoop' },
+  { id: 'bdrone',   grp: 'Automation', name: 'Blasting Drone', desc: 'Flies up to the face, plants a charge and gets clear. It waits for you to get clear too. Each level adds a drone.', cost: L => 2e9 * Math.pow(3, L), max: 4, req: 'dynamite', show: L => L ? L + ' drone' + (L > 1 ? 's' : '') + ' · uses your Blasting Caps' : 'None' },
+  { id: 'turret',   grp: 'Automation', name: 'Laser Turret', desc: 'A tripod laser that stands in the tunnel and burns the face nonstop. It runs off your Laser Focus. Each level adds a turret.', cost: L => 6e11 * Math.pow(2.5, L), max: 8, req: 'laser', show: L => L + ' turret' + (L === 1 ? '' : 's') + ' · ' + fmt(turDps() * L) + ' dmg/s' },
+  { id: 'drone',    grp: 'Automation', name: 'Robot Vacuum', desc: 'Little robots roll around the tunnel sucking up rubble into your bag. When the bag is full they fill their own hoppers until you sell.', cost: L => 3600 * Math.pow(2.1, L), max: 12, show: L => L ? droneCount(L) + ' bot' + (droneCount(L) > 1 ? 's' : '') + ' · speed ' + Math.round(droneSpeed(L) * 10) + ' · holds ' + (15 + 5 * L) + ' each' : 'None' },
   { id: 'conveyor', grp: 'Automation', name: 'Rubble Chute', desc: 'Rubble that comes to rest gets sucked down a chute into your bag.', cost: () => 6e4, max: 1, show: L => L ? 'Running' : 'Not installed' },
   { id: 'pawn',     grp: 'Automation', name: 'Pawn Ticket', desc: 'Sells your bag automatically whenever it fills up.', cost: () => 15000, max: 1, show: L => L ? 'On' : 'Off' },
   { id: 'detector', grp: 'Finds', name: 'Metal Detector', desc: 'Somewhere in this mountain is one sewing needle. Each level hears it from farther away.', cost: L => [1e5, 1e9, 1e14][L], max: 3, show: L => ['Off', 'Hears it within 150 m', 'Hears it within 750 m', 'Shows exactly where it is within 20 m'][L] },
@@ -228,8 +241,19 @@ const crushMul = L => 1.3 + 0.15 * L;
 const crushR = L => 7 + 0.5 * L;
 const tbmMul = L => 2 * (1 + 0.5 * L) * Math.pow(1.05, L);
 const radarR = L => [0, 6, 10, 16][L];
-const TOOL_REQ = [null, null, 'drill', 'sledge', 'dynamite', 'laser'];
-const TOOL_NAME = ['fists', 'vacuum', 'drill', 'sledgehammer', 'dynamite', 'mining laser'];
+const sawMul = L => 6 * (1 + 0.5 * L) * Math.pow(1.05, L);
+const sawLen = L => 5 + 2 * Math.min(3, Math.floor(L / 5));
+const freezeMul = L => 3 + 0.25 * L;
+const freezeT = L => 8 + 0.5 * L;
+const cryoRange = L => 7 + 0.25 * L;
+const singMul = L => 60 * (1 + 0.5 * L) * Math.pow(1.06, L);
+const singR = L => 2.6 + Math.min(1.8, 0.08 * L);
+const singCd = L => 30 / (1 + 0.1 * L);
+const lampRange = L => 46 + 14 * L;
+const excMul = L => 10 * (1 + 0.5 * L) * Math.pow(1.05, L);
+const turDps = () => baseDmg() * laserMul(lv('focus')) * 0.6;
+const TOOL_REQ = [null, null, 'drill', 'sledge', 'dynamite', 'laser', 'saw', 'cryo', 'singularity'];
+const TOOL_NAME = ['fists', 'vacuum', 'drill', 'sledgehammer', 'dynamite', 'mining laser', 'rock saw', 'cryo sprayer', 'singularity'];
 const hatCut = L => Math.min(0.72, 0.12 * L);
 const maxHPof = L => 100 + 25 * L;
 const maxHP = () => maxHPof(lv('vitality'));
@@ -311,8 +335,11 @@ scene.fog = new THREE.FogExp2(0x070708, 0.03);
 const camera = new THREE.PerspectiveCamera(72, 16 / 9, 0.05, 260);
 camera.rotation.order = 'YXZ';
 scene.add(camera);
-const ambient = new THREE.AmbientLight(0x8a8478, 0.26); scene.add(ambient);
+const ambient = new THREE.AmbientLight(0x8a8478, 0.36); scene.add(ambient);
+const hemi = new THREE.HemisphereLight(0xd8cbb4, 0x2a2420, 0.3); scene.add(hemi);
 const headlamp = new THREE.PointLight(0xffe2b0, 0.95, 30, 1.6); camera.add(headlamp); headlamp.position.set(0.4, 0.2, 0);
+// the helmet beam: a cone that reaches well past the point light
+const beamLamp = new THREE.SpotLight(0xfff0d6, 1.1, 46, 0.6, 0.55, 1.2); camera.add(beamLamp); beamLamp.position.set(0.3, 0.25, 0); camera.add(beamLamp.target); beamLamp.target.position.set(0, -0.05, -1);
 const cellBulb = new THREE.PointLight(0xffd29a, 0.9, 26, 1.8); cellBulb.position.set(10, 10.4, -7); scene.add(cellBulb);
 const sun = new THREE.DirectionalLight(0xfff2d8, 0); sun.position.set(-20, 60, DEEP + 40); scene.add(sun);
 
@@ -419,7 +446,6 @@ function buildChunk(ci) {
   const lamps = [];
   for (let z = z0; z < z1; z++) {
     if (z < CELL_Z - 1) continue;
-    const dark = z < 0 ? 1 : clamp(1 - Math.max(0, z - 4500) * 0.0002, 0.8, 1);
     for (let y = -1; y <= GY; y++) for (let x = -1; x <= GX; x++) {
       if (!solid(x, y, z)) continue;
       const mi = matFor(x, y, z), outside = !inRock(x, y, z) && z >= 0;
@@ -427,7 +453,7 @@ function buildChunk(ci) {
       for (const [dx, dy, dz, shade, corners] of DIRS) {
         if (solid(x + dx, y + dy, z + dz)) continue;
         const [u0, v0, u1, v1] = tileUV(mi, (hash(x * 7 + y, z, 3) * VAR) | 0);
-        const k = shade * (outside ? 0.72 : 1) * dark * (0.94 + 0.06 * hash(x, y * 13 + z, 9));
+        const k = shade * (outside ? 0.72 : MATS[mi].lift) * (0.94 + 0.06 * hash(x, y * 13 + z, 9));
         const b = pos.length / 3;
         const uvs = [[u0, v0], [u1, v0], [u1, v1], [u0, v1]];
         for (let q = 0; q < 4; q++) { pos.push(x + corners[q][0], y + corners[q][1], z + corners[q][2]); uv.push(uvs[q][0], uvs[q][1]); col.push(k, k, k); }
@@ -439,8 +465,8 @@ function buildChunk(ci) {
         }
       }
     }
-    // work lamps strung along the tunnel by the crew, every 24 slices once dug out
-    if (z >= 12 && z % 24 === 12 && z < DEEP) {
+    // work lamps strung along the tunnel by the crew, every 12 slices once dug out
+    if (z >= 6 && z % 12 === 6 && z < DEEP) {
       let top = -1; for (let y = GY - 1; y >= 0; y--) if (isDug(10, y, z)) { top = y; break; }
       if (top >= 3) lamps.push([10.5, top + 0.75, z + 0.5]);
     }
@@ -483,13 +509,13 @@ function refreshChunks(force) {
     if (!chunks3.has(c)) continue;
     disposeGroup(chunks3.get(c)); const g = buildChunk(c); scene.add(g); chunks3.set(c, g); budget--;
   }
-  // the two nearest work lamps actually light the tunnel
+  // the nearest work lamps actually light the tunnel
   const near = [];
   for (const g of chunks3.values()) for (const l of g.userData.lamps || []) near.push(l);
   near.sort((a, b) => Math.abs(a[2] - player.z) - Math.abs(b[2] - player.z));
-  for (let k = 0; k < lampLights.length; k++) { const L = lampLights[k], n = near[k]; if (n) { L.position.set(n[0], n[1] - 0.3, n[2]); L.intensity = 0.8; } else L.intensity = 0; }
+  for (let k = 0; k < lampLights.length; k++) { const L = lampLights[k], n = near[k]; if (n) { L.position.set(n[0], n[1] - 0.3, n[2]); L.intensity = 0.85; } else L.intensity = 0; }
 }
-const lampLights = [new THREE.PointLight(0xffd9a0, 0, 26, 1.5), new THREE.PointLight(0xffd9a0, 0, 26, 1.5)];
+const lampLights = [0, 1, 2, 3].map(() => new THREE.PointLight(0xffd9a0, 0, 26, 1.5));
 lampLights.forEach(l => scene.add(l));
 
 /* ---------- the cell you start in ---------- */
@@ -689,6 +715,9 @@ function buildIcons() {
   pix(3, Q => { for (let i = 0; i < 9; i++) Q('#6a4426', 3 + i, 13 - i, 2, 2); Q('#16181a', 8, 1, 7, 7); Q('#5c646b', 9, 2, 5, 5); Q('#9aa3aa', 9, 2, 2, 5); });
   pix(4, Q => { Q('#3a0d06', 5, 5, 6, 10); Q('#c8341f', 6, 5, 4, 9); Q('#e8644a', 6, 5, 1, 9); Q('#e8dcc0', 6, 9, 4, 2); Q('#5a4a3a', 8, 2, 1, 3); Q('#ffd060', 8, 1, 1, 1); Q('#ff8a30', 9, 0, 1, 1); });
   pix(5, Q => { Q('#101214', 1, 5, 12, 5); Q('#4a5560', 2, 6, 10, 3); Q('#7a8894', 2, 6, 10, 1); Q('#3fd6e0', 12, 6, 3, 3); Q('#2b3138', 4, 10, 3, 5); Q('#ff6a3a', 15, 7, 1, 1); });
+  pix(6, Q => { Q('#16181a', 4, 1, 8, 12); Q('#16181a', 2, 3, 12, 8); Q('#9aa3aa', 5, 2, 6, 10); Q('#9aa3aa', 3, 4, 10, 6); Q('#e8eef2', 7, 0, 2, 1); Q('#e8eef2', 1, 6, 1, 2); Q('#e8eef2', 14, 6, 1, 2); Q('#24272a', 7, 6, 2, 2); Q('#3a2a06', 6, 9, 9, 6); Q('#e3a91f', 7, 10, 7, 4); Q('#f6cf5a', 7, 10, 7, 1); });
+  pix(7, Q => { Q('#101214', 1, 6, 7, 4); Q('#7a8894', 2, 7, 5, 2); Q('#101214', 7, 3, 8, 10); Q('#3b8fc4', 8, 4, 6, 8); Q('#9fd8f5', 8, 4, 6, 2); Q('#e8eef2', 10, 4, 1, 8); Q('#2b3138', 11, 13, 3, 3); Q('#cfefff', 0, 5, 1, 1); Q('#cfefff', 0, 10, 1, 1); });
+  pix(8, Q => { Q('#5a2a10', 4, 3, 8, 10); Q('#5a2a10', 3, 4, 10, 8); Q('#000', 5, 4, 6, 8); Q('#000', 4, 5, 8, 6); Q('#ff9a50', 1, 7, 4, 2); Q('#ff9a50', 11, 7, 4, 2); Q('#ffd0a0', 0, 7, 1, 2); Q('#ffd0a0', 15, 7, 1, 2); });
 }
 
 /* ================= audio ================= */
@@ -768,6 +797,9 @@ function sSwing(p) { if (!ok('swing', 120)) return; const t = A.ctx.currentTime;
 function sSmash(p) { if (!ok('smash', 80)) return; const t = A.ctx.currentTime; tone(t, 'sine', 85, 30, 0.9, 0.35); noiseBurst(t, 'lowpass', 1400, 0.7, 0.7 * p + 0.3, 0.3); noiseBurst(t + 0.01, 'highpass', 3500, 0.7, 0.3, 0.12); }
 function sThrow() { if (!ok('throw', 120)) return; const t = A.ctx.currentTime; noiseBurst(t, 'bandpass', 1200, 1.2, 0.2, 0.15); tone(t, 'triangle', 300, 600, 0.05, 0.1); }
 function sFuse() { if (!ok('fuse', 90)) return; noiseBurst(A.ctx.currentTime, 'highpass', 5000, 0.8, 0.06, 0.08); }
+function sHiss() { if (!ok('hiss', 80)) return; noiseBurst(A.ctx.currentTime, 'highpass', 3500, 0.6, 0.12, 0.12); }
+function sScoop(dist) { if (!ok('scoop', 200)) return; const t = A.ctx.currentTime, k = clamp(1 - dist / 40, 0.05, 0.8); noiseBurst(t, 'lowpass', 700, 0.7, 0.6 * k, 0.35); tone(t, 'sine', 70, 35, 0.6 * k, 0.3); }
+function sSing(dist) { if (!ok('sing', 220)) return; const t = A.ctx.currentTime, k = clamp(1 - dist / 50, 0.1, 1); tone(t, 'sine', 48, 40, 0.4 * k, 0.3); noiseBurst(t, 'lowpass', 320, 0.8, 0.3 * k, 0.3); }
 function sEscape() { if (!A.ctx || isMuted()) return; const t = A.ctx.currentTime; [261.6, 329.6, 392, 523.3].forEach((fq, k) => tone(t + k * 0.08, 'triangle', fq, fq, 0.16, 1.6, 0.05)); }
 function setLoops(vac, vacPull, drill, grind, laserOn, tbmLvl) {
   if (!A.ctx) return;
@@ -777,7 +809,7 @@ function setLoops(vac, vacPull, drill, grind, laserOn, tbmLvl) {
   A.drG.gain.setTargetAtTime(isMuted() ? 0 : drill ? 0.09 : 0, t, 0.03);
   A.drO.frequency.setTargetAtTime(grind ? 58 : 76, t, 0.05);
   A.grG.gain.setTargetAtTime(isMuted() ? 0 : grind ? 0.12 : 0, t, 0.03);
-  if (A.lzG) { A.lzG.gain.setTargetAtTime(isMuted() ? 0 : laserOn ? 0.07 : 0, t, 0.03); A.lzO.frequency.setTargetAtTime(laserOn ? 220 + 160 * laserHeat : 180, t, 0.05); }
+  if (A.lzG) { A.lzG.gain.setTargetAtTime(isMuted() ? 0 : laserOn * 0.07, t, 0.03); A.lzO.frequency.setTargetAtTime(laserOn ? 220 + 160 * laserHeat : 180, t, 0.05); }
   if (A.tbG) A.tbG.gain.setTargetAtTime(isMuted() ? 0 : tbmLvl * 0.5, t, 0.2);
 }
 
@@ -1005,9 +1037,10 @@ function breakVoxel(x, y, z, src, n, power) {
 // overflow damage keeps going into the rock along the punch direction, up to 4 voxels
 // Fragments leave faster the more energy is left over after the voxel fails, and each voxel the blow
 // punches through soaks some of it up.
-const SRC_POWER = { p: 1, drill: 0.45, ghost: 0.7, crew: 0.4, sledge: 1.3, blast: 2, laser: 0.5 };
+const SRC_POWER = { p: 1, drill: 0.45, ghost: 0.7, crew: 0.4, sledge: 1.3, blast: 2, laser: 0.5, sing: 0.5 };
 function damageVoxel(x, y, z, amt, dir, src) {
   let a = amt, b = 0;
+  if (frozen.size && frozen.has(vkey(x, y, z))) a *= freezeMul(lv('coolant'));
   const out = [-dir[0], -dir[1], -dir[2]];
   while (a > 0 && b < 4 && breakable(x, y, z)) {
     const k = vkey(x, y, z), h = getHP(x, y, z);
@@ -1120,8 +1153,8 @@ function sticksTick(dt) {
   }
   if (boomT > 0) { boomT -= dt; boomLight.intensity = Math.max(0, boomT / 0.35) * 4; } else boomLight.intensity = 0;
 }
-function explode(x, y, z) {
-  const L = lv('caps'), R = blastR(L), dmg = baseDmg() * blastMul(L);
+function explode(x, y, z, mul) {
+  const L = lv('caps'), R = blastR(L), dmg = baseDmg() * blastMul(L) * (mul || 1);
   const broke = areaDamage(x, y, z, R, dmg, 'blast');
   boomLight.position.set(x, y, z); boomT = 0.35;
   const dist = Math.hypot(x - player.x, y - player.y - 1.6, z - player.z);
@@ -1181,6 +1214,119 @@ function laserTick(dt, firing) {
   if (!on) { beam.visible = beam2.visible = beamGlow.visible = beamCore.visible = false; laserLight.intensity = 0; }
   return on;
 }
+
+// ---- rock saw: cuts a tall slot through whatever it touches ----
+let sawSpin = 0;
+function sawCells(h) {
+  const half = sawLen(lv('blade')) >> 1, out = [];
+  // an upright slot on walls; on floors and ceilings, a slot across your view
+  const ax = h.ny ? (Math.abs(Math.cos(player.yaw)) >= Math.abs(Math.sin(player.yaw)) ? [1, 0, 0] : [0, 0, 1]) : [0, 1, 0];
+  for (let i = -half; i <= half; i++) { const x = h.x + ax[0] * i, y = h.y + ax[1] * i, z = h.z + ax[2] * i; if (breakable(x, y, z)) out.push([x, y, z]); }
+  return out;
+}
+function sawTick(dt, on) {
+  sawSpin += dt * (on ? 40 : 2);
+  if (!on) return false;
+  const h = aim();
+  if (!h || !breakable(h.x, h.y, h.z)) return false;
+  const dmg = baseDmg() * combo * sawMul(lv('blade')) * dt, dir = [-h.nx, -h.ny, -h.nz];
+  for (const [x, y, z] of sawCells(h)) {
+    damageVoxel(x, y, z, dmg, dir, 'drill');
+    if (Math.random() < dt * 14 && parts.length < PMAX) parts.push({ k: 1, x: x + 0.5 + h.nx * 0.55, y: y + 0.5 + h.ny * 0.55, z: z + 0.5 + h.nz * 0.55, vx: rnd(-4, 4) + h.nx * 3, vy: rnd(0, 5), vz: rnd(-4, 4) + h.nz * 3, life: rnd(0.1, 0.3), max: 0.3, c: [255, 220, 150] });
+  }
+  if (Math.random() < dt * 5) dust(h.x + 0.5 + h.nx * 0.6, h.y + 0.5, h.z + 0.5 + h.nz * 0.6, MATS[matFor(h.x, h.y, h.z)].P[2], 1, [h.nx, h.ny, h.nz], 0.5);
+  combo = Math.min(1.2 + 0.15 * lv('combo'), combo + dt * 0.05); lastHit = clock;
+  trauma = Math.min(0.25, trauma + dt);
+  return true;
+}
+// ---- cryo sprayer: frozen rock is brittle, so every hit on it lands harder ----
+const frozen = new Map();
+const iceMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1.04, 1.04, 1.04), new THREE.MeshLambertMaterial({ color: 0xbfe6ff, emissive: 0x16303f, transparent: true, opacity: 0.45, depthWrite: false }), 400);
+iceMesh.count = 0; iceMesh.frustumCulled = false; scene.add(iceMesh);
+const iceM4 = new THREE.Matrix4();
+let hissT = 0;
+function cryoTick(dt, on) {
+  const L = lv('coolant');
+  if (on) {
+    const d = lookDir(), cp = camera.position, R = cryoRange(L);
+    const rx = Math.cos(player.yaw), rz = -Math.sin(player.yaw);
+    const sx = cp.x + rx * 0.3 + d[0] * 0.6, sy = cp.y - 0.35 + d[1] * 0.6, sz = cp.z + rz * 0.3 + d[2] * 0.6;
+    for (let k = 0; k < 10; k++) {
+      const jx = d[0] + rnd(-0.22, 0.22), jy = d[1] + rnd(-0.22, 0.22), jz = d[2] + rnd(-0.22, 0.22), jl = Math.hypot(jx, jy, jz);
+      const h = raycast(cp.x, cp.y, cp.z, jx / jl, jy / jl, jz / jl, R);
+      if (h && breakable(h.x, h.y, h.z)) {
+        const key = vkey(h.x, h.y, h.z);
+        if (frozen.size < 400 || frozen.has(key)) frozen.set(key, freezeT(L));
+        damageVoxel(h.x, h.y, h.z, baseDmg() * 0.4 * dt, [-h.nx, -h.ny, -h.nz], 'drill');
+      }
+      if (parts.length < PMAX) { const sp = rnd(8, 14); parts.push({ k: 1, x: sx, y: sy, z: sz, vx: jx / jl * sp, vy: jy / jl * sp, vz: jz / jl * sp, life: rnd(0.25, 0.5), max: 0.5, c: [215, 240, 255] }); }
+    }
+    if (Math.random() < dt * 10) dust(sx + d[0] * 3, sy + d[1] * 3, sz + d[2] * 3, [205, 230, 245], 1, d, 0.6);
+    hissT -= dt; if (hissT <= 0) { sHiss(); hissT = 0.09; }
+  }
+  let i = 0;
+  for (const [key, t] of frozen) {
+    const z = Math.floor(key / N), rem = key - z * N, y = Math.floor(rem / GX), x = rem - y * GX, nt = t - dt;
+    if (nt <= 0 || !breakable(x, y, z)) { frozen.delete(key); continue; }
+    frozen.set(key, nt);
+    const s = nt < 1.5 ? 0.6 + 0.44 * nt / 1.5 : 1;
+    iceM4.makeScale(s, s, s).setPosition(x + 0.5, y + 0.5, z + 0.5); iceMesh.setMatrixAt(i++, iceM4);
+  }
+  iceMesh.count = i; iceMesh.instanceMatrix.needsUpdate = true;
+  return on;
+}
+// ---- singularity: a tiny black hole that eats rock and rubble, then pops ----
+let sing = null, singT = 0, singGain = 0;
+const singCore = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 12), new THREE.MeshBasicMaterial({ color: 0x000000, fog: false }));
+const singRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.07, 6, 40), new THREE.MeshBasicMaterial({ color: 0xffb070, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+const singHalo = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), new THREE.MeshBasicMaterial({ color: 0xff7a30, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+const singLight = new THREE.PointLight(0xff9a50, 0, 22, 1.5);
+const singG = new THREE.Group(); singG.add(singHalo, singCore, singRing, singLight); singG.visible = false; scene.add(singG);
+function fireSing() {
+  if (sing) return;
+  if (singT > 0) { sDeny(); toast('The singularity is recharging. ' + Math.ceil(singT) + ' s.', 1400); return; }
+  const d = lookDir(), cp = camera.position, h = raycast(cp.x, cp.y, cp.z, d[0], d[1], d[2], 40), t = h ? Math.max(1.5, h.t - 0.45) : 40;
+  sing = { x: cp.x + d[0] * 0.8, y: cp.y - 0.2 + d[1] * 0.8, z: cp.z + d[2] * 0.8, tx: cp.x + d[0] * t, ty: cp.y + d[1] * t, tz: cp.z + d[2] * t, life: -1 };
+  singT = singCd(lv('mass')); singGain = 0;
+  singG.visible = true; sThrow();
+}
+function singTick(dt) {
+  if (!sing) { if (singT > 0) singT = Math.max(0, singT - dt); return; }
+  const s = sing, L = lv('mass');
+  if (s.life < 0) {
+    // in flight
+    const dx = s.tx - s.x, dy = s.ty - s.y, dz = s.tz - s.z, d = Math.hypot(dx, dy, dz), sp = 34 * dt;
+    if (d <= sp) { s.x = s.tx; s.y = s.ty; s.z = s.tz; s.life = 0; } else { s.x += dx / d * sp; s.y += dy / d * sp; s.z += dz / d * sp; }
+    singG.position.set(s.x, s.y, s.z); singG.scale.setScalar(0.4); singLight.intensity = 1;
+    return;
+  }
+  s.life += dt;
+  const R = singR(L) * Math.min(1, 0.3 + s.life / 1.2), dist = Math.hypot(s.x - player.x, s.y - player.y - 1.6, s.z - player.z);
+  areaDamage(s.x, s.y, s.z, R, baseDmg() * singMul(L) * dt, 'sing');
+  // rubble falls in and is paid for as it goes
+  for (let k = rubble.length - 1; k >= 0; k--) {
+    const r = rubble[k];
+    const dx = s.x - r.x, dy = s.y - r.y, dz = s.z - r.z, d = Math.hypot(dx, dy, dz) || 0.001;
+    if (!r.sing) { if (d > R + 5 || r.suck || r.bot) continue; r.sing = true; r.rest = false; r.crush = false; }
+    const sp = Math.min(d, (6 + 24 / (d + 0.4)) * dt);
+    r.x += dx / d * sp + dz / d * sp * 0.5; r.y += dy / d * sp; r.z += dz / d * sp - dx / d * sp * 0.5; spinFrag(r, dt * 3);
+    r.shrink = clamp(d / 2, 0.1, 1);
+    if (d < 0.5) { const g = r.v * r.n * valueMul(); S.money += g; S.stats.earned += g; singGain += g; rubble.splice(k, 1); }
+  }
+  for (let k = 0; k < 4 && parts.length < PMAX; k++) { const a = rnd(6.28), b = rnd(-1, 1), rr = R + 1.5; parts.push({ k: 1, x: s.x + Math.cos(a) * rr * Math.sqrt(1 - b * b), y: s.y + b * rr, z: s.z + Math.sin(a) * rr * Math.sqrt(1 - b * b), vx: -Math.cos(a) * 6, vy: -b * 6, vz: -Math.sin(a) * 6, life: 0.25, max: 0.25, c: [255, 190, 120] }); }
+  singG.position.set(s.x, s.y, s.z); singG.scale.setScalar(1);
+  singCore.scale.setScalar(0.4 + R * 0.25); singHalo.scale.setScalar(R * (0.85 + 0.1 * Math.random()));
+  singRing.scale.setScalar(R * 0.75); singRing.rotation.x += dt * 2.6; singRing.rotation.y += dt * 1.7;
+  singLight.intensity = 2 + Math.random();
+  trauma = Math.min(0.5, trauma + dt * clamp(1 - dist / 30, 0, 1) * 1.2);
+  sSing(dist);
+  if (s.life >= 4) {
+    sing = null; singG.visible = false; singLight.intensity = 0;
+    boomLight.position.set(s.x, s.y, s.z); boomT = 0.3; sBoom(dist * 1.6);
+    for (let k = 0; k < 40 && parts.length < PMAX; k++) { const a = rnd(6.28), b = rnd(-1, 1), sp = rnd(6, 16); parts.push({ k: 1, x: s.x, y: s.y, z: s.z, vx: Math.cos(a) * sp * Math.sqrt(1 - b * b), vy: b * sp, vz: Math.sin(a) * sp * Math.sqrt(1 - b * b), life: rnd(0.2, 0.5), max: 0.5, c: [255, 210, 160] }); }
+    if (singGain > 0) gainPop('+' + money(singGain) + ' swallowed');
+  }
+}
 // ---- machines ----
 let rigList = [];
 const rigBodyGeo = new THREE.BoxGeometry(0.8, 0.8, 1.0), rigStripeGeo = new THREE.BoxGeometry(0.82, 0.16, 1.02), rigBitGeo = new THREE.ConeGeometry(0.17, 0.75, 8);
@@ -1238,13 +1384,13 @@ function crusherTick(dt) {
   if (solid(Math.floor(tx), Math.floor(Math.max(0, player.y)) , Math.floor(tz)) || solid(Math.floor(tx), Math.floor(Math.max(0, player.y)) + 1, Math.floor(tz))) { tx = player.x; tz = player.z - 4; }
   const dx = tx - crusher.x, dz = tz - crusher.z, d = Math.hypot(dx, dz);
   if (d > 0.3) { const sp = Math.min(d, 6 * dt * Math.max(1, d / 6)); crusher.x += dx / d * sp; crusher.z += dz / d * sp; crusher.g.rotation.y = lerp(crusher.g.rotation.y, Math.atan2(dx, dz), Math.min(1, dt * 3)); }
-  crusher.y = lerp(crusher.y, floorBelow(crusher.x, GY - 1, crusher.z), Math.min(1, dt * 8));
+  crusher.y = lerp(crusher.y, groundAt(crusher.x, tunnelY(), crusher.z), Math.min(1, dt * 8));
   crusher.g.position.set(crusher.x, crusher.y, crusher.z);
   for (const ro of crusher.rollers) ro.rotation.x += dt * 9;
   const L = lv('rollers'), R = crushR(L), mul = crushMul(L), mx = crusher.x, my = crusher.y + 2.3, mz = crusher.z;
   for (let k = rubble.length - 1; k >= 0; k--) {
     const r = rubble[k];
-    if (r.suck) continue;
+    if (r.suck || r.sing || r.bot) continue;
     if (!r.crush) { if (r.rest && Math.abs(r.x - mx) + Math.abs(r.z - mz) < R) { r.crush = true; r.rest = false; } else continue; }
     const ddx = mx - r.x, ddy = my - r.y, ddz = mz - r.z, dd = Math.hypot(ddx, ddy, ddz);
     const sp = Math.min(dd, (5 + 10 / (dd + 0.5)) * dt);
@@ -1287,6 +1433,155 @@ function tbmTick(dt) {
   if (Math.random() < dt * 20 && parts.length < PMAX) { const a = rnd(6.28); parts.push({ k: 1, x: 10 + Math.cos(a) * 4.3, y: 6 + Math.sin(a) * 4.3, z: zf - 0.1, vx: rnd(-2, 2), vy: rnd(0, 3), vz: rnd(-3, -1), life: 0.3, max: 0.3, c: [255, 210, 140] }); }
   if (Math.random() < dt * 4) dust(10 + rnd(-4, 4), 6 + rnd(-4, 4), zf - 0.2, MATS[STRATA[strataIdx(zf)].m].P[2], 1, [0, 0, -1], 0.6);
   return clamp(1 - Math.abs(player.z - zf) / 40, 0, 1);
+}
+
+// ---- excavator: parks near the face and takes big bucketfuls ----
+let excav = null;
+const armV = new THREE.Vector3(), armD = new THREE.Vector3();
+function armTo(m, ax, ay, az, bx, by, bz) {
+  armD.set(bx - ax, by - ay, bz - az); const len = armD.length() || 0.01; armD.divideScalar(len);
+  m.position.set((ax + bx) / 2, (ay + by) / 2, (az + bz) / 2); m.quaternion.setFromUnitVectors(UP, armD); m.scale.set(1, len, 1);
+}
+function syncExcav() {
+  if (!lv('excav') || excav) return;
+  const g = new THREE.Group();
+  for (const sx of [-0.9, 0.9]) { const tr = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 3.0), darkMat); tr.position.set(sx, 0.3, 0); g.add(tr); }
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.4, 2.2), rigMat); cab.position.y = 1.3; g.add(cab);
+  const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.02, 0.2, 2.22), darkMat); stripe.position.y = 0.75; g.add(stripe);
+  const win = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.05), new THREE.MeshBasicMaterial({ color: 0x9fd0e8 })); win.position.set(-0.45, 1.65, 1.12); g.add(win);
+  const boom = new THREE.Mesh(new THREE.BoxGeometry(0.36, 1, 0.36), rigMat), stick = new THREE.Mesh(new THREE.BoxGeometry(0.26, 1, 0.26), rigMat);
+  const bucket = new THREE.Group(), bb = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.8, 0.8), darkMat); bucket.add(bb);
+  for (let i = 0; i < 4; i++) { const t = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.4), steelMat); t.position.set(-0.5 + i * 0.33, -0.4, 0.4); bucket.add(t); }
+  g.position.set(player.x, 0, player.z - 4);
+  scene.add(g, boom, stick, bucket);
+  excav = { g, boom, stick, bucket, x: player.x, y: 0, z: player.z - 4, ph: 0, c: -1, bx: player.x, by: 3, bz: player.z };
+}
+function excavTick(dt) {
+  if (!excav) return;
+  const e = excav;
+  // park on the far side of the tunnel from you, a few metres back from the face
+  const tz = faceDepth - 5.5;
+  let tx = player.x > GX / 2 ? 4 : 16;
+  if (solid(Math.floor(tx), groundAt(tx, tunnelY(), tz) + 1, Math.floor(tz))) tx = 10;
+  e.x = lerp(e.x, tx, Math.min(1, dt * 1.5)); e.z = lerp(e.z, tz, Math.min(1, dt * 1.5));
+  e.y = lerp(e.y, groundAt(e.x, tunnelY(), e.z), Math.min(1, dt * 6));
+  e.g.position.set(e.x, e.y, e.z);
+  const was = e.ph; e.ph += dt / 1.6;
+  if (e.ph >= 1 || e.c < 0) { e.ph %= 1; e.c = shallow.length ? shallow[(Math.random() * shallow.length) | 0] : -1; }
+  const sx = e.x, sy = e.y + 2.0, sz = e.z + 0.8, rx = e.x, ry = e.y + 3.2, rz = e.z + 2.4;
+  let bx = rx, by = ry, bz = rz;
+  if (e.c >= 0) {
+    const cx = e.c % GX + 0.5, cy = ((e.c / GX) | 0) + 0.5, cz = front[e.c] - 0.55;
+    const reachK = Math.sin(Math.min(1, e.ph / 0.55) * Math.PI / 2) * (e.ph < 0.55 ? 1 : 1 - (e.ph - 0.55) / 0.45);
+    bx = lerp(rx, cx, reachK); by = lerp(ry, cy, reachK); bz = lerp(rz, cz, reachK);
+    if (was < 0.55 && e.ph >= 0.55) {
+      const x0 = e.c % GX, y0 = (e.c / GX) | 0, dmg = baseDmg() * excMul(lv('bucket'));
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const x = x0 + dx, y = y0 + dy; if (!inRock(x, y, 0)) continue;
+        const z = front[y * GX + x]; if (z >= DEEP || z > front[e.c] + 2) continue;
+        damageVoxel(x, y, z, dmg, [0, 0, 1], 'crew');
+      }
+      const dist = Math.hypot(cx - player.x, cy - player.y - 1.6, cz - player.z);
+      sScoop(dist); dust(cx, cy, cz, MATS[STRATA[strataIdx(front[e.c])].m].P[2], 4, [0, 0, -1], 0.8);
+      trauma = Math.min(1, trauma + 0.12 * clamp(1 - dist / 20, 0, 1));
+    }
+  }
+  e.bx = lerp(e.bx, bx, Math.min(1, dt * 10)); e.by = lerp(e.by, by, Math.min(1, dt * 10)); e.bz = lerp(e.bz, bz, Math.min(1, dt * 10));
+  const ex = (sx + e.bx) / 2, ey = Math.max(sy, e.by) + 1.4, ez = (sz + e.bz) / 2;
+  armTo(e.boom, sx, sy, sz, ex, ey, ez); armTo(e.stick, ex, ey, ez, e.bx, e.by + 0.3, e.bz);
+  e.bucket.position.set(e.bx, e.by, e.bz); e.bucket.rotation.set(-0.6 + e.ph * 1.2, Math.atan2(e.bx - sx, e.bz - sz), 0);
+}
+// ---- blasting drones: plant a charge on the face, back off, boom ----
+let bdrones = [];
+const bdBodyGeo = new THREE.BoxGeometry(0.7, 0.22, 0.7), rotorGeo = new THREE.BoxGeometry(0.62, 0.03, 0.08);
+function syncBdrones() {
+  const n = lv('bdrone');
+  while (bdrones.length < n) {
+    const g = new THREE.Group(); g.add(new THREE.Mesh(bdBodyGeo, darkMat));
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.08, 0.72), stickMat); g.add(band);
+    const rotors = [];
+    for (const [ox, oz] of [[-0.42, -0.42], [0.42, -0.42], [-0.42, 0.42], [0.42, 0.42]]) { const r = new THREE.Mesh(rotorGeo, steelMat); r.position.set(ox, 0.16, oz); g.add(r); rotors.push(r); }
+    const led = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), ledMatR); led.position.set(0, -0.15, 0.3); g.add(led);
+    g.position.set(player.x, player.y + 4, player.z); scene.add(g);
+    bdrones.push({ g, rotors, led, st: 0, t: 2 + bdrones.length * 2.5, c: -1, charge: null, x: player.x, y: player.y + 4, z: player.z, tx: 0, ty: 0, tz: 0, warned: 0 });
+  }
+  while (bdrones.length > n) { const d = bdrones.pop(); scene.remove(d.g); if (d.charge) scene.remove(d.charge.m); }
+}
+function bdronesTick(dt) {
+  if (!bdrones.length) return;
+  const R = blastR(lv('caps')) * 1.7 + 1;
+  bdrones.forEach((d, i) => {
+    const hx = 3 + i * 4.5, hy = 9, hz = faceDepth - 9;
+    let gx = hx, gy = hy, gz = hz;
+    if (d.st === 0) {
+      d.t -= dt;
+      if (d.t <= 0 && shallow.length) {
+        const c = shallow[(Math.random() * shallow.length) | 0], x = c % GX + 0.5, y = ((c / GX) | 0) + 0.5, z = front[c] - 0.6;
+        if (Math.hypot(x - player.x, y - player.y - 1.6, z - player.z) > R) { d.c = c; d.tx = x; d.ty = y; d.tz = z; d.st = 1; }
+        else { d.t = 1; if (clock - d.warned > 20) { d.warned = clock; toast('A blasting drone is waiting for you to step back from the face.', 2200); } }
+      }
+    } else if (d.st === 1) {
+      gx = d.tx; gy = d.ty; gz = d.tz - 0.5;
+      if (Math.hypot(d.x - gx, d.y - gy, d.z - gz) < 0.35) {
+        const m = new THREE.Mesh(stickGeo, stickMat); m.rotation.x = Math.PI / 2; m.position.set(d.tx, d.ty, d.tz + 0.2); scene.add(m);
+        d.charge = { m, x: d.tx, y: d.ty, z: d.tz + 0.3, fuse: 3 }; d.st = 2; sThrow();
+      }
+    }
+    if (d.charge) {
+      const ch = d.charge; ch.fuse -= dt;
+      if (Math.random() < dt * 10) sFuse();
+      if (parts.length < PMAX) parts.push({ k: 1, x: ch.x, y: ch.y + 0.1, z: ch.z - 0.35, vx: rnd(-1.5, 1.5), vy: rnd(0.5, 3), vz: rnd(-1.5, 0), life: 0.2, max: 0.2, c: [255, 200, 90] });
+      if (ch.fuse <= 0) { scene.remove(ch.m); d.charge = null; explode(ch.x, ch.y, ch.z, 0.7); d.st = 0; d.t = 9; }
+    }
+    const dx = gx - d.x, dy = gy - d.y, dz = gz - d.z, dd = Math.hypot(dx, dy, dz), sp = Math.min(dd, 9 * dt);
+    if (dd > 0.01) { d.x += dx / dd * sp; d.y += dy / dd * sp; d.z += dz / dd * sp; }
+    d.g.position.set(d.x, d.y + Math.sin(clock * 3 + i) * 0.08, d.z);
+    for (const r of d.rotors) r.rotation.y += dt * 40;
+    d.led.visible = !d.charge || Math.sin(clock * 20) > 0;
+  });
+}
+// ---- laser turrets: tripods that burn the face nonstop ----
+let turrets = [];
+function syncTurrets() {
+  const n = lv('turret');
+  while (turrets.length < n) {
+    const g = new THREE.Group();
+    for (let i = 0; i < 3; i++) { const a = i * 2.094, leg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 0.1), darkMat); leg.position.set(Math.cos(a) * 0.3, 0.65, Math.sin(a) * 0.3); leg.rotation.set(-0.35 * Math.sin(a), 0, 0.35 * Math.cos(a)); g.add(leg); }
+    const head = new THREE.Group(); head.position.y = 1.4; g.add(head);
+    head.add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.8), rigMat));
+    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.6, 8), steelMat); barrel.rotation.x = Math.PI / 2; barrel.position.z = 0.6; head.add(barrel);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
+    const ln = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: 0xff5a36, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })); ln.frustumCulled = false; ln.visible = false;
+    g.position.set(player.x, player.y, player.z - 3); scene.add(g, ln);
+    turrets.push({ g, head, ln, c: -1, t: 0, x: player.x, z: player.z - 3 });
+  }
+  while (turrets.length > n) { const t = turrets.pop(); scene.remove(t.g, t.ln); }
+}
+function turretsTick(dt) {
+  if (!turrets.length) return 0;
+  const dps = turDps(); let near = 0;
+  turrets.forEach((tu, i) => {
+    // along both walls, out of your line of sight
+    const tx = i % 2 ? GX - 1.5 : 1.5, tz = faceDepth - 6 - Math.floor(i / 2) * 2.5;
+    tu.x = lerp(tu.x, tx, Math.min(1, dt * 2)); tu.z = lerp(tu.z, tz, Math.min(1, dt * 2));
+    const fy = groundAt(tu.x, tunnelY(), tu.z);
+    tu.g.position.set(tu.x, fy, tu.z);
+    tu.t -= dt;
+    if (tu.c < 0 || tu.t <= 0 || front[tu.c] >= DEEP) { tu.c = shallow.length ? shallow[(Math.random() * shallow.length) | 0] : -1; tu.t = 1.5 + Math.random(); }
+    if (tu.c < 0) { tu.ln.visible = false; return; }
+    const cx = tu.c % GX + 0.5, cy = ((tu.c / GX) | 0) + 0.5, cz = front[tu.c], hx = tu.x, hy = fy + 1.4, hz = tu.z;
+    tu.head.lookAt(cx, cy, cz);
+    const dx = cx - hx, dy = cy - hy, dz = cz - hz, dl = Math.hypot(dx, dy, dz) || 1;
+    const h = raycast(hx, hy, hz, dx / dl, dy / dl, dz / dl, dl + 3);
+    if (!h) { tu.ln.visible = false; return; }
+    const ex = h.x + 0.5 + h.nx * 0.5, ey = h.y + 0.5 + h.ny * 0.5, ez = h.z + 0.5 + h.nz * 0.5;
+    const pa = tu.ln.geometry.attributes.position; pa.setXYZ(0, hx + dx / dl * 0.9, hy + dy / dl * 0.9, hz + dz / dl * 0.9); pa.setXYZ(1, ex, ey, ez); pa.needsUpdate = true;
+    tu.ln.visible = true; tu.ln.material.opacity = 0.6 + 0.4 * Math.random();
+    if (breakable(h.x, h.y, h.z)) damageVoxel(h.x, h.y, h.z, dps * dt, [-h.nx, -h.ny, -h.nz], 'crew');
+    if (Math.random() < dt * 25 && parts.length < PMAX) parts.push({ k: 1, x: ex, y: ey, z: ez, vx: rnd(-4, 4) + h.nx * 3, vy: rnd(0, 4), vz: rnd(-4, 4) + h.nz * 3, life: 0.2, max: 0.2, c: [255, 160, 80] });
+    near = Math.max(near, clamp(1 - Math.hypot(hx - player.x, hz - player.z) / 25, 0, 1));
+  });
+  return near;
 }
 // ---- radar: buried finds near you, seen through rock ----
 const radarMarks = [];
@@ -1383,10 +1678,21 @@ function syncDrones() {
   while (drones.length < n) {
     const g = new THREE.Group(); g.add(new THREE.Mesh(droneGeo, droneMat)); const led = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.1), ledMat); led.position.set(0, 0.17, 0.4); g.add(led);
     g.position.set(player.x + rnd(-2, 2), player.y + 0.15, player.z + rnd(-2, 2)); scene.add(g);
-    drones.push({ g, tgt: null, x: g.position.x, y: g.position.y, z: g.position.z });
+    const brush = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.04, 6), darkMat); brush.position.set(0.32, -0.1, 0.32); g.add(brush);
+    led.material = ledMat.clone();
+    drones.push({ g, led, brush, tgt: null, tt: 0, skip: new WeakSet(), hop: 0, hopV: 0, side: drones.length % 2 ? -2 : 2, x: g.position.x, y: g.position.y, z: g.position.z });
   }
   while (drones.length > n) scene.remove(drones.pop().g);
 }
+// the floor under a point inside the tunnel: climb out of any rock first, then drop to the first solid voxel below
+function groundAt(x, y, z) {
+  const xi = Math.floor(x), zi = Math.floor(z);
+  let yy = Math.floor(y);
+  while (yy > -1 && solid(xi, yy, zi)) yy--;
+  while (yy >= -1 && !solid(xi, yy, zi)) yy--;
+  return yy + 1;
+}
+const tunnelY = () => Math.max(0, player.y) + 2;
 function floorBelow(x, y, z) { const xi = Math.floor(x), zi = Math.floor(z); for (let yy = Math.floor(y); yy >= -1; yy--) if (solid(xi, yy, zi)) return yy + 1; return 0; }
 
 /* ================= offline progress ================= */
@@ -1421,7 +1727,8 @@ function runOffline() {
   if (away < 60) return;
   const secs = Math.min(away, 8 * 3600);
   const splash = 1 + (PATTERNS[lv('spread')].length - 1) * 0.5;
-  const dps = 1.5 * lv('crew') * baseDmg() + 0.35 * lv('ghost') * baseDmg() * splash + rigDps() * lv('rigs') + (lv('tbm') ? baseDmg() * tbmMul(lv('cutter')) * TBM_COLS.length * 0.5 : 0);
+  const dps = 1.5 * lv('crew') * baseDmg() + 0.35 * lv('ghost') * baseDmg() * splash + rigDps() * lv('rigs') + (lv('tbm') ? baseDmg() * tbmMul(lv('cutter')) * TBM_COLS.length * 0.5 : 0)
+    + (lv('excav') ? 9 * baseDmg() * excMul(lv('bucket')) / 1.6 : 0) + turDps() * lv('turret') + lv('bdrone') * baseDmg() * blastMul(lv('caps')) * 0.7 * 12 / 12;
   if (dps <= 0) return;
   const r = offlineDig(dps * secs * 0.5);
   if (!r.broken) return;
@@ -1490,7 +1797,7 @@ on(window, 'keydown', e => {
   if (k === 'escape') { closeShop(); return; }
   if (k === ' ' || k.startsWith('arrow')) e.preventDefault();
   K[k] = true; if (e.shiftKey) K.shift = true;
-  if (k >= '1' && k <= '6' && k.length === 1) setTool(+k - 1);
+  if (k >= '1' && k <= '9' && k.length === 1) setTool(+k - 1);
   else if (k === 'e') sell(false);
   else if (k === 'm') toggleMute();
   else if (k === 'f' && !e.repeat) { mouseDown = true; if (S.tool === 0) { tryPunch(); holdT = 0.2; } }
@@ -1626,9 +1933,14 @@ function update(dt) {
   sledge.cd -= dt;
   // dynamite: one stick per press
   if (S.tool === 4 && lv('dynamite') && held && !prevHeld) throwStick();
+  if (S.tool === 8 && lv('singularity') && held && !prevHeld && act) fireSing();
   prevHeld = held;
   if (lv('dynamite')) sticksTick(dt);
   const laserOn = laserTick(dt, act && held && S.tool === 5 && !!lv('laser'));
+  const sawing = sawTick(dt, act && held && S.tool === 6 && !!lv('saw'));
+  cryoTick(dt, act && held && S.tool === 7 && !!lv('cryo'));
+  singTick(dt);
+  let turNear = 0;
   if (act) {
     ghostAcc += dt * 0.35 * lv('ghost');
     let gk = 0; while (ghostAcc >= 1 && gk++ < 30) { ghostAcc--; ghostPunch(); }
@@ -1636,6 +1948,9 @@ function update(dt) {
     crewTick(dt);
     rigsTick(dt);
     crusherTick(dt);
+    excavTick(dt);
+    bdronesTick(dt);
+    turNear = turretsTick(dt);
   }
   const tbmLvl = act ? tbmTick(dt) : 0;
   radarTick(dt);
@@ -1649,8 +1964,9 @@ function update(dt) {
   const open = maxDug >= DEEP - 1;
   skyPlane.visible = open || nearEnd > 0.6;
   const daylight = open ? clamp(1 - (DEEP - player.z) / 120, 0.15, 1) : 0;
-  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03, 0.004, daylight);
-  sun.intensity = daylight * 1.1; ambient.intensity = 0.26 + daylight * 0.5;
+  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.024 - 0.0012 * lv('lamp'), 0.004, daylight);
+  sun.intensity = daylight * 1.1; ambient.intensity = 0.36 + daylight * 0.5;
+  beamLamp.distance = lampRange(lv('lamp')); beamLamp.intensity = 1.1 + 0.2 * lv('lamp'); headlamp.intensity = 0.95 + 0.08 * lv('lamp');
 
   // vacuum
   const vacOn = held && S.tool === 1;
@@ -1662,6 +1978,7 @@ function update(dt) {
   let pulling = false;
   for (let k = rubble.length - 1; k >= 0; k--) {
     const r = rubble[k];
+    if (r.sing || r.bot) continue;
     if (vacOn && !full) {
       const dx = nozzle[0] - r.x, dy = nozzle[1] - r.y, dz = nozzle[2] - r.z, d = Math.hypot(dx, dy, dz);
       const facing = (-(dx * ld[0] + dy * ld[1] + dz * ld[2])) / (d || 1);
@@ -1727,19 +2044,56 @@ function update(dt) {
     d.x += d.vx * dt; d.y += d.vy * dt; d.z += d.vz * dt;
     if (solid(Math.floor(d.x), Math.floor(d.y), Math.floor(d.z))) { d.y += 0.02; d.vy = 0; }
   }
+  // robot vacuums: drive to rubble, suck up everything around them, hover up to ledges.
+  // When your bag is full they fill their own hoppers and tip them into the bag after you sell.
+  const botR = 1.4 + 0.12 * lv('drone'), hopCap = 15 + 5 * lv('drone'), bagRoom = () => S.bagN < bagCap(lv('bag'));
+  const claimed = new Set(drones.map(q => q.tgt));
+  let botsFull = drones.length > 0;
   for (const d of drones) {
-    if (!d.tgt || !rubble.includes(d.tgt) || d.tgt.suck) {
-      d.tgt = null; let bd = 1e9;
-      if (!full) for (const r of rubble) if (r.rest && !r.crush) { const q = Math.hypot(r.x - d.x, r.z - d.z) + Math.abs(r.y - d.y) * 3; if (q < bd) { bd = q; d.tgt = r; } }
+    if (d.hop > 0 && bagRoom()) { const cap = bagCap(lv('bag')), t = Math.min(cap - S.bagN, d.hop), v = d.hopV * t / d.hop; S.bagN += t; S.bagV += v; d.hop -= t; d.hopV -= v; if (S.bagN >= cap && lv('pawn')) sell(true); }
+    const room = bagRoom() || d.hop < hopCap;
+    if (room) botsFull = false;
+    if (d.tgt && (!room || !d.tgt.rest || d.tgt.bot || d.tgt.crush || d.tgt.sing || d.tgt.suck || !rubble.includes(d.tgt) || (d.tt += dt) > 6)) { if (d.tt > 6) d.skip.add(d.tgt); d.tgt = null; }
+    if (!d.tgt && room) {
+      let bd = 1e9;
+      for (const r of rubble) if (r.rest && !r.crush && !r.sing && !r.suck && !r.bot && !claimed.has(r) && !d.skip.has(r)) { const q = Math.hypot(r.x - d.x, r.z - d.z) + Math.abs(r.y - d.y) * 2; if (q < bd) { bd = q; d.tgt = r; } }
+      if (d.tgt) { claimed.add(d.tgt); d.tt = 0; }
     }
-    let tx = player.x + 2, tz = player.z;
-    if (d.tgt) { tx = d.tgt.x; tz = d.tgt.z; }
-    const dx = tx - d.x, dz = tz - d.z, dist = Math.hypot(dx, dz), sp = droneSpeed(lv('drone')) * (d.tgt ? 1 : 0.5);
-    if (dist > 0.3) { d.x += dx / dist * Math.min(dist, sp * dt); d.z += dz / dist * Math.min(dist, sp * dt); }
-    const fy = floorBelow(d.x, Math.max(d.y, 0) + 1.5, d.z); d.y = lerp(d.y, fy + 0.15, Math.min(1, dt * 10));
+    let tx = player.x + (d.side || 2), tz = player.z - 1, ty = null;
+    if (d.tgt) { tx = d.tgt.x; tz = d.tgt.z; ty = d.tgt.y; }
+    const dx = tx - d.x, dz = tz - d.z, dist = Math.hypot(dx, dz), sp = droneSpeed(lv('drone')) * (d.tgt ? 1 : 0.6) * (dist > 12 ? 2 : 1);
+    if (dist > 0.3) {
+      const nx = d.x + dx / dist * Math.min(dist, sp * dt), nz = d.z + dz / dist * Math.min(dist, sp * dt), yy = Math.floor(d.y + 0.3), ox = d.x, oz = d.z;
+      // wedged in a pocket for a moment: squeeze through rather than sit there
+      const ghost = d.stuck > 0.8;
+      if (ghost || !solid(Math.floor(nx), yy, Math.floor(d.z))) d.x = nx;
+      if (ghost || !solid(Math.floor(d.x), yy, Math.floor(nz))) d.z = nz;
+      const moved = Math.hypot(d.x - ox, d.z - oz) > sp * dt * 0.3;
+      d.stuck = moved ? (ghost && d.stuck < 2.3 ? d.stuck + dt : 0) : (d.stuck || 0) + dt;
+    }
+    const fy = groundAt(d.x, Math.max(d.y, ty ?? d.y) + 0.8, d.z) + 0.15, wantY = ty != null && ty > fy + 0.4 && dist < 2.5 ? ty - 0.1 : fy;
+    d.y = lerp(d.y, wantY, Math.min(1, dt * 6));
     d.g.position.set(d.x, d.y, d.z); if (dist > 0.3) d.g.rotation.y = Math.atan2(dx, dz);
-    if (d.tgt && dist < 0.8 && Math.abs(d.tgt.y - d.y) < 1.5) { if (collect(d.tgt)) { const i = rubble.indexOf(d.tgt); if (i >= 0) rubble.splice(i, 1); } d.tgt = null; }
+    d.brush.rotation.y += dt * (room ? 18 : 2);
+    d.led.material.color.setHex(!room ? 0xf2b233 : d.tgt ? 0x58c26b : 0x3a7a48);
+    if (!room) { for (const r of rubble) if (r.bot === d) { r.bot = null; r.shrink = 1; } continue; }
+    for (let k = rubble.length - 1; k >= 0; k--) {
+      const r = rubble[k];
+      if (r.bot !== d) {
+        if (r.bot || !r.rest || r.crush || r.sing || r.suck || Math.abs(r.x - d.x) > botR || Math.abs(r.z - d.z) > botR || Math.abs(r.y - d.y) > 1.6) continue;
+        r.bot = d; r.rest = false;
+      }
+      const ex = d.x - r.x, ey = d.y + 0.15 - r.y, ez = d.z - r.z, dd = Math.hypot(ex, ey, ez) || 0.001, step = Math.min(dd, (3 + 6 / (dd + 0.3)) * dt);
+      r.x += ex / dd * step; r.y += ey / dd * step; r.z += ez / dd * step; spinFrag(r, dt); r.shrink = clamp(dd / botR, 0.2, 1);
+      if (dd < 0.35) {
+        rubble.splice(k, 1); if (d.tgt === r) d.tgt = null;
+        if (bagRoom()) { collect(r); if (r.n > 0) { d.hop += r.n; d.hopV += r.n * r.v; } }
+        else { d.hop += r.n; d.hopV += r.n * r.v; sPop(); }
+        S.seen.vacuumed = 1;
+      }
+    }
   }
+  if (botsFull && rubble.length && clock - botWarn > 30) { botWarn = clock; toast('Your robot vacuums are full. Sell your bag (E) to empty them.', 2600); }
   // instanced fragments
   const counts = [0, 0, 0, 0];
   for (const r of rubble) {
@@ -1783,7 +2137,7 @@ function update(dt) {
   }
   glintMat.opacity = 0.55 + 0.45 * Math.sin(clock * 5);
   // target highlight
-  const h = act && S.tool !== 1 && S.tool !== 4 ? (S.tool === 5 ? raycast(camera.position.x, camera.position.y, camera.position.z, lookDir()[0], lookDir()[1], lookDir()[2], 26) : aim()) : null;
+  const h = act && S.tool !== 1 && S.tool !== 4 && S.tool !== 7 ? (S.tool === 5 || S.tool === 8 ? raycast(camera.position.x, camera.position.y, camera.position.z, lookDir()[0], lookDir()[1], lookDir()[2], S.tool === 8 ? 40 : 26) : aim()) : null;
   targetBox.visible = !!h && breakable(h.x, h.y, h.z);
   for (const b of splashBoxes) b.visible = false;
   if (targetBox.visible) {
@@ -1792,6 +2146,7 @@ function update(dt) {
       const R = sledgeR(lv('weight')); let j = 0;
       for (let dz = -2; dz <= 2; dz++) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { if (!dx && !dy && !dz) continue; const x = h.x + dx, y = h.y + dy, z = h.z + dz; if (Math.hypot(dx - h.nx * 0.35, dy - h.ny * 0.35, dz - h.nz * 0.35) <= R && breakable(x, y, z) && j < splashBoxes.length) { splashBoxes[j].visible = true; splashBoxes[j++].position.set(x + 0.5, y + 0.5, z + 0.5); } }
     }
+    if (S.tool === 6) { let j = 0; for (const [x, y, z] of sawCells(h)) if ((x !== h.x || y !== h.y || z !== h.z) && j < splashBoxes.length) { splashBoxes[j].visible = true; splashBoxes[j++].position.set(x + 0.5, y + 0.5, z + 0.5); } }
     if (S.tool === 0) {
       const [u, v] = planeAxes([h.nx, h.ny, h.nz]); let j = 0;
       for (const [a, b] of PATTERNS[lv('spread')]) { if (!a && !b) continue; const x = h.x + u[0] * a + v[0] * b, y = h.y + u[1] * a + v[1] * b, z = h.z + u[2] * a + v[2] * b; if (breakable(x, y, z) && j < splashBoxes.length) { splashBoxes[j].visible = true; splashBoxes[j++].position.set(x + 0.5, y + 0.5, z + 0.5); } }
@@ -1799,9 +2154,9 @@ function update(dt) {
   }
   hoverInfo = h && breakable(h.x, h.y, h.z) ? h : null;
   if (Math.floor(player.z / CH) !== lastChunkZ || dirty.size) { lastChunkZ = Math.floor(player.z / CH); refreshChunks(false); }
-  setLoops(vacOn, pulling, drilling, grinding, laserOn, tbmLvl);
+  setLoops(vacOn, pulling, drilling || sawing, grinding || sawing, laserOn ? 1 : turNear * 0.5, tbmLvl);
 }
-let lastChunkZ = -999, hoverInfo = null, prevHeld = false;
+let lastChunkZ = -999, hoverInfo = null, prevHeld = false, botWarn = -99;
 function spinFrag(r, dt) {
   const w = Math.hypot(r.wx, r.wy, r.wz);
   if (w > 1e-3) { tmpV.set(r.wx / w, r.wy / w, r.wz / w); tmpQ.setFromAxisAngle(tmpV, w * dt); r.q.premultiply(tmpQ); }
@@ -1951,6 +2306,56 @@ function drawLaser(firing) {
   if (firing) { g2.save(); g2.globalCompositeOperation = 'lighter'; const gr = g2.createRadialGradient(tx, ty, 0, tx, ty, 14 * k); gr.addColorStop(0, 'rgba(255,170,110,.9)'); gr.addColorStop(1, 'rgba(255,90,40,0)'); g2.fillStyle = gr; g2.fillRect(tx - 14 * k, ty - 14 * k, 28 * k, 28 * k); g2.restore(); }
   const hs = fistSpr[1][3]; g2.drawImage(hs.c, Math.round(grip[0] - hs.kx), Math.round(grip[1] - hs.ky - 2 * k));
 }
+function drawSaw(active) {
+  const k = fistH / 46, jx = active ? rnd(-0.7, 0.7) : 0, jy = active ? rnd(-0.7, 0.7) : 0;
+  const cx = W / 2 + fistH * 0.62 + jx, cy = H - fistH * 0.58 + jy, r = 11 * k;
+  const hx = cx + 9 * k, hy = cy + 7 * k;
+  drawArm(W / 2 + W * 0.3, H + fistH * 0.9, hx + 15 * k, hy + 10 * k, fistH * 0.55, fistH * 0.3);
+  g2.save(); g2.translate(cx, cy);
+  g2.fillStyle = '#16181a'; g2.beginPath(); g2.arc(0, 0, r + 1.5 * k, 0, 7); g2.fill();
+  g2.rotate(sawSpin);
+  g2.fillStyle = '#9aa3aa'; g2.beginPath(); g2.arc(0, 0, r, 0, 7); g2.fill();
+  for (let i = 0; i < 12; i++) { g2.rotate(Math.PI / 6); g2.fillStyle = '#5c646b'; g2.fillRect(r * 0.62, -1.1 * k, r * 0.3, 2.2 * k); g2.fillStyle = '#e8eef2'; g2.fillRect(r - 0.5 * k, -1.4 * k, 2.4 * k, 2.8 * k); }
+  g2.fillStyle = '#6a737a'; g2.beginPath(); g2.arc(0, 0, r * 0.45, 0, 7); g2.fill(); g2.fillStyle = '#24272a'; g2.fillRect(-2 * k, -2 * k, 4 * k, 4 * k);
+  g2.restore();
+  // guard over the back half, then the motor
+  g2.fillStyle = '#3a2a06'; g2.beginPath(); g2.arc(cx, cy, r + 3.5 * k, -0.2, Math.PI * 0.85); g2.lineTo(cx, cy); g2.fill();
+  g2.fillStyle = '#e3a91f'; g2.beginPath(); g2.arc(cx, cy, r + 2.5 * k, -0.15, Math.PI * 0.8); g2.lineTo(cx, cy); g2.fill();
+  g2.fillStyle = '#3a2a06'; g2.fillRect(hx - k, hy - k, 19 * k, 10 * k); g2.fillStyle = '#e3a91f'; g2.fillRect(hx, hy, 17 * k, 8 * k); g2.fillStyle = '#f6cf5a'; g2.fillRect(hx, hy, 17 * k, 1.5 * k); g2.fillStyle = '#1a1a1a'; g2.fillRect(hx + 6 * k, hy, 2 * k, 8 * k);
+  const hs = fistSpr[1][3]; g2.drawImage(hs.c, Math.round(hx + 13 * k - hs.kx), Math.round(hy + 6 * k - hs.ky));
+}
+function drawCryo(active) {
+  const k = fistH / 46, jx = active ? rnd(-0.4, 0.4) : 0;
+  const tx = W / 2 + fistH * 0.3 + jx, ty = H / 2 + fistH * 0.5, pvx = W / 2 + W * 0.3, pvy = H + fistH * 0.5;
+  const a = Math.atan2(pvy - ty, pvx - tx), ca = Math.cos(a), sa = Math.sin(a);
+  const grip = [tx + 33 * k * ca - 10 * k * sa, ty + 33 * k * sa + 10 * k * ca];
+  drawArm(pvx, pvy + fistH * 0.4, grip[0], grip[1] + 6 * k, fistH * 0.55, fistH * 0.3);
+  g2.save(); g2.translate(tx, ty); g2.rotate(a);
+  const R = (c, x, y, w, h) => { g2.fillStyle = c; g2.fillRect(x, y, w, h); };
+  R('#101214', 0, -2.5 * k, 22 * k, 5 * k); R('#7a8894', 1, -2 * k, 20 * k, 4 * k); R('#a9b6c0', 1, -2 * k, 20 * k, 1 * k);
+  R('#101214', 20 * k, -7 * k, 22 * k, 14 * k); R('#3b8fc4', 21 * k, -6 * k, 20 * k, 12 * k); R('#9fd8f5', 21 * k, -6 * k, 20 * k, 3 * k); R('#e8eef2', 27 * k, -6 * k, 3 * k, 12 * k);
+  R('#2b3138', 31 * k, 7 * k, 6 * k, 12 * k);
+  R(active ? '#f2fbff' : '#6fc2e8', 0, -2 * k, 2 * k, 4 * k);
+  g2.restore();
+  if (active) { g2.save(); g2.globalCompositeOperation = 'lighter'; const gr = g2.createRadialGradient(tx, ty, 0, tx, ty, 18 * k); gr.addColorStop(0, 'rgba(200,235,255,.55)'); gr.addColorStop(1, 'rgba(120,190,255,0)'); g2.fillStyle = gr; g2.fillRect(tx - 18 * k, ty - 18 * k, 36 * k, 36 * k); g2.restore(); }
+  const hs = fistSpr[1][3]; g2.drawImage(hs.c, Math.round(grip[0] - hs.kx), Math.round(grip[1] - hs.ky - 2 * k));
+}
+function drawSing() {
+  const k = fistH / 46, ready = !sing && singT <= 0;
+  const tx = W / 2 + fistH * 0.32, ty = H / 2 + fistH * 0.5 + Math.sin(clock * 1.7) * 1.5, pvx = W / 2 + W * 0.3, pvy = H + fistH * 0.5;
+  const a = Math.atan2(pvy - ty, pvx - tx), ca = Math.cos(a), sa = Math.sin(a);
+  const grip = [tx + 30 * k * ca - 10 * k * sa, ty + 30 * k * sa + 10 * k * ca];
+  drawArm(pvx, pvy + fistH * 0.4, grip[0], grip[1] + 6 * k, fistH * 0.55, fistH * 0.3);
+  g2.save(); g2.translate(tx, ty); g2.rotate(a);
+  const R = (c, x, y, w, h) => { g2.fillStyle = c; g2.fillRect(x, y, w, h); };
+  R('#101214', 0, -6 * k, 38 * k, 12 * k); R('#2c2a30', 1, -5 * k, 36 * k, 10 * k); R('#45424c', 1, -5 * k, 36 * k, 2 * k);
+  for (let i = 0; i < 3; i++) R(ready ? '#ff9a50' : '#5a3a2a', (5 + i * 5) * k, -6 * k, 2 * k, 12 * k);
+  R('#000', -1, -4 * k, 3 * k, 8 * k);
+  R('#2b3138', 28 * k, 6 * k, 6 * k, 12 * k);
+  g2.restore();
+  if (ready) { g2.save(); g2.globalCompositeOperation = 'lighter'; const gr = g2.createRadialGradient(tx, ty, 0, tx, ty, 10 * k); gr.addColorStop(0, 'rgba(255,160,90,.5)'); gr.addColorStop(1, 'rgba(255,120,60,0)'); g2.fillStyle = gr; g2.fillRect(tx - 10 * k, ty - 10 * k, 20 * k, 20 * k); g2.restore(); }
+  const hs = fistSpr[1][3]; g2.drawImage(hs.c, Math.round(grip[0] - hs.kx), Math.round(grip[1] - hs.ky - 2 * k));
+}
 // small readout under the crosshair: sledge wind-up, sticks left, laser heat
 function toolMeter() {
   const cx = W >> 1, cy = (H >> 1) + 26;
@@ -1963,6 +2368,10 @@ function toolMeter() {
     const mx = stickMax(lv('sticks')), n = S.sticks || 0;
     for (let i = 0; i < mx; i++) { g2.fillStyle = 'rgba(0,0,0,.7)'; g2.fillRect(cx - mx * 4 + i * 8, cy - 1, 6, 10); g2.fillStyle = i < n ? '#c8341f' : '#3a3e42'; g2.fillRect(cx - mx * 4 + i * 8 + 1, cy, 4, 8); }
     if (n < mx) { g2.fillStyle = 'rgba(0,0,0,.7)'; g2.fillRect(cx - 17, cy + 12, 34, 3); g2.fillStyle = '#f2b233'; g2.fillRect(cx - 16, cy + 13, Math.round(32 * dynT / stickT(lv('sticks'))), 1); }
+  }
+  if (S.tool === 8 && singT > 0) {
+    g2.fillStyle = 'rgba(0,0,0,.75)'; g2.fillRect(cx - 21, cy, 42, 5);
+    g2.fillStyle = '#ff9a50'; g2.fillRect(cx - 20, cy + 1, Math.round(40 * (1 - singT / singCd(lv('mass')))), 3);
   }
   if (S.tool === 5 && (laserHeat > 0.01 || laserHot)) {
     g2.fillStyle = 'rgba(0,0,0,.75)'; g2.fillRect(cx - 21, cy, 42, 5);
@@ -2007,7 +2416,10 @@ function draw2D() {
   else if (S.tool === 2) drawDrill(held && lv('drill'));
   else if (S.tool === 3) drawSledge();
   else if (S.tool === 4) drawDynamite();
-  else drawLaser(beam.visible);
+  else if (S.tool === 5) drawLaser(beam.visible);
+  else if (S.tool === 6) drawSaw(held && !!lv('saw'));
+  else if (S.tool === 7) drawCryo(held && !!lv('cryo'));
+  else drawSing();
   toolMeter();
 }
 
@@ -2057,6 +2469,12 @@ function buy(id) {
   if (id === 'rigs') { syncRigs(); if (lv('rigs') === 1) toast('Your first drill rig is clamping onto the face.', 3000); }
   if (id === 'crusher') { syncCrusher(); toast('The rock crusher is rolling in behind you.', 3000); }
   if (id === 'tbm') { syncTbm(); toast('The boring machine is on its way to the face.', 3200); }
+  if (id === 'saw') { setTool(6); toast('Rock saw unlocked (7). Hold it on the face to cut a slot.', 3200); }
+  if (id === 'cryo') { setTool(7); toast('Cryo sprayer unlocked (8). Freeze the rock, then hit it with something else.', 3600); }
+  if (id === 'singularity') { setTool(8); toast('Singularity unlocked (9). Fire it into the rock and keep back.', 3600); }
+  if (id === 'excav') { syncExcav(); toast('The excavator is crawling up to the face.', 3000); }
+  if (id === 'bdrone') { syncBdrones(); if (lv('bdrone') === 1) toast('Your blasting drone is airborne. It waits until you are clear.', 3400); }
+  if (id === 'turret') { syncTurrets(); if (lv('turret') === 1) toast('A laser turret is setting up behind the face.', 3000); }
   if (id === 'crew' && lv('crew') === 1) toast('Your crew is on the clock. They keep digging while you are away.', 3500);
   uiTick(true);
 }
@@ -2098,7 +2516,7 @@ function uiTick(force) {
   const h = hintText();
   if (h) { el.hint.innerHTML = h; el.hint.hidden = false; } else el.hint.hidden = true;
   el.resume.hidden = coarse || locked || lockFailed || !playing();
-  for (let k = 2; k < 6; k++) $('#t' + k).hidden = !lv(TOOL_REQ[k]);
+  for (let k = 2; k < 9; k++) $('#t' + k).hidden = !lv(TOOL_REQ[k]);
   el.mute.textContent = isMuted() ? 'SOUND OFF' : 'SOUND ON';
 }
 const Kb = s => `<b>${s}</b>`;
@@ -2121,7 +2539,7 @@ function toast(s, ms) { if (!s) return; el.toast.textContent = s; el.toast.style
 function setTool(t) {
   if (TOOL_REQ[t] && !lv(TOOL_REQ[t])) { sDeny(); toast('The ' + TOOL_NAME[t] + ' unlocks in Upgrades.'); return; }
   S.tool = t; sTool(); sledge.charge = 0;
-  for (let k = 0; k < 6; k++) $('#t' + k).classList.toggle('on', k === t);
+  for (let k = 0; k < 9; k++) $('#t' + k).classList.toggle('on', k === t);
 }
 function openShop() { el.shop.classList.add('open'); if (document.exitPointerLock && locked) document.exitPointerLock(); mouseDown = false; uiTick(true); }
 function closeShop() { el.shop.classList.remove('open'); }
@@ -2140,7 +2558,7 @@ function showEnding() {
   $('#ending').hidden = false;
 }
 
-for (let k = 0; k < 6; k++) $('#t' + k).addEventListener('click', () => { aInit(); setTool(k); });
+for (let k = 0; k < 9; k++) $('#t' + k).addEventListener('click', () => { aInit(); setTool(k); });
 $('#sellBtn').addEventListener('click', () => { aInit(); sell(false); });
 $('#shopBtn').addEventListener('click', () => { aInit(); toggleShop(); });
 $('#shopClose').addEventListener('click', closeShop);
@@ -2196,6 +2614,10 @@ function resetWorld() {
   if (crusher) { scene.remove(crusher.g); crusher = null; }
   if (tbm) { scene.remove(tbm.g); tbm = null; }
   for (const st of sticksOut) scene.remove(st.m); sticksOut = [];
+  if (excav) { scene.remove(excav.g, excav.boom, excav.stick, excav.bucket); excav = null; }
+  for (const d of bdrones) { scene.remove(d.g); if (d.charge) scene.remove(d.charge.m); } bdrones = [];
+  for (const t of turrets) scene.remove(t.g, t.ln); turrets = [];
+  frozen.clear(); sing = null; singG.visible = false; singT = 0;
   recomputeFront(); syncDrones(); buildShop(); setTool(0); refreshChunks(true); uiTick(true);
 }
 function apply(d) {
@@ -2232,7 +2654,7 @@ function start(data) {
   const d = data && data.v === 3 ? data : load();
   if (d) { apply(d); pendingAway = !(data && data.v === 3); if (pendingAway) awayFrom = d.lastSeen || 0; }
   else recomputeFront();
-  syncDrones(); syncRigs(); syncCrusher(); syncTbm(); setTool(TOOL_REQ[S.tool || 0] && !lv(TOOL_REQ[S.tool || 0]) ? 0 : S.tool || 0);
+  syncDrones(); syncRigs(); syncCrusher(); syncTbm(); syncExcav(); syncBdrones(); syncTurrets(); setTool(TOOL_REQ[S.tool || 0] && !lv(TOOL_REQ[S.tool || 0]) ? 0 : S.tool || 0);
   refreshChunks(true); updateCamera(); uiTick(true);
   if (data && data.v === 3) $('#intro').hidden = true; else showIntro();
   let last = performance.now(), uiAcc = 0;
