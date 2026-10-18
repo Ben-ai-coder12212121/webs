@@ -1,6 +1,6 @@
 /* app.js: the game player (top bar, levels, leaderboards, full screen, random button) and the homepage grid */
 const ALLG=G.slice();const PAGE=window.PAGE_GAME||null;const gameUrl=g=>(g.url||("/games/"+g.id+"/"));
-const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'm_garden', 'm_lanelords', 'm_pet', 'm_pool', 'bunker'];
+const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'm_garden', 'm_lanelords', 'm_pet', 'm_pool'];
 const WIP=G.filter(g=>WIP_IDS.includes(g.id));
 WIP.forEach(g=>G.splice(G.indexOf(g),1));
 const stage=$('#stage'),arena=$('#arena'),statEl=$('#stat'),grid=$('#grid');
@@ -136,7 +136,7 @@ const durLabel=g=>{const d=meta(g).d;return d>=15?'15+ min':d+' min'};
 /* modes: filters that apply to the random button, the time picks, "Another detourr" and the grid */
 const MODES={big:'Big games only',quick:'Quick games',class:'Classroom-friendly'};
 /* the big games: superheroes, 3D worlds, sims and story games (what the old "Big games" random button picked) */
-const MAJOR=new Set(['openroad','apexgt','wanted','zsurv','stillshot','fishing','flightsim','skyfront','rumble','breach','royale','e3_study','e3_sub','e3_cabin','kart','octagon','jetpack','sim_farm','sim_town','sim_tractor','geo_wai','powerlab','gunsim','goose','ph_buddy','knuckle']);
+const MAJOR=new Set(['openroad','apexgt','wanted','zsurv','stillshot','fishing','flightsim','skyfront','rumble','breach','royale','e3_study','e3_sub','e3_cabin','kart','octagon','jetpack','sim_farm','sim_town','sim_tractor','geo_wai','powerlab','gunsim','goose','ph_buddy','knuckle','bunker','m_bowduel']);
 const isMajor=g=>!!(g.major||g.kind==='hero'||MAJOR.has(g.id));
 let modes=Object.assign({big:false,quick:false,class:false},S.get('modes',{}));delete modes.silent;delete modes.kb;/* the Silent and Keyboard-only filters were removed */
 function modeOK(g){const m=meta(g);if(modes.big&&!isMajor(g))return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.kind==='hero'||g.kind==='shooter'))return false;return true}
