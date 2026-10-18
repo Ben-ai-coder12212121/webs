@@ -8,7 +8,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ## 1. What this is
 
-**Detourr** is a free browser-games site for bored students: 272 games in the catalog, of which **204 are public**. The rest are hidden (50 removed in the audit, plus 8 shelved shooter prototypes) or in progress (10). No sign-up, no ads, runs on school Chromebooks and phones.
+**Detourr** is a free browser-games site for bored students: 272 games in the catalog, of which **158 are public**. The rest are hidden (69 removed: 50 in the audit, 19 in the owner's game review; plus 8 shelved shooter prototypes) or in progress (41). No sign-up, no ads, runs on school Chromebooks and phones.
 
 - **Live site:** https://detourr.net (Netlify; `detourr.netlify.app` redirects there).
 - **Repo:** `ben-ai-coder12212121/webs`.
@@ -135,8 +135,13 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 **Shelved shooter prototypes (`kind:'shooter'`, in `games/_hidden/`):** Boredom Outbreak, Operation Breadcrumb, Snowball Siege, Vacuum Wars, Gnome Patrol, Pizza Heist, Jailbreak Dog, Space Llama.
 
-**The owner chose to KEEP these 23** from the audit's remove list, so don't hide them:
-- breathe, gt_fireflies, ch_rain, info_life, info_pets, info_moon
+**Owner's game review (Oct 2026):** the owner went through every game in a review page (private artifact https://claude.ai/artifact/RHnHhy9v459MhxaZZbVHrm, picks stored in its `choices` collection) and chose:
+- **Removed (added to `HIDDEN`, 19):** Box Pusher, Bigger or Smaller, Capital Quiz, Continent Sort, Landmark Locator, Pin the City, Country Shapes, Goose Heist, Glow Spiro, Fact Machine, Jelly Buddies, Jigsaw, Kaleidoscope, Beat Lanes, Quick Math, Maze Runner, Pop Fidget, Sticky Goo, Teo's Escape.
+- **Moved to In progress (added to `WIP_IDS`, 29):** Apex GT, Archery, Bowling, Breach 5v5, Darts, Field Goal, Tight Lines, Horizon Flight Sim, Gunmach, Hill Climb, Hoops, Dinger Derby, Frostline, Pocket, Titan, Spring Climber, Road Hopper, Rail Dash, Spiral Drop, Word Wheel, Open Road, Crash Dummy, Last Drop, Street Rumble, Farm Life, Lemonade Tycoon, Skyfront 1943, Tennis, Virus Attack. No notes were given on what each needs.
+- Everything else was marked no change. `node tools/pull-game.cjs --wip|--hide <ids>` does the move (lists, noindex, sitemap); `tools/release-game.cjs` reverses `--wip`. Their ids are still in `TOP_PICKS`/`MAJOR`/`CORE`, which is harmless (the homepage drops in-progress and hidden games first) and keeps them ready to return.
+
+**The owner chose to KEEP these 22** from the audit's remove list (Glow Spiro was later removed in the review), so don't hide them:
+- breathe, gt_fireflies, ch_rain, info_life, info_pets, info_moon (gt_spiro below was removed in the review)
 - info_prices, info_trip, info_clock, io_absorb, fifteen, scramble
 - fishtank, fireworks, glowboard, gt_spiro, googly, pond
 - lava, sparkler, spiro, warp, sand

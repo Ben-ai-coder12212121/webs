@@ -1,6 +1,6 @@
 /* app.js: the game player (top bar, levels, leaderboards, full screen, random button) and the homepage grid */
 const ALLG=G.slice();const PAGE=window.PAGE_GAME||null;const gameUrl=g=>(g.url||("/games/"+g.id+"/"));
-const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'm_garden', 'm_lanelords', 'm_pet', 'm_pool', 'lumber', 'fishtycoon'];
+const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'm_garden', 'm_lanelords', 'm_pet', 'm_pool', 'lumber', 'fishtycoon', 'apexgt', 'archery', 'bowling', 'breach', 'darts', 'fieldgoal', 'fishing', 'flightsim', 'gunmach', 'hillclimb', 'hoops', 'hrderby', 'hs_ice', 'hs_size', 'hs_strength', 'm_climber', 'm_hopper', 'm_raildash', 'm_spiral', 'm_wordwheel', 'openroad', 'ph_dummy', 'royale', 'rumble', 'sim_farm', 'sim_lemon', 'skyfront', 'tennis', 'virus'];
 const WIP=G.filter(g=>WIP_IDS.includes(g.id));
 WIP.forEach(g=>G.splice(G.indexOf(g),1));
 const stage=$('#stage'),arena=$('#arena'),statEl=$('#stat'),grid=$('#grid');
@@ -286,7 +286,7 @@ function renderGrid(){if(PAGE)return;grid.innerHTML='';if(filter==='foryou'&&!qu
 /* taken off the listings and the random button (their pages and links still work): early prototypes, and the games the
    September 2026 audit marked for removal as passive, one-tap, redundant or niche */
 const HIDDEN=new Set(['rps','monsterrush','skyrace','pebble','torchmaze','jelloreversi','ancient',
-  'doodle','todo','hilo','cactus','hanoi','guess','balloons','piano','drums','life','8ball','fortune','facts','pitch','xylo','tempo','theremin','chords','drumpads','pegs','futoshiki','hwweave','mitoza','hundred','hexfit','info_daynight','info_big','info_old','gt_ribbons','gt_tunnel','gt_aurora','gt_meteors','gt_lightpaint','gt_bloom','ch_chimes','ch_stars','sprint','cradle','rope','magnets','knobsketch','snowglobe','zipper']);
+  'doodle','todo','hilo','cactus','hanoi','guess','balloons','piano','drums','life','8ball','fortune','facts','pitch','xylo','tempo','theremin','chords','drumpads','pegs','futoshiki','hwweave','mitoza','hundred','hexfit','info_daynight','info_big','info_old','gt_ribbons','gt_tunnel','gt_aurora','gt_meteors','gt_lightpaint','gt_bloom','ch_chimes','ch_stars','sprint','cradle','rope','magnets','knobsketch','snowglobe','zipper','boxpush','geo_bigger','geo_capitals','geo_continents','geo_landmarks','geo_pin','geo_shapes','goose','gt_spiro','info_facts','jellies','jigsaw','kaleido','lanes','math','maze','popit','stickygoo','teoescape']);
 for(let i=G.length-1;i>=0;i--)if(G[i].kind==='shooter'||HIDDEN.has(G[i].id))G.splice(i,1);
 /* the public count: games in the main list (not hidden, not in progress, not the shelved 3D shooters), same rule as tools/allgames.cjs */
 {const n=G.filter(g=>!HIDDEN.has(g.id)&&!WIP_IDS.includes(g.id)&&g.kind!=='shooter').length;const ce=$('#count');if(ce)ce.textContent=n;const c2=$('#count2');if(c2)c2.textContent=n}
