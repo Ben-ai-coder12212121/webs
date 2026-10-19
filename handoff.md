@@ -122,6 +122,12 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
   - 15 mobile-style games.
   - Moonblade art upgrade.
 
+### Analytics and the homepage first screen (Oct 2026)
+
+- **Tracking (`TRACK` in `js/app.js`, right after `HIST`):** sends GA4 events through the page's `gtag` when present: `game_open`, `game_start` (first click, tap or key in the game), `game_time` (visible seconds, sent on hide/close/pagehide with beacon transport), `new_best` (at most once a minute per game), `random_game`, `home_pick` (first-screen cards, `source` continue/top), `filter`. User properties `visit_number` (counted on the device, a new visit after 30 min away; a wiped device shows as 1 again) and `device_kind` (chromebook/phone/tablet/computer from the user agent). The owner has to register custom dimensions in GA (event: `game_id`, `source`; user: `visit_number`, `device_kind`) and a custom metric `seconds` for these to show in reports.
+- **Homepage first screen:** `#heroGames` under the headline, filled by `renderHero()`: Continue playing (the 3 most recent games in this device's `HIST`) and Top games from `TOP_PICKS` (6 for first-time visitors). Headline and sign were made smaller so the cards fit above the fold.
+- **Random button:** players with fewer than 5 games in their history get a game from `TOP_PICKS` (was `CORE`).
+
 ### Removed from the site (hidden, pages kept, `noindex`)
 
 **In the `HIDDEN` set in `js/app.js` (50):**
@@ -153,7 +159,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 | Game | What it needs |
 |---|---|
 | Lumberjack Tycoon | 3D open-world lumber game (`TimberTycoon(host, env)`, save key `unb_lumber3d_save`, installed with `--libs=online`). Round 2: PBR bark/ground textures, leaf-card trees, HDRI lighting, soft shadows, haze, wind grass and an animated character from `/assets`; chainsaws (3 tiers), a drivable tree-cutting machine, a log loader with crane, customer orders, daily order and login bonus, 24 awards, Cherry and Ironwood, a woodshop (beams, furniture crates), hired loggers and sellers (only while playing), storms, a rare giant tree; 4-player online co-op via `js/lib/online.js` (host world, per-player wallets, host owns land/machines). Source lives in the build agent's scratchpad (`parts/` + `build.sh`, which strips the `?ltdebug` hook). Needs a real-device fps check and longer play to tune prices; on short landscape phones the site header covers the bottom of the game unless full screen |
-| Fishing Tycoon | Rebuilt as a 3D island fishing adventure in the style the owner asked for (the popular Roblox fishing games, all original): `TideCaster(host, env)`, save key `unb_fish3d_save`. Six islands, 61 drawn fish across 7 zones and 7 rarities (some only at night, in rain or fog), special variants, charge cast, shake and reel minigame shaped by rod stats, 10 rods, 6 baits, backpack upgrades, 3 boats you drive, a journal, bounties, day/night and weather. Leaderboard stays total money earned (matches the old board). Needs a real-device fps check and longer balance play |
+| Fishing Tycoon | 3D island fishing adventure (`TideCaster(host, env)`, save key `unb_fish3d_save`). Round 2 (owner: camera was bad and didn't follow the mouse): pointer-lock mouse look from an over-the-shoulder camera with collision (drag-to-look fallback and on touch), camera frames the bobber while fishing and sits behind the boat; HDRI lighting, textured terrain and buildings, `n_nature.glb` vegetation, an animated Quaternius fisherman, fish-leaps-to-hand catch moment, faster first bites and beginner luck, a Next goal line. Source in the build agent's scratchpad (`fish3d_work/`, `build.sh` strips the test hook). High graphics is heavier now: check on a mid laptop. 61 fish, 7 zones, rods, bait, boats, journal, bounties, day/night and weather. Leaderboard is total money earned |
 | Neon Harbor | Open-world crime game; heavy, and the theme isn't classroom-friendly |
 | The Hollow | Survival horror; heavy |
 | Silent Contract | Unfinished |

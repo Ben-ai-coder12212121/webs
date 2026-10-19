@@ -12,7 +12,7 @@ function makeCtx(g){const ds=[];let alive=true;return{
   stat(t){statEl.textContent=t},
   level:g.levels?S.get('lvl_'+g.id,1):1,
   pick(a,b,c){return[a,b,c][this.level]},
-  best(v,lower){if(v!=null&&Number.isFinite(+v))try{noteScore(g,+v,!!(lower||g.lower))}catch(e){}const k=bestKey(g),b=S.get(k,null);if(v!=null&&(b==null||(lower?v<b:v>b))){S.set(k,v);try{LB.best(g,k,v,lower)}catch(e){}return v}return b},
+  best(v,lower){if(v!=null&&Number.isFinite(+v))try{noteScore(g,+v,!!(lower||g.lower))}catch(e){}const k=bestKey(g),b=S.get(k,null);if(v!=null&&(b==null||(lower?v<b:v>b))){S.set(k,v);try{LB.best(g,k,v,lower)}catch(e){}try{TRACK.best(g)}catch(e){}return v}return b},
   dispose(){alive=false;ds.forEach(f=>f())}}}
 const LVN=['Easy','Normal','Hard'];
 function bestKey(g){const l=g.levels?S.get('lvl_'+g.id,1):1;return'best_'+g.id+(l!==1?'_'+l:'')}
@@ -52,15 +52,15 @@ const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','sma
   return{best,open,close:()=>{closePanel();btn.hidden=true},eligible,probe,toast,share,send,name,cid}})();
 const DOC_TITLE=document.title;
 function openGame(g){if(g.id!==PAGE){location.href=gameUrl(g);return}setTimeout(()=>{try{rotCheck()}catch(e){}},700);if(ctx){ctx.dispose();if(ctx.extra)ctx.extra()}current=g;arena.innerHTML='';arena.classList.toggle('wide',!!g.wide);statEl.textContent='';$('#stTitle').textContent=g.name;stage.hidden=false;document.body.style.overflow='hidden';const lv=$('#lvl');lv.hidden=!g.levels;if(g.levels){const l=S.get('lvl_'+g.id,1);lv.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.l===l))}stage.scrollTop=0;
-  ctx=makeCtx(g);try{HIST.open(g);touchStreak();checkBadges()}catch(e){}try{syncBeat()}catch(e){}try{document.title=g.name+' · Play free on Detourr'}catch(e){}try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;gfxBtn.hidden=true;[600,2500,6000].forEach(ms=>setTimeout(()=>{if(current===g)checkGfx()},ms));if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}}
-function closeGame(){if(PAGE){location.href='/';return}try{HIST.close()}catch(e){}try{LB.close()}catch(e){}try{document.title=DOC_TITLE}catch(e){}try{if(fsEl())fsExit()}catch(e){}try{rotq.classList.remove('on');rotSkip=false}catch(e){}if(ctx){ctx.dispose();if(ctx.extra)ctx.extra();ctx=null}current=null;arena.innerHTML='';stage.hidden=true;document.body.style.overflow='';renderGrid();try{history.replaceState(null,'',location.pathname)}catch(e){}}
+  ctx=makeCtx(g);try{HIST.open(g);touchStreak();checkBadges()}catch(e){}try{TRACK.open(g)}catch(e){}try{syncBeat()}catch(e){}try{document.title=g.name+' · Play free on Detourr'}catch(e){}try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;gfxBtn.hidden=true;[600,2500,6000].forEach(ms=>setTimeout(()=>{if(current===g)checkGfx()},ms));if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}}
+function closeGame(){try{TRACK.stop()}catch(e){}if(PAGE){location.href='/';return}try{HIST.close()}catch(e){}try{LB.close()}catch(e){}try{document.title=DOC_TITLE}catch(e){}try{if(fsEl())fsExit()}catch(e){}try{rotq.classList.remove('on');rotSkip=false}catch(e){}if(ctx){ctx.dispose();if(ctx.extra)ctx.extra();ctx=null}current=null;arena.innerHTML='';stage.hidden=true;document.body.style.overflow='';renderGrid();try{history.replaceState(null,'',location.pathname)}catch(e){}}
 const isBig=g=>g.big!=null?g.big:(g.kind==='hero'||g.kind==='shooter'||/with3D|runShooter/.test(String(g.run)));
 let rndMode=S.get('rndMode','all');
 function syncRnd(){document.querySelectorAll('#rndMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===rndMode));}
 document.querySelectorAll('#rndMode button').forEach(b=>b.addEventListener('click',()=>{rndMode=b.dataset.m;S.set('rndMode',rndMode);beep(500,.05,'triangle');syncRnd()}));
 syncRnd();
 function rnd01(){try{const u=new Uint32Array(1);crypto.getRandomValues(u);return u[0]/4294967296}catch(e){return Math.random()}}
-function surprise(want){const fit=g=>!want||want==='any'||meta(g).d===+want;let pool=G.filter(g=>g!==current&&fit(g)&&poolOK(g));if(Object.keys(HIST.get()).length<5){const core=pool.filter(g=>CORE.has(g.id));if(core.length>=3)pool=core}if(!pool.length)pool=G.filter(g=>g!==current&&poolOK(g));if(!pool.length)pool=G.filter(g=>g!==current);let seen=S.get('rndSeen',[]);const keep=Math.floor(pool.length*.6);let fresh=pool.filter(g=>!seen.includes(g.id));if(!fresh.length){seen=[];fresh=pool}const g=fresh[Math.floor(rnd01()*fresh.length)];seen.push(g.id);if(seen.length>keep)seen=seen.slice(-keep);S.set('rndSeen',seen);spinTo(g)}
+function surprise(want){const fit=g=>!want||want==='any'||meta(g).d===+want;let pool=G.filter(g=>g!==current&&fit(g)&&poolOK(g));const newbie=Object.keys(HIST.get()).length<5;if(newbie){const top=pool.filter(g=>TOP_PICKS.includes(g.id)),core=pool.filter(g=>CORE.has(g.id));if(top.length>=3)pool=top;else if(core.length>=3)pool=core}if(!pool.length)pool=G.filter(g=>g!==current&&poolOK(g));if(!pool.length)pool=G.filter(g=>g!==current);let seen=S.get('rndSeen',[]);const keep=Math.floor(pool.length*.6);let fresh=pool.filter(g=>!seen.includes(g.id));if(!fresh.length){seen=[];fresh=pool}const g=fresh[Math.floor(rnd01()*fresh.length)];seen.push(g.id);if(seen.length>keep)seen=seen.slice(-keep);S.set('rndSeen',seen);try{TRACK.ev('random_game',{game_id:g.id,time_pick:String(want||'any'),new_player:newbie?'yes':'no'})}catch(e){}spinTo(g)}
 $('#back').addEventListener('click',closeGame);
 $('#again').addEventListener('click',()=>surprise());
 const fsBtn=$('#fs'),fsApi=()=>document.fullscreenElement||document.webkitFullscreenElement||null,fsEl=()=>fsApi()||(stage.classList.contains('pfs')?stage:null);
@@ -198,12 +198,39 @@ gfxBtn.addEventListener('click',()=>{try{sessionStorage.setItem('unb_gfx',gfxLow
 {const fs=$('#fs');if(fs&&fs.parentNode){fs.parentNode.insertBefore(gfxBtn,fs);syncGfx()}}
 function checkGfx(){gfxBtn.hidden=!arena.querySelector('.g3,canvas[data-engine="three"]')}
 {const mt=$('#moretog');if(mt)mt.addEventListener('click',()=>{const f=mt.closest('.filters');const o=!f.classList.contains('open');f.classList.toggle('open',o);mt.setAttribute('aria-expanded',o?'true':'false');mt.textContent=o?'Less ▴':'More ▾'})}
-document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));renderGrid()}));
+document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;try{TRACK.ev('filter',{filter:filter})}catch(e){}document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));renderGrid()}));
 const KIND={game:'Game',toy:'Toy',chill:'Chill',sports:'Sports',music:'Music',weird:'Weird',puzzle:'Puzzle',shooter:'3D Shooter',hero:'Superhero',smash:'Smash',geo:'Geography',info:'Cool Info',io:'.io',arcade:'Arcade',casual:'Casual',board:'Board & Classic',cooking:'Cooking',sim:'Simulators',escape:'Escape Room'};
 let query='';
 $('#search').addEventListener('input',e=>{query=e.target.value.trim().toLowerCase();renderGrid()});
 try{const q0=new URLSearchParams(location.search).get('q');if(q0){$('#search').value=q0;query=q0.trim().toLowerCase()}}catch(e){}
 const HIST={get(){return S.get('hist',{})},open(g){this.close();const h=this.get();const e=h[g.id]||{n:0,s:0,t:0};e.n++;e.t=Date.now();h[g.id]=e;S.set('hist',h);this.cur={id:g.id,t0:Date.now()}},close(){if(!this.cur)return;const h=this.get();const e=h[this.cur.id];if(e){e.s=Math.min(36e5,(e.s||0)+Math.round((Date.now()-this.cur.t0)/1000));S.set('hist',h)}this.cur=null}};
+/* Analytics: Google Analytics 4 through the page's gtag, when it is there. Events: game_open (page opened), game_start
+   (first click, tap or key in the game), game_time (seconds played while the tab is visible, sent when it is hidden,
+   the game closes or the page goes away), new_best, random_game, home_pick, filter. User properties: visit_number
+   (visits counted on this device: a device that wipes its data shows up as visit 1 again) and device_kind. */
+const TRACK=(()=>{const ok=()=>typeof gtag==='function',ev=(n,p)=>{try{if(ok())gtag('event',n,p||{})}catch(e){}};
+  const ua=navigator.userAgent||'',dev=/CrOS/.test(ua)?'chromebook':/iPad|Tablet/.test(ua)||(/Android/.test(ua)&&!/Mobi/.test(ua))?'tablet':/Mobi|iPhone|Android/.test(ua)?'phone':'computer';
+  const now=Date.now();let v=S.get('visits',null);if(!v||!v.n)v={n:1,first:now,last:now};else if(now-(v.last||0)>18e5)v.n++;v.last=now;S.set('visits',v);
+  try{if(ok())gtag('set','user_properties',{visit_number:String(Math.min(v.n,50)),device_kind:dev})}catch(e){}
+  let cur=null;const lastBest={};
+  const send=()=>{if(!cur||!cur.started||!cur.vis)return;const t=performance.now(),s=Math.round((t-cur.from)/1000);cur.from=t;if(s>=2)ev('game_time',{game_id:cur.id,seconds:Math.min(s,3600),transport_type:'beacon'})};
+  const stop=()=>{send();cur=null};
+  const open=g=>{stop();cur={id:g.id,started:false,vis:!document.hidden,from:0};ev('game_open',{game_id:g.id,in_progress:WIP_IDS.includes(g.id)?'yes':'no'})};
+  const go=()=>{if(!cur||cur.started)return;cur.started=true;cur.from=performance.now();const h=HIST.get()[cur.id];ev('game_start',{game_id:cur.id,in_progress:WIP_IDS.includes(cur.id)?'yes':'no',times_played:h?h.n:1,visit_number:v.n})};
+  for(const e of ['pointerdown','keydown','touchstart'])addEventListener(e,ev2=>{if(cur&&!cur.started&&(!ev2.target||!ev2.target.closest||ev2.target.closest('#arena')||e==='keydown'))go()},{capture:true,passive:true});
+  addEventListener('visibilitychange',()=>{if(!cur)return;if(document.hidden){send();cur.vis=false}else{cur.vis=true;cur.from=performance.now()}});
+  addEventListener('pagehide',send);
+  // one new_best per game per minute at most: some games report a rising score every frame
+  const best=g=>{const t=Date.now();if(t-(lastBest[g.id]||0)<6e4)return;lastBest[g.id]=t;ev('new_best',{game_id:g.id})};
+  return{ev,open,stop,best,dev,visits:v}})();
+/* First screen of the homepage: Continue playing (newest games in this device's history) and Top games, as picture cards. */
+function renderHero(){const box=$('#heroGames');if(!box)return;box.innerHTML='';const h=HIST.get(),find=id=>G.find(g=>g.id===id)||WIP.find(g=>g.id===id);
+  const cont=Object.keys(h).filter(find).sort((a,b)=>(h[b].t||0)-(h[a].t||0)).slice(0,3).map(find);
+  const tops=TOP_PICKS.map(id=>G.find(g=>g.id===id)).filter(g=>g&&!cont.includes(g)).slice(0,cont.length?3:6);
+  const card=(g,src)=>{const a=el('a',{class:'hgc',href:gameUrl(g)},el('div',{class:'art',style:'background:'+g.tint,html:'<svg viewBox="0 0 120 72" aria-hidden="true">'+g.art+'</svg>'}),el('b',null,g.name));a.addEventListener('click',()=>TRACK.ev('home_pick',{game_id:g.id,source:src}));return a};
+  const row=(title,list,src)=>{if(!list.length)return;box.append(el('h2',{class:'hgh'},title));const r=el('div',{class:'hgr'});list.forEach(g=>r.append(card(g,src)));box.append(r)};
+  row('Continue playing',cont,'continue');row(cont.length?'Top games':'Start with a top game',tops,'top')}
+
 const REC_POP=['hs_villain','hs_havoc','ph_buddy','hs_kaiju','stack','cook_pizza','sim_tractor','hs_speed','sim_town','snake','2048','io_blob'];
 const STOPW=new Set('with your from that this into over they them then than what when where which while their there these those just more most very each every only also have like make made game games play free your you and the for are can but not all out get got its it’s it’s'.split(' '));
 function recFeat(g){if(g._rf)return g._rf;const words=new Set((g.name+' '+g.blurb).toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>3&&!STOPW.has(w)));return g._rf={words,d3:/\b3d\b/i.test(g.blurb)||['hero','shooter'].includes(g.kind)||!!g.big}}
@@ -297,7 +324,7 @@ $('#aboutClose').addEventListener('click',closeAbout);
 about.addEventListener('click',e=>{if(e.target===about)closeAbout()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!about.hidden)closeAbout()});
 $('#imgCredits').addEventListener('click',()=>{const L=$('#imgList');if(!L.hidden){L.hidden=true;return}L.innerHTML='';(window.HYPE_CREDITS||[]).forEach(([t,f,a,l,u])=>{const p=el('p',null,el('b',null,t+': '),'“'+f+'” by '+a+', '+l+' ');p.append(el('a',{href:u,target:'_blank',rel:'noopener'},'(source)'));L.append(p)});if(!L.children.length)L.append(el('p',null,'No photos loaded.'));L.hidden=false});
-renderGrid();try{renderDaily()}catch(e){}
+renderGrid();try{renderDaily()}catch(e){}try{renderHero()}catch(e){}
 /* each game has its own page; old /#id links from before the split are sent there */
 if(PAGE){const g=ALLG.find(x=>x.id===PAGE);if(g)openGame(g)}else{const h=(location.hash||'').slice(1);const old=h&&ALLG.find(g=>g.id===h);if(old)location.replace(gameUrl(old));addEventListener('hashchange',()=>{const g=ALLG.find(x=>x.id===location.hash.slice(1));if(g)location.replace(gameUrl(g))})}
 /* Dark / Light toggle: dark is the default; the choice is saved per device (the head script applies it before first paint).

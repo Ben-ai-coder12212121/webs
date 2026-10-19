@@ -58,6 +58,10 @@ svg.i{width:20px;height:20px;flex:none;display:block}
 #loc{font-weight:800;font-size:13px;margin-top:5px;color:#2b5d86}
 #clock{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;margin-top:4px;color:var(--dim)}
 #clock svg{width:18px;height:18px}
+#goal{margin-top:7px;padding-top:6px;border-top:2px dashed #d8d2c2;max-width:230px;font-size:12.5px;font-weight:700;line-height:1.25}
+#goal b{display:block;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:#c0392b}
+#goal.pop{animation:gp .6s ease-out}
+@keyframes gp{0%{transform:scale(1.06);background:#fff3b0}100%{transform:none;background:transparent}}
 #tr{position:absolute;right:12px;top:12px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 #mini{width:128px;height:128px;border:3px solid var(--ink);border-radius:10px;box-shadow:3px 3px 0 var(--ink);background:#2f86c8;display:block;cursor:pointer}
 #menu{display:flex;flex-direction:column;gap:6px;align-items:stretch}
@@ -103,6 +107,10 @@ svg.i{width:20px;height:20px;flex:none;display:block}
 #reelProg{margin-top:7px;height:14px;background:#e9e4d6;border:3px solid var(--ink);border-radius:8px;overflow:hidden}
 #reelProgFill{height:100%;width:30%;background:var(--mint)}
 #reelTip{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--dim);text-align:center}
+#lockHint{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;padding:8px 14px;font-weight:800;font-size:15px;white-space:nowrap}
+#lockHint svg{width:22px;height:22px}
+#aimDot{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px rgba(29,26,47,.55);opacity:.75}
+.touchui #aimDot{display:none}
 #catch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(330px,86%);padding:14px 16px 14px;text-align:center;pointer-events:auto;animation:cin .3s cubic-bezier(.2,1.4,.5,1)}
 @keyframes cin{from{transform:translate(-50%,-40%) scale(.7);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
 #catch canvas{width:100%;height:auto;display:block;margin:2px 0 4px}
@@ -180,6 +188,12 @@ svg.i{width:20px;height:20px;flex:none;display:block}
 #tCast{right:18px;bottom:22px;width:86px;height:86px;background:var(--sun);font-size:15px}
 #tJump{right:116px;bottom:18px;width:62px;height:62px}
 #tAct{right:30px;bottom:124px;width:62px;height:62px;font-family:var(--f-d);font-size:22px;background:var(--mint)}
+#loading{position:absolute;inset:0;display:grid;place-items:center;background:#7ec4ec}
+.ldc{padding:16px 22px;text-align:center;min-width:240px}
+.ldc b{display:block;font-family:var(--f-d);font-weight:400;font-size:28px}
+.ldc small{display:block;font-weight:700;color:var(--dim);margin:2px 0 10px}
+.ldbar{height:12px;border:3px solid var(--ink);border-radius:7px;background:#ece8dc;overflow:hidden}
+.ldbar i{display:block;height:100%;width:0;background:var(--mint);transition:width .2s}
 #err{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;font-weight:800;color:#fff;background:#1D1A2F}
 .r0{background:var(--r0)}.r1{background:var(--r1)}.r2{background:var(--r2)}.r3{background:var(--r3)}.r4{background:var(--r4)}.r5{background:var(--r5)}
 .c0{color:#77736a}.c1{color:#2e9a3a}.c2{color:#1f72c9}.c3{color:#9a37d6}.c4{color:#c77d00}.c5{color:#e0244a}
@@ -187,6 +201,7 @@ svg.i{width:20px;height:20px;flex:none;display:block}
  #tl{left:8px;top:8px;padding:6px 9px;min-width:0}
  #money{font-size:20px}
  #loc,#clock{font-size:11.5px}
+ #goal{max-width:150px;font-size:11px}
  #tr{right:8px;top:8px;gap:6px}
  #mini{width:84px;height:84px}
  #menu .btn{font-size:0;gap:0;padding:5px}
@@ -232,7 +247,7 @@ svg.i{width:20px;height:20px;flex:none;display:block}
 const TC_HTML = `<div id="game">
 <canvas id="gl" tabindex="0" aria-label="A 3D fishing world. Walk to the water, cast your rod and reel in fish."></canvas>
 <div id="hud">
- <div id="tl" class="plate"><div id="money">0</div><div id="loc">Pebble Harbor</div><div id="clock"><span id="wxI"></span><span id="clockT">Morning</span></div></div>
+ <div id="tl" class="plate"><div id="money">0</div><div id="loc">Pebble Harbor</div><div id="clock"><span id="wxI"></span><span id="clockT">Morning</span></div><div id="goal"><b>Next goal</b><span id="goalT"></span></div></div>
  <div id="tr">
   <canvas id="mini" class="pe" width="256" height="256" title="Open the map"></canvas>
   <div id="menu" class="pe">
@@ -260,6 +275,8 @@ const TC_HTML = `<div id="game">
   <button class="slot" id="slBait" type="button"><b>2</b><span id="slBaitI"></span><span id="slBaitT">No bait</span></button>
  </div>
  <div id="catch" class="plate" hidden></div>
+ <div id="lockHint" class="plate" hidden><span data-ico="eye"></span>Click the game to look around with your mouse</div>
+ <div id="aimDot"></div>
 </div>
 <div id="touch" hidden>
  <div id="joy"><div id="joyK"></div></div>
@@ -279,6 +296,7 @@ const TC_HTML = `<div id="game">
  <p class="keys" id="introKeys">Keys: E talk or use, Space jump, 1 rod, 2 bait, B backpack, J journal, Q bounties, M map. Scroll to zoom.</p>
  <div class="row"><button class="btn pri" id="introGo" type="button">Start fishing</button></div>
 </div></div></div>
+<div id="loading"><div class="ldc plate"><b>Fishing Tycoon</b><small>Loading the islands...</small><div class="ldbar"><i id="ldBar"></i></div></div></div>
 <div id="err" hidden></div>
 </div>`;
 // Fishing Tycoon: a third-person 3D fishing adventure. Mounts into `host` inside its own shadow root.
@@ -353,6 +371,7 @@ const IP = {
   pin: 'M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11zM12 8a2 2 0 1 0 .1 0',
   scale: 'M12 3v18M5 7h14M5 7l-3 7a3.5 3.5 0 0 0 6 0zM19 7l-3 7a3.5 3.5 0 0 0 6 0zM8 21h8',
   bag2: 'M5 9h14v11H5zM8 9V6h8v3M5 13h14',
+  eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zM12 9a3 3 0 1 0 .1 0',
 };
 const svg = (n, c) => '<svg class="i' + (c ? ' ' + c : '') + '" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="' + (IP[n] || IP.fish) + '"/></svg>';
 shadow.querySelectorAll('[data-ico]').forEach(e => { e.insertAdjacentHTML('afterbegin', svg(e.dataset.ico)); });
@@ -462,7 +481,7 @@ const VARS = [
 // rods: luck %, lure speed %, control (bar size), resilience %, max weight kg, cast range m
 const RODS = [
   { id: 'twig', n: 'Twig Rod', p: 0, luck: 0, lure: 0, ctrl: .22, res: 0, maxw: 12, rng: 13, col: '#8a5a2b', acc: '#d9c08a', at: 0, d: 'A bendy stick with some string. Everyone starts somewhere.' },
-  { id: 'bamboo', n: 'Bamboo Pole', p: 250, luck: 10, lure: 10, ctrl: .23, res: 5, maxw: 30, rng: 15, col: '#c9b45a', acc: '#6b8f3a', at: 0, d: 'Light and springy. A real step up.' },
+  { id: 'bamboo', n: 'Bamboo Pole', p: 180, luck: 10, lure: 10, ctrl: .23, res: 5, maxw: 30, rng: 15, col: '#c9b45a', acc: '#6b8f3a', at: 0, d: 'Light and springy. A real step up.' },
   { id: 'fiber', n: 'Fiberglass Rod', p: 900, luck: 18, lure: 18, ctrl: .25, res: 10, maxw: 70, rng: 16, col: '#3a8fd0', acc: '#e8e2d0', at: 0, d: 'Strong enough for the lake and the harbor.' },
   { id: 'copper', n: 'Copper Coil', p: 2500, luck: 25, lure: 15, ctrl: .27, res: 22, maxw: 140, rng: 17, col: '#c8763a', acc: '#ffd23f', at: 0, d: 'A heavy reel that does not give up.' },
   { id: 'reef', n: 'Reefrunner', p: 6000, luck: 40, lure: 32, ctrl: .26, res: 15, maxw: 180, rng: 18, col: '#3fd0a0', acc: '#ff7eb6', at: 2, d: 'Bright and quick. Fish bite much sooner.' },
@@ -573,12 +592,16 @@ function placeName(x, z) {
   return I ? I.n : 'Open Sea';
 }
 
+function game() {
 /* ================= renderer + scene ================= */
 const glc = $('#gl');
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: HQ, powerPreference: 'high-performance' }); }
 catch (e) { const er = $('#err'); er.hidden = false; er.textContent = 'This browser could not start WebGL, which the game needs for 3D.'; return () => { shadow.innerHTML = ''; }; }
 renderer.setPixelRatio(1);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = .9;
 if (HQ) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; }
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0xbfe4f7, 0.003);
@@ -586,13 +609,20 @@ const camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 1400);
 const hemi = new THREE.HemisphereLight(0xcfe6ff, 0x6a6048, 0.62); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff3dc, 1); scene.add(sun); scene.add(sun.target);
 if (HQ) {
-  sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
-  const sc = sun.shadow.camera; sc.left = -34; sc.right = 34; sc.top = 34; sc.bottom = -34; sc.near = 1; sc.far = 220;
-  sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04;
+  sun.castShadow = true; sun.shadow.mapSize.set(coarse ? 1024 : 2048, coarse ? 1024 : 2048);
+  const sc = sun.shadow.camera; sc.left = -40; sc.right = 40; sc.top = 40; sc.bottom = -40; sc.near = 1; sc.far = 260;
+  sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.04; sun.shadow.radius = 3;
 }
+// image based lighting from an HDR sky (high graphics only)
+let envRT = null;
+if (HQ && ART.hdr) { try { const pm = new THREE.PMREMGenerator(renderer); envRT = pm.fromEquirectangular(ART.hdr); pm.dispose(); scene.environment = envRT.texture; } catch (e) { envRT = null; } }
+const STDM = []; // PBR materials whose sky reflection dims at night
+const LIN = h => new THREE.Color(h).convertSRGBToLinear();
 const tmpV = new THREE.Vector3(), tmpV2 = new THREE.Vector3(), tmpV3 = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), tmpE = new THREE.Euler(), tmpM = new THREE.Matrix4(), tmpS = new THREE.Vector3(), tmpC = new THREE.Color(), tmpC2 = new THREE.Color();
-const LAMB = new THREE.MeshLambertMaterial({ vertexColors: true });
-const glowMat = new THREE.MeshBasicMaterial({ color: 0x5d7d99 });
+const LAMB = HQ ? new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .86, metalness: 0 }) : new THREE.MeshLambertMaterial({ vertexColors: true });
+if (HQ) STDM.push(LAMB);
+const glowMat = new THREE.MeshBasicMaterial({ color: 0x5d7d99, toneMapped: false });
+const tmpLin = new THREE.Color();
 const disposables = [];
 
 /* ---------- geometry builder: merges many little shapes into one vertex-coloured mesh ---------- */
@@ -606,15 +636,22 @@ function prismGeo() { // triangular prism: base width 1 on X, height 1 on Y (ape
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); return g;
 }
 const G_PRISM = prismGeo();
+// texture ids for the props material: 0 none, 1 wood planks, 2 plaster, 3 stone, 4 roof tiles
+const TEX_WOOD = new Set(['#9a6a3c', '#5e3d22', '#b98552', '#a87848', '#b88a52', '#8a5e32', '#8a5a30', '#c8a070', '#8a4a3a']), TEX_STONE = new Set(['#a8a39a', '#8a857c', '#8a96a8']);
 class GeoB {
-  constructor() { this.p = []; this.c = []; }
+  constructor() { this.p = []; this.c = []; this.a = []; this.tex = -1; this.anyT = false; }
   add(g, m, col) {
     const gi = g.index ? g.toNonIndexed() : g, pa = gi.attributes.position, ca = gi.attributes.color;
+    let t = this.tex;
+    if (t < 0) { const k = typeof col === 'string' ? col.toLowerCase() : ''; t = TEX_WOOD.has(k) ? 1 : TEX_STONE.has(k) ? 3 : 0; }
+    if (t) this.anyT = true;
     if (col !== undefined && !(col instanceof THREE.Color)) col = tmpC2.set(col);
+    if (col !== undefined) col = tmpLin.copy(col).convertSRGBToLinear();
     for (let i = 0; i < pa.count; i++) {
       tmpV.fromBufferAttribute(pa, i).applyMatrix4(m); this.p.push(tmpV.x, tmpV.y, tmpV.z);
       if (ca) this.c.push(ca.getX(i) * (col ? col.r : 1), ca.getY(i) * (col ? col.g : 1), ca.getZ(i) * (col ? col.b : 1));
       else this.c.push(col.r, col.g, col.b);
+      this.a.push(t);
     }
     if (gi !== g) gi.dispose();
     return this;
@@ -623,8 +660,54 @@ class GeoB {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(this.p, 3));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.c, 3));
-    g.computeVertexNormals(); g.computeBoundingSphere(); this.p = this.c = null; return g;
+    if (this.anyT) g.setAttribute('at', new THREE.Float32BufferAttribute(this.a, 1));
+    g.computeVertexNormals(); g.computeBoundingSphere(); this.p = this.c = this.a = null; return g;
   }
+}
+/* ---------- textured materials: the CC0 photo textures add detail, the vertex colours keep the palette ---------- */
+function litMat(o) {
+  const m = HQ ? new THREE.MeshStandardMaterial(Object.assign({ vertexColors: true, roughness: .9, metalness: 0 }, o || {})) : new THREE.MeshLambertMaterial({ vertexColors: true });
+  if (HQ) STDM.push(m); return m;
+}
+const U3 = v => ({ value: v || new THREE.Vector3(.5, .5, .5) });
+function splatMat() {
+  const m = litMat({ roughness: .96 });
+  if (!(ART.tex.sand && ART.tex.grass && ART.tex.rock)) return m;
+  m.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, { tS: { value: ART.tex.sand }, tG: { value: ART.tex.grass }, tR: { value: ART.tex.rock }, mS: U3(ART.mean.sand), mG: U3(ART.mean.grass), mR: U3(ART.mean.rock) });
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 aw; varying vec3 vAw; varying vec3 vWP;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvAw = aw; vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D tS, tG, tR; uniform vec3 mS, mG, mR; varying vec3 vAw; varying vec3 vWP;').replace('#include <map_fragment>', [
+      '#include <map_fragment>',
+      'vec2 tuv = vWP.xz * 0.17;',
+      'vec3 ts = mix(texture2D(tS, tuv).rgb, texture2D(tS, tuv * 0.23 + 0.37).rgb, 0.45) / mS;',
+      'vec3 tg = mix(texture2D(tG, tuv * 0.8).rgb, texture2D(tG, tuv * 0.19 + 0.61).rgb, 0.45) / mG;',
+      'vec3 tr = mix(texture2D(tR, tuv * 0.45).rgb, texture2D(tR, tuv * 0.13 + 0.21).rgb, 0.45) / mR;',
+      'vec3 det = ts * vAw.x + tg * vAw.y + tr * vAw.z;',
+      'diffuseColor.rgb *= pow(clamp(det, 0.0, 3.0), vec3(1.5));'].join('\n'));
+  };
+  m.customProgramCacheKey = () => 'tcsplat';
+  return m;
+}
+function propMat() {
+  const m = litMat({ roughness: .82 });
+  const T = ART.tex; if (!(T.planks && T.plaster && T.stonewall && T.roof)) return m;
+  m.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, { tW: { value: T.planks }, tP: { value: T.plaster }, tSt: { value: T.stonewall }, tRf: { value: T.roof }, mW: U3(ART.mean.planks), mP: U3(ART.mean.plaster), mSt: U3(ART.mean.stonewall), mRf: U3(ART.mean.roof) });
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float at; varying float vAt; varying vec3 vWP; varying vec3 vWN;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvAt = at; vWP = (modelMatrix * vec4(transformed, 1.0)).xyz; vWN = normalize(mat3(modelMatrix) * objectNormal);');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D tW, tP, tSt, tRf; uniform vec3 mW, mP, mSt, mRf; varying float vAt; varying vec3 vWP; varying vec3 vWN;').replace('#include <map_fragment>', [
+      '#include <map_fragment>',
+      'if (vAt > 0.5) {',
+      '  vec3 an = abs(vWN); vec2 uv = an.y > 0.55 ? vWP.xz : (an.x > an.z ? vWP.zy : vWP.xy);',
+      '  vec3 t;',
+      '  if (vAt < 1.5) t = texture2D(tW, uv * 0.45).rgb / mW;',
+      '  else if (vAt < 2.5) t = texture2D(tP, uv * 0.3).rgb / mP;',
+      '  else if (vAt < 3.5) t = texture2D(tSt, uv * 0.35).rgb / mSt;',
+      '  else t = texture2D(tRf, uv * 0.4).rgb / mRf;',
+      '  diffuseColor.rgb *= pow(clamp(t, 0.0, 3.0), vec3(1.35));',
+      '}'].join('\n'));
+  };
+  m.customProgramCacheKey = () => 'tcprop';
+  return m;
 }
 const M4 = (x, y, z, sx, sy, sz, ry, rx, rz) => tmpM.compose(tmpV2.set(x, y, z), tmpQ.setFromEuler(tmpE.set(rx || 0, ry || 0, rz || 0, 'YXZ')), tmpS.set(sx, sy, sz));
 // shape helpers: positions are the shape's centre, except cones/prisms which sit on their base
@@ -702,7 +785,7 @@ const waveAmp = (x, z) => .15 + .85 * smooth(LAKE.r * .7, LAKE.r * 1.3, Math.hyp
 const WAVE = (x, z, t) => .16 * Math.sin(x * .11 + t * 1.1) + .12 * Math.sin(z * .13 + t * .9 + x * .04) + .06 * Math.sin((x + z) * .27 + t * 1.7);
 const waterU = THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
   uTime: { value: 0 }, uOff: { value: new THREE.Vector2() }, uHT: { value: htTex }, uWorld: { value: WORLD }, uSunDir: { value: new THREE.Vector3(0, 1, 0) },
-  uSunCol: { value: new THREE.Color(1, 1, 1) }, uSky: { value: new THREE.Color(0xbfe4f7) }, uLight: { value: 1 }, uAmp: { value: 1 }, uNight: { value: 0 }, uLake: { value: new THREE.Vector3(LAKE.x, LAKE.z, LAKE.r) },
+  uSunCol: { value: new THREE.Color(1, 1, 1) }, uSky: { value: new THREE.Color(0xbfe4f7) }, uTop: { value: new THREE.Color(0x3d97e6) }, uLight: { value: 1 }, uAmp: { value: 1 }, uNight: { value: 0 }, uLake: { value: new THREE.Vector3(LAKE.x, LAKE.z, LAKE.r) },
 }]);
 waterU.uHT.value = htTex;
 const waterMat = new THREE.ShaderMaterial({
@@ -719,7 +802,7 @@ const waterMat = new THREE.ShaderMaterial({
     '  #include <fog_vertex>',
     '}'].join('\n'),
   fragmentShader: [
-    'uniform float uTime, uWorld, uLight, uAmp, uNight; uniform vec3 uLake; uniform sampler2D uHT; uniform vec3 uSunDir, uSunCol, uSky; varying vec3 vW;',
+    'uniform float uTime, uWorld, uLight, uAmp, uNight; uniform vec3 uLake; uniform sampler2D uHT; uniform vec3 uSunDir, uSunCol, uSky, uTop; varying vec3 vW;',
     '#include <fog_pars_fragment>',
     'float h2(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }',
     'float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h2(i), h2(i + vec2(1, 0)), f.x), mix(h2(i + vec2(0, 1)), h2(i + vec2(1, 1)), f.x), f.y); }',
@@ -741,7 +824,8 @@ const waterMat = new THREE.ShaderMaterial({
     '  float sh = smoothstep(3.5, 0.0, depth);',
     '  vec3 deep = ht.rgb;',
     '  vec3 col = mix(deep, deep * 1.25 + vec3(0.12, 0.26, 0.2), sh);',
-    '  col = mix(col, uSky, clamp(fres * 0.75 + 0.06, 0.0, 0.8));',
+    '  vec3 Rf = reflect(-V, n); vec3 skyR = mix(uSky, uTop, pow(clamp(Rf.y, 0.0, 1.0), 0.55));',
+    '  col = mix(col, skyR, clamp(fres * 0.85 + 0.08, 0.0, 0.88));',
     '  col *= 0.35 + 0.65 * uLight;',
     '  vec3 L = normalize(uSunDir); float sp = pow(max(dot(reflect(-L, n), V), 0.0), 90.0);',
     '  col += uSunCol * sp * (L.y > 0.0 ? 1.1 : 0.35);',
@@ -763,66 +847,73 @@ const WSTEP = WSIZE / WSEG;
 /* ---------- terrain meshes, one per island ---------- */
 const PATHS = []; // {a,b,w} segments that colour the ground as a dirt path
 const PLAZA = { x: 0, z: 2, r: 11 };
+const CW = [0, 1, 0]; // splat weights of the last islandColor call: sand, grass, rock
+const setW = (sd, g, r) => { CW[0] = sd; CW[1] = g; CW[2] = r; };
 function islandColor(I, h, ny, x, z, out) {
   const n = vnoise(x * .15, z * .15), n2 = vnoise(x * .04 + 9, z * .04);
+  const steep = smooth(.8, .64, ny);
   if (h < -.25) { // under water
     const d = clamp(-h / 9, 0, 1);
-    if (I.b === 4) out.setRGB(.2 - d * .1, .17 - d * .08, .17 - d * .08);
-    else if (I.b === 2) out.setRGB(.9 - d * .5, .84 - d * .4, .62 - d * .3);
-    else out.setRGB(.72 - d * .4, .66 - d * .36, .48 - d * .28);
+    if (I.b === 4) { out.setRGB(.2 - d * .1, .17 - d * .08, .17 - d * .08); setW(.4, 0, .6); }
+    else if (I.b === 2) { out.setRGB(.9 - d * .5, .84 - d * .4, .62 - d * .3); setW(1, 0, 0); }
+    else { out.setRGB(.72 - d * .4, .66 - d * .36, .48 - d * .28); setW(1 - steep, 0, steep); }
     return out;
   }
   const beach = h < (I.b === 3 ? .9 : 1.1);
   if (I.b === 4) { // volcanic
     if (ny < .72) out.setRGB(.22 + n * .05, .18, .17); else if (beach) out.setRGB(.24, .21, .2); else out.setRGB(.33 + n * .06, .27 + n * .04, .24);
     if (h > 12) out.lerp(tmpC.setRGB(.42, .2, .14), smooth(12, 16, h));
+    setW(beach ? .8 : .25, 0, beach ? .2 : .75);
     return out;
   }
   if (I.b === 3) { // snow
     if (ny < .74) out.setRGB(.52 + n * .08, .56 + n * .08, .62 + n * .08);
     else if (beach) out.setRGB(.66, .68, .7);
     else out.setRGB(.93 + n * .05, .95 + n * .04, .98);
+    setW(1 - steep, 0, steep);
     return out;
   }
-  if (beach) { out.setRGB(.93, .85, .62); if (I.b === 1) out.setRGB(.78, .74, .52); return out; }
-  if (ny < .7) { out.setRGB(.55 + n * .08, .53 + n * .07, .48 + n * .05); return out; }
+  if (beach) { out.setRGB(.93, .85, .62); if (I.b === 1) out.setRGB(.78, .74, .52); setW(1, 0, 0); return out; }
+  if (ny < .7) { out.setRGB(.55 + n * .08, .53 + n * .07, .48 + n * .05); setW(0, 0, 1); return out; }
   if (I.b === 0) out.setRGB(.42 + n * .07 + n2 * .05, .7 + n * .06, .3 + n2 * .05);
   else if (I.b === 1) out.setRGB(.3 + n * .06, .52 + n * .08 + n2 * .05, .22 + n * .04);
   else if (I.b === 2) out.setRGB(.5 + n * .08, .78 + n * .05, .34);
   else out.setRGB(.5 + n * .05, .5 + n * .05, .47);
+  setW(0, 1 - steep, steep);
   if (I.b === 0) {
-    if (Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r) { out.setRGB(.76 + n * .06, .72 + n * .05, .66 + n * .04); return out; }
+    if (Math.hypot(x - PLAZA.x, z - PLAZA.z) < PLAZA.r) { out.setRGB(.76 + n * .06, .72 + n * .05, .66 + n * .04); setW(0, 0, 1); return out; }
   }
-  for (const P of PATHS) if (segDist(x, z, P.a, P.b) < P.w) { out.setRGB(.78 + n * .05, .64 + n * .04, .44); break; }
+  for (const P of PATHS) if (segDist(x, z, P.a, P.b) < P.w) { out.setRGB(.78 + n * .05, .64 + n * .04, .44); setW(1, 0, 0); break; }
   return out;
 }
+let terrainMat = null;
 function buildIsland(I) {
-  const R = I.r * 1.42, st = HQ ? (I.r > 70 ? 2.6 : 2.1) : 3.4, nx = Math.ceil(R * 2 / st);
-  const H = new Float32Array((nx + 1) * (nx + 1));
+  const R = I.r * 1.42, st = HQ ? (I.r > 70 ? 2 : 1.6) : 3, nx = Math.ceil(R * 2 / st), N1 = nx + 1;
+  const H = new Float32Array(N1 * N1);
+  for (let j = 0; j <= nx; j++) for (let i = 0; i <= nx; i++) H[j * N1 + i] = Math.max(islandH(I, I.x - R + i * st, I.z - R + j * st), -14);
+  const pos = new Float32Array(N1 * N1 * 3), nor = new Float32Array(N1 * N1 * 3), col = new Float32Array(N1 * N1 * 3), aw = new Float32Array(N1 * N1 * 3), c = new THREE.Color();
   for (let j = 0; j <= nx; j++) for (let i = 0; i <= nx; i++) {
-    const x = I.x - R + i * st, z = I.z - R + j * st;
-    H[j * (nx + 1) + i] = Math.max(islandH(I, x, z), -14);
+    const k = j * N1 + i, x = I.x - R + i * st, z = I.z - R + j * st, h = H[k];
+    const hl = H[j * N1 + Math.max(0, i - 1)], hr = H[j * N1 + Math.min(nx, i + 1)], hd = H[Math.max(0, j - 1) * N1 + i], hu = H[Math.min(nx, j + 1) * N1 + i];
+    tmpV.set(hl - hr, 2 * st, hd - hu).normalize();
+    pos[k * 3] = x; pos[k * 3 + 1] = h; pos[k * 3 + 2] = z;
+    nor[k * 3] = tmpV.x; nor[k * 3 + 1] = tmpV.y; nor[k * 3 + 2] = tmpV.z;
+    islandColor(I, h, tmpV.y, x, z, c); c.convertSRGBToLinear();
+    col[k * 3] = c.r; col[k * 3 + 1] = c.g; col[k * 3 + 2] = c.b;
+    aw[k * 3] = CW[0]; aw[k * 3 + 1] = CW[1]; aw[k * 3 + 2] = CW[2];
   }
-  const p = [], c = [], col = new THREE.Color(), a = new THREE.Vector3(), b = new THREE.Vector3(), cc = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3();
-  const tri = (ax, az, ah, bx, bz, bh, cx, cz, chh) => {
-    a.set(ax, ah, az); b.set(bx, bh, bz); cc.set(cx, chh, cz);
-    e1.subVectors(b, a); e2.subVectors(cc, a); e1.cross(e2).normalize();
-    const mh = (ah + bh + chh) / 3, mx = (ax + bx + cx) / 3, mz = (az + bz + cz) / 3;
-    islandColor(I, mh, Math.abs(e1.y), mx, mz, col);
-    p.push(ax, ah, az, bx, bh, bz, cx, chh, cz);
-    for (let k = 0; k < 3; k++) c.push(col.r, col.g, col.b);
-  };
+  const idx = [];
   for (let j = 0; j < nx; j++) for (let i = 0; i < nx; i++) {
-    const k = j * (nx + 1) + i, h00 = H[k], h10 = H[k + 1], h01 = H[k + nx + 1], h11 = H[k + nx + 2];
-    if (h00 < -9 && h10 < -9 && h01 < -9 && h11 < -9) continue;
-    const x0 = I.x - R + i * st, z0 = I.z - R + j * st, x1 = x0 + st, z1 = z0 + st;
-    if ((i + j) & 1) { tri(x0, z0, h00, x0, z1, h01, x1, z0, h10); tri(x1, z0, h10, x0, z1, h01, x1, z1, h11); }
-    else { tri(x0, z0, h00, x0, z1, h01, x1, z1, h11); tri(x0, z0, h00, x1, z1, h11, x1, z0, h10); }
+    const k = j * N1 + i, a = k, b = k + 1, d = k + N1, e = k + N1 + 1;
+    if (H[a] < -9 && H[b] < -9 && H[d] < -9 && H[e] < -9) continue;
+    if ((i + j) & 1) idx.push(a, d, b, b, d, e); else idx.push(a, d, e, a, e, b);
   }
   const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
-  g.computeVertexNormals(); g.computeBoundingSphere();
-  const m = new THREE.Mesh(g, LAMB); m.receiveShadow = HQ; scene.add(m); return m;
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('aw', new THREE.BufferAttribute(aw, 3));
+  g.setIndex(idx); g.computeBoundingSphere();
+  if (!terrainMat) terrainMat = splatMat();
+  const m = new THREE.Mesh(g, terrainMat); m.receiveShadow = HQ; scene.add(m); return m;
 }
 
 /* ---------- shore finding, used to place piers and the bridge ---------- */
@@ -849,10 +940,10 @@ function house(x, z, ry, w, d, h, wall, roof, o) {
   const P = (lx, lz) => loc(x, z, ry, lx, lz);
   let [px, pz] = P(0, 0);
   box(props, px, y0 - .9, pz, w + .4, 2, d + .4, C.stone2, ry);
-  box(props, px, y0 + h / 2, pz, w, h, d, wall, ry);
+  props.tex = 2; box(props, px, y0 + h / 2, pz, w, h, d, wall, ry); props.tex = -1;
   // corner posts
   for (const [lx, lz] of [[-w / 2, -d / 2], [w / 2, -d / 2], [-w / 2, d / 2], [w / 2, d / 2]]) { [px, pz] = P(lx, lz); box(props, px, y0 + h / 2, pz, .3, h, .3, o.trim || C.dark, ry); }
-  [px, pz] = P(0, 0); prism(props, px, y0 + h, pz, w + .9, Math.min(w, 5) * .5, d + .7, roof, ry);
+  [px, pz] = P(0, 0); props.tex = 4; prism(props, px, y0 + h, pz, w + .9, Math.min(w, 5) * .5, d + .7, roof, ry); props.tex = -1;
   [px, pz] = P(0, d / 2 + .05); box(props, px, y0 + .9, pz, 1, 1.8, .12, C.dark, ry);
   [px, pz] = P(0, d / 2 + .5); box(props, px, y0 + .08, pz, 1.6, .16, .8, C.stone, ry);
   const win = (lx, lz, side) => { const [wx, wz] = P(lx, lz); box(glows, wx, y0 + h * .58, wz, side ? .1 : .8, .75, side ? .8 : .1, 0, ry); box(props, wx, y0 + h * .58 - .45, wz, side ? .22 : 1, .12, side ? 1 : .22, C.white, ry); };
@@ -860,7 +951,7 @@ function house(x, z, ry, w, d, h, wall, roof, o) {
   win(w / 2 + .04, 0, 1); win(-w / 2 - .04, 0, 1);
   if (o.chim) { [px, pz] = P(w / 4, -d / 6); box(props, px, y0 + h + 1.1, pz, .55, 1.8, .55, C.stone2, ry); }
   if (o.sign) { [px, pz] = P(0, d / 2 + .12); box(props, px, y0 + h + .1, pz, w * .6, .7, .12, o.sign, ry); }
-  COLB.push({ x, z, hw: w / 2 + .3, hd: d / 2 + .3, ry });
+  COLB.push({ x, z, hw: w / 2 + .3, hd: d / 2 + .3, ry, y1: y0 + h + Math.min(w, 5) * .5 + .4 });
   EXCL.push({ x, z, r: Math.max(w, d) * .75 + 2 });
   return { y0, front: P(0, d / 2 + 1.6) };
 }
@@ -871,10 +962,10 @@ function lamp(x, z) {
   box(props, x, y + 3.25, z, .5, .08, .5, C.iron);
   box(glows, x, y + 3.0, z, .32, .42, .32, 0);
   box(props, x, y + 3.32, z, .2, .12, .2, C.iron);
-  COLC.push({ x, z, r: .3 });
+  COLC.push({ x, z, r: .3, y1: y + 3.5, nc: 1 });
 }
-function crate(x, z, s, ry) { const y = groundAt(x, z); box(props, x, y + s / 2, z, s, s, s, '#b88a52', ry); box(props, x, y + s / 2, z, s * 1.02, s * .16, s * 1.02, '#8a5e32', ry); COLC.push({ x, z, r: s * .6 }); }
-function barrel(x, z) { const y = groundAt(x, z); cyl(props, x, y + .5, z, .4, 1, '#8a5a30'); cyl(props, x, y + .25, z, .42, .08, C.iron); cyl(props, x, y + .75, z, .42, .08, C.iron); COLC.push({ x, z, r: .45 }); }
+function crate(x, z, s, ry) { const y = groundAt(x, z); box(props, x, y + s / 2, z, s, s, s, '#b88a52', ry); box(props, x, y + s / 2, z, s * 1.02, s * .16, s * 1.02, '#8a5e32', ry); COLC.push({ x, z, r: s * .6, y1: y + s, nc: 1 }); }
+function barrel(x, z) { const y = groundAt(x, z); cyl(props, x, y + .5, z, .4, 1, '#8a5a30'); cyl(props, x, y + .25, z, .42, .08, C.iron); cyl(props, x, y + .75, z, .42, .08, C.iron); COLC.push({ x, z, r: .45, y1: y + 1.1, nc: 1 }); }
 function pierAt(I, ang, len, o) {
   o = o || {};
   const s = o.s != null ? o.s : shoreAlong(I, ang, o.from), dx = Math.cos(ang), dz = Math.sin(ang);
@@ -904,7 +995,7 @@ function pedestal(x, z, rodId) {
   cyl(props, x, y + .3, z, 1.3, .6, C.stone2, G_CYL6);
   cyl(props, x, y + .9, z, .9, .6, C.stone, G_CYL6);
   cyl(props, x, y + 1.25, z, 1.05, .12, C.stone2, G_CYL6);
-  COLC.push({ x, z, r: 1.2 });
+  COLC.push({ x, z, r: 1.2, y1: y + 2.6 });
   EXCL.push({ x, z, r: 4 });
   const R = ROD(rodId);
   const m = new THREE.Mesh(rodGeo(R), LAMB); m.position.set(x, y + 1.6, z); m.rotation.z = .35; scene.add(m);
@@ -959,9 +1050,87 @@ function makeChar(o) {
   const head = mk(g.head, sh, 0, .06, 0);
   return { root, hips, legL, legR, torso, armL, armR, head, sh, geos: g };
 }
+/* ---------- animated characters (Quaternius CC0 base character, peasant outfit and motion clips) ---------- */
+const CHAR_OK = !!(ART.glb.peasant && ART.glb.head && ART.glb.anims && THREE.SkeletonUtils);
+const clipOf = n => { const a = ART.glb.anims.animations; return a.find(c => c.name === n) || a.find(c => c.name === 'Idle_Loop'); };
+const RCM = {};
+function recolorMat(m, to) {
+  // the outfit texture's alpha channel marks the cloth; it is repainted keeping the shading
+  const key = m.uuid + '|' + to; if (RCM[key]) return RCM[key];
+  const x = HQ ? m.clone() : new THREE.MeshLambertMaterial({ map: m.map, color: 0xffffff, skinning: true }), c = LIN(to);
+  x.onBeforeCompile = sh => {
+    sh.uniforms.qTo = { value: c }; sh.uniforms.qRef = { value: .288 };
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 qTo; uniform float qRef;').replace('#include <map_fragment>', '#include <map_fragment>\nif (qRef > 0.) { vec3 c = diffuseColor.rgb; float mx = max(c.r, max(c.g, c.b)); diffuseColor.rgb = mix(c, qTo * clamp(mx / qRef, .2, 2.2), clamp((diffuseColor.a - .25) / .75, 0., 1.)); }\ndiffuseColor.a = 1.;');
+  };
+  x.customProgramCacheKey = () => 'qrc'; x.transparent = false; x.alphaTest = 0;
+  if (x.isMeshStandardMaterial) STDM.push(x);
+  return RCM[key] = x;
+}
+function tintMat(m, col) { const x = m.clone(); x.color = LIN(col); if (x.isMeshStandardMaterial) STDM.push(x); return x; }
+function hatGeo(kind, hc) {
+  const b = new GeoB(), k = .52, y0 = -.6;
+  const Cy = (y, r, h, col) => cyl(b, 0, (y + y0) * k, 0, r * k, h * k, col);
+  const Bx = (x, y, z, w, h, d, col) => box(b, x * k, (y + y0) * k, z * k, w * k, h * k, d * k, col);
+  if (kind === 'bucket') { Cy(.72, .36, .3, hc); Cy(.6, .52, .05, hc); Cy(.64, .37, .06, '#1D1A2F'); }
+  else if (kind === 'cap') { Cy(.67, .35, .2, hc); Bx(0, .6, .36, .44, .05, .32, hc); }
+  else if (kind === 'captain') { Cy(.7, .36, .22, '#f4efe4'); Bx(0, .6, .34, .5, .06, .24, '#1D1A2F'); Cy(.6, .37, .05, '#1D1A2F'); }
+  else if (kind === 'beanie') { Cy(.66, .35, .26, hc); ico(b, 0, (.86 + y0) * k, 0, .12 * k, .12 * k, .12 * k, '#f4efe4'); }
+  else if (kind === 'straw') { Cy(.72, .33, .22, '#e8c86a'); Cy(.6, .64, .04, '#e8c86a'); Cy(.66, .34, .06, hc); }
+  else return null;
+  return b.build();
+}
+function makeQChar(o) {
+  o = o || {};
+  const SU = THREE.SkeletonUtils, model = SU.clone(ART.glb.peasant.scene), bones = {};
+  model.traverse(b => { if (b.isBone && !bones[b.name]) bones[b.name] = b; });
+  const root = new THREE.Group(); root.add(model);
+  const H = SU.clone(ART.glb.head.scene), hs = []; H.traverse(c => { if (c.isMesh) hs.push(c); });
+  let headInv = null;
+  for (const c of hs) if (c.isSkinnedMesh) { const sk = c.skeleton, i = sk.bones.findIndex(b => b.name === 'Head'); if (!headInv) headInv = sk.boneInverses[i]; c.bind(new THREE.Skeleton(sk.bones.map(b => bones[b.name] || b), sk.boneInverses), c.bindMatrix); model.add(c); }
+  H.updateMatrixWorld(true);
+  const hairs = [o.hair || 'Hair_SimpleParted'].concat(o.beard ? ['Hair_Beard'] : []);
+  for (const c of hs) { if (c.isSkinnedMesh || !hairs.includes(c.name) || !headInv || !bones.Head) continue; const M = headInv.clone().multiply(c.matrixWorld); c.parent.remove(c); M.decompose(c.position, c.quaternion, c.scale); c.material = tintMat(c.material, o.hairCol || '#4a2e1a'); bones.Head.add(c); }
+  model.traverse(m => {
+    if (!m.isMesh) return; m.castShadow = HQ; m.receiveShadow = HQ; m.frustumCulled = false;
+    const mn = m.material.name || '';
+    if (/Peasant/.test(mn)) m.material = recolorMat(m.material, o.shirt || '#ff7a3d');
+    else if (!HQ && m.material.isMeshStandardMaterial) m.material = new THREE.MeshLambertMaterial({ map: m.material.map, color: m.material.color, skinning: !!m.isSkinnedMesh });
+    else if (m.material.isMeshStandardMaterial) STDM.push(m.material);
+  });
+  const hg = o.hat && hatGeo(o.hat, o.hatCol || '#ffd23f');
+  if (hg && bones.Head) {
+    model.updateMatrixWorld(true);
+    const hat = new THREE.Mesh(hg, LAMB); hat.castShadow = HQ; bones.Head.add(hat);
+    bones.Head.getWorldQuaternion(tmpQ); hat.quaternion.copy(tmpQ.invert());
+    const wp = new THREE.Vector3(0, 1.79, 0); bones.Head.worldToLocal(wp); hat.position.copy(wp);
+  }
+  const hand = new THREE.Object3D(); if (bones.hand_r) { bones.hand_r.add(hand); hand.position.set(.08, -.01, .02); }
+  const mx = new THREE.AnimationMixer(model), acts = {};
+  const act = n => acts[n] || (acts[n] = mx.clipAction(clipOf(n)));
+  const ch = { root, model, hand, real: true, base: null, shot: null, mixer: mx, head: bones.Head };
+  ch.loop = (n, ts) => {
+    ts = ts == null ? 1 : ts;
+    if (ch.base === n) { act(n).timeScale = ts; return; }
+    const a = act(n), prev = ch.base && act(ch.base); a.enabled = true; a.setLoop(THREE.LoopRepeat); a.timeScale = ts;
+    if (!ch.shot) { a.reset().setEffectiveWeight(1).play(); if (prev) a.crossFadeFrom(prev, .22, false); }
+    ch.base = n;
+  };
+  ch.once = (n, dur) => {
+    const a = act(n), prev = ch.shot ? act(ch.shot) : ch.base ? act(ch.base) : null;
+    a.reset(); a.enabled = true; a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; a.timeScale = dur ? a.getClip().duration / dur : 1; a.setEffectiveWeight(1).play();
+    if (prev && prev !== a) a.crossFadeFrom(prev, .08, false);
+    ch.shot = n; ch.shotEnd = a.getClip().duration;
+  };
+  ch.update = dt => {
+    mx.update(dt);
+    if (ch.shot) { const a = act(ch.shot); if (a.time >= ch.shotEnd - .001 || !a.isRunning()) { const b = ch.base && act(ch.base); ch.shot = null; if (b) { b.reset().setEffectiveWeight(1).play(); b.crossFadeFrom(a, .2, false); } } }
+  };
+  ch.loop('Idle_Loop');
+  return ch;
+}
 function labelTex(name, role) {
   const cv = document.createElement('canvas'); cv.width = 320; cv.height = 96;
-  const t = new THREE.CanvasTexture(cv); t.minFilter = THREE.LinearFilter;
+  const t = new THREE.CanvasTexture(cv); t.minFilter = THREE.LinearFilter; t.encoding = THREE.sRGBEncoding;
   const draw = () => {
     const x = cv.getContext('2d'); x.clearRect(0, 0, 320, 96);
     x.font = '36px "Bagel Fat One", Impact, sans-serif'; x.textAlign = 'center'; x.lineJoin = 'round';
@@ -978,13 +1147,13 @@ function makeLabel(name, role, x, y, z) {
 }
 const NPCS = [];
 function npc(x, z, faceX, faceZ, o, name, role, act, label) {
-  const ch = makeChar(o), y = groundAt(x, z);
+  const ch = CHAR_OK && HQ ? makeQChar(o) : makeChar(o), y = groundAt(x, z);
   ch.root.position.set(x, y, z); ch.root.rotation.y = Math.atan2(faceX - x, faceZ - z);
-  ch.armL.rotation.z = .08; ch.armR.rotation.z = -.08;
+  if (!ch.real) { ch.armL.rotation.z = .08; ch.armR.rotation.z = -.08; }
   scene.add(ch.root);
   const lab = makeLabel(name, role, x, y + 3.05, z);
   const N = { ch, x, z, y, yaw0: ch.root.rotation.y, lab, name, ph: Math.random() * 6, wave: 0 };
-  NPCS.push(N); COLC.push({ x, z, r: .6 }); EXCL.push({ x, z, r: 3 });
+  NPCS.push(N); COLC.push({ x, z, r: .6, y1: y + 2.2, nc: 1 }); EXCL.push({ x, z, r: 3 });
   INTER.push({ x, z, r: 3.4, label: () => label, act, npc: N });
   return N;
 }
@@ -1010,7 +1179,7 @@ const islandMeshes = ISL.map(buildIsland);
   const fy = terrainH(0, 2);
   cyl(props, 0, fy + .25, 2, 3, .5, C.stone, G_CYL6); cyl(props, 0, fy + .55, 2, 2.6, .12, '#5fb6e8', G_CYL6);
   cyl(props, 0, fy + 1.2, 2, .4, 1.6, C.stone); cyl(props, 0, fy + 2, 2, 1.1, .2, C.stone, G_CYL6); ico(props, 0, fy + 2.35, 2, .45, .45, .45, '#5fb6e8');
-  COLC.push({ x: 0, z: 2, r: 3.1 });
+  COLC.push({ x: 0, z: 2, r: 3.1, y1: fy + 2.8 });
   // fish market stall
   const mx = 13, mz = -9, mr = face(mx, mz), my = terrainH(mx, mz);
   { const P = (lx, lz) => loc(mx, mz, mr, lx, lz); let p;
@@ -1021,7 +1190,7 @@ const islandMeshes = ISL.map(buildIsland);
     for (const [lx, lz] of [[-3, 1.8], [3, 1.8], [-3, -1.6], [3, -1.6]]) { p = P(lx, lz); box(props, p[0], my + 1.6, p[1], .22, 3.2, .22, C.dark, mr); }
     for (let k = 0; k < 7; k++) { p = P(-3 + k * 1, .1); box(props, p[0], my + 3.25, p[1], 1, .12, 4.2, k & 1 ? '#f4efe4' : '#3a8fd0', mr, -.18); }
     p = P(0, -1.5); box(props, p[0], my + 1.5, p[1], 6, 3, .2, C.plank, mr);
-    COLB.push({ x: mx, z: mz, hw: 3.2, hd: 2.2, ry: mr }); EXCL.push({ x: mx, z: mz, r: 6 });
+    COLB.push({ x: mx, z: mz, hw: 3.2, hd: 2.2, ry: mr, y1: my + 3.6 }); EXCL.push({ x: mx, z: mz, r: 6 });
     p = P(0, -.3);
     npc(p[0], p[1], 0, 2, { shirt: '#e8e2d0', pants: '#3a5068', apron: '#3a8fd0', hat: 'cap', hatCol: '#3a8fd0', beard: '#d9d6cf' }, 'Old Pim', 'Fish market', () => openSell('Old Pim'), 'Sell fish to Old Pim');
   }
@@ -1039,7 +1208,7 @@ const islandMeshes = ISL.map(buildIsland);
     box(props, x, y + 1.7, z, 3, 1.6, .16, C.plank, r);
     prism(props, x, y + 2.5, z, 3.4, .5, .5, '#d9452b', r);
     for (const [lx, ly] of [[-.8, 1.95], [.2, 1.85], [.9, 1.55], [-.5, 1.4]]) { const [px, pz] = loc(x, z, r, lx, .1); box(props, px, y + ly, pz, .55, .62, .02, '#f4efe4', r); }
-    COLB.push({ x, z, hw: 1.6, hd: .4, ry: r }); EXCL.push({ x, z, r: 3 });
+    COLB.push({ x, z, hw: 1.6, hd: .4, ry: r, y1: y + 3 }); EXCL.push({ x, z, r: 3 });
     makeLabel('Bounties', 'Jobs that pay', x, y + 3.4, z);
     INTER.push({ x, z, r: 3.2, label: () => 'Read the bounty board', act: () => openQuests() }); }
   // houses around town
@@ -1050,7 +1219,7 @@ const islandMeshes = ISL.map(buildIsland);
   // lamps along the paths
   for (const P of PATHS.slice(0, 5)) { const L = Math.hypot(P.b.x - P.a.x, P.b.z - P.a.z), ux = (P.b.x - P.a.x) / L, uz = (P.b.z - P.a.z) / L; for (let d = 13; d < L - 2; d += 14) lamp(P.a.x + ux * d - uz * 2.6, P.a.z + uz * d + ux * 2.6); }
   // benches
-  for (const a of [.8, 2.4, 3.9, 5.4]) { const x = Math.cos(a) * 8.5, z = 2 + Math.sin(a) * 8.5, r = Math.atan2(-Math.cos(a), -Math.sin(a)), y = terrainH(x, z); box(props, x, y + .5, z, 2, .12, .6, C.plank, r); const [bx, bz] = loc(x, z, r, 0, -.3); box(props, bx, y + .85, bz, 2, .5, .1, C.plank, r); box(props, x, y + .25, z, 1.8, .5, .4, C.dark, r); COLB.push({ x, z, hw: 1, hd: .4, ry: r }); }
+  for (const a of [.8, 2.4, 3.9, 5.4]) { const x = Math.cos(a) * 8.5, z = 2 + Math.sin(a) * 8.5, r = Math.atan2(-Math.cos(a), -Math.sin(a)), y = terrainH(x, z); box(props, x, y + .5, z, 2, .12, .6, C.plank, r); const [bx, bz] = loc(x, z, r, 0, -.3); box(props, bx, y + .85, bz, 2, .5, .1, C.plank, r); box(props, x, y + .25, z, 1.8, .5, .4, C.dark, r); COLB.push({ x, z, hw: 1, hd: .4, ry: r, y1: y + 1 }); }
 }
 // harbor pier, boat dealer, crates
 const DK0 = pierAt(H0, angE, 22, { side: 1 });
@@ -1091,7 +1260,7 @@ dockPost(DK0, 'Pebble Harbor');
   // shrine on the far side of the lake
   const sa = angMoss + Math.PI + .2, sd = LAKE.r + 14, sx = LAKE.x + Math.cos(sa) * sd, sz = LAKE.z + Math.sin(sa) * sd;
   const sy = terrainH(sx, sz);
-  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; const px = sx + Math.cos(a) * 4, pz = sz + Math.sin(a) * 4; box(props, px, sy + 1.4, pz, .5, 3.4, .5, '#8a96a8', -a); COLC.push({ x: px, z: pz, r: .4 }); }
+  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; const px = sx + Math.cos(a) * 4, pz = sz + Math.sin(a) * 4; box(props, px, sy + 1.4, pz, .5, 3.4, .5, '#8a96a8', -a); COLC.push({ x: px, z: pz, r: .4, y1: sy + 3.2, nc: 1 }); }
   pedestal(sx, sz, 'star');
   // lake platform
   const la = Math.atan2(BR_B.z - LAKE.z, BR_B.x - LAKE.x);
@@ -1144,7 +1313,7 @@ let DKl, lightBeam;
   const lx = HL.x - Math.cos(ang) * 4, lz = HL.z - Math.sin(ang) * 4, ly = terrainH(lx, lz);
   for (let k = 0; k < 6; k++) cyl(props, lx, ly + 1.2 + k * 2.4, lz, 2.2 - k * .18, 2.4, k & 1 ? '#d9452b' : '#f4efe4');
   cyl(props, lx, ly + 15.4, lz, 1.5, .3, C.iron); cyl(glows, lx, ly + 16.5, lz, 1.05, 2, 0); cone(props, lx, ly + 17.5, lz, 1.5, 1.6, '#d9452b');
-  COLC.push({ x: lx, z: lz, r: 2.4 });
+  COLC.push({ x: lx, z: lz, r: 2.4, y1: ly + 19 });
   EXCL.push({ x: lx, z: lz, r: 5 });
   const bm = new THREE.Mesh(new THREE.ConeGeometry(4, 40, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .12, depthWrite: false, side: THREE.DoubleSide, fog: false }));
   bm.geometry.translate(0, -20, 0); bm.geometry.rotateZ(Math.PI / 2);
@@ -1154,13 +1323,13 @@ let DKl, lightBeam;
 }
 // lava pool in the crater and steam vents in the water
 const VENTS = [];
-const lavaMat = new THREE.MeshBasicMaterial({ color: 0xff6a1f });
+const lavaMat = new THREE.MeshBasicMaterial({ color: 0xff6a1f, toneMapped: false });
 {
   const lava = new THREE.Mesh(new THREE.CircleGeometry(HV.r * .2, 20), lavaMat); lava.rotation.x = -Math.PI / 2; lava.position.set(HV.x, 3.7, HV.z); scene.add(lava);
   for (let k = 0; k < 7; k++) { const a = k / 7 * Math.PI * 2 + .4, d = HV.r * (1.15 + (k % 3) * .12); VENTS.push({ x: HV.x + Math.cos(a) * d, z: HV.z + Math.sin(a) * d }); }
 }
 
-const propMesh = new THREE.Mesh(props.build(), LAMB); propMesh.castShadow = HQ; propMesh.receiveShadow = HQ; scene.add(propMesh);
+const propMesh = new THREE.Mesh(props.build(), propMat()); propMesh.castShadow = HQ; propMesh.receiveShadow = HQ; scene.add(propMesh);
 const glowMesh = new THREE.Mesh(glows.build(), glowMat); scene.add(glowMesh);
 
 /* ================= trees, rocks and plants (instanced) ================= */
@@ -1209,25 +1378,72 @@ function treeGeo(kind) {
 function inst(kind, items, shadow) {
   if (!items.length) return null;
   const m = new THREE.InstancedMesh(treeGeo(kind), LAMB, items.length);
-  items.forEach((it, i) => { m.setMatrixAt(i, M4(it.x, it.y, it.z, it.s * (it.sx || 1), it.s * (it.sy || 1), it.s * (it.sz || 1), it.ry || 0, it.rx || 0, it.rz || 0)); m.setColorAt(i, tmpC.set(it.c || 0xffffff)); });
+  items.forEach((it, i) => { m.setMatrixAt(i, M4(it.x, it.y, it.z, it.s * (it.sx || 1), it.s * (it.sy || 1), it.s * (it.sz || 1), it.ry || 0, it.rx || 0, it.rz || 0)); m.setColorAt(i, tmpC.set(it.c || 0xffffff).convertSRGBToLinear()); });
   m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true;
   m.frustumCulled = false; m.castShadow = HQ && !!shadow; scene.add(m); return m;
+}
+const natOK = HQ && !!(ART.glb.nature && ART.glb.nature.scene);
+const VEG = []; // per-island instanced groups, hidden when far away
+const NATM = new Map();
+function natParts(name) {
+  const sc = ART.glb.nature.scene, node = sc.getObjectByName(name); if (!node) return null;
+  sc.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(node.matrixWorld).invert(), parts = [], bb = new THREE.Box3();
+  node.traverse(m => { if (!m.isMesh) return; const rel = inv.clone().multiply(m.matrixWorld); parts.push({ geo: m.geometry, mat: m.material, rel }); if (!m.geometry.boundingBox) m.geometry.computeBoundingBox(); bb.union(m.geometry.boundingBox.clone().applyMatrix4(rel)); });
+  return { parts, h: Math.max(.1, bb.max.y - bb.min.y), y0: bb.min.y };
+}
+function natMat(m) {
+  if (NATM.has(m)) return NATM.get(m);
+  const leafy = /Leaves|Leaf|Grass|Flower/i.test(m.name || '');
+  let x;
+  if (HQ) { x = m.clone(); x.roughness = Math.max(.7, x.roughness || .8); x.metalness = 0; STDM.push(x); }
+  else x = new THREE.MeshLambertMaterial({ map: m.map || null, color: m.color ? m.color.clone() : 0xffffff });
+  if (leafy) { x.side = THREE.DoubleSide; x.alphaTest = Math.max(.45, m.alphaTest || 0); x.transparent = false; }
+  x.userData.leafy = leafy; NATM.set(m, x); return x;
+}
+function natInst(name, items, targetH, tintAll, shadow) {
+  if (!items.length) return true;
+  const P = natParts(name); if (!P) return false;
+  const k0 = targetH / P.h, M = new THREE.Matrix4();
+  // one instanced mesh per island so the camera can skip the ones out of view
+  const groups = new Map();
+  for (const it of items) { const I = nearIsland(it.x, it.z, 2) || ISL[0]; if (!groups.has(I)) groups.set(I, []); groups.get(I).push(it); }
+  for (const [I, list] of groups) {
+    let r = 0; for (const it of list) r = Math.max(r, Math.hypot(it.x - I.x, it.z - I.z) + targetH * it.s);
+    const sphere = new THREE.Sphere(new THREE.Vector3(I.x, 4, I.z), r + 6);
+    for (const p of P.parts) {
+      const geo = p.geo.clone(); geo.boundingSphere = sphere.clone();
+      const mat = natMat(p.mat), im = new THREE.InstancedMesh(geo, mat, list.length);
+      list.forEach((it, i) => {
+        M.multiplyMatrices(M4(it.x, it.y - P.y0 * k0 * it.s - .05, it.z, k0 * it.s, k0 * it.s, k0 * it.s, it.ry || 0), p.rel); im.setMatrixAt(i, M);
+        im.setColorAt(i, tmpC.set((tintAll || mat.userData.leafy) && it.c ? it.c : 0xffffff).convertSRGBToLinear());
+      });
+      im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
+      im.castShadow = HQ && shadow; im.receiveShadow = HQ; scene.add(im);
+      VEG.push({ m: im, x: I.x, z: I.z, r: r + 6 });
+    }
+  }
+  return true;
+}
+function vegTick() {
+  const cx = camera.position.x, cz = camera.position.z;
+  for (const v of VEG) v.m.visible = Math.hypot(cx - v.x, cz - v.z) - v.r < (coarse ? 110 : 170);
 }
 const tint = (R, base, v) => { const k = 1 - v / 2 + R() * v; tmpC.set(base).multiplyScalar(k); tmpC.r = Math.min(1, tmpC.r); tmpC.g = Math.min(1, tmpC.g); tmpC.b = Math.min(1, tmpC.b); return tmpC.getHex(); };
 {
   const land = (lo, hi, sl) => (x, z, h) => h > lo && h < hi && slopeAt(x, z) < (sl || .9);
   const T = { round: [], pine: [], snowpine: [], palm: [], dead: [], bush: [], rock: [], reed: [], lily: [], flower: [], coral: [], fan: [], ice: [], grass: [] };
   const add = (k, arr, f) => { for (const it of arr) { f && f(it); T[k].push(it); } };
-  const tree = it => { COLC.push({ x: it.x, z: it.z, r: .55 * it.s }); };
+  const tree = it => { COLC.push({ x: it.x, z: it.z, r: .55 * it.s, y0: it.y, y1: it.y + 7 * it.s, cr: 1.7 * it.s }); };
   // harbor
-  add('round', scatter(H0, 26, 11, (x, z, h) => land(1.3, 9)(x, z, h) && Math.hypot(x, z) > 26), it => { it.s = .85 + it.R() * .45; it.c = tint(it.R, 0xffffff, .2); tree(it); });
+  add('round', scatter(H0, natOK ? 20 : 26, 11, (x, z, h) => land(1.3, 9)(x, z, h) && Math.hypot(x, z) > 26), it => { it.s = .85 + it.R() * .45; it.c = tint(it.R, 0xffffff, .2); tree(it); });
   add('pine', scatter(H0, 10, 12, (x, z, h) => land(1.3, 9)(x, z, h) && Math.hypot(x, z) > 32), it => { it.s = .9 + it.R() * .4; tree(it); });
   add('bush', scatter(H0, 30, 13, land(1.2, 9)), it => { it.s = .7 + it.R() * .5; });
   add('flower', scatter(H0, 50, 14, land(1.2, 9)), it => { it.s = .8 + it.R() * .6; it.c = [0xffffff, 0xfff27a, 0xffb0b0, 0xb0d8ff][Math.floor(it.R() * 4)]; });
   add('grass', scatter(H0, 140, 15, land(1.1, 9)), it => { it.s = .8 + it.R() * .7; });
   add('rock', scatter(H0, 14, 16, (x, z, h) => h > -1.5 && h < 1.2), it => { it.s = .6 + it.R() * .9; it.c = tint(it.R, 0xffffff, .2); });
   // mosswater
-  add('round', scatter(HM, 46, 21, land(1.4, 14)), it => { it.s = .9 + it.R() * .6; it.c = tint(it.R, 0x9ad08a, .25); tree(it); });
+  add('round', scatter(HM, natOK ? 28 : 46, 21, land(1.4, 14)), it => { it.s = .9 + it.R() * .6; it.c = tint(it.R, 0x9ad08a, .25); tree(it); });
   add('pine', scatter(HM, 14, 22, land(2, 14)), it => { it.s = .9 + it.R() * .5; it.c = 0xb8d8a8; tree(it); });
   add('bush', scatter(HM, 40, 23, land(1, 14)), it => { it.s = .7 + it.R() * .6; it.c = 0x9ad08a; });
   add('grass', scatter(HM, 160, 24, land(.8, 14)), it => { it.s = .8 + it.R() * .8; it.c = 0xb0d890; });
@@ -1244,7 +1460,7 @@ const tint = (R, base, v) => { const k = 1 - v / 2 + R() * v; tmpC.set(base).mul
   add('fan', scatter(HR, 40, 35, (x, z, h) => h < -.8 && h > -6, 1.5), it => { it.s = .6 + it.R() * .8; it.c = coralC[Math.floor(it.R() * 6)]; });
   add('rock', scatter(HR, 14, 36, (x, z, h) => h < 1 && h > -3, 1.4), it => { it.s = .5 + it.R() * .8; it.c = 0xe8dcc0; });
   // frostfjord
-  add('snowpine', scatter(HF, 70, 41, (x, z, h) => h > 1.6 && slopeAt(x, z) < 1.3), it => { it.s = .8 + it.R() * .7; tree(it); });
+  add('snowpine', scatter(HF, natOK ? 46 : 70, 41, (x, z, h) => h > 1.6 && slopeAt(x, z) < 1.3), it => { it.s = .8 + it.R() * .7; it.c = natOK ? tint(it.R, 0xc8dce6, .15) : 0xffffff; tree(it); });
   add('rock', scatter(HF, 30, 42, (x, z, h) => h > -1 && slopeAt(x, z) < 2.5), it => { it.s = .8 + it.R() * 1.6; it.c = 0xb8c4d0; });
   add('ice', scatter(HF, 36, 43, (x, z, h) => h < -2, 1.45), it => { it.y = .02; it.s = 1 + it.R() * 2.2; it.sy = .5 / it.s; });
   add('ice', scatter({ x: lerp(FJa.x, FJb.x, .5), z: lerp(FJa.z, FJb.z, .5), r: 40 }, 14, 44, (x, z, h) => h < -2.5 && segDist(x, z, FJa, FJb) < 9, 1), it => { it.y = .02; it.s = .8 + it.R() * 1.4; it.sy = .5 / it.s; });
@@ -1254,7 +1470,22 @@ const tint = (R, base, v) => { const k = 1 - v / 2 + R() * v; tmpC.set(base).mul
   // lookout rock
   add('rock', scatter(HL, 12, 61, (x, z, h) => h > -1), it => { it.s = .8 + it.R() * 1.2; it.c = 0xa8a8b0; });
   add('grass', scatter(HL, 30, 62, (x, z, h) => h > 1.2), it => { it.c = 0xa0c890; });
-  for (const k in T) inst(k, T[k], k === 'round' || k === 'pine' || k === 'snowpine' || k === 'palm' || k === 'dead' || k === 'rock');
+  // CC0 nature models (Quaternius Stylized Nature MegaKit) replace the simple shapes when they loaded
+  const NAT = { round: [['CommonTree_3', 7], ['CommonTree_3', 6.2], ['CommonTree_3', 7.6], ['CommonTree_1', 7.5]], willow: [['CommonTree_3', 7.5], ['CommonTree_3', 6.5], ['CommonTree_3', 7], ['CommonTree_3', 6.8], ['CommonTree_3', 7.2], ['TwistedTree_1', 7.5], ['CommonTree_3', 6], ['TwistedTree_5', 7]], pine: [['Pine_2', 8.5]], snowpine: [['Pine_2', 8.5]], bush: [['Bush_Common', 1.5]], rock: [['Rock_Medium_1', 1.4], ['Rock_Medium_2', 1.3]], grass: [['Grass_Wispy_Tall', .75]], flower: [['Flower_3_Group', .55]] };
+  const mossTrees = T.round.filter(it => Math.hypot(it.x - HM.x, it.z - HM.z) < HM.r * 1.3);
+  T.willow = mossTrees; T.round = T.round.filter(it => !mossTrees.includes(it));
+  for (const k in T) {
+    const sh = ['round', 'willow', 'pine', 'snowpine', 'palm', 'dead', 'rock'].includes(k);
+    const nat = NAT[k];
+    if (nat && natOK) {
+      const LEAF = { round: 0x6cae45, willow: 0x5a9a3c, pine: 0x3d7a4c, snowpine: 0x9cbcb4, bush: 0x5a9e3e, grass: 0x78b44c, flower: 0xf2a6c8 };
+      if (LEAF[k]) for (const it of T[k]) { const R = it.R || Math.random; it.c = tint(R, k === 'flower' ? [0xf2a6c8, 0xfff07a, 0xffffff, 0xb8d0ff][Math.floor(R() * 4)] : LEAF[k], k === 'flower' ? .1 : .28); }
+      let all = T[k];
+      if (k === 'grass' || k === 'flower') all = all.filter((_, i) => i % 3 === 0);
+      const per = nat.map(() => []); all.forEach((it, i) => per[i % nat.length].push(it));
+      nat.forEach(([name, h], i) => { if (!natInst(name, per[i], h, k === 'rock', sh)) inst(k === 'willow' ? 'round' : k, per[i], sh); });
+    } else inst(k === 'willow' ? 'round' : k, T[k], sh);
+  }
 }
 
 /* ================= sky stuff: clouds, rain, snow, particles ================= */
@@ -1547,9 +1778,10 @@ function fishCanvas(fi, v, w, h, sil) {
 }
 
 /* ================= the player ================= */
-const PC = makeChar({ shirt: '#ff7a3d', pants: '#2b3a55', hat: 'bucket', hatCol: '#ffd23f', hair: '#5a3a22', vest: '#3a8fd0' });
+const PC = CHAR_OK ? makeQChar({ shirt: '#ff7a3d', hat: 'bucket', hatCol: '#ffd23f', hair: 'Hair_SimpleParted', hairCol: '#5a3a22' }) : makeChar({ shirt: '#ff7a3d', pants: '#2b3a55', hat: 'bucket', hatCol: '#ffd23f', hair: '#5a3a22', vest: '#3a8fd0' });
 scene.add(PC.root);
-const rodHold = new THREE.Group(); rodHold.position.set(0, -.72, .06); rodHold.rotation.x = 1.68; PC.armR.add(rodHold);
+// the rod is placed in the world each frame at the right hand, aimed by what you are doing
+const rodHold = new THREE.Group(); scene.add(rodHold);
 let rodMesh = null;
 const rodTip = new THREE.Object3D(); rodTip.position.y = ROD_TIP_Y; rodHold.add(rodTip);
 function setRodModel() {
@@ -1569,21 +1801,23 @@ const bobber = (() => {
   cyl(b, 0, 1.2, 0, .18, 1, '#f2352a');
   const m = new THREE.Mesh(b.build(), LAMB); m.scale.setScalar(.3); m.visible = false; scene.add(m); return m;
 })();
-function spriteTex(draw, w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); const t = new THREE.CanvasTexture(cv); t.minFilter = THREE.LinearFilter; return t; }
+function spriteTex(draw, w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); const t = new THREE.CanvasTexture(cv); t.minFilter = THREE.LinearFilter; t.encoding = THREE.sRGBEncoding; return t; }
 const bang = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex((x, w, h) => { x.fillStyle = '#FFD23F'; x.strokeStyle = INK; x.lineWidth = 6; x.beginPath(); x.arc(w / 2, h / 2, w / 2 - 5, 0, 6.3); x.fill(); x.stroke(); x.fillStyle = INK; x.font = '64px "Bagel Fat One", Impact, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('!', w / 2, h / 2 + 4); }, 96, 96), depthTest: false, fog: false }));
 bang.scale.set(1.1, 1.1, 1); bang.visible = false; bang.renderOrder = 5; scene.add(bang);
+const aimRing = new THREE.Mesh(new THREE.RingGeometry(.55, .8, 24), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .8, depthWrite: false, fog: false }));
+aimRing.geometry.rotateX(-Math.PI / 2); aimRing.visible = false; aimRing.renderOrder = 3; scene.add(aimRing);
 const heldFish = new THREE.Sprite(new THREE.SpriteMaterial({ depthWrite: false, fog: false, transparent: true }));
 heldFish.visible = false; scene.add(heldFish);
 function showHeldFish(fi, v, size) {
-  const old = heldFish.material.map; const t = new THREE.CanvasTexture(fishCanvas(fi, v, 256, 160)); t.minFilter = THREE.LinearFilter; heldFish.material.map = t; heldFish.material.needsUpdate = true; if (old) old.dispose();
+  const old = heldFish.material.map; const t = new THREE.CanvasTexture(fishCanvas(fi, v, 256, 160)); t.minFilter = THREE.LinearFilter; t.encoding = THREE.sRGBEncoding; heldFish.material.map = t; heldFish.material.needsUpdate = true; if (old) old.dispose();
   const s = clamp(size, .9, 3.2); heldFish.scale.set(s * 1.6, s, 1); heldFish.visible = true;
 }
 
 /* ================= boat ================= */
 function boatGeo(lvl) {
   const B = BOATS[lvl], b = new GeoB(), L = B.len, w = 1.9 + lvl * .12;
-  box(b, 0, .25, -L * .1, w, .6, L * .8, B.hull);
-  b.add(G_PRISM, M4(0, .25, L * .3, w, L * .3, .6, 0, Math.PI / 2), B.hull);
+  b.tex = 1; box(b, 0, .25, -L * .1, w, .6, L * .8, B.hull);
+  b.add(G_PRISM, M4(0, .25, L * .3, w, L * .3, .6, 0, Math.PI / 2), B.hull); b.tex = -1;
   box(b, 0, .55, -L * .1, w + .06, .12, L * .8, B.trim);
   box(b, 0, .58, -L * .1, w - .3, .1, L * .74, '#8a5e32');
   box(b, 0, .78, -L * .3, w - .3, .14, .5, '#c8a070'); box(b, 0, .78, L * .05, w - .3, .14, .4, '#c8a070');
@@ -1592,7 +1826,7 @@ function boatGeo(lvl) {
   if (lvl === 3) { box(b, 0, .62, L * .2, w - .2, .2, L * .25, '#f4efe4'); box(b, w / 2 - .1, .6, -L * .1, .08, .14, L * .8, '#f2352a'); box(b, -w / 2 + .1, .6, -L * .1, .08, .14, L * .8, '#f2352a'); }
   return b.build();
 }
-const boat = { x: 0, z: 0, yaw: 0, v: 0, lvl: 0, out: false, mesh: new THREE.Mesh(new THREE.BufferGeometry(), LAMB), pitch: 0, roll: 0, wakeT: 0 };
+const boat = { x: 0, z: 0, yaw: 0, v: 0, lvl: 0, out: false, mesh: new THREE.Mesh(new THREE.BufferGeometry(), propMat()), pitch: 0, roll: 0, wakeT: 0 };
 boat.mesh.castShadow = HQ; boat.mesh.visible = false; scene.add(boat.mesh);
 function setBoatModel() {
   boat.lvl = S.boat || 0;
@@ -1626,7 +1860,7 @@ function luckNow(spot) {
   return rod.luck + (n && rod.night ? rod.night : 0) + (b ? b.luck + (n && b.night ? b.night : 0) : 0) + (spot ? 60 : 0);
 }
 function rollFish(zone, spot) {
-  const L = luckNow(spot) / 100, b = activeBait();
+  const L = luckNow(spot) / 100 + (S.stats.caught < 3 ? 1.2 : 0), b = activeBait();
   const cands = BY_ZONE[zone].filter(f => condOk(f.cond));
   const boost = [0, .5, 1.1, 1.8, 2.6, 3.5];
   let tot = 0; const ws = cands.map(f => { const w = RAR[f.r].w * (1 + L * boost[f.r]); tot += w; return w; });
@@ -1643,8 +1877,8 @@ function rollFish(zone, spot) {
 }
 
 /* ================= fishing ================= */
-const FS = { st: 'idle', pow: 0, pd: 1, t: 0, sx: 0, sy: 0, sz: 0, tx: 0, tz: 0, bx: 0, by: 0, bz: 0, zone: 0, wait: 0, nib: 0, spot: null, catchC: null, need: 0, got: 0, shT: 0, shMax: 1, hold: false, r: null, landT: 0, onLand: false, castAnim: 0 };
-const el = { money: $('#money'), loc: $('#loc'), clockT: $('#clockT'), wxI: $('#wxI'), hint: $('#hint'), prompt: $('#prompt'), promptT: $('#promptT'), power: $('#power'), powerFill: $('#powerFill'),
+const FS = { st: 'idle', pow: 0, pd: 1, t: 0, sx: 0, sy: 0, sz: 0, tx: 0, tz: 0, bx: 0, by: 0, bz: 0, zone: 0, wait: 0, nib: 0, spot: null, catchC: null, need: 0, got: 0, shT: 0, shMax: 1, hold: false, r: null, landT: 0, onLand: false, castAnim: 0, jumpT: 0, jx: 0, jy: 0, jz: 0 };
+const el = { goal: $('#goal'), goalT: $('#goalT'), money: $('#money'), loc: $('#loc'), clockT: $('#clockT'), wxI: $('#wxI'), hint: $('#hint'), prompt: $('#prompt'), promptT: $('#promptT'), power: $('#power'), powerFill: $('#powerFill'),
   shake: $('#shake'), shakeBtn: $('#shakeBtn'), shakeTime: $('#shakeTime i'), reel: $('#reel'), reelName: $('#reelName'), reelW: $('#reelW'), reelZone: $('#reelZone'), reelFish: $('#reelFish'), reelFishC: $('#reelFish canvas'), reelProg: $('#reelProgFill'), reelTip: $('#reelTip'),
   catchC: $('#catch'), toasts: $('#toasts'), zt: $('#zt'), ztS: $('#ztS'), ztN: $('#ztN'), bagN: $('#bagN'), bookN: $('#bookN'), slRod: $('#slRod'), slRodT: $('#slRodT'), slRodI: $('#slRodI'), slBait: $('#slBait'), slBaitT: $('#slBaitT'), slBaitI: $('#slBaitI'),
   panel: $('#panel'), pTitle: $('#pTitle'), pBody: $('#pBody'), intro: $('#intro'), touch: $('#touch'), tCast: $('#tCast'), tAct: $('#tAct'), mini: $('#mini') };
@@ -1656,7 +1890,7 @@ function toast(t, kind) {
   while (el.toasts.children.length > 4) el.toasts.firstChild.remove();
   setTimeout(() => { d.style.transition = 'opacity .4s'; d.style.opacity = 0; setTimeout(() => d.remove(), 450); }, 3200);
 }
-const rodTipPos = out => { PC.root.updateMatrixWorld(true); return rodTip.getWorldPosition(out); };
+const rodTipPos = out => { rodHold.updateMatrixWorld(true); return rodTip.getWorldPosition(out); };
 function canFish() {
   if (!S.rodOn || panelOpen() || !S.intro) return false;
   if (P.inBoat) return Math.abs(boat.v) < 2.2;
@@ -1690,6 +1924,7 @@ function doCast() {
   FS.tx = ox + dx * (d + (P.inBoat ? 1.2 : 0)); FS.tz = oz + dz * (d + (P.inBoat ? 1.2 : 0));
   FS.st = 'fly'; FS.t = 0; FS.dur = .45 + pow * .45; FS.arc = 2 + d * .22;
   bobber.visible = true; fishLine.visible = true; FS.castAnim = 1;
+  if (PC.real) PC.once('Sword_Attack', .55);
   sfx.cast();
 }
 function bobberLand() {
@@ -1704,7 +1939,7 @@ function bobberLand() {
   FS.onLand = false;
   FS.by = 0; FS.st = 'wait'; FS.t = 0; FS.zone = zoneAt(FS.bx, FS.bz); FS.spot = spotAt(FS.bx, FS.bz);
   const lure = ROD(S.rod).lure + (activeBait() ? activeBait().lure : 0);
-  FS.wait = rnd(4.5, 10.5) * 100 / (100 + lure * 1.4) * (FS.spot ? .6 : 1);
+  FS.wait = S.stats.caught < 4 ? rnd(1.4, 3) : rnd(4, 9.5) * 100 / (100 + lure * 1.4) * (FS.spot ? .6 : 1);
   FS.nib = rnd(1.5, 3);
   emit(FS.bx, .1, FS.bz, 18, 2.4, 4.5, '#e8f6ff', 14, .8);
   sfx.splash(.6);
@@ -1737,8 +1972,9 @@ function shakeTap() {
 function startReel() {
   el.shake.hidden = true; bang.visible = false;
   const c = FS.catchC, f = FISH[c.fi], rod = ROD(S.rod), over = c.w / rod.maxw, heavy = over > 1;
-  const d = clamp([.12, .25, .4, .58, .75, .9][f.r] + (heavy ? .1 : 0), 0, 1);
-  FS.r = { fx: .5, ft: .5, retT: 0, zx: .5, zv: 0, zw: clamp(rod.ctrl * (heavy ? .85 : 1), .12, .5), prog: .3, d, gain: .21 * (heavy ? clamp(1 / Math.pow(over, .9), .05, 1) : 1), loss: .13 * (1 - rod.res / 100 * .8) * (.75 + d * .6), tick: 0, spl: 0 };
+  const easy = S.stats.caught < 4;
+  const d = clamp([.12, .25, .4, .58, .75, .9][f.r] + (heavy ? .1 : 0), 0, 1) * (easy ? .5 : 1);
+  FS.r = { fx: .5, ft: .5, retT: 0, zx: .5, zv: 0, zw: clamp(rod.ctrl * (heavy ? .85 : 1), .12, .5), prog: easy ? .4 : .3, d, gain: .21 * (easy ? 1.4 : 1) * (heavy ? clamp(1 / Math.pow(over, .9), .05, 1) : 1), loss: .13 * (1 - rod.res / 100 * .8) * (.75 + d * .6), tick: 0, spl: 0 };
   FS.st = 'reel'; FS.hold = false; FS.t = 0;
   const known = S.J[c.fi];
   el.reelName.textContent = known ? f.n : '???';
@@ -1800,10 +2036,12 @@ function landFish() {
   S.stats.caught++;
   S.visited[FS.zone] = 1;
   checkBounties(item, FS.zone);
-  showCatch(item, isNew);
+  FS.card = [item, isNew];
   sfx.catch(f.r);
   emit(FS.bx, .2, FS.bz, 30, 3, 7, '#ffffff', 14, 1);
   showHeldFish(c.fi, c.v, .9 + Math.sqrt(c.w / (f.w1 || 1)) * 1.1 + (c.v === 4 ? .6 : 0));
+  FS.jumpT = .8; FS.jx = FS.bx; FS.jy = .2; FS.jz = FS.bz; heldFish.position.set(FS.bx, .2, FS.bz);
+  emit(FS.bx, .2, FS.bz, 40, 4, 8, '#ffffff', 14, 1.1); sfx.splash(1.3); cam.punch = 1;
   FS.st = 'land'; FS.t = 0; bobber.visible = false; fishLine.visible = false;
   syncHUD();
 }
@@ -1826,7 +2064,9 @@ function fishTick(dt) {
     el.power.hidden = false; el.powerFill.style.height = (FS.pow * 100) + '%';
     el.powerFill.style.background = FS.pow > .88 ? '#FFD23F' : '#3fd0a0';
     faceCamera();
-  } else el.power.hidden = true;
+    const d = 3 + FS.pow * ROD(S.rod).rng + (P.inBoat ? 1.2 : 0), ox = P.inBoat ? boat.x : P.x, oz = P.inBoat ? boat.z : P.z, ax = ox + Math.sin(P.yaw) * d, az = oz + Math.cos(P.yaw) * d, g = groundAt(ax, az);
+    aimRing.visible = true; aimRing.position.set(ax, Math.max(g, waveY(ax, az)) + .08, az); aimRing.material.color.set(g > -.25 ? 0xff5a4a : 0xffffff);
+  } else { el.power.hidden = true; aimRing.visible = false; }
   if (st === 'fly') {
     const t = Math.min(1, FS.t / FS.dur);
     FS.bx = lerp(FS.sx, FS.tx, t); FS.bz = lerp(FS.sz, FS.tz, t); FS.by = lerp(FS.sy, 0, t) + Math.sin(Math.PI * t) * FS.arc;
@@ -1851,7 +2091,14 @@ function fishTick(dt) {
     FS.bx = lerp(FS.bx, tmpV.x, k); FS.by = lerp(FS.by, tmpV.y, k); FS.bz = lerp(FS.bz, tmpV.z, k);
     if (FS.t > .4) { FS.st = 'idle'; bobber.visible = false; fishLine.visible = false; }
   } else if (st === 'land') {
-    if (FS.t > 1.8) { FS.st = 'idle'; heldFish.visible = false; }
+    if (FS.jumpT > 0) {
+      FS.jumpT = Math.max(0, FS.jumpT - dt); const k = 1 - FS.jumpT / .8, e = 1 - (1 - k) * (1 - k);
+      const hx = PC.root.position.x, hy = PC.root.position.y + (PC.real ? 3 : 3.5), hz = PC.root.position.z;
+      heldFish.position.set(lerp(FS.jx, hx, e), lerp(FS.jy, hy, e) + Math.sin(Math.PI * k) * 4.5, lerp(FS.jz, hz, e));
+      heldFish.material.rotation = (1 - k) * Math.PI * 4;
+      if (Math.random() < dt * 30 && k < .5) emit(heldFish.position.x, heldFish.position.y, heldFish.position.z, 1, .5, 0, '#dff4ff', 9, .6);
+    } else { heldFish.material.rotation = 0; if (FS.card) { showCatch(FS.card[0], FS.card[1]); FS.card = null; } }
+    if (FS.t > 2.6) { FS.st = 'idle'; heldFish.visible = false; }
   }
   if (FS.jig > 0) FS.jig -= dt;
   if (bobber.visible) bobber.position.set(FS.bx, FS.by - (FS.jig > 0 ? .12 : 0), FS.bz);
@@ -1873,6 +2120,7 @@ function updateLine() {
   lineGeo.attributes.position.needsUpdate = true;
 }
 function cancelFishing() {
+  if (FS.card) { showCatch(FS.card[0], FS.card[1]); FS.card = null; }
   if (FS.st === 'idle') return;
   el.reel.hidden = true; el.shake.hidden = true; el.power.hidden = true; bang.visible = false;
   FS.st = 'idle'; bobber.visible = false; fishLine.visible = false; heldFish.visible = false;
@@ -1903,7 +2151,10 @@ function bountyText(b) {
   if (b.t === 'wt') return 'Catch a fish heavier than ' + b.w + ' kg';
   return 'Catch ' + b.n + ' fish at ' + ZONES[b.z].n;
 }
-function fillBounties() { while (S.bounties.length < 3) S.bounties.push(genBounty()); }
+function fillBounties() {
+  if (!S.bounties.length && S.stats.caught === 0) S.bounties.push({ t: 'zn', z: 0, n: 3, p: 0, r: 60 }, { t: 'sp', f: 0, n: 1, p: 0, r: 25 });
+  while (S.bounties.length < 3) S.bounties.push(genBounty());
+}
 function checkBounties(it, zone) {
   const f = FISH[it.f];
   S.bounties.forEach((b, i) => {
@@ -1929,7 +2180,6 @@ function syncHotbar() {
   el.slRodI.innerHTML = rodIcon(R);
   const b = activeBait();
   el.slBait.classList.toggle('on', !!b); el.slBaitT.textContent = b ? b.n.split(' ').pop() + ' x' + S.bait[b.id] : 'No bait';
-  if (rodHold) rodHold.visible = !!S.rodOn;
 }
 function syncHUD() {
   el.money.textContent = money(S.money);
@@ -1944,13 +2194,14 @@ let curPanel = null;
 const panelOpen = () => !el.panel.hidden;
 function openPanel(title, who, render, act) {
   if (FS.st === 'charge') cancelFishing();
+  releaseLock();
   curPanel = { title, who, render, act };
   el.pTitle.innerHTML = esc(title) + (who ? ' <span class="who">' + esc(who) + '</span>' : '');
   el.panel.hidden = false; keys.clear(); refreshPanel();
   sfx.click();
 }
 function refreshPanel() { if (!curPanel) return; const st = el.pBody.scrollTop; el.pBody.innerHTML = ''; curPanel.render(el.pBody); el.pBody.scrollTop = st; }
-function closePanel() { el.panel.hidden = true; curPanel = null; el.pBody.innerHTML = ''; glc.focus({ preventScroll: true }); }
+function closePanel() { el.panel.hidden = true; curPanel = null; el.pBody.innerHTML = ''; glc.focus({ preventScroll: true }); requestLock(); syncLockHint(); }
 on(el.panel, 'pointerdown', e => { if (e.target === el.panel) closePanel(); });
 on($('#pClose'), 'click', closePanel);
 on(el.pBody, 'click', e => {
@@ -2165,7 +2416,7 @@ const sfx = {
 const keys = new Set();
 const joy = { x: 0, y: 0, id: null };
 let drag = null;
-const cam = { yaw: SPAWN.yaw - Math.PI, pitch: .36, dist: 9, manualT: -9, tx: SPAWN.x, ty: 3, tz: SPAWN.z };
+const cam = { yaw: SPAWN.yaw - Math.PI, pitch: .1, dist: 6.3, d: 6.3, pmin: -.5, pmax: 1.15, manualT: -9, tx: SPAWN.x, ty: 3, tz: SPAWN.z, punch: 0, fov: 0 };
 const introOpen = () => !el.intro.hidden;
 function onKeyDown(e) {
   if (!alive || !gameFocus) return;
@@ -2194,20 +2445,47 @@ function onKeyUp(e) {
 on(window, 'keydown', onKeyDown); on(window, 'keyup', onKeyUp);
 on(window, 'blur', () => { keys.clear(); FS.hold = false; joy.x = joy.y = 0; });
 on(glc, 'contextmenu', e => e.preventDefault());
+// mouse look: click the game to lock the pointer, then plain mouse movement turns the camera. Esc gives the mouse back.
+let locked = false, lockedOnce = false, lockFailed = false, lmb = false;
+const canLock = !coarse && !!glc.requestPointerLock;
+const SENS = .0024;
+function requestLock() {
+  if (!canLock || lockFailed || locked || !alive) return;
+  try { const pr = glc.requestPointerLock(); if (pr && pr.catch) pr.catch(() => { if (!lockedOnce) lockFailed = true; syncLockHint(); }); } catch (_) { if (!lockedOnce) lockFailed = true; }
+}
+function releaseLock() { if (locked && document.exitPointerLock) { try { document.exitPointerLock(); } catch (_) {} } }
+function look(dx, dy) { cam.yaw -= dx * SENS; cam.pitch = clamp(cam.pitch + dy * SENS, cam.pmin, cam.pmax); cam.manualT = clock; }
+on(document, 'pointerlockchange', () => {
+  locked = shadow.pointerLockElement === glc || document.pointerLockElement === glc || document.pointerLockElement === host;
+  if (locked) lockedOnce = true;
+  if (!locked && lmb) { lmb = false; castRelease(); }
+  syncLockHint();
+});
+on(document, 'pointerlockerror', () => { if (!lockedOnce) lockFailed = true; syncLockHint(); });
+on(document, 'mousemove', e => { if (locked) look(e.movementX || 0, e.movementY || 0); });
+const lockHint = $('#lockHint'), aimDot = $('#aimDot');
+function syncLockHint() { if (lockHint) lockHint.hidden = !(canLock && !lockFailed && !locked && S.intro && !panelOpen() && !introOpen()); }
 on(glc, 'pointerdown', e => {
   aInit(); gameFocus = true; glc.focus({ preventScroll: true });
   if (introOpen() || panelOpen()) return;
+  if (e.pointerType === 'mouse') {
+    if (canLock && !lockFailed && !locked) { requestLock(); return; }
+    if (locked) return;
+  }
   if (drag && e.pointerType === 'touch') return;
   try { glc.setPointerCapture(e.pointerId); } catch (_) {}
   drag = { id: e.pointerId, x: e.clientX, y: e.clientY, btn: e.button, touch: e.pointerType !== 'mouse' };
   if (e.pointerType === 'mouse' && e.button === 0) castPress();
   else if (e.pointerType !== 'mouse' && FS.st === 'reel') FS.hold = true;
 });
+// while the pointer is locked, presses arrive as mouse events on the locked canvas
+on(document, 'mousedown', e => { if (!locked || e.button !== 0 || lmb || panelOpen() || introOpen()) return; aInit(); lmb = true; castPress(); });
+on(document, 'mouseup', e => { if (locked && e.button === 0 && lmb) { lmb = false; castRelease(); } });
 on(glc, 'pointermove', e => {
   if (!drag || e.pointerId !== drag.id) return;
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
-  const k = drag.touch ? .008 : .0055;
-  cam.yaw -= dx * k; cam.pitch = clamp(cam.pitch + dy * k * .8, -.05, 1.25); cam.manualT = clock;
+  const k = drag.touch ? .0075 : .005;
+  cam.yaw -= dx * k; cam.pitch = clamp(cam.pitch + dy * k * .8, cam.pmin, cam.pmax); cam.manualT = clock;
 });
 const endDrag = e => {
   if (!drag || e.pointerId !== drag.id) return;
@@ -2216,7 +2494,7 @@ const endDrag = e => {
   drag = null;
 };
 on(glc, 'pointerup', endDrag); on(glc, 'pointercancel', endDrag);
-on(glc, 'wheel', e => { e.preventDefault(); cam.dist = clamp(cam.dist + Math.sign(e.deltaY) * .9, 4.5, P.inBoat ? 22 : 16); }, { passive: false });
+on(glc, 'wheel', e => { e.preventDefault(); cam.dist = clamp(cam.dist + Math.sign(e.deltaY) * .7, 3.5, 13); }, { passive: false });
 on(el.shakeBtn, 'pointerdown', e => { e.preventDefault(); e.stopPropagation(); aInit(); shakeTap(); });
 // touch controls
 const joyEl = $('#joy'), joyK = $('#joyK');
@@ -2248,7 +2526,7 @@ function interact() {
   if (n.npc) n.npc.wave = 1.2;
   n.act();
 }
-function enterBoat() { cancelFishing(); P.inBoat = true; P.swim = false; cam.dist = Math.max(cam.dist, 12); hint('W and S for speed, A and D to steer. Stop to fish. Press E near land to get out.', 4); }
+function enterBoat() { cancelFishing(); P.inBoat = true; P.swim = false; hint('W and S for speed, A and D to steer. Stop to fish. Press E near land to get out.', 4); }
 function leaveBoat() {
   let best = null, bd = 1e9;
   for (let d = 2.5; d <= 8; d += 1.1) for (let k = 0; k < 16; k++) {
@@ -2256,7 +2534,7 @@ function leaveBoat() {
     if (g > .25 && slopeAt(x, z) < 1 && d < bd) { bd = d; best = { x, z, g }; }
   }
   if (!best) { hint('Get closer to land or a pier to hop out.', 2.5); sfx.no(); return; }
-  cancelFishing(); P.inBoat = false; boat.v = 0; P.x = best.x; P.z = best.z; P.y = best.g + .2; P.vy = 0; cam.dist = 9;
+  cancelFishing(); P.inBoat = false; boat.v = 0; P.x = best.x; P.z = best.z; P.y = best.g + .2; P.vy = 0;
 }
 function jump() { if (P.inBoat || panelOpen()) return; if (P.ground && !P.swim && ['idle', 'land', 'back'].includes(FS.st)) { P.vy = 7.2; P.ground = false; sfx.jump(); } }
 
@@ -2310,7 +2588,7 @@ function playerTick(dt) {
   if (moving && P.ground && !P.swim) { P.stepT -= dt * P.walk; if (P.stepT <= 0) { P.stepT = .32; sfx.step(); } }
   if (P.swim && moving && Math.random() < dt * 6) emit(P.x, .05, P.z, 2, .8, 1.2, '#ffffff', 8, .5);
   // follow the player with the camera when walking and not steering by hand
-  if (moving && clock - cam.manualT > 1.4 && my > -.3) cam.yaw = angLerp(cam.yaw, P.yaw - Math.PI, dt * .9 * P.walk);
+  if (!locked && moving && clock - cam.manualT > 1.4 && my > -.3) cam.yaw = angLerp(cam.yaw, P.yaw - Math.PI, dt * .9 * P.walk);
 }
 function boatTick(dt, mx, my) {
   const B = BOATS[boat.lvl], spd = B.sp;
@@ -2324,7 +2602,7 @@ function boatTick(dt, mx, my) {
   else { boat.x = nx; boat.z = nz; }
   if (Math.abs(boat.v) > 3) { boat.wakeT -= dt; if (boat.wakeT <= 0) { boat.wakeT = .05; const sx = boat.x - Math.sin(boat.yaw) * B.len * .55, sz = boat.z - Math.cos(boat.yaw) * B.len * .55; emit(sx, .1, sz, 2, 1.2, 1.4, '#ffffff', 8, .9); } }
   if (FS.st === 'wait' && Math.abs(boat.v) > 2.2) reelBack('The boat moved, so you reeled in your line.');
-  if (Math.abs(boat.v) > .5 && clock - cam.manualT > .8) cam.yaw = angLerp(cam.yaw, boat.yaw - Math.PI, dt * 1.8);
+  if (Math.abs(boat.v) > .5 && clock - cam.manualT > (locked ? 1.6 : .8)) cam.yaw = angLerp(cam.yaw, boat.yaw - Math.PI, dt * 1.8);
   if (Math.abs(boat.v) > .5) P.yaw = boat.yaw;
   P.x = boat.x; P.z = boat.z;
 }
@@ -2336,8 +2614,45 @@ function boatVisual(dt) {
   boat.mesh.position.set(boat.x, y - .15, boat.z); boat.mesh.rotation.set(boat.pitch, boat.yaw, boat.roll, 'YXZ');
   if (A.engG) { const on2 = P.inBoat && !isMuted(); A.engG.gain.value = on2 ? .025 + Math.abs(boat.v) / B.sp * .03 : 0; A.eng.frequency.value = 45 + Math.abs(boat.v) * 3; A.engF.frequency.value = 300 + Math.abs(boat.v) * 30; }
 }
+const UPV = new THREE.Vector3(0, 1, 0), rodDir = new THREE.Vector3(), rodQ = new THREE.Quaternion(), handP = new THREE.Vector3();
+function placeRod(dt) {
+  const ch = PC;
+  rodHold.visible = !!S.rodOn && ch.root.visible && !P.swim;
+  if (!rodHold.visible) return;
+  if (ch.real) { ch.root.updateMatrixWorld(true); ch.hand.getWorldPosition(handP); }
+  else { ch.root.updateMatrixWorld(true); ch.armR.localToWorld(handP.set(0, -.72, .06)); }
+  const fx = Math.sin(P.yaw), fz = Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = -Math.sin(P.yaw), st = FS.st;
+  let f = .55, u = .82, r = .12;
+  if (st === 'charge') { f = -.5; u = .86; r = .1; }
+  else if (FS.castAnim > 0) { const k = FS.castAnim; f = lerp(.95, -.4, k); u = lerp(.3, .9, k); }
+  else if (st === 'wait' || st === 'fly' || st === 'back') { f = .85; u = .5; }
+  else if (st === 'shake') { f = .85 + Math.sin(clock * 30) * .08; u = .5 + Math.sin(clock * 25) * .1; }
+  else if (st === 'reel') { f = .8; u = .62 + Math.sin(clock * 9) * .05; r = .05 + Math.sin(clock * 5) * .06; }
+  else if (st === 'land') { f = .1; u = 1; }
+  rodDir.set(fx * f + rx * r, u, fz * f + rz * r).normalize();
+  rodQ.setFromUnitVectors(UPV, rodDir);
+  rodHold.quaternion.slerp(rodQ, Math.min(1, dt * 16));
+  rodHold.position.copy(handP).addScaledVector(rodDir, -.22);
+}
 function animChar(dt) {
   const ch = PC, t = clock;
+  if (FS.castAnim > 0) FS.castAnim = Math.max(0, FS.castAnim - dt * 2.6);
+  if (ch.real) {
+    if (P.inBoat) {
+      const B = BOATS[boat.lvl], c = Math.cos(boat.yaw), s = Math.sin(boat.yaw), lz = -B.len * .28;
+      ch.root.position.set(boat.x + s * lz, boat.mesh.position.y + .25, boat.z + c * lz);
+    } else ch.root.position.set(P.x, P.y + (P.swim ? -.4 : 0), P.z);
+    ch.root.rotation.y = P.yaw;
+    const st = FS.st, fishing = st === 'charge' || st === 'fly' || st === 'wait' || st === 'shake' || st === 'reel' || st === 'back';
+    if (st === 'land') ch.loop('Idle_Talking_Loop');
+    else if (fishing) ch.loop('Sword_Idle', st === 'reel' ? 1.6 : 1);
+    else if (P.inBoat) ch.loop(Math.abs(boat.v) > .5 ? 'Crouch_Idle_Loop' : 'Sword_Idle');
+    else if (P.swim) ch.loop(P.walk > .1 ? 'Jog_Fwd_Loop' : 'Idle_Loop', P.walk > .1 ? .7 : 1);
+    else if (!P.ground) ch.loop('Jog_Fwd_Loop');
+    else if (P.walk > .08) ch.loop(P.walk < .75 ? 'Walk_Loop' : keys.has('shift') ? 'Sprint_Loop' : 'Jog_Fwd_Loop', P.walk < .75 ? clamp(P.walk / .5, .6, 1.5) : 1);
+    else ch.loop('Idle_Loop');
+    ch.update(dt);
+  } else {
   if (P.inBoat) {
     const B = BOATS[boat.lvl], c = Math.cos(boat.yaw), s = Math.sin(boat.yaw), lz = -B.len * .3;
     ch.root.position.set(boat.x + s * lz, boat.mesh.position.y + .1, boat.z + c * lz);
@@ -2352,7 +2667,6 @@ function animChar(dt) {
     else if (!P.ground) { ch.hips.rotation.x = 0; ch.legL.rotation.x = -.6; ch.legR.rotation.x = .3; }
     else { ch.hips.rotation.x = lerp(ch.hips.rotation.x, 0, dt * 8); ch.legL.rotation.x = sw; ch.legR.rotation.x = -sw; ch.hips.position.y = .84 + Math.abs(Math.sin(P.ph)) * .06 * P.walk; }
   }
-  // arms
   let aL = 0, aR = 0, zL = .08, zR = -.08;
   const sw = P.inBoat ? 0 : Math.sin(P.ph) * .7 * clamp(P.walk, 0, 1.4);
   if (P.swim) { aL = Math.sin(t * 6) * 2; aR = -Math.sin(t * 6) * 2; }
@@ -2364,31 +2678,68 @@ function animChar(dt) {
     else if (FS.st === 'reel') { aR = -.95 + Math.sin(t * 18) * .08; aL = -.9 + Math.sin(t * 9) * .2; zL = .35; }
     else if (FS.st === 'shake') aR = -1.1 + Math.sin(t * 30) * .15;
   } else { aL = -sw; aR = sw; }
-  if (FS.castAnim > 0) FS.castAnim = Math.max(0, FS.castAnim - dt * 4);
   ch.armL.rotation.x = lerp(ch.armL.rotation.x, aL, Math.min(1, dt * 14)); ch.armR.rotation.x = lerp(ch.armR.rotation.x, aR, Math.min(1, dt * 16));
   ch.armL.rotation.z = zL; ch.armR.rotation.z = zR;
-  ch.head.rotation.y = 0;
-  if (heldFish.visible) { ch.root.updateMatrixWorld(true); heldFish.position.set(ch.root.position.x, ch.root.position.y + 3.5 + Math.sin(t * 4) * .05, ch.root.position.z); }
+  }
+  placeRod(dt);
+  if (heldFish.visible && FS.jumpT <= 0) heldFish.position.set(ch.root.position.x, ch.root.position.y + (ch.real ? 3 : 3.5) + Math.sin(t * 4) * .05, ch.root.position.z);
 }
 
 /* ================= camera ================= */
+function camBlocked(x, y, z) {
+  if (terrainH(x, z) > y - .4) return true;
+  const pl = platAt(x, z); if (pl > -50 && y < pl + .35 && y > pl - 1.2) return true;
+  for (let i = 0; i < COLB.length; i++) {
+    const b = COLB[i]; if (y > (b.y1 || 4)) continue;
+    const c = Math.cos(b.ry), s2 = Math.sin(b.ry), dx = x - b.x, dz = z - b.z;
+    if (Math.abs(dx * c - dz * s2) < b.hw + .3 && Math.abs(dx * s2 + dz * c) < b.hd + .3) return true;
+  }
+  for (let i = 0; i < COLC.length; i++) {
+    const c = COLC[i], top = c.y1 || 3; if (c.nc || y > top) continue;
+    const dx = x - c.x, dz = z - c.z, r = c.r + .25;
+    if (dx * dx + dz * dz < r * r) return true;
+  }
+  return false;
+}
+const camF = new THREE.Vector3(), camP = new THREE.Vector3();
 function cameraTick(dt) {
-  const tx = P.inBoat ? boat.x : P.x, tz = P.inBoat ? boat.z : P.z, ty = (P.inBoat ? boat.mesh.position.y + 1.2 : P.y + 1.7);
-  let fx = tx, fz = tz;
-  if (['wait', 'shake', 'reel'].includes(FS.st)) { fx = lerp(tx, FS.bx, .25); fz = lerp(tz, FS.bz, .25); }
-  const sh = ['charge', 'fly', 'wait', 'shake', 'reel', 'back'].includes(FS.st) ? 1.4 : 0;
-  cam.sh = lerp(cam.sh || 0, sh, 1 - Math.exp(-dt * 4));
-  fx += Math.cos(cam.yaw) * cam.sh; fz -= Math.sin(cam.yaw) * cam.sh;
-  const k = 1 - Math.exp(-dt * 9);
-  cam.tx = lerp(cam.tx, fx, k); cam.ty = lerp(cam.ty, ty, k); cam.tz = lerp(cam.tz, fz, k);
-  const dist = cam.dist * (P.inBoat && cam.dist < 12 ? 1.35 : 1);
-  const cp = Math.cos(cam.pitch), ox = Math.sin(cam.yaw) * cp, oy = Math.sin(cam.pitch), oz = Math.cos(cam.yaw) * cp;
-  let d = dist;
-  for (let i = 1; i <= 5; i++) { const s = dist * i / 5, x = cam.tx + ox * s, y = cam.ty + oy * s, z = cam.tz + oz * s; if (terrainH(x, z) > y - .4) { d = Math.max(1.5, s - dist / 5); break; } }
-  let x = cam.tx + ox * d, y = cam.ty + oy * d, z = cam.tz + oz * d;
-  y = Math.max(y, groundAt(x, z) + .6, .7);
-  camera.position.set(x, y, z);
-  camera.lookAt(cam.tx, cam.ty + .2, cam.tz);
+  const inB = P.inBoat, fishing = ['wait', 'shake', 'reel'].includes(FS.st);
+  const ph = PC.real ? 2.2 : 2.55;
+  let tx = inB ? boat.x : P.x, tz = inB ? boat.z : P.z, ty = inB ? boat.mesh.position.y + 2.9 : P.y + ph;
+  if (P.swim) ty = P.y + ph - .3;
+  if (fishing) {
+    tx = lerp(tx, FS.bx, .2); tz = lerp(tz, FS.bz, .2);
+    // frame the bobber: turn toward it unless you are steering the camera yourself
+    if (clock - cam.manualT > 1.5) { const want = Math.atan2(-(FS.bx - (inB ? boat.x : P.x)), -(FS.bz - (inB ? boat.z : P.z))); cam.yaw = angLerp(cam.yaw, want, Math.min(1, dt * 1.6)); cam.pitch = lerp(cam.pitch, .2, Math.min(1, dt * 1.2)); }
+  }
+  const k = 1 - Math.exp(-dt * 11);
+  cam.tx = lerp(cam.tx, tx, k); cam.ty = lerp(cam.ty, ty, k); cam.tz = lerp(cam.tz, tz, k);
+  // over the right shoulder on foot, straight behind in the boat
+  const shWant = inB ? 0 : fishing || FS.st === 'charge' ? .9 : .65;
+  cam.sh = lerp(cam.sh || 0, shWant, 1 - Math.exp(-dt * 5));
+  const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw), cp = Math.cos(cam.pitch), spp = Math.sin(cam.pitch);
+  if (cam.sh > 0 && camBlocked(cam.tx + cy * cam.sh, cam.ty, cam.tz - sy * cam.sh)) cam.sh = 0;
+  const px = cam.tx + cy * cam.sh, py = cam.ty, pz = cam.tz - sy * cam.sh;
+  camF.set(-sy * cp, -spp, -cy * cp);
+  cam.punch = Math.max(0, cam.punch - dt * .9);
+  const wantD = cam.dist * (inB ? 1.75 : 1) * (1 - Math.sin(Math.min(1, cam.punch) * Math.PI) * .38);
+  let d = wantD;
+  for (let i = 1; i <= 10; i++) { const s2 = wantD * i / 10; if (camBlocked(px - camF.x * s2, py - camF.y * s2, pz - camF.z * s2)) { d = Math.max(.55, s2 - wantD / 10 - .25); break; } }
+  cam.d = d < cam.d ? lerp(cam.d, d, Math.min(1, dt * 25)) : lerp(cam.d, d, Math.min(1, dt * 3));
+  camP.set(px - camF.x * cam.d, py - camF.y * cam.d, pz - camF.z * cam.d);
+  camP.y = Math.max(camP.y, groundAt(camP.x, camP.z) + .4, waveY(camP.x, camP.z) + .45);
+  for (let i = 0; i < 6 && cam.d > .6 && camBlocked(camP.x, camP.y, camP.z); i++) { cam.d = Math.max(.55, cam.d - .45); camP.set(px - camF.x * cam.d, py - camF.y * cam.d, pz - camF.z * cam.d); camP.y = Math.max(camP.y, groundAt(camP.x, camP.z) + .4, waveY(camP.x, camP.z) + .45); }
+  // never end up inside a lamp post, crate or person: slide out sideways
+  for (let i = 0; i < COLC.length; i++) {
+    const c = COLC[i]; if (!c.nc || camP.y > (c.y1 || 3) + .3) continue;
+    const dx = camP.x - c.x, dz = camP.z - c.z, r = c.r + .45, d2 = dx * dx + dz * dz;
+    if (d2 < r * r) { const dd = Math.sqrt(d2) || 1; camP.x = c.x + dx / dd * r; camP.z = c.z + dz / dd * r; }
+  }
+  PC.root.visible = cam.d > 1.25 || P.inBoat;
+  camera.position.copy(camP);
+  camera.lookAt(camP.x + camF.x, camP.y + camF.y, camP.z + camF.z);
+  const fw = 62 + Math.sin(Math.min(1, cam.punch) * Math.PI) * -8 + (P.inBoat ? Math.min(8, Math.abs(boat.v) * .3) : 0);
+  if (Math.abs(fw - cam.fov) > .05) { cam.fov = fw; camera.fov = (camera.aspect < 1 ? 74 : fw); camera.updateProjectionMatrix(); }
 }
 
 /* ================= day, night and weather ================= */
@@ -2433,17 +2784,18 @@ function worldTick(dt) {
   skyU.uTop.value.copy(L_.top); skyU.uHor.value.copy(L_.hor); skyU.uSun.value.copy(L_.sunDir); skyU.uSunCol.value.copy(L_.sunC); skyU.uNight.value = nightK; skyU.uTime.value = clock; skyU.uHaze.value = gloom;
   scene.fog.color.copy(L_.hor); scene.fog.density = .0026 + W.rain * .006 + W.fog * .03;
   const up = L_.sunDir.y > -.05 ? 1 : -1;
-  sun.color.copy(L_.sunC); sun.intensity = sunI;
+  sun.color.copy(L_.sunC).convertSRGBToLinear(); sun.intensity = sunI * (envRT ? 1.9 : 1.75);
   sun.position.set(cam.tx + L_.sunDir.x * 90 * up, Math.max(20, cam.ty + Math.abs(L_.sunDir.y) * 90 + 25), cam.tz + L_.sunDir.z * 90 * up);
   sun.target.position.set(cam.tx, cam.ty, cam.tz);
-  hemi.color.copy(L_.hs); hemi.groundColor.copy(L_.hg); hemi.intensity = hemiI;
-  waterU.uSunDir.value.copy(sun.position).sub(sun.target.position).normalize(); waterU.uSunCol.value.copy(L_.sunC).multiplyScalar(sunI); waterU.uSky.value.copy(L_.hor); waterU.uLight.value = lightK; waterU.uTime.value = clock; waterU.uNight.value = nightK;
+  hemi.color.copy(L_.hs).convertSRGBToLinear(); hemi.groundColor.copy(L_.hg).convertSRGBToLinear(); hemi.intensity = hemiI * (envRT ? .4 : 1.25);
+  const envK = envRT ? clamp(lightK, .1, 1) * .5 * (1 - gloom * .4) : 0; if (Math.abs(envK - (worldTick.ek || -1)) > .02) { worldTick.ek = envK; for (const m of STDM) m.envMapIntensity = envK * (m.userData.envI || 1); }
+  waterU.uSunDir.value.copy(sun.position).sub(sun.target.position).normalize(); waterU.uSunCol.value.copy(L_.sunC).multiplyScalar(sunI); waterU.uSky.value.copy(L_.hor); waterU.uTop.value.copy(L_.top); waterU.uLight.value = lightK; waterU.uTime.value = clock; waterU.uNight.value = nightK;
   ampNow = 1 + W.rain * .5; waterU.uAmp.value = ampNow;
   waterU.uOff.value.set(Math.round(camera.position.x / WSTEP) * WSTEP, Math.round(camera.position.z / WSTEP) * WSTEP);
-  glowMat.color.setRGB(lerp(.36, 1, nightK), lerp(.49, .84, nightK), lerp(.6, .45, nightK));
-  cloudMat.color.setRGB(lerp(1, .35, nightK), lerp(1, .38, nightK), lerp(1, .5, nightK)).lerp(tmpC.setRGB(.6, .62, .66), gloom * .6);
-  cloudMat.emissive.copy(L_.hor).multiplyScalar(.45);
-  lavaMat.color.setRGB(1, .38 + Math.sin(clock * 2) * .08, .1);
+  glowMat.color.setRGB(lerp(.36, 1, nightK), lerp(.49, .84, nightK), lerp(.6, .45, nightK)).convertSRGBToLinear();
+  cloudMat.color.setRGB(lerp(1, .35, nightK), lerp(1, .38, nightK), lerp(1, .5, nightK)).lerp(tmpC.setRGB(.6, .62, .66), gloom * .6).convertSRGBToLinear();
+  cloudMat.emissive.copy(L_.hor).lerp(tmpC.setRGB(1, 1, 1), .35).multiplyScalar(lerp(.75, .25, nightK) * (1 - gloom * .4)).convertSRGBToLinear();
+  lavaMat.color.setRGB(1, .38 + Math.sin(clock * 2) * .08, .1).convertSRGBToLinear();
   if (lightBeam) { lightBeam.rotation.y = clock * .8; lightBeam.visible = nightK > .3 || W.fog > .5; }
 }
 
@@ -2458,8 +2810,11 @@ function ambientTick(dt) {
     N.lab.visible = d < 45;
     const want = d < 9 ? Math.atan2(dx, dz) : N.yaw0;
     N.ch.root.rotation.y = angLerp(N.ch.root.rotation.y, want, Math.min(1, dt * 4));
+    if (N.ch.real) { if (N.wave > 0) N.wave -= dt; if (d < 55) { N.ch.loop(N.wave > 0 || d < 6 ? 'Idle_Talking_Loop' : 'Idle_Loop'); N.ch.update(dt); } }
+    else {
     N.ch.hips.position.y = .84 + Math.sin(clock * 2 + N.ph) * .02;
     if (N.wave > 0) { N.wave -= dt; N.ch.armR.rotation.x = -2.8; N.ch.armR.rotation.z = -.3 + Math.sin(clock * 14) * .3; } else { N.ch.armR.rotation.x = Math.sin(clock * 1.3 + N.ph) * .05; N.ch.armR.rotation.z = -.08; }
+    }
   }
   for (const pd of PEDS) { pd.m.rotation.y += dt * .9; pd.m.position.y = pd.y + Math.sin(clock * 1.6) * .15; pd.m.visible = pd.rod.id !== 'star' || nightK > .5; }
   // swarms
@@ -2497,11 +2852,27 @@ function uiTick() {
   }
   const h = Math.floor(S.time * 24), m = Math.floor((S.time * 24 - h) * 60 / 15) * 15;
   el.clockT.textContent = ((h + 11) % 12 + 1) + ':' + String(m).padStart(2, '0') + (h < 12 ? ' AM' : ' PM') + ' · ' + (S.wx === 'rain' ? 'Rain' : S.wx === 'fog' ? 'Fog' : 'Clear');
+  const gt = goalText(); if (gt !== el.goalT.textContent) { el.goalT.textContent = gt; el.goal.classList.remove('pop'); void el.goal.offsetWidth; el.goal.classList.add('pop'); }
   // press E prompt
+  syncLockHint();
+  aimDot.hidden = !(locked && S.rodOn && (FS.st === 'idle' || FS.st === 'charge') && !P.swim);
   near = (FS.st === 'idle' || FS.st === 'land') && !panelOpen() && !introOpen() ? findNear() : null;
   el.prompt.hidden = !near || coarse || !el.catchC.hidden; if (near) el.promptT.textContent = near.label;
   el.tAct.hidden = !near;
   if (coarse) el.tCast.textContent = { idle: S.rodOn ? 'Cast' : 'Rod', charge: 'Let go', fly: '...', wait: 'Reel in', shake: 'Shake', reel: 'Hold', land: 'Nice!', back: '...' }[FS.st] || 'Cast';
+}
+function goalText() {
+  const sp = Object.keys(S.J).length;
+  if (S.stats.caught === 0) return 'Catch your first fish. Walk to the pier and cast!';
+  if (S.stats.sold === 0) return 'Sell your fish to Old Pim at the market by the fountain';
+  if (S.rods.length === 1) return S.money >= ROD('bamboo').p ? 'Buy the Bamboo Pole from Juno in town' : 'Save ' + money(ROD('bamboo').p) + ' for the Bamboo Pole (' + money(S.money) + ' now)';
+  if (!S.visited[1]) return 'Fish in Mosswater Lake. Cross the bridge west of town';
+  if (!S.boat) return S.money >= BOATS[1].p ? 'Buy a boat from Captain Rook at the pier' : 'Save ' + money(BOATS[1].p) + ' for a boat (' + money(S.money) + ' now)';
+  if (!S.visited[2]) return 'Sail east to Coral Key and its reef fish';
+  if (sp < 20) return 'Find 20 kinds of fish (' + sp + ' of 20)';
+  if (!S.visited[3] || !S.visited[4]) return 'Explore Frostfjord and Ember Vents';
+  if (sp < FISH.length) return 'Fill the journal (' + sp + ' of ' + FISH.length + ' fish)';
+  return 'You found every fish! Hunt for Golden and Rainbow ones';
 }
 const TIPS = [
   ['cast', () => S.stats.caught === 0 && FS.st === 'idle' && !P.inBoat && terrainH(P.x, P.z) < 3 && Math.hypot(P.x - DOCK_BASE.x, P.z - DOCK_BASE.z) < 40, () => coarse ? 'Walk to the end of the pier, then hold Cast and let go to throw your line.' : 'Walk to the water, then hold the mouse button (or F) and let go to cast.'],
@@ -2555,10 +2926,10 @@ function reportBest() {
 let renderScale = 1, rsFrames = 0, rsTime = 0;
 function layout() {
   const vw = Math.max(1, host.clientWidth), vh = Math.max(1, host.clientHeight);
-  const dpr = Math.min(window.devicePixelRatio || 1, HQ ? 1.5 : 1), budget = HQ ? 2.4e6 : 9e5;
+  const dpr = Math.min(window.devicePixelRatio || 1, HQ ? 1.5 : 1), budget = HQ ? (coarse ? 1.3e6 : 2.2e6) : 9e5;
   const k = Math.min(1, Math.sqrt(budget / (vw * dpr * vh * dpr))) * renderScale;
   renderer.setSize(Math.max(2, Math.round(vw * dpr * k)), Math.max(2, Math.round(vh * dpr * k)), false);
-  camera.aspect = vw / vh; camera.fov = vw / vh < 1 ? 72 : 60; camera.updateProjectionMatrix();
+  camera.aspect = vw / vh; cam.fov = 0; camera.updateProjectionMatrix();
 }
 function watchSpeed(raw) {
   if (raw > 250) { rsFrames = rsTime = 0; return; }
@@ -2571,8 +2942,8 @@ let rsT = 0;
 const ro = new ResizeObserver(() => { clearTimeout(rsT); rsT = setTimeout(() => { if (alive) layout(); }, 100); }); ro.observe(host);
 let clock = 0;
 function startGame() {
-  el.intro.hidden = true; S.intro = true; aInit(); fillBounties(); save(); glc.focus({ preventScroll: true });
-  hint(coarse ? 'Use the stick to walk to the pier. Hold Cast to fish.' : 'Walk to the pier with WASD. Drag the mouse to look around.', 5);
+  el.intro.hidden = true; S.intro = true; aInit(); requestLock(); fillBounties(); save(); glc.focus({ preventScroll: true });
+  hint(coarse ? 'Use the stick to walk to the pier. Hold Cast to fish.' : 'Walk to the pier with WASD. Move the mouse to look around.', 5);
 }
 on($('#introGo'), 'click', startGame);
 load();
@@ -2581,7 +2952,7 @@ setRodModel(); setBoatModel(); syncHUD(); wxIcon();
 if (boat.out && S.boat) { boat.mesh.visible = true; }
 P.y = groundAt(P.x, P.z) + .1;
 if (P.inBoat) { P.x = boat.x; P.z = boat.z; }
-cam.yaw = P.yaw - Math.PI; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 1.7;
+cam.yaw = P.yaw - Math.PI; cam.tx = P.x; cam.tz = P.z; cam.ty = P.y + 2.3; cam.d = cam.dist;
 if (!S.intro) el.intro.hidden = false; else hint('Welcome back!', 2.5);
 layout();
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('36px "Bagel Fat One"'), document.fonts.load('800 24px Figtree')]).then(() => { if (alive) LABELS.forEach(f => f()); }).catch(() => {});
@@ -2589,7 +2960,7 @@ let last = performance.now();
 const perf = { js: 0, n: 0 };
 function frame(now) {
   if (!alive) return;
-  const raw = now - last, dt = Math.min(.05, raw / 1000); last = now;
+  const raw = Math.max(0, now - last), dt = Math.min(.05, raw / 1000); last = now;
   const t0 = performance.now();
   clock += dt;
   if (!introOpen()) { playerTick(dt); fishTick(dt); }
@@ -2598,6 +2969,7 @@ function frame(now) {
   cameraTick(dt);
   worldTick(dt);
   cloudsTick(dt);
+  vegTick();
   rainTick(dt, W.rain);
   partsTick(dt);
   ambientTick(dt);
@@ -2614,7 +2986,7 @@ function frame(now) {
   raf = requestAnimationFrame(frame);
 }
 raf = requestAnimationFrame(frame);
-// test hook for automated checks (not used by the game)
+
 
 function dispose() {
   if (!alive) return;
@@ -2634,6 +3006,44 @@ function dispose() {
   shadow.innerHTML = '';
 }
 return dispose;
+}
+
+/* ================= art loading ================= */
+// Textures, sky lighting, trees and characters come from the site's CC0 asset folder (see /assets/CREDITS.txt).
+// Every file is optional: if one fails the game uses a plainer look instead.
+const ART_BASE = '/assets/';
+const ART = { tex: {}, mean: {}, hdr: null, glb: {} };
+function texMean(img) {
+  try { const c = document.createElement('canvas'); c.width = c.height = 8; const x = c.getContext('2d'); x.drawImage(img, 0, 0, 8, 8); const d = x.getImageData(0, 0, 8, 8).data; let r = 0, g = 0, b = 0; for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; } const n = d.length / 4 * 255; return new THREE.Vector3(Math.max(.05, r / n), Math.max(.05, g / n), Math.max(.05, b / n)); } catch (_) { return new THREE.Vector3(.5, .5, .5); }
+}
+function loadArt(onp) {
+  const T = THREE;
+  const libP = (T.GLTFLoader && T.RGBELoader && T.SkeletonUtils) ? Promise.resolve() : new Promise((res, rej) => {
+    const sc = document.createElement('script'); sc.src = ART_BASE + 'lib/loaders.js'; sc.onload = res; sc.onerror = () => rej(new Error('loaders')); document.head.append(sc);
+  });
+  const texL = new T.TextureLoader();
+  const img = u => new Promise(res => texL.load(ART_BASE + u, t => { t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = HQ ? 4 : 1; res(t); }, undefined, () => res(null)));
+  const jobs = [];
+  for (const k of ['sand', 'grass', 'rock', 'planks', 'plaster', 'stonewall', 'roof']) jobs.push(() => img('tex/' + k + '_col.jpg').then(t => { if (t) { ART.tex[k] = t; ART.mean[k] = texMean(t.image); } }));
+  const glb = (k, path) => () => new Promise(res => new T.GLTFLoader().load(ART_BASE + path, g => { ART.glb[k] = g; res(); }, undefined, () => res()));
+  jobs.push(glb('nature', 'models/n_nature.glb'), glb('peasant', 'chars/q_peasant.glb'), glb('head', 'chars/q_head.glb'), glb('anims', 'chars/q_anims.glb'));
+  if (HQ) jobs.push(() => new Promise(res => new T.RGBELoader().setDataType(T.UnsignedByteType).load(ART_BASE + 'hdr/day.hdr', h => { ART.hdr = h; res(); }, undefined, () => res())));
+  let done = 0;
+  const all = libP.catch(() => {}).then(() => {
+    const list = T.GLTFLoader ? jobs : jobs.slice(0, 7);
+    return Promise.all(list.map(j => j().catch(() => {}).then(() => onp && onp(++done, list.length))));
+  });
+  return Promise.race([all, new Promise(res => setTimeout(res, 30000))]);
+}
+let innerDispose = null;
+loadArt((n, t) => { const b = $('#ldBar'); if (b) b.style.width = Math.round(n / t * 100) + '%'; })
+  .then(() => {
+    if (!alive) return;
+    $('#loading').hidden = true;
+    try { innerDispose = game(); } catch (e) { console.error(e); const er = $('#err'); er.hidden = false; er.textContent = 'This 3D game hit an error: ' + e.message; }
+  });
+function outerDispose() { if (innerDispose) { const d = innerDispose; innerDispose = null; d(); return; } alive = false; for (const f of offs) f(); shadow.innerHTML = ''; }
+return outerDispose;
 }
 G.push({id:'fishtycoon',name:'Fishing Tycoon',kind:'sim',wide:true,big:true,tags:['3D','fishing'],tint:'#bfe6ff',
 blurb:'Walk a 3D island world, cast your line and reel in over 60 kinds of fish. Sell your catch for better rods, bait and boats, then sail to reefs, frozen fjords and the deep trench.',
