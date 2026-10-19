@@ -276,5 +276,8 @@ G.push(
 {"id":"knuckle","name":"Knuckle Through","kind":"game","tint":"#f2b233","url":"/games/knuckle-through/","wide":true,"big":true,"tags":["digging","tycoon","3D"],"fmt":b=>b+' m'},
 {"id":"lumber","name":"Lumberjack Tycoon","kind":"sim","tint":"#7cbb4e","url":"/games/lumberjack-tycoon/","wide":true,"big":true,"tags":["3D","tycoon"],"fmt":b=>{const u=['','K','M','B','T'];let i=0;while(b>=1000&&i<4){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
 {"id":"fishtycoon","name":"Fishing Tycoon","kind":"sim","tint":"#bfe6ff","url":"/games/fishing-tycoon/","wide":true,"big":true,"tags":["3D","fishing"],"fmt":b=>{const u=['','K','M','B','T','Qa','Qi'];let i=0;while(b>=1000&&i<6){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
-{"id":"cards","name":"All-Star Pulls","kind":"game","tint":"#16304f","url":"/games/all-star-pulls/","wide":true,"fmt":b=>b+' cards'}
+{"id":"cards","name":"All-Star Pulls","kind":"game","tint":"#16304f","url":"/games/all-star-pulls/","wide":true,"fmt":b=>b+' cards'},
+{"id":"sk_orbit","name":"Orbit Pop","kind":"arcade","tint":"#0b1024","url":"/games/orbit-pop/","fmt":b=>b+' pts'},
+{"id":"sk_cannon","name":"Splitstorm","kind":"arcade","tint":"#081226","url":"/games/splitstorm/","fmt":b=>b+' pts'},
+{"id":"sk_color","name":"Hue Smash","kind":"arcade","tint":"#0d0f22","url":"/games/hue-smash/","fmt":b=>b+' pts'}
 );
