@@ -175,6 +175,8 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 | Pocket Pet | Needs more to do |
 | Corner Pocket | The computer opponent needs tuning; aiming needs help lines |
 
+**All sports games are in progress (owner, Oct 2026: "move all sports to in progress till I figure the issues out").** penalty, golf, airhockey, ski and kart joined the ones already there; the Sports filter button on the homepage is `hidden` while it would be empty. Bring them back with `tools/release-game.cjs` and remove `hidden` from `data-f="sports"` in index.html.
+
 ### Live but needs work (from the audit)
 
 - **Plain looks or thin content:** Memory Match, Hangman, Code Breaker, Maze Runner, Space Dodge, Teo's Escape, Box Pusher (12 levels), Riddle Box.
