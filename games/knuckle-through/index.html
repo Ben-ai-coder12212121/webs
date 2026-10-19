@@ -161,9 +161,9 @@ for (let z = 0, k = 0; z < DEEP; z++) { while (k + 1 < STRATA.length && z >= STR
 const strataIdx = z => STRAT_OF[clamp(z | 0, 0, DEEP - 1)];
 // HP per voxel by depth: an inverse-designed curve (log10 HP every 100 slices) so each slice takes a little longer than the last.
 const KNOTS = [0, 0.2, 0.84, 1.126, 1.414, 1.819, 2.115, 2.289, 2.548, 3.199, 3.379, 3.549, 3.767, 3.915, 4.075, 4.217, 4.551, 4.689, 4.835, 4.969, 5.099, 5.252, 5.668, 5.754, 5.928, 6.003, 6.134, 6.255, 6.375, 6.502, 6.62, 6.737, 6.861, 6.976, 7.392, 7.512, 7.625, 7.738, 7.809, 7.921, 8.037, 8.147, 8.256, 8.371, 8.479, 8.587, 8.7, 9.107, 9.214, 9.32, 9.431, 9.631];
-// past the end of the designed curve rock keeps getting harder at a steady 10^0.14 per 100 slices
+// past the end of the designed curve rock keeps getting harder at a steady 10^0.07 per 100 slices
 const KN_END = (KNOTS.length - 1) * 100;
-const hpDeep = d => { if (d >= KN_END) return Math.pow(10, KNOTS[KNOTS.length - 1] + 0.14 * (d - KN_END) / 100); const i = Math.floor(d / 100), f = (d - i * 100) / 100; return Math.pow(10, KNOTS[i] + (KNOTS[i + 1] - KNOTS[i]) * f); };
+const hpDeep = d => { if (d >= KN_END) return Math.pow(10, KNOTS[KNOTS.length - 1] + 0.07 * (d - KN_END) / 100); const i = Math.floor(d / 100), f = (d - i * 100) / 100; return Math.pow(10, KNOTS[i] + (KNOTS[i + 1] - KNOTS[i]) * f); };
 const valDeep = d => Math.pow(1.008, d);
 const FIND_P = 0.0025;
 const FINDS = [
@@ -424,24 +424,12 @@ if (HQ) {
   };
 }
 
-// Render scale for High graphics. If the game runs under ~36 fps for 3 seconds while you play, the 3D view drops
-// 10% in resolution (down to 60%); after 20 smooth seconds it tries one step back up, and stays put if that was too much.
-let renderScale = 1, rsFrames = 0, rsTime = 0, rsSmooth = 0, rsRaised = false, rsLocked = false;
-function watchSpeed(dt, raw) {
-  if (!HQ || !playing() || raw > 250) { rsFrames = rsTime = 0; return; }
-  rsFrames++; rsTime += raw;
-  if (rsTime < 3000) return;
-  const avg = rsTime / rsFrames; rsFrames = rsTime = 0;
-  if (avg > 28 && renderScale > 0.65) { if (rsRaised) rsLocked = true; rsRaised = false; rsSmooth = 0; renderScale = Math.round((renderScale - 0.1) * 10) / 10; layout(); }
-  else if (avg < 18 && renderScale < 1 && !rsLocked) { rsSmooth += 3; if (rsSmooth >= 20) { rsSmooth = 0; rsRaised = true; renderScale = Math.round((renderScale + 0.1) * 10) / 10; layout(); } }
-  else rsSmooth = 0;
-}
 function layout() {
   const vw = Math.max(1, host.clientWidth), vh = Math.max(1, host.clientHeight);
   PXS = clamp(Math.round(vh / 330), 2, 5);
   W = Math.ceil(vw / PXS); H = Math.ceil(vh / PXS);
   // the world renders at screen resolution (capped), the hands and numbers on top stay chunky pixel art
-  if (HQ) { const dpr = Math.min(window.devicePixelRatio || 1, 1.5), k = Math.min(1, Math.sqrt(2.6e6 / (vw * dpr * vh * dpr))) * renderScale; GW = Math.max(2, Math.round(vw * dpr * k)); GH = Math.max(2, Math.round(vh * dpr * k)); }
+  if (HQ) { const dpr = Math.min(window.devicePixelRatio || 1, 1.5), k = Math.min(1, Math.sqrt(2.6e6 / (vw * dpr * vh * dpr))); GW = Math.max(2, Math.round(vw * dpr * k)); GH = Math.max(2, Math.round(vh * dpr * k)); }
   else { GW = W; GH = H; }
   renderer.setSize(GW, GH, false);
   if (post) post.size(GW, GH);
@@ -1023,11 +1011,7 @@ let combo = 1, lastHit = -9, trauma = 0, clock = 0, ghostAcc = 0, drillAcc = 0, 
 let texts = [];
 const fists = [{ side: 0, st: 0, t: 0, x: 0, y: 0, sc: 1 }, { side: 1, st: 0, t: 0, x: 0, y: 0, sc: 1 }];
 function floatText(wx, wy, wz, s, col, big) { if (texts.length > 40) texts.shift(); texts.push({ wx, wy, wz, s, col, big, life: big ? 1.2 : 0.8, max: big ? 1.2 : 0.8, rise: 0 }); }
-// effects past the fog can't be seen, so machines working far away don't spawn any
-let fxRange = 90;
-const fxHidden = z => Math.abs(z - player.z) > fxRange;
 function burst(x, y, z, mi, n, power, nx, ny, nz) {
-  if (fxHidden(z)) return;
   const m = MATS[mi];
   for (let k = 0; k < n && parts.length < PMAX; k++) {
     const sp = rnd(2, 6) * power;
@@ -1073,7 +1057,6 @@ function mergeOldest() {
   if (best) { best.v = (best.v * best.n + r.v * r.n) / (best.n + r.n); best.n += r.n; best.s = Math.min(0.95, Math.cbrt(best.s ** 3 + r.s ** 3)); }
 }
 function dust(x, y, z, col, n, out, power) {
-  if (fxHidden(z)) return;
   for (let k = 0; k < n; k++) {
     const sp = rnd(0.4, 2.2) * (power || 1);
     dusts.push({ x: x + rnd(-0.45, 0.45), y: y + rnd(-0.45, 0.45), z: z + rnd(-0.45, 0.45), vx: (out ? out[0] : 0) * sp + rnd(-0.7, 0.7), vy: rnd(-0.1, 0.9), vz: (out ? out[2] : 0) * sp + rnd(-0.7, 0.7), life: rnd(1.4, 3.6), c: [col[0] / 255, col[1] / 255, col[2] / 255] });
@@ -1084,8 +1067,20 @@ function dust(x, y, z, col, n, out, power) {
 // (SPAN): anything past its limit cracks, trickles dust for a moment, then breaks loose and falls.
 // Each depth that changed is checked with 6 layers of padding. Nearby depths are merged into one window, but
 // machines digging far apart are checked as separate small windows instead of one span covering everything between.
-function requestSupport(z) { supZs.add(z); }
+// On top of that, a sweep walks every slice between the shallowest and deepest dig (what the original single check
+// covered in one go), 160 slices per check with 24 slices of padding, so rock far from any dig still cracks and falls.
+let swLo = 1e9, swHi = -1, swAt = -1;
+function requestSupport(z) { supZs.add(z); if (z < swLo) swLo = z; if (z > swHi) swHi = z; }
+function supportSweep() {
+  if (swAt < 0) { if (swHi < 0) return; swAt = swLo; }
+  const hi = swHi, a = swAt, b = Math.min(hi, a + 159);
+  supportWindow(Math.max(0, a - 24), Math.min(DEEP - 1, b + 24));
+  swAt = b + 1;
+  if (swAt > hi) { swAt = -1; swLo = 1e9; swHi = -1; }
+}
 function analyzeSupport() {
+  supportSweep();
+  if (!supZs.size) return;
   const zs = Array.from(supZs).sort((a, b) => a - b); supZs.clear();
   let a = zs[0], b = zs[0];
   for (let k = 1; k <= zs.length; k++) {
@@ -2108,7 +2103,7 @@ function update(dt) {
   if (S.needle.got && faceDepth >= (S.needle.k + 1) * MTN) { S.needle = newNeedle(Math.floor(faceDepth / MTN), faceDepth); toast('A new needle is hidden somewhere in this mountain.', 3600); }
   skyPlane.visible = false;
   const daylight = 0;
-  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03 - 0.0015 * lv('lamp'), 0.004, daylight); fxRange = 2.6 / scene.fog.density;
+  scene.background.copy(FOG).lerp(SKYC, daylight); scene.fog.color.copy(scene.background); scene.fog.density = lerp(0.03 - 0.0015 * lv('lamp'), 0.004, daylight);
   beamLamp.intensity = lv('lamp') ? 0.6 + 0.15 * lv('lamp') : 0; beamLamp.distance = lampRange(lv('lamp'));
   sun.intensity = daylight * 1.1; ambient.intensity = 0.26 + daylight * 0.5;
 
@@ -2177,9 +2172,9 @@ function update(dt) {
     const nt = t - dt;
     if (nt <= 0) { stressed.delete(key); detach(key); continue; }
     stressed.set(key, nt);
-    if (Math.random() < dt * 7 && !fxHidden(z) && parts.length < PMAX) { const mi = STRATA[strataIdx(z)].m; parts.push({ k: 0, x: x + rnd(0.1, 0.9), y: y + 0.02, z: z + rnd(0.1, 0.9), vx: 0, vy: -0.5, vz: 0, life: 0.9, max: 0.9, c: MATS[mi].P[2] }); if (Math.random() < 0.4) dust(x + 0.5, y, z + 0.5, MATS[mi].P[2], 1, null, 0.2); }
+    if (Math.random() < dt * 7) { const mi = STRATA[strataIdx(z)].m; parts.push({ k: 0, x: x + rnd(0.1, 0.9), y: y + 0.02, z: z + rnd(0.1, 0.9), vx: 0, vy: -0.5, vz: 0, life: 0.9, max: 0.9, c: MATS[mi].P[2] }); if (Math.random() < 0.4) dust(x + 0.5, y, z + 0.5, MATS[mi].P[2], 1, null, 0.2); }
   }
-  if (wOn) { supT -= dt; if (supZs.size && supT <= 0) { analyzeSupport(); supT = 0.12; } }
+  if (wOn) { supT -= dt; if ((supZs.size || swHi >= 0) && supT <= 0) { analyzeSupport(); supT = 0.12; } }
   // dust drifts, spreads and slowly settles
   { const drag = Math.exp(-dt * 1.6); let w = 0;
     for (let k = 0; k < dusts.length; k++) {
@@ -2863,9 +2858,8 @@ function start(data) {
   if (data && data.v === 3) $('#intro').hidden = true; else showIntro();
   let last = performance.now(), uiAcc = 0;
   function frame(now) {
-    const raw = now - last, dt = Math.min(0.05, raw / 1000); last = now;
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
     update(dt);
-    watchSpeed(dt, raw);
     motesTick(dt);
     if (post) post.render(); else renderer.render(scene, camera);
     draw2D();
