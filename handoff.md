@@ -63,7 +63,7 @@ Builder agents write one deliverable each to the session scratchpad (`/tmp/claud
 | Deliverable | Game | Install |
 |---|---|---|
 | `lumber3d.js` | Lumberjack round 3: online by default, own spawn and starter car, buy car fix, multi-seat cars, Chop a Forest / Timber Truck features | `--libs=online` (id lumber3d, keep In progress) |
-| `disaster.js` | Natural disaster multiplayer survival | `--libs=online` |
+| `disaster.js` | Natural disaster multiplayer survival | INSTALLED as Disaster Dash (games/disaster-dash, In progress) |
 | `west3d.js` | Wild West sandbox (Westwood-inspired) | `--libs=online` |
 | `getaway3d.js` | Road-trip getaway (Runaways-inspired) | `--libs=online` |
 | `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | none |

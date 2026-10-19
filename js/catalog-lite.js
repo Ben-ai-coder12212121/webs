@@ -279,5 +279,6 @@ G.push(
 {"id":"cards","name":"All-Star Pulls","kind":"game","tint":"#16304f","url":"/games/all-star-pulls/","wide":true,"fmt":b=>b+' cards'},
 {"id":"sk_orbit","name":"Orbit Pop","kind":"arcade","tint":"#0b1024","url":"/games/orbit-pop/","fmt":b=>b+' pts'},
 {"id":"sk_cannon","name":"Splitstorm","kind":"arcade","tint":"#081226","url":"/games/splitstorm/","fmt":b=>b+' pts'},
-{"id":"sk_color","name":"Hue Smash","kind":"arcade","tint":"#0d0f22","url":"/games/hue-smash/","fmt":b=>b+' pts'}
+{"id":"sk_color","name":"Hue Smash","kind":"arcade","tint":"#0d0f22","url":"/games/hue-smash/","fmt":b=>b+' pts'},
+{"id":"disaster","name":"Disaster Dash","kind":"game","tint":"#e8473c","url":"/games/disaster-dash/","wide":true,"big":true,"tags":["3D","multiplayer","survival"],"fmt":b=>b+' in a row'}
 );
