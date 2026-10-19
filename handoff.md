@@ -56,6 +56,22 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 - **Last full check:** `tools/test-games.cjs` reported **272 games tested, ALL CLEAN**.
 - **Open question for the owner:** should any of the 10 in-progress games move to the main list?
 
+### In flight (Oct 19-20 2026 request list), if a session picks this up
+
+Builder agents write one deliverable each to the session scratchpad (`/tmp/claude-0/-home-user-webs/b2fe29ec-6401-52e7-8b76-eda5b927e5c7/scratchpad/`); the main session reviews screenshots, installs with `node tools/new-game.cjs <file> [--wip] [--libs=...]`, deletes the agent's `games/_*` test page, runs `node tools/allgames.cjs` and `tools/test-games.cjs`, commits to `preview`. Every new or rebuilt game goes to In progress. Not deployed until the owner says "deploy".
+
+| Deliverable | Game | Install |
+|---|---|---|
+| `lumber3d.js` | Lumberjack round 3: online by default, own spawn and starter car, buy car fix, multi-seat cars, Chop a Forest / Timber Truck features | `--libs=online` (id lumber3d, keep In progress) |
+| `disaster.js` | Natural disaster multiplayer survival | `--libs=online` |
+| `west3d.js` | Wild West sandbox (Westwood-inspired) | `--libs=online` |
+| `getaway3d.js` | Road-trip getaway (Runaways-inspired) | `--libs=online` |
+| `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | none |
+| `cookempire.js` | Chemistry-teacher cook empire sim, fictional chemistry only, `age:16` | none |
+| `growop.js` | Licensed grow-op tycoon, `age:16` | none |
+
+Owner answers this round: drug games approved for 16+ players (built with the age notice); all sports games moved to In progress until the owner decides what's wrong with them; Bonk Buddy is fine now.
+
 ### Recently done (newest first)
 
 - **Knuckle Through released** (`games/knuckle-through/`, id `knuckle`): out of In progress, indexable, in the sitemap, and in `MAJOR` so it shows under "Big games only" (it already has `big:true` for "Big 3D & story"). It is a first-person 3D digging tycoon: one 20×12×5000 voxel wall in 17 strata, fracture debris, a structural-support solver for cave-ins, health with falling-rock and fall damage, a dig crew, finds and a hidden needle per mountain. The game is a self-contained `KnuckleThrough(host, env)` that mounts in a shadow root inside a `.g3` frame, uses the local three.js r128 via `with3D`, the site Sound button and `c.best` (metres dug). Fonts Big Shoulders Stencil Display, IBM Plex Sans Condensed and Silkscreen are self-hosted in `assets/fonts/`. Still worth a real-mouse playtest for balance. Later added tools 4 to 6 (sledgehammer with area smash, throwable dynamite that chains and can hurt you, a mining laser that overheats), machines (drill rigs bolted to the face, a rock crusher that sells rubble, a tunnel boring machine), and upgrades (roof bolts, ground radar, geologist, tool tiers). Locked tools stay hidden until bought. The game source is built from one file and pasted in with `node tools/new-game.cjs <file>` (no `--wip`). Then added tools 7 to 9 (rock saw, cryo sprayer that makes rock brittle, singularity charge that eats rock and rubble), machines (excavator, blasting drones that wait for you to step clear, laser turrets), and rewrote the robot vacuums (they suck up everything nearby, hover to ledges, hold rubble in hoppers when the bag is full, and no longer get stuck on top of the rock). Machines find the tunnel floor with `groundAt()`, not `floorBelow(…, GY - 1, …)`, which lands on top of undug rock. A lighting change (brighter deep rock, helmet spotlight, more lamps) was tried and reverted at the owner's request: they prefer the original darker look, so leave the base lighting alone. The Headlamp upgrade came back on request: a helmet spotlight that is off at level 0 (so the default look is unchanged) and gets brighter and longer per level. Graphics pass after that: the world renders at screen resolution (hands and numbers stay pixel art), Phong rock with a height map, per-material gloss and glowing veins (magma, neutronium, crystal) from maps painted with the atlas, baked corner shading on voxel faces, textured machine skins, bloom + vignette post pass, soft round dust and grit, drifting dust in the headlamp. All of it is off when the site's Graphics button is on Low (`env.lowGfx`), which keeps the old chunky renderer.
