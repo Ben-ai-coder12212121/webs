@@ -52,7 +52,7 @@ const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','sma
   return{best,open,close:()=>{closePanel();btn.hidden=true},eligible,probe,toast,share,send,name,cid}})();
 const DOC_TITLE=document.title;
 function openGame(g){if(g.id!==PAGE){location.href=gameUrl(g);return}setTimeout(()=>{try{rotCheck()}catch(e){}},700);if(ctx){ctx.dispose();if(ctx.extra)ctx.extra()}current=g;arena.innerHTML='';arena.classList.toggle('wide',!!g.wide);statEl.textContent='';$('#stTitle').textContent=g.name;stage.hidden=false;document.body.style.overflow='hidden';const lv=$('#lvl');lv.hidden=!g.levels;if(g.levels){const l=S.get('lvl_'+g.id,1);lv.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.l===l))}stage.scrollTop=0;
-  ctx=makeCtx(g);try{HIST.open(g);touchStreak();checkBadges()}catch(e){}try{TRACK.open(g)}catch(e){}try{syncBeat()}catch(e){}try{document.title=g.name+' · Play free on Detourr'}catch(e){}try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;gfxBtn.hidden=true;[600,2500,6000].forEach(ms=>setTimeout(()=>{if(current===g)checkGfx()},ms));if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}}
+  ctx=makeCtx(g);try{HIST.open(g);touchStreak();checkBadges()}catch(e){}try{TRACK.open(g)}catch(e){}try{RATE.bar(g)}catch(e){}try{syncBeat()}catch(e){}try{document.title=g.name+' · Play free on Detourr'}catch(e){}try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;gfxBtn.hidden=true;[600,2500,6000].forEach(ms=>setTimeout(()=>{if(current===g)checkGfx()},ms));if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}}
 function closeGame(){try{TRACK.stop()}catch(e){}if(PAGE){location.href='/';return}try{HIST.close()}catch(e){}try{LB.close()}catch(e){}try{document.title=DOC_TITLE}catch(e){}try{if(fsEl())fsExit()}catch(e){}try{rotq.classList.remove('on');rotSkip=false}catch(e){}if(ctx){ctx.dispose();if(ctx.extra)ctx.extra();ctx=null}current=null;arena.innerHTML='';stage.hidden=true;document.body.style.overflow='';renderGrid();try{history.replaceState(null,'',location.pathname)}catch(e){}}
 const isBig=g=>g.big!=null?g.big:(g.kind==='hero'||g.kind==='shooter'||/with3D|runShooter/.test(String(g.run)));
 let rndMode=S.get('rndMode','all');
@@ -225,6 +225,50 @@ const TRACK=(()=>{const ok=()=>typeof gtag==='function',ev=(n,p)=>{try{if(ok())g
   // one new_best per game per minute at most: some games report a rising score every frame
   const best=g=>{const t=Date.now();if(t-(lastBest[g.id]||0)<6e4)return;lastBest[g.id]=t;ev('new_best',{game_id:g.id})};
   return{ev,open,stop,best,dev,visits:v}})();
+/* Ratings and reviews (netlify/functions/reviews.mjs). Games: a 5-star bar under the game once you've started playing,
+   and the average on homepage tiles once 3 players have rated. Site: the "What players think" section on the homepage. */
+const RATE=(()=>{const cid=()=>{let v=S.get('lb_id',null);if(!v||!/^[a-z0-9]{8,40}$/.test(v)){v=(Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^a-z0-9]/g,'').slice(0,24);S.set('lb_id',v)}return v};const API='/api/reviews',P='<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>';
+  const star=(on,sz)=>'<svg viewBox="0 0 24 24" width="'+(sz||18)+'" height="'+(sz||18)+'" aria-hidden="true" class="rstar'+(on?' on':'')+'">'+P+'</svg>';
+  const stars=(v,sz)=>[1,2,3,4,5].map(i=>star(v>=i-.25,sz)).join('');
+  const get=q=>fetch(API+q,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const post=b=>fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({id:cid()},b))}).then(r=>r.json()).catch(()=>({error:'Could not reach the server. Try again in a moment.'}));
+  let sum=null;
+  // game page: "Rate this game" bar, shown after the first click, tap or key in the game (or after 40 s)
+  function bar(g){const old=document.querySelector('.ratebar');if(old)old.remove();if(!stage||!arena)return;
+    const b=el('div',{class:'ratebar',hidden:true});const row=el('div',{class:'rrow',role:'radiogroup','aria-label':'Rate '+g.name});const info=el('span',{class:'rinfo'},'');
+    // the five buttons are made once; hovering only recolours them (rebuilding under the pointer swallowed clicks)
+    let mine=0;const btns=[];const draw=hov=>btns.forEach((bt,k)=>{bt.querySelector('svg').classList.toggle('on',(hov||mine)>=k+1);bt.setAttribute('aria-checked',String(mine===k+1))});
+    for(let i=1;i<=5;i++){const bt=el('button',{type:'button',class:'rbtn',role:'radio','aria-checked':'false','aria-label':i+' star'+(i>1?'s':''),html:star(false,22)});bt.addEventListener('mouseenter',()=>draw(i));bt.addEventListener('focus',()=>draw(i));
+      bt.addEventListener('click',()=>{mine=i;draw();info.textContent='Saving…';post({op:'rate',game:g.id,stars:i}).then(r=>{if(r&&!r.error){info.textContent='Thanks! '+r.avg.toFixed(1)+' from '+r.n+' player'+(r.n===1?'':'s');try{TRACK.ev('rate_game',{game_id:g.id,stars:i})}catch(e){}}else info.textContent=(r&&r.error)||'Could not save'})});row.append(bt);btns.push(bt)}
+    row.addEventListener('mouseleave',()=>draw());draw();
+    b.append(el('b',null,'Rate '+g.name),row,info);arena.after(b);
+    get('?game='+g.id+'&id='+cid()).then(r=>{if(!r||r.error)return;mine=r.mine||0;draw();info.textContent=r.n?r.avg.toFixed(1)+' from '+r.n+' player'+(r.n===1?'':'s'):'Be the first to rate it'});
+    const show=()=>{b.hidden=false};let done=false;const once=()=>{if(done)return;done=true;show()};
+    arena.addEventListener('pointerdown',once,{once:true,capture:true});document.addEventListener('keydown',once,{once:true});setTimeout(once,40000)}
+  // homepage tiles: average rating once at least 3 players rated
+  function decorate(){if(!sum)return;document.querySelectorAll('#grid a.tile').forEach(a=>{if(a.querySelector('.rt'))return;const g=ALLG.find(x=>gameUrl(x)===a.getAttribute('href'));const v=g&&sum[g.id];if(!v||v[1]<3)return;const m=a.querySelector('.meta');if(m)m.append(el('span',{class:'rt',title:v[1]+' ratings',html:star(true,13)+' '+v[0].toFixed(1)}))})}
+  function loadSum(){get('?sum=1').then(r=>{if(r&&r.games){sum=r.games;decorate()}})}
+  // homepage: what players think of the site
+  function site(){const box=$('#reviews');if(!box)return;let st=null,pick=0,msg='',bad=false,busy=false;
+    const ago=t=>{const m=Math.round((Date.now()-t)/6e4);return m<60?Math.max(1,m)+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
+    function render(){box.innerHTML='';box.append(el('h2',{id:'revH'},'What players think of Detourr'));
+      const top=el('div',{class:'rtop'});
+      if(st&&st.n){top.append(el('div',{class:'ravg'},el('b',null,st.avg.toFixed(1)),el('span',{class:'rs',html:stars(st.avg,20)}),el('small',null,st.n+' review'+(st.n===1?'':'s'))));
+        const d=el('div',{class:'rdist'});for(let i=5;i>=1;i--){const n=st.dist[i-1],w=st.n?Math.round(n/st.n*100):0;d.append(el('div',{class:'rd'},el('span',null,i+''),el('i',null,el('u',{style:'width:'+w+'%'})),el('em',null,n+'')))}top.append(d)}
+      else top.append(el('p',{class:'rnone'},st?'No reviews yet. Be the first!':'Loading reviews…'));
+      const f=el('form',{class:'rform'});f.append(el('b',null,st&&st.mine?'Update your review':'Rate Detourr'));const sr=el('div',{class:'rrow',role:'radiogroup','aria-label':'Your rating'});
+      for(let i=1;i<=5;i++){const bt=el('button',{type:'button',class:'rbtn',role:'radio','aria-checked':String(pick===i),'aria-label':i+' star'+(i>1?'s':''),html:star(pick>=i,28)});bt.addEventListener('click',()=>{pick=i;render()});sr.append(bt)}
+      const ta=el('textarea',{id:'revText',maxlength:'240',rows:'2',placeholder:'What do you like? What should we add? (optional)'});ta.value=f.dataset.t||draftT;ta.addEventListener('input',()=>draftT=ta.value);
+      const nm=el('input',{id:'revName',maxlength:'16',placeholder:'Name (optional)',autocomplete:'off'});nm.value=draftN;nm.addEventListener('input',()=>draftN=nm.value);
+      const go=el('button',{type:'submit',class:'btn primary'},busy?'Sending…':'Post review');if(busy)go.disabled=true;
+      f.append(sr,ta,el('div',{class:'rfrow'},nm,go));if(msg)f.append(el('p',{class:'rmsg'+(bad?' bad':'')},msg));
+      f.addEventListener('submit',e=>{e.preventDefault();if(!pick){msg='Pick 1 to 5 stars first.';bad=true;render();return}busy=true;msg='';render();
+        post({op:'review',stars:pick,text:draftT,name:draftN}).then(r=>{busy=false;if(r&&!r.error){st=r;msg='Thanks for the review!';bad=false;draftT='';try{TRACK.ev('review_site',{stars:pick})}catch(e){}}else{msg=(r&&r.error)||'Could not post that.';bad=true}render()})});
+      top.append(f);box.append(top);
+      if(st&&st.recent.length){const ul=el('ul',{class:'rlist'});st.recent.slice(0,12).forEach(r=>ul.append(el('li',null,el('span',{class:'rs',html:stars(r.s,14)}),el('p',null,r.x),el('small',null,(r.n||'A player')+' · '+ago(r.t)))));box.append(ul)}}
+    let draftT='',draftN=S.get('lb_name','')||'';render();
+    get('?site=1&id='+cid()).then(r=>{st=r&&!r.error?r:{avg:0,n:0,dist:[0,0,0,0,0],recent:[]};if(st.mine)pick=st.mine.s;render()})}
+  return{bar,decorate,loadSum,site}})();
 /* First screen of the homepage: Continue playing (newest games in this device's history) and Top games, as picture cards. */
 function renderHero(){const box=$('#heroGames');if(!box)return;box.innerHTML='';const h=HIST.get(),find=id=>G.find(g=>g.id===id)||WIP.find(g=>g.id===id);
   const cont=Object.keys(h).filter(find).sort((a,b)=>(h[b].t||0)-(h[a].t||0)).slice(0,3).map(find);
@@ -326,7 +370,9 @@ $('#aboutClose').addEventListener('click',closeAbout);
 about.addEventListener('click',e=>{if(e.target===about)closeAbout()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!about.hidden)closeAbout()});
 $('#imgCredits').addEventListener('click',()=>{const L=$('#imgList');if(!L.hidden){L.hidden=true;return}L.innerHTML='';(window.HYPE_CREDITS||[]).forEach(([t,f,a,l,u])=>{const p=el('p',null,el('b',null,t+': '),'“'+f+'” by '+a+', '+l+' ');p.append(el('a',{href:u,target:'_blank',rel:'noopener'},'(source)'));L.append(p)});if(!L.children.length)L.append(el('p',null,'No photos loaded.'));L.hidden=false});
+{const _rg=renderGrid;renderGrid=function(){_rg.apply(this,arguments);try{RATE.decorate()}catch(e){}}}
 renderGrid();try{renderDaily()}catch(e){}try{renderHero()}catch(e){}
+if(!PAGE){try{RATE.loadSum();RATE.site()}catch(e){}}
 /* each game has its own page; old /#id links from before the split are sent there */
 if(PAGE){const g=ALLG.find(x=>x.id===PAGE);if(g)openGame(g)}else{const h=(location.hash||'').slice(1);const old=h&&ALLG.find(g=>g.id===h);if(old)location.replace(gameUrl(old));addEventListener('hashchange',()=>{const g=ALLG.find(x=>x.id===location.hash.slice(1));if(g)location.replace(gameUrl(g))})}
 /* Dark / Light toggle: dark is the default; the choice is saved per device (the head script applies it before first paint).
