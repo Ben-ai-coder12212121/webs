@@ -275,5 +275,6 @@ G.push(
 {"id":"bunker","name":"Bunker Down","kind":"game","tint":"#ffd9a0","url":"/games/bunker-down/","levels":true,"wide":true,"fmt":b=>b+' days'},
 {"id":"knuckle","name":"Knuckle Through","kind":"game","tint":"#f2b233","url":"/games/knuckle-through/","wide":true,"big":true,"tags":["digging","tycoon","3D"],"fmt":b=>b+' m'},
 {"id":"lumber","name":"Lumberjack Tycoon","kind":"sim","tint":"#7cbb4e","url":"/games/lumberjack-tycoon/","wide":true,"big":true,"tags":["3D","tycoon"],"fmt":b=>{const u=['','K','M','B','T'];let i=0;while(b>=1000&&i<4){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
-{"id":"fishtycoon","name":"Fishing Tycoon","kind":"sim","tint":"#bfe6ff","url":"/games/fishing-tycoon/","wide":true,"big":true,"tags":["3D","fishing"],"fmt":b=>{const u=['','K','M','B','T','Qa','Qi'];let i=0;while(b>=1000&&i<6){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}}
+{"id":"fishtycoon","name":"Fishing Tycoon","kind":"sim","tint":"#bfe6ff","url":"/games/fishing-tycoon/","wide":true,"big":true,"tags":["3D","fishing"],"fmt":b=>{const u=['','K','M','B','T','Qa','Qi'];let i=0;while(b>=1000&&i<6){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
+{"id":"cards","name":"All-Star Pulls","kind":"game","tint":"#16304f","url":"/games/all-star-pulls/","wide":true,"fmt":b=>b+' cards'}
 );
