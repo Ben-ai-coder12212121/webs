@@ -7,7 +7,7 @@
 // Usage: node tools/catalog-lite.cjs
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
-const KEEP = ['id', 'name', 'kind', 'tint', 'url', 'levels', 'wide', 'big', 'major', 'lower', 'tags', 'noLb'];
+const KEEP = ['id', 'name', 'kind', 'tint', 'url', 'levels', 'wide', 'big', 'major', 'lower', 'tags', 'noLb', 'age'];
 const lines = fs.readFileSync(path.join(ROOT, 'js/catalog.js'), 'utf8').split('\n').filter(l => l.startsWith('{"id"'));
 const art = {};
 const out = lines.map(l => {

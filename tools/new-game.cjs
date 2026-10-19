@@ -65,7 +65,7 @@ fs.writeFileSync(path.join(ROOT, 'games', slug, 'index.html'), head + body + seo
 const catP = path.join(ROOT, 'js/catalog.js');
 let cat = fs.readFileSync(catP, 'utf8');
 const o = { id: g.id, name: g.name, kind: g.kind, tint: g.tint, blurb: g.blurb, art: g.art, url };
-for (const k of ['levels', 'wide', 'big', 'major', 'lower', 'tags', 'noLb']) if (g[k] != null) o[k] = g[k];
+for (const k of ['levels', 'wide', 'big', 'major', 'lower', 'tags', 'noLb', 'age']) if (g[k] != null) o[k] = g[k];
 let line = JSON.stringify(o);
 if (g.fmt) line = line.slice(0, -1) + ',"fmt":' + String(g.fmt) + '}';
 const re = new RegExp('^\\{"id":"' + g.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '".*$', 'm');
