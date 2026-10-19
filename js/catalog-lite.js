@@ -176,7 +176,7 @@ G.push(
 {"id":"sim_tractor","name":"Tractor Fields","kind":"sim","tint":"#6EC56E","url":"/games/tractor-fields/","wide":true,"big":true,"fmt":b=>'$'+b},
 {"id":"sim_farm","name":"Farm Life","kind":"sim","tint":"#8fd36b","url":"/games/farm-life/","wide":true,"big":false,"fmt":b=>'$'+b},
 {"id":"sim_lemon","name":"Lemonade Tycoon","kind":"sim","tint":"#FFE27A","url":"/games/lemonade-tycoon/","wide":true,"big":false,"fmt":b=>'$'+b},
-{"id":"sim_town","name":"Tiny Town","kind":"sim","tint":"#7FC8F8","url":"/games/tiny-town/","wide":true,"big":false,"fmt":b=>b+' people'},
+{"id":"sim_town","name":"Tiny Town","kind":"sim","tint":"#7FC8F8","url":"/games/tiny-town/","wide":true,"fmt":b=>b+' people'},
 {"id":"esc_class","name":"Escape: Detention","kind":"escape","tint":"#cfe3d4","url":"/games/escape-detention/","big":false,"lower":true,"fmt":b=>Math.floor(b/60)+':'+String(Math.floor(b%60)).padStart(2,'0')},
 {"id":"esc_lab","name":"Escape: The Lab","kind":"escape","tint":"#dfe6ee","url":"/games/escape-the-lab/","big":false,"lower":true,"fmt":b=>Math.floor(b/60)+':'+String(Math.floor(b%60)).padStart(2,'0')},
 {"id":"esc_tomb","name":"Escape: Pharaoh’s Tomb","kind":"escape","tint":"#d9b77a","url":"/games/escape-pharaoh-s-tomb/","big":false,"lower":true,"fmt":b=>Math.floor(b/60)+':'+String(Math.floor(b%60)).padStart(2,'0')},
