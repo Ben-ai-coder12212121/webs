@@ -24,14 +24,14 @@ const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','sma
   const name=()=>S.get('lb_name','');
   async function probe(){if(ok!==null)return ok;if(location.protocol==='file:'){ok=false;return ok}try{const r=await fetch(API+'?probe=1',{cache:'no-store'});ok=r.ok&&(await r.json()).ok===true}catch(e){ok=false}return ok}
   let tT=0;function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('on'),4200)}
-  async function send(k,g,v,lower,quiet){if(!await probe()||!name())return null;try{const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({game:k,name:name(),score:v,lower:!!lower,id:cid()})});if(!r.ok)return null;const j=await r.json();if(!quiet&&j.rank)toast('New best in '+g.name+'! You’re #'+j.rank+' of '+j.total+' on the leaderboard');if(cur&&cur.k===k&&!panel.hidden)refresh();return j}catch(e){return null}}
+  async function send(k,g,v,lower,quiet){if(!await probe()||!name())return null;try{const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({game:k,name:name(),score:v,lower:!!lower,id:cid(),jersey:(()=>{try{return RW.code()}catch(e){return''}})()})});if(!r.ok)return null;const j=await r.json();if(!quiet&&j.rank)toast('New best in '+g.name+'! You’re #'+j.rank+' of '+j.total+' on the leaderboard');if(cur&&cur.k===k&&!panel.hidden)refresh();return j}catch(e){return null}}
   function best(g,k,v,lower){if(!eligible(g))return;lower=!!(lower||g.lower);const p=pend[k]||(pend[k]={});clearTimeout(p.t);p.t=setTimeout(()=>{delete pend[k];if(!name()){if(ok!==false&&!shown){shown=true;probe().then(o=>{if(o)toast('New best! Tap the trophy to put it on the leaderboard')})}return}send(k,g,v,lower)},2500)}
   const ago=t=>{const s=Math.max(1,Math.round((Date.now()-t)/1000));return s<60?s+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'};
   function keyInfo(g){const k=bestKey(g);const l=g.levels?S.get('lvl_'+g.id,1):1;return{k,label:g.levels?LVN2[l]:''}}
   async function refresh(){if(!cur)return;const {g,k,label}=cur;try{const r=await fetch(API+'?game='+encodeURIComponent(k)+'&id='+cid(),{cache:'no-store'});const j=await r.json();if(!cur||cur.k!==k)return;render(j)}catch(e){panel.querySelector('.lbl').innerHTML='<p class="lbmuted">Couldn’t reach the leaderboard. Retrying…</p>'}}
   function render(j){const {g,label}=cur;const L=panel.querySelector('.lbl');const fmt=v=>{try{return g.fmt(v)}catch(e){return String(v)}};
-    if(!j.top||!j.top.length){L.innerHTML='<p class="lbmuted">No scores yet. Be the first!</p>'}else L.innerHTML='<ol>'+j.top.map((e,i)=>'<li class="'+(e.me?'me':'')+'"><b>'+(i<3?'<i class="lbm lbm'+(i+1)+'">'+(i+1)+'</i>':(i+1)+'.')+'</b><span class="lbn"></span><span class="s">'+fmt(e.s)+'</span><small>'+ago(e.t)+'</small></li>').join('')+'</ol>';
-    L.querySelectorAll('li .lbn').forEach((s,i)=>{s.textContent=j.top[i].n});
+    if(!j.top||!j.top.length){L.innerHTML='<p class="lbmuted">No scores yet. Be the first!</p>'}else L.innerHTML='<ol>'+j.top.map((e,i)=>'<li class="'+(e.me?'me':'')+'"><b>'+(i<3?'<i class="lbm lbm'+(i+1)+'">'+(i+1)+'</i>':(i+1)+'.')+'</b><span class="lbj"></span><span class="lbn"></span><span class="s">'+fmt(e.s)+'</span><small>'+ago(e.t)+'</small></li>').join('')+'</ol>';
+    L.querySelectorAll('li .lbn').forEach((s,i)=>{s.textContent=j.top[i].n});L.querySelectorAll('li .lbj').forEach((s,i)=>{try{s.innerHTML=RW.mini(j.top[i].j)}catch(e){}});
     const you=panel.querySelector('.lbyou');const mine=S.get(cur.k,null);
     if(j.you)you.innerHTML='You: <b>#'+j.you.rank+'</b> of '+j.total+' · '+fmt(j.you.s);else if(!name())you.textContent='Set a name to join the leaderboard'+(mine!=null?' with your best: '+fmt(mine):'.');else if(mine!=null)you.textContent='Your best '+fmt(mine)+' is being submitted…';else you.textContent='Play to get on the board! '+j.total+' players so far.';
     panel.querySelector('.lblive').textContent='● Live · updated '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})}
@@ -158,7 +158,7 @@ function noteScore(g,v,lower){const t=today();const d=S.get('dayScores',{d:0,s:{
   if(beatTarget!=null&&!beatWon&&(lower?v<beatTarget:v>beatTarget)){beatWon=true;syncBeat();try{LB.toast('You beat your friend’s score! Send them yours back.')}catch(e){}}}
 function streak(){const st=S.get('streak',{last:0,n:0,max:0});if(st.last<today()-1)st.n=0;return st}
 function touchStreak(){const t=today();const st=S.get('streak',{last:0,n:0,max:0});if(st.last===t)return;st.n=st.last===t-1?st.n+1:1;st.last=t;st.max=Math.max(st.max||0,st.n);S.set('streak',st)}
-function renderDaily(){['#daily','#dailyW'].forEach(q=>{const b=$(q);if(b){renderDailyInto(b);renderBadges(b)}})}
+function renderDaily(){['#daily','#dailyW'].forEach(q=>{const b=$(q);if(b){renderDailyInto(b);renderBadges(b);try{RW.card(b)}catch(e){}}})}
 function renderDailyInto(box){box.innerHTML='';const g=dailyGame();const st=streak();const t=today();
   if(g){const done=S.get('dailyDone_'+t,false),sc=dayScores()[g.id];let v='';try{v=sc!=null?g.fmt(sc):''}catch(e){}
     box.append(el('a',{class:'dc'+(done?' done':''),href:gameUrl(g)},el('span',{class:'ic',html:ico(done?'check':'calendar')}),el('span',null,el('b',null,done?'Challenge done: '+v:'Today’s challenge: '+g.name),done?'New one tomorrow · tap to beat it again':'Set any score today · '+durLabel(g))))}
@@ -269,6 +269,87 @@ const RATE=(()=>{const cid=()=>{let v=S.get('lb_id',null);if(!v||!/^[a-z0-9]{8,4
     let draftT='',draftN=S.get('lb_name','')||'';render();
     get('?site=1&id='+cid()).then(r=>{st=r&&!r.error?r:{avg:0,n:0,dist:[0,0,0,0,0],recent:[]};if(st.mine)pick=st.mine.s;render()})}
   return{bar,decorate,loadSum,site}})();
+/* Rewards: 1 point per minute of active play (a game open, the tab visible, a click, tap or key in the last minute), a daily
+   bonus after 10 minutes of play that grows with back-to-back days, and a shop on the homepage: card packs for the card game
+   (S 'rw_packs'), patches, and jerseys that take days of play (the top ones a full week). The jersey you wear shows next to your
+   name on leaderboards. Everything stays on this device. No points while the game is closed. */
+const RW=(()=>{const PACK_GAME='cards',K='rw';
+  const T={club:[2880,'Club'],pro:[5760,'Pro'],legend:[10080,'Legend']};
+  const JERSEYS=[['j1','Fire Red','#d8392b','#ffffff','plain','club'],['j2','Ocean Blue','#2563c9','#ffffff','plain','club'],['j3','Forest','#1f7a46','#f4d35e','plain','club'],['j4','Midnight','#1d1d2b','#ff7a1a','plain','club'],['j5','Snow','#f3f1ea','#d8392b','plain','club'],['j6','Sunrise','#ff8a1a','#1d1d2b','plain','club'],
+    ['j7','Candy Stripe','#ffffff','#d8392b','stripes','pro'],['j8','Clover Hoops','#1f7a46','#ffffff','hoops','pro'],['j9','Gold Sash','#1d1d2b','#f2b631','sash','pro'],['j10','Split','#2563c9','#f4d35e','halves','pro'],['j11','Chevron','#1d2b4a','#ff8a1a','chevron','pro'],['j12','Pinstripe','#8a8f99','#1d2b4a','pin','pro'],
+    ['j13','Golden','#f2b631','#1d1d2b','stars','legend'],['j14','Lava','#1d1d2b','#ff5a1a','flames','legend'],['j15','Glacier','#bfe6f5','#2563c9','crystal','legend'],['j16','Camo','#56653a','#2f3a20','camo','legend'],['j17','Neon Grid','#14161f','#29d3c2','grid','legend'],['j18','Detourr Original','#161616','#ff7a1a','crest','legend']];
+  const PATCHES=[['p1','Star',300,'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],['p2','Bolt',300,'M13 3L5 14h6l-1 7 8-11h-6z'],['p3','Heart',720,'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z'],['p4','Flame',720,'M12 3c1 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-6 1-9z'],['p5','Crown',1440,'M4 17l1-10 4 4 3-6 3 6 4-4 1 10z'],['p6','Road Sign',1440,'M12 3l9 9-9 9-9-9z']];
+  const PACKS=[['k1','Card pack',60,1],['k5','Bundle of 5 packs',270,5]];
+  const st=()=>{const s=S.get(K,null)||{};s.sec=s.sec||0;s.bonus=s.bonus||0;s.spent=s.spent||0;s.own=s.own||[];s.told=s.told||[];if(s.num==null)s.num=7;return s};
+  const pts=s=>Math.floor(s.sec/60)+s.bonus-s.spent;
+  const hm=m=>{m=Math.max(0,Math.ceil(m));const h=Math.floor(m/60);return h?h+' h'+(m%60?' '+m%60+' min':''):m+' min'};
+  const J=id=>JERSEYS.find(j=>j[0]===id),P=id=>PATCHES.find(p=>p[0]===id);
+  const cost=it=>it[5]?T[it[5]][0]:it[2];
+  /* jersey art, 120x120. back=true shows the name and number. */
+  let uid=0;
+  const BODY='M40 12L26 17 7 35l13 17 10-7v63h60V45l10 7 13-17-19-18-14-5';
+  function art(j,o){o=o||{};const [,,b,a,pat]=j,id='rwc'+(++uid),W=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+a+'"/>';let p='';
+    if(pat==='stripes')for(let x=20;x<110;x+=16)p+=W(x,0,7,120);
+    else if(pat==='hoops')for(let y=30;y<115;y+=18)p+=W(0,y,120,8);
+    else if(pat==='sash')p='<path d="M25 20h22l60 90H85z" fill="'+a+'"/>';
+    else if(pat==='halves')p=W(60,0,60,120);
+    else if(pat==='chevron')p='<path d="M20 40l40 30 40-30v14L60 84 20 54z" fill="'+a+'"/>';
+    else if(pat==='pin')for(let x=24;x<110;x+=9)p+=W(x,0,1.6,120);
+    else if(pat==='stars')for(const [x,y] of [[40,40],[78,34],[56,64],[38,88],[82,80],[64,100]])p+='<path transform="translate('+(x-6)+' '+(y-6)+') scale(.5)" d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="'+a+'" opacity=".55"/>';
+    else if(pat==='flames')p='<path d="M28 110c0-14 6-18 8-30 5 8 4 14 8 18 2-12 8-18 8-34 8 12 10 22 10 30 3-6 6-10 6-20 8 10 10 22 10 36z" fill="'+a+'"/><path d="M40 110c0-8 4-10 6-18 3 6 3 10 6 12 2-8 5-10 5-20 5 8 6 14 6 20 2-4 4-6 4-12 5 6 6 12 6 18z" fill="#ffd23f"/>';
+    else if(pat==='crystal')p='<path d="M30 110l14-34 12 34zM58 110l16-50 14 50zM20 70l10-24 8 24zM72 44l8-18 8 18z" fill="'+a+'" opacity=".45"/>';
+    else if(pat==='camo')p='<path d="M20 30c10-6 22 4 18 12s-20 4-18-12zM62 50c14-4 24 6 16 14s-26 0-16-14zM30 80c10-2 18 8 10 14s-22-2-10-14zM74 92c8-4 18 2 14 10s-20 2-14-10zM70 18c8 0 12 8 6 10s-12-6-6-10z" fill="'+a+'"/><path d="M44 58c6-2 10 4 6 8s-12-2-6-8zM88 40c6 0 8 6 4 8s-10-4-4-8zM50 100c6-2 10 4 6 6s-10-2-6-6z" fill="#8a7a4a"/>';
+    else if(pat==='grid'){for(let x=20;x<110;x+=12)p+=W(x,0,1.2,120);for(let y=20;y<115;y+=12)p+=W(0,y,120,1.2)}
+    else if(pat==='crest'&&!o.back)p='<path d="M60 42l14 14-14 14-14-14z" fill="none" stroke="'+a+'" stroke-width="3.5"/><path d="M57 63v-5c0-2 1-3 2-4l2-2c1-1 1-2 1-3v-1" fill="none" stroke="'+a+'" stroke-width="2.6"/>';
+    const neck=o.back?'M42 13q18 6 36 0':'M40 12q20 16 40 0',trim='<path d="'+neck+'" fill="none" stroke="'+a+'" stroke-width="5" stroke-linecap="round"/><path d="M7 35l13 17M113 35l-13 17" stroke="'+a+'" stroke-width="5"/>';
+    let txt='';if(o.back){const nm=String(o.name||'PLAYER').toUpperCase().slice(0,12).replace(/[<&>"]/g,''),fs=nm.length>8?8.5:11;
+      txt='<text x="60" y="46" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="'+fs+'" fill="'+a+'" stroke="'+b+'" stroke-width=".6" letter-spacing=".5">'+nm+'</text><text x="60" y="92" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="38" fill="'+a+'" stroke="'+b+'" stroke-width="1.6" paint-order="stroke">'+(o.num|0)+'</text>'}
+    let pt='';const pa=o.patch&&P(o.patch);if(pa){const cx=o.back?20:78,cy=o.back?36:30;pt='<circle cx="'+cx+'" cy="'+cy+'" r="10" fill="#fffdf6" stroke="#1d1a2f" stroke-width="2"/><path transform="translate('+(cx-7)+' '+(cy-7)+') scale(.58)" d="'+pa[3]+'" fill="#ff7a1a" stroke="#1d1a2f" stroke-width="2" stroke-linejoin="round"/>'}
+    return '<svg class="rwj" viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="'+id+'"><path d="'+BODY+'q-20 '+(o.back?6:16)+'-40 0z"/></clipPath></defs><g clip-path="url(#'+id+')"><rect width="120" height="120" fill="'+b+'"/>'+p+trim+'</g><path d="'+BODY+'q-20 '+(o.back?6:16)+'-40 0z" class="rwo" fill="none" stroke-width="3" stroke-linejoin="round"/>'+txt+pt+'</svg>'}
+  const patchArt=pa=>'<svg class="rwj" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#fffdf6" stroke="#1d1a2f" stroke-width="1.5"/><path transform="translate(4.6 4.6) scale(.62)" d="'+pa[3]+'" fill="#ff7a1a" stroke="#1d1a2f" stroke-width="2" stroke-linejoin="round"/></svg>';
+  const packArt=n=>'<svg class="rwj" viewBox="0 0 60 60" aria-hidden="true">'+(n>1?'<rect x="20" y="8" width="30" height="42" rx="4" fill="#2563c9" stroke="#1d1a2f" stroke-width="2.5" transform="rotate(10 35 29)"/>':'')+'<rect x="12" y="10" width="30" height="42" rx="4" fill="#ff7a1a" stroke="#1d1a2f" stroke-width="2.5"/><path d="M27 20l7 7-7 7-7-7z" fill="#fffdf6" stroke="#1d1a2f" stroke-width="2"/><path d="M14 44h26" stroke="#1d1a2f" stroke-width="2"/></svg>';
+  /* leaderboard code: jersey id plus patch, e.g. "j7.p2" */
+  const code=()=>{const s=st();return s.eq&&J(s.eq)?s.eq+(s.patch&&P(s.patch)?'.'+s.patch:''):''};
+  const mini=c=>{const [j,p]=String(c||'').split('.');const jj=J(j);return jj?art(jj,{patch:p}):''};
+  /* earning */
+  let lastIn=0;for(const e of ['pointerdown','pointermove','keydown','touchstart','wheel'])addEventListener(e,()=>{lastIn=Date.now()},{capture:true,passive:true});
+  function tick(){if(!current||document.hidden||Date.now()-lastIn>6e4)return;const s=st(),now=Date.now();
+    if(s.last&&now-s.last<4e3)return; // another tab already counted these seconds
+    const p0=pts(s);s.last=now;s.sec+=5;const d=today();if(s.day!==d){s.streak=s.day===d-1&&s.dsec>=600?(s.streak||1)+1:1;s.day=d;s.dsec=0}s.dsec=(s.dsec||0)+5;
+    let msg='';if(s.dsec===600){const b=Math.min(30,5+5*s.streak);s.bonus+=b;msg='Daily bonus: +'+b+' reward points'+(s.streak>1?' ('+s.streak+' days in a row)':'')}
+    const p1=pts(s);if(!msg&&Math.floor(p1/30)>Math.floor(p0/30))msg='+30 reward points from playing. You have '+p1+'.';
+    for(const it of [...PACKS.slice(0,1),...PATCHES,...JERSEYS]){const c=cost(it);if(p1>=c&&p0<c&&!s.own.includes(it[0])&&!s.told.includes(it[0])){s.told.push(it[0]);msg='You have '+p1+' points: '+it[1]+' is ready in Rewards on the homepage!';break}}
+    S.set(K,s);if(msg)try{LB.toast(msg)}catch(e){}}
+  if(PAGE)setInterval(tick,5e3);
+  /* the shop */
+  let dlg=null;
+  function buy(it,kind){const s=st(),c=cost(it);if(pts(s)<c)return;s.spent+=c;if(kind==='pack')S.set('rw_packs',S.get('rw_packs',0)+it[3]);else{s.own.push(it[0]);if(kind==='jersey')s.eq=it[0];else s.patch=it[0]}S.set(K,s);try{TRACK.ev('reward_buy',{item:it[0]})}catch(e){}draw()}
+  function item(artH,name,sub,btn){return el('div',{class:'rwi'},el('div',{class:'rwa',html:artH}),el('b',null,name),el('small',null,sub),btn)}
+  function draw(){if(!dlg)return;const s=st(),p=pts(s),card=dlg.querySelector('.rwcard'),eq=J(s.eq),nm=(LB.name&&LB.name())||'';card.innerHTML='';
+    const close=el('button',{class:'btn',type:'button'},'Close');close.addEventListener('click',hide);
+    const next=[...PATCHES,...JERSEYS].filter(it=>!s.own.includes(it[0])).sort((x,y)=>cost(x)-cost(y)).find(it=>cost(it)>p);
+    const locker=el('div',{class:'rwlock'},el('div',{class:'rwbig',html:eq?art(eq,{back:true,name:nm||'PLAYER',num:s.num,patch:s.patch}):'<svg class="rwj" viewBox="0 0 120 120" aria-hidden="true"><path d="'+BODY+'q-20 6-40 0z" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="6 5" stroke-linejoin="round" opacity=".5"/></svg>'}),
+      el('div',null,el('div',{class:'rwpts'},el('b',null,String(p)),' points'),el('p',null,'Played here: '+hm(s.sec/60)+'. '+(next?'Next up: '+next[1]+' in '+hm(cost(next)-p)+' of play.':'You own everything. Legend.')),
+        next?el('div',{class:'rwbar'},el('i',{style:'width:'+Math.min(100,p/cost(next)*100).toFixed(1)+'%'})):'',
+        eq?el('label',{class:'rwnum'},'Number ',(()=>{const i=el('input',{type:'number',min:'0',max:'99',value:String(s.num)});i.addEventListener('change',()=>{const t=st();t.num=Math.max(0,Math.min(99,Math.round(+i.value)||0));S.set(K,t);draw()});return i})()):el('p',{class:'rwmuted'},'Your first jersey comes after 48 hours of play. It shows next to your name on every leaderboard.')));
+    const how=el('p',{class:'rwhow'},'Earn 1 point for every minute you actually play a game (clicking, tapping or pressing keys). Play 10 minutes in a day for a daily bonus that grows when you come back on back-to-back days. Points stay on this device, and nothing is earned while games are closed.');
+    const packs=el('div',{class:'rwgrid'}),pg=ALLG.find(g=>g.id===PACK_GAME&&!HIDDEN.has(g.id));
+    PACKS.forEach(it=>{const b=el('button',{class:'btn'+(p>=it[2]?' primary':''),type:'button'},p>=it[2]?'Get for '+it[2]:it[2]+' points');if(p<it[2])b.disabled=true;b.addEventListener('click',()=>buy(it,'pack'));packs.append(item(packArt(it[3]),it[1],it[3]>1?'5 free packs, 10% off':'A free pack to open',b))});
+    const nP=S.get('rw_packs',0),packNote=el('p',{class:'rwmuted'},nP?'You have '+nP+' free pack'+(nP>1?'s':'')+' waiting. ':'',pg?el('a',{href:gameUrl(pg)},'Open them in '+pg.name):'Packs open in the card game.');
+    const own=(it,kind)=>{const has=s.own.includes(it[0]),c=cost(it),on=kind==='jersey'?s.eq===it[0]:s.patch===it[0];let b;
+      if(has){b=el('button',{class:'btn'+(on?' on':''),type:'button'},on?'Wearing':'Wear');b.addEventListener('click',()=>{const t=st();if(kind==='jersey')t.eq=on?null:it[0];else t.patch=on?null:it[0];S.set(K,t);draw()})}
+      else if(p>=c){b=el('button',{class:'btn primary',type:'button'},'Get for '+c);b.addEventListener('click',()=>buy(it,kind))}
+      else{b=el('button',{class:'btn',type:'button'},hm(c-p)+' to go');b.disabled=true}
+      return item(kind==='jersey'?art(it,{patch:s.patch}):patchArt(it),it[1],(kind==='jersey'?T[it[5]][1]+' · ':'')+c+' points ('+hm(c)+' of play)',b)};
+    const patches=el('div',{class:'rwgrid'});PATCHES.forEach(it=>patches.append(own(it,'patch')));
+    const jer=el('div',null);for(const t of ['club','pro','legend']){const g=el('div',{class:'rwgrid'});JERSEYS.filter(j=>j[5]===t).forEach(it=>g.append(own(it,'jersey')));jer.append(el('h4',null,T[t][1]+' jerseys · '+hm(T[t][0])+' of play each'),g)}
+    card.append(close,el('h2',{id:'rwH'},'Rewards'),locker,how,el('h3',null,'Card packs'),packs,packNote,el('h3',null,'Patches'),patches,el('h3',null,'Jerseys'),jer)}
+  function hide(){if(dlg){dlg.hidden=true;document.body.style.overflow=''}}
+  function show(){if(!dlg){dlg=el('div',{id:'rewards',role:'dialog','aria-modal':'true','aria-labelledby':'rwH'},el('div',{class:'rwcard'}));dlg.hidden=true;dlg.addEventListener('click',e=>{if(e.target===dlg)hide()});addEventListener('keydown',e=>{if(e.key==='Escape')hide()});document.body.append(dlg)}
+    draw();dlg.hidden=false;document.body.style.overflow='hidden';try{TRACK.ev('rewards_open')}catch(e){}}
+  /* the homepage card next to the badges */
+  function card(box){const s=st(),p=pts(s),eq=J(s.eq);const b=el('button',{class:'dc rwdc',type:'button'},el('span',{class:'ic',html:eq?art(eq,{patch:s.patch}):packArt(1)}),el('span',null,el('b',null,p+' reward points'),'Packs, patches and jerseys'));b.addEventListener('click',show);box.append(b)}
+  return{code,mini,show,card,pts:()=>pts(st())}})();
 /* First screen of the homepage: Continue playing (newest games in this device's history) and Top games, as picture cards. */
 function renderHero(){const box=$('#heroGames');if(!box)return;box.innerHTML='';const h=HIST.get(),find=id=>G.find(g=>g.id===id)||WIP.find(g=>g.id===id);
   const cont=Object.keys(h).filter(find).sort((a,b)=>(h[b].t||0)-(h[a].t||0)).slice(0,3).map(find);

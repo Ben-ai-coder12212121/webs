@@ -16,7 +16,7 @@ export const validId = i => typeof i === "string" && /^[a-z0-9]{8,40}$/.test(i);
 const sorter = lower => (a, b) => (lower ? a.s - b.s : b.s - a.s) || a.t - b.t;
 
 // pure merge step (exported for tests): returns {data, rank, improved}
-export function record(data, { name, score, id, lower }, now = Date.now()) {
+export function record(data, { name, score, id, lower, jersey }, now = Date.now()) {
   data = data && Array.isArray(data.e) ? data : { e: [], lower: !!lower };
   const lo = !!data.lower;
   let ent = data.e.find(x => x.id === id), improved = false;
@@ -26,6 +26,8 @@ export function record(data, { name, score, id, lower }, now = Date.now()) {
     ent.n = name; ent.u = now;
     if (lo ? score < ent.s : score > ent.s) { ent.s = score; ent.t = now; improved = true; }
   }
+  // the reward jersey the player wears (rewards in js/app.js), shown next to their name
+  if (typeof jersey === "string" && /^(j[0-9]{1,2}(\.p[0-9])?)?$/.test(jersey)) { if (jersey) ent.j = jersey; else delete ent.j; }
   data.e.sort(sorter(lo));
   if (data.e.length > MAX_ENTRIES) data.e.length = MAX_ENTRIES;
   const rank = data.e.indexOf(ent) + 1;
@@ -33,7 +35,7 @@ export function record(data, { name, score, id, lower }, now = Date.now()) {
 }
 export function view(data, id) {
   const e = data && Array.isArray(data.e) ? data.e : [];
-  const top = e.slice(0, SHOW).map(x => ({ n: x.n, s: x.s, t: x.t, me: !!id && x.id === id }));
+  const top = e.slice(0, SHOW).map(x => ({ n: x.n, s: x.s, t: x.t, me: !!id && x.id === id, ...(x.j ? { j: x.j } : {}) }));
   const i = id ? e.findIndex(x => x.id === id) : -1;
   return { top, total: e.length, lower: !!(data && data.lower), you: i >= 0 ? { rank: i + 1, s: e[i].s, n: e[i].n } : null };
 }
@@ -86,7 +88,7 @@ export async function handle(req, store) {
     if (!validGame(b.game) || !validId(b.id) || !Number.isFinite(score) || Math.abs(score) > 1e10) return json({ error: "invalid" }, 400);
     const name = cleanName(b.name);
     const cur = await store.get(b.game, { type: "json" });
-    const r = record(cur, { name, score, id: b.id, lower: !!b.lower });
+    const r = record(cur, { name, score, id: b.id, lower: !!b.lower, jersey: b.jersey });
     if (r.limited) return json({ error: "slow down" }, 429);
     await store.setJSON(b.game, r.data);
     if (r.improved) {
