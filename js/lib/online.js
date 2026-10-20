@@ -22,13 +22,18 @@ const Online=(()=>{
   function host(game,opts){opts=opts||{};const max=Math.max(2,opts.max||2);const L=emitter({role:'host',me:rid(),code:null,peers:new Map(),closed:false});
     let pollT=null,beatT=null;const pending=new Map();
     const beat=()=>api('POST',{op:'beat',game,room:L.code,peer:L.me,n:1+L.peers.size,open:L.peers.size<max-1&&!L.locked}).catch(()=>{});
-    const setPolling=()=>{const want=!L.closed&&!L.locked&&L.peers.size<max-1;if(want&&!pollT)pollT=setInterval(poll,1300);if(!want&&pollT){clearInterval(pollT);pollT=null}};
-    async function poll(){try{const r=await api('GET',null,'?room='+L.code+'&peer='+L.me);for(const{from,msg}of r.msgs){if(!msg)continue;if(msg.type==='join')await accept(from,msg.name);else if(msg.type==='answer'){const p=pending.get(from);if(p&&p.pc.signalingState!=='stable')await p.pc.setRemoteDescription(msg.sdp)}}}catch(e){}}
+    // poll fast (1.3 s) while someone is connecting or just after the room changed, then every 5 s while the room waits
+    // (8 s in a hidden tab), so an open public room costs far fewer function calls
+    let busyTill=0;const nudge=()=>{busyTill=Date.now()+20000};
+    const gap=()=>pending.size||Date.now()<busyTill?1300:document.hidden?8000:5000;
+    const tick=async()=>{await poll();if(pollT)pollT=setTimeout(tick,gap())};
+    const setPolling=()=>{const want=!L.closed&&!L.locked&&L.peers.size<max-1;if(want&&!pollT){busyTill=Date.now()+20000;pollT=setTimeout(tick,1300)}if(!want&&pollT){clearTimeout(pollT);pollT=null}};
+    async function poll(){try{const r=await api('GET',null,'?room='+L.code+'&peer='+L.me);for(const{from,msg}of r.msgs){if(!msg)continue;if(msg.type==='join'){nudge();await accept(from,msg.name)}else if(msg.type==='answer'){const p=pending.get(from);if(p&&p.pc.signalingState!=='stable')await p.pc.setRemoteDescription(msg.sdp)}}}catch(e){}}
     async function accept(from,name){if(L.peers.has(from)||pending.has(from))return;if(L.locked||L.peers.size+pending.size>=max-1){api('POST',{op:'send',room:L.code,from:L.me,to:from,msg:{type:'full'}}).catch(()=>{});return}
       const pc=new RTCPeerConnection(ICE);const rl=pc.createDataChannel('r'),u=pc.createDataChannel('u',{ordered:false,maxRetransmits:0});
       const peer={id:from,name:String(name||'Player').replace(/[^A-Za-z0-9 _.\-']/g,'').slice(0,16)||'Player',pc,rl,u};pending.set(from,peer);
       const onM=m=>L.emit('msg',m,peer);wire(rl,onM);wire(u,onM);
-      rl.onopen=()=>{pending.delete(from);L.peers.set(from,peer);L.emit('join',peer);beat();setPolling()};
+      rl.onopen=()=>{pending.delete(from);L.peers.set(from,peer);L.emit('join',peer);beat();setPolling();nudge()};
       const gone=()=>{pending.delete(from);if(L.peers.delete(from)){L.emit('leave',peer);beat();setPolling()}};
       rl.onclose=gone;pc.onconnectionstatechange=()=>{if(['failed','closed','disconnected'].includes(pc.connectionState))gone()};
       setTimeout(()=>{if(pending.get(from)===peer){pending.delete(from);try{pc.close()}catch(e){}}},30000);
@@ -36,7 +41,7 @@ const Online=(()=>{
     L.send=(m,to,o)=>{const p=L.peers.get(to);if(!p)return false;return sendOn(o&&o.fast?p.u:p.rl,m)};
     L.broadcast=(m,o)=>{const s=JSON.stringify(m);for(const p of L.peers.values()){const ch=o&&o.fast?p.u:p.rl;if(ch.readyState==='open')try{ch.send(s)}catch(e){}}};
     L.lock=v=>{L.locked=v!==false;setPolling();beat()};
-    L.close=()=>{if(L.closed)return;L.closed=true;clearInterval(pollT);clearInterval(beatT);pollT=null;if(L.code)api('POST',{op:'close',game,room:L.code,peer:L.me}).catch(()=>{});for(const p of[...L.peers.values(),...pending.values()])try{p.pc.close()}catch(e){}L.peers.clear();pending.clear();L.emit('close')};
+    L.close=()=>{if(L.closed)return;L.closed=true;clearTimeout(pollT);clearInterval(beatT);pollT=null;if(L.code)api('POST',{op:'close',game,room:L.code,peer:L.me}).catch(()=>{});for(const p of[...L.peers.values(),...pending.values()])try{p.pc.close()}catch(e){}L.peers.clear();pending.clear();L.emit('close')};
     api('POST',{op:'host',game,peer:L.me,name:opts.name||myName(),max,mode:opts.mode||''}).then(r=>{if(L.closed)return;L.code=r.id;setPolling();beatT=setInterval(beat,8000);L.emit('ready',L.code)}).catch(e=>L.emit('error','Could not create a room: '+e.message));
     return L}
 

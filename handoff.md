@@ -56,13 +56,15 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 - **Last full check:** `tools/test-games.cjs` reported **272 games tested, ALL CLEAN**.
 - **Open question for the owner:** should any of the 10 in-progress games move to the main list?
 
+**Online polling cost (`js/lib/online.js`):** a host polls `/api/mp` every 1.3 s only while someone is connecting or for 20 s after the room changes, otherwise every 5 s (8 s in a hidden tab); heartbeats stay at 8 s (rooms go stale after 25 s). An idle public room went from about 27 calls per 30 s to about 10. Lumberjack and Disaster Dash open public rooms by default, so watch the Netlify function count.
+
 ### In flight (Oct 19-20 2026 request list), if a session picks this up
 
 Builder agents write one deliverable each to the session scratchpad (`/tmp/claude-0/-home-user-webs/b2fe29ec-6401-52e7-8b76-eda5b927e5c7/scratchpad/`); the main session reviews screenshots, installs with `node tools/new-game.cjs <file> [--wip] [--libs=...]`, deletes the agent's `games/_*` test page, runs `node tools/allgames.cjs` and `tools/test-games.cjs`, commits to `preview`. Every new or rebuilt game goes to In progress. Not deployed until the owner says "deploy".
 
 | Deliverable | Game | Install |
 |---|---|---|
-| `lumber3d.js` | Lumberjack round 3: online by default, own spawn and starter car, buy car fix, multi-seat cars, Chop a Forest / Timber Truck features | `--libs=online` (id lumber3d, keep In progress) |
+| `lumber3d.js` | Lumberjack round 3 | INSTALLED (games/lumberjack-tycoon, In progress). Online by default (Play joins the busiest public world or hosts one; Play alone), own spawn and starter pickup, guests buy their own cars, passenger and truck-bed seats, bare-hands start, carry on your back, gems and classes at the Gem Stump, timed haul jobs, wobbly loads and straps, rebuildable bridges, the goose. Source in the session scratchpad `parts/` + `build.sh` |
 | `disaster.js` | Natural disaster multiplayer survival | INSTALLED as Disaster Dash (games/disaster-dash, In progress) |
 | `west3d.js` | Wild West sandbox (Westwood-inspired) | `--libs=online` |
 | `getaway3d.js` | Road-trip getaway (Runaways-inspired) | `--libs=online` |

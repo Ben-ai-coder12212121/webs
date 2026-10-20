@@ -172,16 +172,35 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @container (max-width:760px){#goal{display:none}}
 @container (max-height:430px){#region{display:none}#hint{font-size:12px}}
 @container (max-width:560px){#money{font-size:21px}#moneyBox svg{width:22px;height:22px}#clock{font-size:12px}.slot{width:54px;height:50px}.slot svg{width:28px;height:28px}#hint{font-size:13px}}
+
+#moneyBox{grid-template-columns:auto auto auto}
+#axeName{grid-column:2/4}
+#gems{display:flex;align-items:center;gap:3px;font-weight:800;font-size:15px;color:#7ff5df;text-shadow:0 1px 0 #000;margin-left:6px}
+#gems svg{width:17px;height:17px;grid-row:auto}
+#gems.pop{animation:gpop .5s}
+@keyframes gpop{40%{transform:scale(1.35)}}
+#netList{position:absolute;right:12px;top:96px;padding:6px 10px;font-size:12px;display:grid;gap:2px;max-width:200px;pointer-events:none}
+#netList b{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--leaf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#netList span{display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#netList i{width:9px;height:9px;border:1px solid #000;flex:none}
+.slot.pk{width:auto;min-width:64px;padding:0 8px;pointer-events:auto}
+.slot.pk .n{color:var(--gold)}
+#tTip.carry{right:calc(118px + env(safe-area-inset-right,0px));bottom:calc(236px + env(safe-area-inset-bottom,0px));width:58px;height:58px;font-size:11px}
+.g-short #tTip.carry{right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(74px + env(safe-area-inset-bottom,0px));width:46px;height:46px;font-size:10px}
+#introNet{color:var(--gold);font-weight:700;min-height:1.3em}
+.riding #cross{display:none}
+.gorow{display:flex;gap:8px}.gorow .go{flex:2}.gorow .go2{flex:1;margin-top:0;height:50px}
 `;
 const LT_HTML = `<div id="game">
 <canvas id="gl" tabindex="-1" aria-label="A 3D forest. Walk up to a tree and chop it with your axe."></canvas>
 <div id="vig"></div>
 <div id="hud">
- <div id="moneyBox" class="plate"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#ffd25a" stroke="#0e0c09" stroke-width="2.5"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#c99a1c" stroke-width="2"/><path d="M16 10v12M13 13.5c0-1.4 1.3-2 3-2s3 .7 3 2-1.3 1.8-3 2.4-3 1.1-3 2.4 1.3 2 3 2 3-.6 3-2" stroke="#7a5a08" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span id="money">0</span><span id="axeName"></span></div>
+ <div id="moneyBox" class="plate"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#ffd25a" stroke="#0e0c09" stroke-width="2.5"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#c99a1c" stroke-width="2"/><path d="M16 10v12M13 13.5c0-1.4 1.3-2 3-2s3 .7 3 2-1.3 1.8-3 2.4-3 1.1-3 2.4 1.3 2 3 2 3-.6 3-2" stroke="#7a5a08" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span id="money">0</span><span id="gems" title="Gems"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l6 6-6 10-6-10z" fill="#5ff0d0" stroke="#0e0c09" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 8h12M10 2v16" stroke="#1d8f7a" stroke-width="1"/></svg><b id="gemN">0</b></span><span id="axeName"></span></div>
  <div id="goal" class="plate" hidden></div>
  <div id="order" class="plate" hidden></div>
  <div id="netTags"></div>
  <div id="netBadge" class="plate" hidden></div>
+ <div id="netList" class="plate" hidden></div>
  <div id="award"></div>
  <div id="clockBox" class="plate"><svg id="clockIc" viewBox="0 0 24 24" aria-hidden="true"></svg><span id="clock"></span></div>
  <div id="topBtns"><button class="mini" id="bNet" type="button" title="Play online">Online</button><button class="mini" id="bMap" type="button" title="Map (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button><button class="mini" id="bCam" type="button" title="Camera (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></button><button class="mini" id="bSnd" type="button" title="Sound"></button><button class="mini" id="bMenu" type="button" title="Menu (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div>
@@ -194,7 +213,7 @@ const LT_HTML = `<div id="game">
  <div id="prompt" class="plate" hidden></div>
  <div id="swing"><i></i></div>
  <div id="drive" class="plate" hidden><span id="truckName"></span><b id="speedo">0 km/h</b><span id="cargoTxt"></span><span class="keys" id="driveKeys"><kbd>E</kbd> get out <kbd>T</kbd> tip bed <kbd>H</kbd> horn</span></div>
- <div id="bar"><button class="slot on" id="s0" type="button" aria-label="Axe (1)"><span class="k">1</span><span class="n">Axe</span></button><button class="slot" id="s1" type="button" aria-label="Hands (2)"><span class="k">2</span><span class="n">Grab</span></button><button class="slot" id="s3" type="button" aria-label="Chainsaw (3)" hidden><span class="k">3</span><span class="n">Saw</span></button><button class="slot" id="s2" type="button" aria-label="Build (B)" hidden><span class="k">B</span><span class="n">Build</span></button></div>
+ <div id="bar"><button class="slot on" id="s0" type="button" aria-label="Axe (1)"><span class="k">1</span><span class="n">Axe</span></button><button class="slot" id="s1" type="button" aria-label="Hands (2)"><span class="k">2</span><span class="n">Grab</span></button><button class="slot" id="s3" type="button" aria-label="Chainsaw (3)" hidden><span class="k">3</span><span class="n">Saw</span></button><button class="slot" id="s2" type="button" aria-label="Build (B)" hidden><span class="k">B</span><span class="n">Build</span></button><button class="slot pk" id="sPack" type="button" aria-label="Wood on your back (C)" hidden></button></div>
  <div id="resume" class="plate" hidden>Click to play</div>
 </div>
 <div id="touch" hidden>
@@ -207,8 +226,8 @@ const LT_HTML = `<div id="game">
 </div>
 <div id="shop" class="panel" hidden><header><h2 id="shopTitle">Shop<span class="sub"></span></h2><button class="close" id="shopClose" type="button">Close</button></header><div class="list" id="shopList"></div></div>
 <div id="map" hidden><div class="wrap"><canvas id="mapCv" width="600" height="600"></canvas><button class="close mclose" id="mapClose" type="button">Close</button></div></div>
-<div id="menu" hidden><div class="card"><h1>Paused</h1><p class="tag" id="menuStats"></p><button class="go" id="mResume" type="button">Keep playing</button><button class="go2" id="mOnline" type="button">Play online with friends</button><button class="go2" id="mAwards" type="button">Awards</button><button class="go2" id="mHelp" type="button">How to play</button><button class="go2" id="mTruck" type="button">My truck is stuck: bring it back</button><button class="go2" id="mHome" type="button">Go back to town</button><button class="go2" id="mReset" type="button">Start a new game</button></div></div>
-<div id="intro" hidden><div class="card"><h1>Lumberjack Tycoon</h1><p class="tag">Chop trees, haul logs and build your own timber business in a big open world.</p><ul class="steps" id="introSteps"></ul><div class="keys" id="introKeys"></div><button class="go" id="introGo" type="button">Start chopping</button></div></div>
+<div id="menu" hidden><div class="card"><h1>Paused</h1><p class="tag" id="menuStats"></p><button class="go" id="mResume" type="button">Keep playing</button><button class="go2" id="mSolo" type="button">Play alone</button><button class="go2" id="mOnline" type="button">Online: friends and room codes</button><button class="go2" id="mGems" type="button">Gems, classes and perks</button><button class="go2" id="mAwards" type="button">Awards</button><button class="go2" id="mHelp" type="button">How to play</button><button class="go2" id="mTruck" type="button">My truck is stuck: bring it back</button><button class="go2" id="mHome" type="button">Go back to town</button><button class="go2" id="mReset" type="button">Start a new game</button></div></div>
+<div id="intro" hidden><div class="card"><h1>Lumberjack Tycoon</h1><p class="tag">Chop trees, haul logs and build your own timber business in a big open world.</p><ul class="steps" id="introSteps"></ul><div class="keys" id="introKeys"></div><p class="tag" id="introNet" hidden></p><div class="gorow"><button class="go" id="introGo" type="button">Play</button><button class="go2" id="introSolo" type="button">Play alone</button></div></div></div>
 <div id="loading"><div class="card"><h1>Lumberjack Tycoon</h1><p class="tag" id="ldTxt">Loading the forest, trucks and lumberjacks. First time only.</p><div class="ldbar"><i id="ldBar"></i></div></div></div>
 <div id="err" hidden></div>
 </div>`;
@@ -267,7 +286,7 @@ const SP = [
 ];
 const PLANK_MUL = 3.6;
 const AXES = [
-  { id: 'rusty', name: 'Rusty Hatchet', price: 0, dmg: 2, swing: 0.72, reach: 3.1, tier: 0, head: 0x8d6e5a, handle: 0x7a5230, desc: 'Old but it still bites. Fine for Oak, Birch and Maple.' },
+  { id: 'rusty', name: 'Rusty Hatchet', price: 30, dmg: 2, swing: 0.72, reach: 3.1, tier: 0, head: 0x8d6e5a, handle: 0x7a5230, desc: 'Old but it still bites. Fine for Oak, Birch and Maple.' },
   { id: 'steel', name: 'Steel Chopper', price: 90, dmg: 3.6, swing: 0.64, reach: 3.3, tier: 1, head: 0xb8c2cc, handle: 0x8a5a32, desc: 'Sharp enough for Snow Pine up north.' },
   { id: 'woods', name: 'Woodsman Axe', price: 450, dmg: 6, swing: 0.6, reach: 3.5, tier: 2, head: 0xdfe4e8, handle: 0x9a5a30, desc: 'A heavy head that can bite into Bogwood.' },
   { id: 'frost', name: 'Frostbite Axe', price: 1600, dmg: 9, swing: 0.56, reach: 3.6, tier: 3, head: 0x9fe3ff, handle: 0x5a6b7a, bonus: { pine: 1.6 }, desc: 'Ice blue blade. Extra strong on Snow Pine.' },
@@ -275,7 +294,9 @@ const AXES = [
   { id: 'timber', name: 'Timberline Axe', price: 12000, dmg: 20, swing: 0.5, reach: 4, tier: 4, head: 0xffc14a, handle: 0x6a3a1a, desc: 'Gold trimmed. Strong enough for Glowbark.' },
   { id: 'star', name: 'Starsplitter', price: 40000, dmg: 34, swing: 0.45, reach: 4.3, tier: 5, head: 0x7ff5df, handle: 0x2a3a44, bonus: { glow: 1.4 }, glow: true, desc: 'The best axe there is. It glows in the dark.' },
 ];
-const axeById = id => AXES.find(a => a.id === id) || AXES[0];
+// everyone starts with bare hands: slow, but enough to punch down an oak and buy a hatchet
+const FISTS = { id: 'fists', name: 'Bare Hands', price: 0, dmg: 0.9, swing: 0.55, reach: 2.6, tier: 0, fists: true, head: 0xe0a882, handle: 0xe0a882, desc: 'Punch trees. It works, slowly.' };
+const axeById = id => id === 'fists' ? FISTS : AXES.find(a => a.id === id) || FISTS;
 // chainsaws: hold to cut; damage per second, and the hardest wood tier they can cut
 const SAWS = [
   { id: 'saw1', name: 'Buzz 30 Chainsaw', price: 1200, dps: 18, tier: 2, reach: 2.6, color: 0xe8761e, desc: 'Hold to cut. Much faster than any axe at this price.' },
@@ -306,12 +327,29 @@ const ITEMS = {
   shop1: { name: 'Woodshop Bench', price: 1500, color: 0x8a5a32, desc: 'Drop planks on it to make beams and furniture crates, which sell for more. Press E at the bench to switch what it makes.' },
 };
 const MOTORS = [{ name: 'Basic belt motor', price: 0, speed: 1.4 }, { name: 'Fast Belt Motor', price: 600, speed: 2.1, desc: 'Makes all your belts and mills feed 50% faster.' }, { name: 'Turbo Belt Motor', price: 2500, speed: 3, desc: 'The fastest belts money can buy.' }];
+// gems drop from trees you fell. They buy classes and perks that stay with you forever
+const CLASSES = {
+  logger: { name: 'Logger', desc: 'Your axe and saw hit 25% harder.', color: 0xc8322a },
+  hauler: { name: 'Hauler', desc: 'Carry 3 more pieces on your back and walk at full speed with a load.', color: 0x2f6fb0 },
+  trucker: { name: 'Trucker', desc: 'Vehicles you drive go 20% faster and loads hold on better.', color: 0xd8a02a },
+};
+const CLASS_COST = 5, CLASS_SWITCH = 3;
+const PERKS = {
+  arms: { name: 'Strong Arms', desc: 'Chop and saw 8% harder per level.', max: 5, cost: [3, 6, 10, 15, 22] },
+  luck: { name: 'Lucky Finds', desc: 'More gems drop from trees.', max: 4, cost: [3, 6, 10, 16] },
+  back: { name: 'Big Back', desc: 'Carry one more piece on your back per level.', max: 3, cost: [4, 8, 14] },
+  feet: { name: 'Quick Feet', desc: 'Walk and run 5% faster per level.', max: 3, cost: [3, 7, 12] },
+};
+// carrying wood on your back: pieces you can hold at once, bought with coins
+const RACKS = [{ name: 'Rope sling', cap: 2 }, { name: 'Wood frame pack', price: 120, cap: 3 }, { name: 'Steel back rack', price: 600, cap: 4 }, { name: 'Pro hauling rack', price: 2400, cap: 6 }, { name: 'Giant timber rack', price: 9000, cap: 8 }];
+// straps keep a wobbly load on your truck
+const STRAPS = [{ name: 'No straps', k: 1 }, { name: 'Ratchet straps', price: 300, k: 0.35, desc: 'Logs fall off your truck much less often.' }, { name: 'Chain binders', price: 2200, k: 0.1, desc: 'Your load barely moves, even on rough roads.' }];
 const PLOT_PRICE = 150, NORTH_TOLL = 600, EAST_TOLL = 2500, FERRY_PASS = 10000;
 const DAY_LEN = 720;
 
 function fresh() {
-  return { v: 2, money: 40, earned: 0, axes: ['rusty'], axe: 'rusty', tool: 0, plot: -1, unlock: { n: 0, e: 0, f: 0 }, motor: 0,
-    inv: { mill1: 0, mill2: 0, mill3: 0, belt: 0, shop1: 0 }, placed: [], trucks: [], time: 0.3, day: 1, cam: 0, seen: {}, stats: { trees: 0, sold: 0, planks: 0, crafted: 0, contracts: 0, giants: 0, storms: 0 },
+  return { v: 3, money: 0, earned: 0, axes: ['fists'], axe: 'fists', gems: 0, cls: '', perks: { arms: 0, luck: 0, back: 0, feet: 0 }, pack: [], rack: 0, straps: 0, ownT: ['pickup'], repair: {}, tool: 0, plot: -1, unlock: { n: 0, e: 0, f: 0 }, motor: 0,
+    inv: { mill1: 0, mill2: 0, mill3: 0, belt: 0, shop1: 0 }, placed: [], trucks: [], time: 0.3, day: 1, cam: 0, seen: {}, stats: { trees: 0, sold: 0, planks: 0, crafted: 0, contracts: 0, giants: 0, storms: 0, hauls: 0 },
     saws: [], saw: '', fellerLv: 0, workers: { logger: 0, seller: 0 }, orders: [], orderSeq: 1, daily: { day: '', done: 0, streak: 0, last: '' }, ach: {} };
 }
 let S = fresh();
@@ -560,6 +598,11 @@ const PLOTS = [{ x: -225, z: 255 }, { x: -185, z: 255 }, { x: -225, z: 301 }, { 
 const PLOT_H = 16;
 const NB = { x: -100, z: 0 }, EB = { x: 0, z: 200 };   // bridge centres, set below from the river curves
 NB.z = riverW(NB.x); EB.x = riverE(EB.z);
+// two old bridges that fell apart; players rebuild them with planks (free routes once fixed)
+const FIX = [{ key: 'fw', title: 'Old Mill Bridge', x: -300, z: 0, need: 16, axis: 'z' }, { key: 'fe', title: 'Beaver Creek Bridge', x: 0, z: 40, need: 28, axis: 'x' }];
+FIX[0].z = riverW(FIX[0].x); FIX[1].x = riverE(FIX[1].z);
+// places that want wood delivered by truck (haul jobs)
+const DESTS = [{ id: 'maple', name: 'Maple Ridge Mill', x: -206, z: 372, need: '' }, { id: 'cabin', name: 'Frostpine Cabins', x: -52, z: -318, need: 'n' }, { id: 'stilt', name: 'Stilt Village', x: 262, z: 54, need: 'e' }];
 const SPAWN = { x: -118, z: 192 };
 function riverDist(x, z) {
   let d = 1e9;
@@ -605,6 +648,8 @@ const PADS = [
   { x: EB.x - 21, z: EB.z, r: 6, f: 9, h: 3 }, { x: EB.x + 21, z: EB.z, r: 6, f: 9, h: 3 },
 ];
 for (const p of PLOTS) PADS.push({ x: p.x, z: p.z, sq: PLOT_H + 1, f: 12 });
+for (const f of FIX) { const ax = f.axis === 'z' ? [0, 21] : [21, 0]; PADS.push({ x: f.x - ax[0], z: f.z + ax[1], r: 6, f: 9, h: 3 }, { x: f.x + ax[0], z: f.z - ax[1], r: 6, f: 9, h: 3 }); }
+for (const d of DESTS) PADS.push({ x: d.x, z: d.z, r: 9, f: 10 });
 // roads: lists of points
 const ROADS = [
   [[-252, 278], [-150, 278], [-130, 232], [-120, 205], [-120, 170], [-60, 190], [0, 228], [12, 240]],
@@ -1088,14 +1133,14 @@ function bridge(ax, az, bx, bz, key, title, toll) {
   const boomCol = addCol(gx, gy + 1.2, gz, 4.4, 1.6, 0.3, ry, 0, { tag: 'gate' });
   const tx = signTex(512, 160, board(title, 'Toll ' + money(toll) + ', one time', '#8a2f22', '#fff1d0', '#ffd25a'));
   const [sx, sz] = lat(-6.2, -3.45); signMesh(tx, 2.6, 0.8, sx, gy + 3.3, sz, ry + PI);
-  const g = GATES[key] = { key, toll, title, boomPivot, boomCol, open: false, x: gx, z: gz, ang: 0 };
+  const g = GATES[key] = { key, toll, title, boomPivot, boomCol, boomArgs: [gx, gy + 1.2, gz, 4.4, 1.6, 0.3, ry, 0, { tag: 'gate' }], open: false, x: gx, z: gz, ang: 0 };
   const [ix, iz] = lat(0, -2.2);
   addInter(ix, iz, 4.5, () => g.open ? null : (S.money >= toll ? 'Pay <b>' + money(toll) + '</b> to open the ' + title : 'The ' + title + ' costs ' + money(toll) + '. You have ' + money(S.money) + '.'), () => { if (!g.open) buyGate(key); }, { key: 'gate' + key });
   return g;
 }
 bridge(NB.x, NB.z + 21, NB.x, NB.z - 21, 'n', 'North Bridge', NORTH_TOLL);
 bridge(EB.x - 21, EB.z, EB.x + 21, EB.z, 'e', 'East Bridge', EAST_TOLL);
-function setGate(key, open) { const g = GATES[key]; if (!g) return; g.open = open; if (open && g.boomCol) { removeCol(g.boomCol); g.boomCol = null; } }
+function setGate(key, open) { const g = GATES[key]; if (!g) return; g.open = open; if (open && g.boomCol) { removeCol(g.boomCol); g.boomCol = null; } if (!open && !g.boomCol) g.boomCol = addCol(...g.boomArgs); }
 
 /* --- ferry docks: swamp shore to Glimmer Isle --- */
 function marchTo(x0, z0, dx, dz, below) { for (let t = 0; t < 320; t += 0.5) { const x = x0 + dx * t, z = z0 + dz * t; if (hAt(x, z) < below) return { x, z }; } return { x: x0, z: z0 }; }
@@ -1291,6 +1336,8 @@ const TX = [], TZ = [], TY = [], TSP = [], TS = [], TSY = [], TROT = [];
     let bad = false;
     for (const p of PLOTS) if (Math.abs(x - p.x) < PLOT_H + 3 && Math.abs(z - p.z) < PLOT_H + 3) bad = true;
     for (const k in GATES) if (Math.hypot(x - GATES[k].x, z - GATES[k].z) < 24) bad = true;
+    for (const f of FIX) if (Math.hypot(x - f.x, z - f.z) < 30) bad = true;
+    for (const d of DESTS) if (Math.hypot(x - d.x, z - d.z) < 17) bad = true;
     if (Math.hypot(x - FERRY.a0.x, z - FERRY.a0.z) < 16 || Math.hypot(x - FERRY.b0.x, z - FERRY.b0.z) < 14) bad = true;
     if (bad || nearRoad(x, z)) continue;
     let sp;
@@ -1887,20 +1934,29 @@ function rayBodies(o, d, maxT) {
   return RH;
 }
 
-/* ================= online co-op (up to 4 players in the host's world) =================
-   Uses the site's Online lib (WebRTC, room codes). The host's browser runs the world; friends send what they do
-   (chop this tree, cut that log, drag this piece, drive that truck) and get the world back about 12 times a second.
-   Money: everyone has their own wallet. A friend earns for the wood they cut, carried or loaded, and keeps it in
-   their own saved game. Tools are personal too; land, machines, bridges and the ferry belong to the host's world. */
-const NET = { mode: null, link: null, peers: new Map(), code: '', me: 'me', status: '', known: new Set(), sendT: 0, placedSig: '', trucksSig: '', ended: false };
+/* ================= online: everyone plays together in one world (up to 4 lumberjacks) =================
+   Uses the site's Online lib (WebRTC, room codes). When you press Play the game looks for an open public world
+   with free space and joins it; if there is none, your own world becomes a public world others can join.
+   The host's browser runs the world; the others send what they do and get the world back about 12 times a second.
+   Money, tools, vehicles, gems and the wood on your back belong to each player and are saved in their own game.
+   Land, sawmills, workers, toll bridges, rebuilt bridges, the ferry and orders belong to the world you are in. */
+const NET = { mode: null, link: null, peers: new Map(), code: '', me: 'me', status: '', known: new Set(), sendT: 0, placedSig: '', trucksSig: '', ordersSig: '', ended: false, pub: false, searching: false, solo: false, tried: false, hostName: '' };
 Object.defineProperty(NET, 'guest', { get: () => NET.mode === 'guest' });
 Object.defineProperty(NET, 'host', { get: () => NET.mode === 'host' });
 const ONLINE_OK = typeof Online !== 'undefined' && !!(window.RTCPeerConnection);
 const SHIRTS = [0x2f6fb0, 0x3f8f3a, 0xd8a02a, 0x7a3a8a];
 const ANIMS = ['Idle_Loop', 'Walk_Loop', 'Jog_Fwd_Loop', 'Sprint_Loop', 'Sword_Idle', 'Crouch_Idle_Loop'];
 const r2 = v => Math.round(v * 100) / 100, r4 = v => Math.round(v * 10000) / 10000;
-const myNetName = () => { try { const n = JSON.parse(localStorage.getItem('unb_lb_name') || 'null'); if (n) return String(n).replace(/[^A-Za-z0-9 _.\-']/g, '').slice(0, 16); } catch (e) {} return 'Host'; };
+const NET_NAME = (() => { try { const n = JSON.parse(localStorage.getItem('unb_lb_name') || 'null'); if (n) { const c = String(n).replace(/[^A-Za-z0-9 _.\-']/g, '').slice(0, 16); if (c) return c; } } catch (e) {} return 'Lumberjack ' + (100 + Math.floor(Math.random() * 900)); })();
+const myNetName = () => NET_NAME;
 function peerName(id) { if (id === 'host') return NET.hostName || 'Host'; const p = NET.peers.get(id); return p ? p.name : null; }
+// spots around the town square so nobody spawns inside anybody else
+const SPAWN_PTS = [[0, 0], [4, 2.5], [-4, 2.5], [4, -3], [-4, -3], [0, 6], [8, 1], [-8, 1]].map(([dx, dz]) => ({ x: SPAWN.x + dx, z: SPAWN.z + dz }));
+function pickSpawn() {
+  const who = [[player.x, player.z]]; for (const p of NET.peers.values()) who.push([p.tx != null ? p.tx : p.x, p.tz != null ? p.tz : p.z]);
+  for (const s of SPAWN_PTS) if (who.every(w => Math.hypot(w[0] - s.x, w[1] - s.z) > 2.5)) return s;
+  return { x: SPAWN.x + (fr() - 0.5) * 10, z: SPAWN.z + (fr() - 0.5) * 10 };
+}
 // ---- avatars for the other players ----
 function avatarFor(p) {
   if (p.ch) return p.ch;
@@ -1913,7 +1969,7 @@ function dropAvatar(p) { if (p.ch) { scene.remove(p.ch.g); p.ch = null; } if (p.
 function avatarTool(p, tool, toolId) {
   if (p.toolK === tool + toolId) return; p.toolK = tool + toolId;
   if (p.toolM) { p.ch.hand.remove(p.toolM); p.toolM = null; }
-  if (tool === 0) { p.toolM = axeModel(axeById(toolId)); p.toolM.rotation.x = PI / 2; p.toolM.position.set(0, 0, -0.12); }
+  if (tool === 0 && toolId !== 'fists') { p.toolM = axeModel(axeById(toolId)); p.toolM.rotation.x = PI / 2; p.toolM.position.set(0, 0, -0.12); }
   else if (tool === 2 && sawById(toolId)) { p.toolM = sawModel(sawById(toolId), 1); p.toolM.position.set(0, -0.02, -0.05); }
   if (p.toolM) p.ch.hand.add(p.toolM);
 }
@@ -1923,12 +1979,14 @@ function updateAvatars(dt) {
     if (!p.ch) continue;
     p.x += (p.tx - p.x) * k; p.y += (p.ty - p.y) * k; p.z += (p.tz - p.z) * k;
     let d = p.tyaw - p.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); p.yaw += d * k;
-    p.ch.g.position.set(p.x, p.y, p.z); p.ch.g.rotation.y = p.yaw + PI;
-    if (p.inTruck >= 0 && trucks[p.inTruck]) { const t = trucks[p.inTruck]; p.ch.g.position.copy(t.seatW); p.ch.g.position.y -= 0.35; p.ch.g.quaternion.copy(t.q); }
-    p.ch.loop(ANIMS[p.anim] || 'Idle_Loop');
-    if (p.swing && p.swing !== p.lastSwing) { p.lastSwing = p.swing; p.ch.once('Sword_Attack', 0.6); }
+    p.ch.g.position.set(p.x, p.y, p.z); p.ch.g.rotation.set(0, p.yaw + PI, 0);
+    const t = p.inTruck >= 0 ? truckById(p.inTruck) : null, st = t ? t.seats[p.seat || 0] : null;
+    if (st) { p.ch.g.position.copy(st.w); if (!st.stand) p.ch.g.position.y -= 0.35; p.ch.g.quaternion.copy(t.q); p.x = p.tx = st.w.x; p.z = p.tz = st.w.z; p.y = p.ty = st.w.y; }
+    p.ch.loop(st ? (st.stand ? 'Idle_Loop' : 'Crouch_Idle_Loop') : ANIMS[p.anim] || 'Idle_Loop');
+    if (p.swing && p.swing !== p.lastSwing) { p.lastSwing = p.swing; p.ch.once(p.toolId === 'fists' && p.tool === 0 ? 'Punch_Jab' : 'Sword_Attack', 0.6); }
     avatarTool(p, p.tool, p.toolId || '');
-    if (p.toolM) p.toolM.visible = p.inTruck < 0;
+    if (p.toolM) p.toolM.visible = !st;
+    setPackVis(p.ch, (p.pack || '').split('').filter(c => c !== '').map(Number));
     if (Math.hypot(p.x - camera.position.x, p.z - camera.position.z) < 120) p.ch.update(dt);
     // name tag
     tmpV.set(p.x, p.y + 2.25, p.z).project(camera);
@@ -1940,106 +1998,179 @@ function updateAvatars(dt) {
 // ---- what my own player is doing, as numbers ----
 let mySwing = 0;
 function myAnimIndex() {
-  if (player.truck) return 5;
+  if (player.truck) return player.truck.seats[player.seat] && player.truck.seats[player.seat].stand ? 0 : 5;
   const sp = Math.hypot(player.vx, player.vz), busy = (S.tool === 2 && (lmb || tChopHeld)) || held;
   return busy && sp < 1 ? 4 : sp > 7 ? 3 : sp > 4.5 ? 2 : sp > 0.4 ? 1 : 0;
 }
 function myToolId() { return S.tool === 0 ? S.axe : S.tool === 2 ? S.saw : ''; }
+const packSig = () => S.pack.map(it => it[1]).join('');
+const truckMsg = t => [t.nid, t.type, r2(t.pos.x), r2(t.pos.z), r4(t.yaw), t.owner === 'me' ? 'host' : t.owner, t.owner === 'me' ? myNetName() : t.ownerName, t.lv || 0, t.straps || 0];
+
+/* ---------------- finding a world when you press Play ---------------- */
+const waitFor = (p, ms) => Promise.race([p, new Promise(res => setTimeout(() => res(null), ms))]);
+async function netAuto(onStatus) {
+  if (!ONLINE_OK || NET.mode || NET.link || NET.solo) return 'solo';
+  NET.searching = true; onStatus && onStatus('Looking for other lumberjacks online...');
+  let r = null;
+  try { r = await waitFor(Online.api('GET', null, '?list=lumber'), 6000); } catch (e) { r = null; }
+  if (!alive || !NET.searching) return 'cancel';
+  if (!r || !Array.isArray(r.rooms)) { NET.searching = false; return 'solo'; }   // no network or no signalling: play on your own, quietly
+  const open = r.rooms.filter(x => x.mode === 'pub' && x.n < x.max).sort((a, b) => b.n - a.n);
+  for (const room of open.slice(0, 2)) {
+    onStatus && onStatus('Joining ' + (room.name || 'a world') + '...');
+    const ok = await startJoin(room.id, true);
+    if (!alive || !NET.searching) return 'cancel';
+    if (ok) { NET.searching = false; return 'joined'; }
+  }
+  NET.searching = false;
+  startHost(true);
+  return 'host';
+}
+function cancelSearch() { NET.searching = false; if (NET.link && !NET.mode) { try { NET.link.close(); } catch (e) {} NET.link = null; } }
+
 /* ---------------- host ---------------- */
-function startHost() {
+function startHost(pub) {
   if (!ONLINE_OK || NET.mode) return;
-  NET.status = 'Making a room...'; fillShopIf();
-  const link = Online.host('lumber', { max: 4 });
-  NET.link = link; NET.mode = 'host'; NET.known = new Set(bodies.map(b => b.id)); NET.placedSig = ''; NET.trucksSig = '';
-  link.on('ready', code => { NET.code = code; NET.status = 'Room ready. Friends join with this code.'; fillShopIf(); netBadge(); });
+  NET.status = pub ? 'Opening your world to other players...' : 'Making a private room...'; fillShopIf();
+  const link = Online.host('lumber', { max: 4, name: myNetName() + "'s world", mode: pub ? 'pub' : 'priv' });
+  NET.link = link; NET.mode = 'host'; NET.pub = !!pub; NET.me = 'me'; NET.known = new Set(bodies.map(b => b.id)); NET.placedSig = ''; NET.trucksSig = ''; NET.ordersSig = '';
+  link.on('ready', code => { NET.code = code; NET.status = NET.pub ? 'Your world is open. Other players can join.' : 'Private room ready. Friends join with this code.'; fillShopIf(); netUI(); });
   link.on('join', peer => {
-    const slot = [...NET.peers.values()].length;
-    const p = { id: peer.id, name: peer.name, shirt: SHIRTS[slot % SHIRTS.length], x: player.x + 2, y: player.y, z: player.z + 2, yaw: 0, anim: 0, tool: 0, toolId: 'rusty', inTruck: -1, hold: null };
+    const used = new Set([...NET.peers.values()].map(q => q.slot)); let slot = 0; while (used.has(slot)) slot++;
+    const sp = pickSpawn();
+    const p = { id: peer.id, name: peer.name, slot, shirt: SHIRTS[slot % SHIRTS.length], x: sp.x, y: hAt(sp.x, sp.z), z: sp.z, yaw: 0, anim: 0, tool: 0, toolId: 'fists', inTruck: -1, seat: 0, hold: null, spawn: sp, cls: '', luck: 0, pack: '', hello: false };
     NET.peers.set(peer.id, p); avatarFor(p);
     link.send({ e: worldMsg(p) }, peer.id);
-    toast(peer.name + ' joined your world!'); sBuy(); unlock('online'); fillShopIf(); netBadge();
+    toast(peer.name + ' joined your world!'); sBuy(); unlock('online'); fillShopIf(); netUI();
   });
-  link.on('leave', peer => { const p = NET.peers.get(peer.id); if (p) { releasePeer(p); dropAvatar(p); NET.peers.delete(peer.id); toast(p.name + ' left.'); } fillShopIf(); netBadge(); });
+  link.on('leave', peer => { const p = NET.peers.get(peer.id); if (p) { releasePeer(p, true); dropAvatar(p); NET.peers.delete(peer.id); toast(p.name + ' left.'); } fillShopIf(); netUI(); });
   link.on('msg', (m, peer) => { const p = NET.peers.get(peer.id); if (!p || !m) return; if (m.p) onPeerState(p, m.p); if (m.a) onPeerAct(p, m.a); });
-  link.on('error', msg => { NET.status = msg; NET.mode = null; NET.link = null; fillShopIf(); netBadge(); });
+  link.on('error', msg => { NET.status = NET.pub ? '' : msg; NET.mode = null; NET.link = null; fillShopIf(); netUI(); });
   link.on('close', () => { stopOnline(true); });
 }
 function worldMsg(p) {
-  return { t: 'w', you: p.id, shirt: p.shirt, spawn: [r2(player.x + 2), r2(player.y + 1), r2(player.z + 2)], time: S.time, day: S.day, unlock: S.unlock, plot: S.plot, motor: S.motor, fellerLv: S.fellerLv,
-    placed: placed.map(it => [it.type, it.x, it.z, it.rot]), trucks: trucks.map(t => [t.type, r2(t.pos.x), r2(t.pos.z), r4(t.yaw)]),
+  return { t: 'w', you: p.id, shirt: p.shirt, spawn: [r2(p.spawn.x), r2(hAt(p.spawn.x, p.spawn.z) + 0.5), r2(p.spawn.z)], time: S.time, day: S.day, unlock: S.unlock, repair: S.repair, plot: S.plot, motor: S.motor,
+    placed: placed.map(it => [it.type, it.x, it.z, it.rot]), trucks: trucks.map(truckMsg), orders: S.orders,
     trees: Array.from({ length: TN }, (_, i) => i).filter(i => tState[i] !== 0).map(i => [i, tState[i], r2(tCut[i]), r2(tGrow[i]), r2(tHP[i])]),
     bodies: bodies.map(bodyMsg), ferry: ferry.t, giant: EV.giant, hostName: myNetName() };
 }
 const bodyMsg = b => [b.id, b.k, b.sp, r2(b.len), r2(b.r), r2(b.pw), r2(b.pt), r2(b.p.x), r2(b.p.y), r2(b.p.z), r4(b.q.x), r4(b.q.y), r4(b.q.z), r4(b.q.w), Math.round(b.val || 0)];
-function onPeerState(p, a) { p.tx = a[0]; p.ty = a[1]; p.tz = a[2]; p.tyaw = a[3]; p.anim = a[4]; p.tool = a[5]; p.toolId = a[6]; p.swing = a[7]; p.yawLook = a[3]; if (!p.ch) avatarFor(p); }
-function releasePeer(p) {
+function onPeerState(p, a) { p.tx = a[0]; p.ty = a[1]; p.tz = a[2]; p.tyaw = a[3]; p.anim = a[4]; p.tool = a[5]; p.toolId = a[6]; p.swing = a[7]; p.pack = a[8] || ''; if (a[9] !== undefined && a[9] !== p.cls) { p.cls = a[9]; for (const t of trucks) if (t.seats[0].who === p.id) t.lastDrv = undefined; } p.luck = a[10] || 0; if (!p.ch) avatarFor(p); }
+// a player left: free their seat, let go of their wood and send their vehicles home
+function releasePeer(p, leaving) {
   for (const b of bodies) if (b.heldBy === p.id) { b.heldBy = null; b.hold = null; }
-  for (const t of trucks) if (t.driver === p.id) { t.driver = null; t.input = null; }
-  p.inTruck = -1;
+  for (const t of trucks) for (const st of t.seats) if (st.who === p.id) { st.who = null; if (st === t.seats[0]) t.input = null; }
+  p.inTruck = -1; p.seat = 0;
+  if (GOOSE.hat === p.id) GOOSE.hat = null;
+  if (leaving) for (const t of trucks.slice()) if (t.owner === p.id) removeTruck(t);
+}
+// park a guest's own vehicles: the starter pickup right by them, bigger ones at the motor lot
+function spawnPeerTrucks(p, list, lv, straps) {
+  const seen = new Set();
+  for (const k of list) {
+    if (!TRUCKS[k] || seen.has(k) || trucks.some(t => t.owner === p.id && t.type === k)) continue; seen.add(k);
+    const near = k === 'pickup' ? freeParking(p.spawn.x + 7, p.spawn.z + 3) : freeParking(SHOPS.motors.x + 9, SHOPS.motors.z + 2);
+    makeTruck(k, near[0], near[1], k === 'pickup' ? PI / 2 : PI, { owner: p.id, ownerName: p.name, lv: k === 'feller' ? lv || 0 : 0, straps: straps || 0 });
+  }
 }
 function onPeerAct(p, a) {
   const T = a.t;
-  if (T === 'hitTree') {
+  if (T === 'hello') { p.hello = true; p.cls = a.cls || ''; p.luck = a.luck || 0; spawnPeerTrucks(p, Array.isArray(a.ownT) ? a.ownT.slice(0, 6) : ['pickup'], a.lv, a.straps); }
+  else if (T === 'hitTree') {
     if (a.i < 0 || a.i >= TN) return;
-    const r = damageTree(a.i, Math.min(a.dmg, 120), a.tier, a.x, a.z, a.y, p.id, a.tool);
+    const r = damageTree(a.i, Math.min(a.dmg, 160), a.tier, a.x, a.z, a.y, p.id, a.tool);
     if (a.tool !== 'saw' && Math.hypot(TX[a.i] - player.x, TZ[a.i] - player.z) < 50) sChop(SP[TSP[a.i]].hard);
     if (r === 'felled') netSend(p, { e: { t: 'msg', text: 'Timber!' } });
-  } else if (T === 'hitBody') { const b = bodies.find(x => x.id === a.id); if (b) damageBody(b, a.s, Math.min(a.dmg, 150), a.tier, p.id, a.tool); }
-  else if (T === 'grab') { const b = bodies.find(x => x.id === a.id); if (b && !b.heldBy && b !== held) { if (b.cargo) detachCargo(b); b.heldBy = p.id; b.owner = p.id; b.hold = { local: new THREE.Vector3(a.l[0], a.l[1], a.l[2]), target: new THREE.Vector3(a.tg[0], a.tg[1], a.tg[2]), spin: 0, tilt: 0, yaw: p.yaw }; wakeB(b); } }
+  } else if (T === 'hitBody') { const b = bodies.find(x => x.id === a.id); if (b) damageBody(b, a.s, Math.min(a.dmg, 200), a.tier, p.id, a.tool); }
+  else if (T === 'grab') { const b = bodies.find(x => x.id === a.id); if (b && !b.heldBy && b !== held && !b.crane) { if (b.cargo) detachCargo(b); b.heldBy = p.id; b.owner = p.id; b.hold = { local: new THREE.Vector3(a.l[0], a.l[1], a.l[2]), target: new THREE.Vector3(a.tg[0], a.tg[1], a.tg[2]), spin: 0, tilt: 0, yaw: p.yaw }; wakeB(b); } }
   else if (T === 'hold') { const b = bodies.find(x => x.heldBy === p.id); if (b && b.hold) { b.hold.target.set(a.tg[0], a.tg[1], a.tg[2]); b.hold.spin = a.sp || 0; b.hold.tilt = a.tl || 0; b.hold.yaw = p.yaw; } }
   else if (T === 'drop') { for (const b of bodies) if (b.heldBy === p.id) { b.heldBy = null; b.hold = null; } }
-  else if (T === 'enter') { const t = trucks[a.ti]; if (t && !t.driver && player.truck !== t) { t.driver = p.id; p.inTruck = a.ti; netSend(p, { e: { t: 'entered', ti: a.ti } }); } else netSend(p, { e: { t: 'msg', text: 'Someone is already driving that.' } }); }
-  else if (T === 'exit') { const t = trucks[p.inTruck]; if (t && t.driver === p.id) { t.driver = null; t.input = null; t.speed = 0; } p.inTruck = -1; }
-  else if (T === 'drive') { const t = trucks[p.inTruck]; if (t && t.driver === p.id) t.input = { f: a.f, s: a.s, b: a.b }; }
-  else if (T === 'tip') { const t = trucks[p.inTruck]; if (t && t.driver === p.id) { if (t.tipT < 0 && Math.abs(t.speed) < 3) { t.tipT = 0; while (t.cargo.length) { const b = t.cargo[0]; b.owner = b.owner || p.id; detachCargo(b); b.v.x -= Math.sin(t.yaw) * 1.6; b.v.z -= Math.cos(t.yaw) * 1.6; b.v.y += 0.6; } sTip(); } } }
-  else if (T === 'mach') { const t = trucks[p.inTruck]; if (t && t.driver === p.id) machineDo(t, p.id); }
+  else if (T === 'enter') {
+    const t = truckById(a.ti); if (!t) return;
+    for (const q of trucks) for (const st of q.seats) if (st.who === p.id) st.who = null;
+    let seat = a.seat >= 0 && t.seats[a.seat] && !t.seats[a.seat].who ? a.seat : pickSeat(t, a.seat);
+    if (seat < 0) { netSend(p, { e: { t: 'msg', text: 'No free seats in that one.' } }); return; }
+    t.seats[seat].who = p.id; p.inTruck = t.nid; p.seat = seat;
+    netSend(p, { e: { t: 'seat', ti: t.nid, seat } });
+    if (seat > 0 && t.seats[0].who) netSend(p, { e: { t: 'award', id: 'ride' } });
+    if (seat === 0 && t.seats.some((q, k) => k > 0 && q.who === 'me')) unlock('ride');
+  }
+  else if (T === 'exit') { const t = truckById(p.inTruck); if (t) for (let k = 0; k < t.seats.length; k++) if (t.seats[k].who === p.id) { t.seats[k].who = null; if (k === 0) t.input = null; } p.inTruck = -1; p.seat = 0; }
+  else if (T === 'drive') { const t = truckById(p.inTruck); if (t && t.seats[0].who === p.id) t.input = { f: clamp(+a.f || 0, -1, 1), s: clamp(+a.s || 0, -1, 1), b: a.b ? 1 : 0 }; }
+  else if (T === 'tip') { const t = truckById(p.inTruck); if (t && t.seats[0].who === p.id) tipTruck(t, p.id); }
+  else if (T === 'mach') { const t = truckById(p.inTruck); if (t && t.seats[0].who === p.id) machineDo(t, p.id); }
+  else if (T === 'buyT') { if (TRUCKS[a.k] && !trucks.some(t => t.owner === p.id && t.type === a.k)) { const s = freeParking(SHOPS.motors.x + 9, SHOPS.motors.z + 2); makeTruck(a.k, s[0], s[1], PI, { owner: p.id, ownerName: p.name, lv: a.lv || 0, straps: a.straps || 0 }); } }
+  else if (T === 'upg') { for (const t of trucks) if (t.owner === p.id) { if (t.kind === 'feller') t.lv = a.lv || 0; t.straps = a.straps || 0; } }
+  else if (T === 'returnT') { for (const t of trucks) if (t.owner === p.id) returnTruck(t, { x: p.spawn.x + 7, z: p.spawn.z + 3, yaw: PI / 2 }); }
+  else if (T === 'stow') { const b = bodies.find(x => x.id === a.id); if (b && packable(b) && (!b.heldBy || b.heldBy === p.id) && b !== held && !b.crane) { if (b.cargo) detachCargo(b); const it = itemOf(b); removeBody(b); netSend(p, { e: { t: 'stowed', it } }); } }
+  else if (T === 'unpack') { const it = a.it; if (Array.isArray(it) && SP[it[1]] && it[2] > 0 && it[2] < 6) makeBody({ k: it[0] | 0, sp: it[1] | 0, len: +it[2], r: +it[3] || 0.1, pw: +it[4] || 0, pt: +it[5] || 0, x: +a.x, y: +a.y, z: +a.z, q: tmpQ.setFromAxisAngle(UPV, (+a.yaw || 0) + PI / 2), val: +it[6] || 0, owner: p.id }); }
+  else if (T === 'packSold') { if (SP[a.sp]) orderCredit({ k: a.k | 0, sp: a.sp | 0, p: new THREE.Vector3(p.x, p.y, p.z) }, p.id); }
+  else if (T === 'goose') { if (Math.hypot(GOOSE.x - p.x, GOOSE.z - p.z) < 6) scareGoose(p.id, p.x, p.z); }
 }
 function netSend(p, m) { if (NET.link && NET.host) NET.link.send(m, p.id); }
 /* ---------------- guest ---------------- */
-function startJoin(code) {
-  if (!ONLINE_OK || NET.mode) return;
-  code = String(code || '').trim(); if (code.length < 4) { NET.status = 'Type the room code your friend sees.'; fillShopIf(); return; }
-  save();
-  NET.status = 'Connecting to your friend...'; fillShopIf();
-  const link = Online.join('lumber', code);
-  NET.link = link;
-  link.on('open', () => { NET.mode = 'guest'; NET.code = code; NET.hostName = link.hostName || 'Host'; NET.status = 'Connected! Waiting for the world...'; fillShopIf(); netBadge(); });
-  link.on('msg', m => { if (!m) return; if (m.s) onSnap(m.s); if (m.e) onEvent(m.e); });
-  link.on('error', msg => { NET.status = msg; NET.link = null; NET.mode = null; fillShopIf(); });
-  link.on('close', () => { if (NET.mode === 'guest') stopOnline(true); });
+let joinWait = null;
+function startJoin(code, auto) {
+  return new Promise(resolve => {
+    if (!ONLINE_OK || NET.mode) { resolve(false); return; }
+    code = String(code || '').trim(); if (code.length < 4) { NET.status = 'Type the room code your friend sees.'; fillShopIf(); resolve(false); return; }
+    save();
+    NET.status = 'Connecting...'; fillShopIf();
+    const link = Online.join('lumber', code, { name: myNetName() });
+    NET.link = link;
+    let done = false;
+    const finish = ok => { if (done) return; done = true; clearTimeout(to); resolve(ok); };
+    const to = setTimeout(() => { if (done) return; if (NET.link === link && !NET.mode) { try { link.close(); } catch (e) {} NET.link = null; } NET.status = auto ? '' : 'Could not reach that world. Try again or play on your own.'; fillShopIf(); finish(false); }, auto ? 13000 : 32000);
+    link.on('open', () => { if (done && auto) { try { link.close(); } catch (e) {} return; } NET.mode = 'guest'; NET.code = code; NET.hostName = link.hostName || 'Host'; NET.status = 'Connected! Waiting for the world...'; fillShopIf(); netUI();
+      link.send({ a: { t: 'hello', ownT: S.ownT, lv: S.fellerLv, straps: S.straps, cls: S.cls, luck: S.perks.luck || 0 } });
+      joinWait = () => finish(true); setTimeout(() => finish(true), 5000); });
+    link.on('msg', m => { if (!m) return; if (m.s) onSnap(m.s); if (m.e) onEvent(m.e); });
+    link.on('error', msg => { if (NET.link === link) { NET.link = null; NET.mode = null; } NET.status = auto ? '' : msg; fillShopIf(); finish(false); });
+    link.on('close', () => { if (NET.mode === 'guest' && NET.link === link) stopOnline(true); });
+  });
 }
 let gotWorld = false;
 function clearWorld() {
+  if (held) dropHeld();
+  if (build) cancelBuild();
+  if (player.truck) { player.truck = null; player.seat = 0; $('#drive').hidden = true; $('#game').classList.remove('driving', 'riding'); engineOff(); }
+  GOOSE.carry = null; GOOSE.hat = null; GOOSE.n.hat = null;
   while (bodies.length) removeBody(bodies[0]);
-  for (const t of trucks) { scene.remove(t.g); const k = KCOLS.indexOf(t.kc); if (k >= 0) KCOLS.splice(k, 1); }
-  trucks.length = 0;
+  while (trucks.length) { const t = trucks[trucks.length - 1]; for (const st of t.seats) st.who = null; removeTruck(t); }
   while (placed.length) removeItem(placed[0]);
   for (const a of ACTIVE.slice()) deactivate(a, true);
   for (let i = 0; i < TN; i++) if (tState[i] !== 0) { setStump(i, false); tState[i] = 0; tGrow[i] = 1; tHP[i] = treeMaxHP(i); setTreeInstance(i, true); }
+  for (let i = 0; i < TN; i++) if (tGiant[i]) giantRegrow(i);
+  if (EV.beam) { scene.remove(EV.beam); EV.beam = null; } EV.giant = -1; EV.storm = 0; EV.stormLeft = 0;
   FELLED.length = 0; GROWING.length = 0;
   for (const w of workers) scene.remove(w.ch.g); workers.length = 0;
+  for (const k in GATES) setGate(k, false);
+  S.repair = {}; for (const k in FIXB) setFixed(k, false);
+  while (GEMS.length) scene.remove(GEMS.pop().m);
 }
 function onEvent(e) {
   if (e.t === 'w') {
     NET.me = e.you; gotWorld = true;
-    if (player.truck) { player.truck = null; $('#drive').hidden = true; $('#game').classList.remove('driving'); }
     clearWorld();
-    S.time = e.time; S.day = e.day; S.unlock = Object.assign({}, e.unlock); S.plot = e.plot; S.motor = e.motor; S.fellerLv = e.fellerLv;
+    S.time = e.time; S.day = e.day; S.unlock = Object.assign({ n: 0, e: 0, f: 0 }, e.unlock); S.plot = e.plot; S.motor = e.motor; S.orders = Array.isArray(e.orders) ? e.orders : [];
+    S.repair = Object.assign({}, e.repair || {});
     for (const k in GATES) setGate(k, !!S.unlock[k]);
+    for (const k in FIXB) { if ((S.repair[k] || 0) >= FIXB[k].f.need) setFixed(k, true); else { refreshPile(k); redrawSign(FIXB[k].so); } }
     for (const p of e.placed) placeItem(p[0], p[1], p[2], p[3]);
-    for (const t of e.trucks) { const tr = makeTruck(t[0], t[1], t[2], t[3]); tr.remote = true; }
+    syncTrucks(e.trucks);
     for (const [i, st, cut, g, hp] of e.trees) { tCut[i] = cut; tHP[i] = hp; if (st === 2) { tState[i] = 2; setTreeInstance(i, false); setStump(i, true); } else if (st === 3) { tState[i] = 3; tGrow[i] = g; GROWING.push(i); setTreeInstance(i, true); } else if (st === 1) { tState[i] = 0; } }
     for (const a of e.bodies) addRemoteBody(a);
     ferry.t = e.ferry; NET.hostName = e.hostName || NET.hostName;
     if (e.giant >= 0) guestGiant(e.giant, true);
-    player.x = e.spawn[0]; player.y = e.spawn[1]; player.z = e.spawn[2]; player.vx = player.vz = player.vy = 0;
-    redrawSigns(); buildFence(); NET.status = 'Playing in ' + NET.hostName + "'s world."; fillShopIf(); netBadge();
-    toast('You joined ' + NET.hostName + "'s world! Your money and tools come with you."); unlock('online');
+    player.x = e.spawn[0]; player.y = e.spawn[1]; player.z = e.spawn[2]; player.vx = player.vz = player.vy = 0; player.yaw = PI;
+    redrawSigns(); buildFence(); refreshBar(); NET.status = 'Playing in ' + NET.hostName + "'s world."; fillShopIf(); netUI();
+    toast('You joined ' + NET.hostName + "'s world! Your money, tools and trucks come with you."); unlock('online');
+    if (joinWait) { const f = joinWait; joinWait = null; f(); }
     return;
   }
   if (!gotWorld && NET.guest) return;
   if (e.t === 'add') { for (const a of e.b) addRemoteBody(a); }
-  else if (e.t === 'del') { for (const id of e.ids || [e.id]) { const b = bodies.find(x => x.id === id); if (b) removeBody(b); } }
+  else if (e.t === 'del') { for (const id of e.ids || [e.id]) { const b = bodies.find(x => x.id === id); if (b) { if (b === held) dropHeld(); removeBody(b); } } }
   else if (e.t === 'treeHit') {
     const i = e.i; if (tState[i] === 2) return; tCut[i] = e.cut;
     const a = activate(i, e.ang, TY[i] + e.cut); tHP[i] = e.hp; notchTree(a, clamp(e.depth, 0.08, 0.92));
@@ -2052,15 +2183,34 @@ function onEvent(e) {
     if (e.who === NET.me) { S.money += e.v; S.earned += e.v; S.stats.sold++; sCoin(e.v); floatText(e.x, e.y + 1, e.z, '+' + money(e.v), e.label); }
     else floatText(e.x, e.y + 1, e.z, '+' + money(e.v), (e.who === 'me' ? NET.hostName : peerNameG(e.who)) + ': ' + e.label);
   }
-  else if (e.t === 'trucks') { const have = trucks.length; for (let k = have; k < e.list.length; k++) { const t = e.list[k]; const tr = makeTruck(t[0], t[1], t[2], t[3]); tr.remote = true; } }
+  else if (e.t === 'trucks') syncTrucks(e.list);
   else if (e.t === 'placed') { while (placed.length) removeItem(placed[0]); for (const p of e.list) placeItem(p[0], p[1], p[2], p[3]); S.plot = e.plot; buildFence(); redrawSigns(); }
-  else if (e.t === 'entered') { const t = trucks[e.ti]; if (t) enterTruck(t, true); }
+  else if (e.t === 'seat') { const t = truckById(e.ti); if (t) { for (const q of trucks) for (const st of q.seats) if (st.who === 'me') st.who = null; t.seats[e.seat].who = 'me'; enterTruck(t, e.seat, true); } }
+  else if (e.t === 'out') { if (player.truck) { const t = player.truck; for (const st of t.seats) if (st.who === 'me') st.who = null; player.truck = null; player.seat = 0; $('#drive').hidden = true; $('#game').classList.remove('driving', 'riding'); setTouchMode(); engineOff(); } player.x = e.x; player.z = e.z; player.y = groundAt(e.x, e.z, 50); player.vy = 0; if (e.msg) toast(e.msg); }
   else if (e.t === 'giant') guestGiant(e.i, true);
   else if (e.t === 'giantEnd') guestGiant(e.i, false, e.felled);
   else if (e.t === 'msg') toast(e.text);
   else if (e.t === 'gate') setGate(e.key, true);
+  else if (e.t === 'repair') { S.repair[e.key] = e.n; if (FIXB[e.key]) { refreshPile(e.key); redrawSign(FIXB[e.key].so); } }
+  else if (e.t === 'fixed') { S.repair[e.key] = FIXB[e.key] ? FIXB[e.key].f.need : 99; setFixed(e.key, true); addGems(3); unlock('builder'); toast('The ' + (FIXB[e.key] ? FIXB[e.key].f.title : 'bridge') + ' is fixed! Everyone gets 3 gems.'); }
+  else if (e.t === 'gem') spawnGems(e.x, e.z, e.n);
+  else if (e.t === 'bonus') { S.money += e.v; S.earned += e.v; S.stats.contracts++; if (e.haul) S.stats.hauls++; if (e.gems) addGems(e.gems); sBuy(); toast(e.text); }
+  else if (e.t === 'award') unlock(e.id);
+  else if (e.t === 'stowed') { S.pack.push(e.it); packChanged(); sGrab(); }
+  else if (e.t === 'orders') S.orders = e.list || [];
 }
 function peerNameG(id) { const p = NET.peers.get(id); return p ? p.name : 'A friend'; }
+// match the host's list of vehicles: add new ones, remove ones that went home
+function syncTrucks(list) {
+  const ids = new Set(list.map(a => a[0]));
+  for (const t of trucks.slice()) if (!ids.has(t.nid)) removeTruck(t);
+  for (const a of list) {
+    if (truckById(a[0])) continue;
+    const own = a[5] === NET.me;
+    const tr = makeTruck(a[1], a[2], a[3], a[4], { id: a[0], owner: own ? 'me' : a[5], ownerName: own ? '' : a[6], lv: a[7], straps: a[8] });
+    tr.remote = true;
+  }
+}
 function guestGiant(i, on, felled) {
   if (on && !tGiant[i]) { tGiant[i] = 1; TS[i] *= 2.0; TSY[i] *= 1.45; if (tState[i] === 0) setTreeInstance(i, true); EV.giant = i; const bm = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 120, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xffe28a, transparent: true, opacity: 0.2, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false })); bm.position.set(TX[i], TY[i] + 60, TZ[i]); scene.add(bm); EV.beam = bm; toast('A giant ' + SP[TSP[i]].name + ' has appeared! Look for the light beam.'); }
   else if (!on) { if (EV.beam) { scene.remove(EV.beam); EV.beam = null; } if (!felled && tGiant[i] && tState[i] !== 2) { TS[i] /= 2.0; TSY[i] /= 1.45; tGiant[i] = 0; setTreeInstance(i, true); } EV.giant = -1; }
@@ -2075,17 +2225,21 @@ function onSnap(s) {
   if (!gotWorld) return;
   S.time = s.tm; EV.storm = s.st || 0; ferry.t = s.fe;
   if (s.u) { for (const k of ['n', 'e', 'f']) if (s.u[k] && !S.unlock[k]) { S.unlock[k] = 1; setGate(k, true); } }
-  // players: host plus other guests
+  // players: host plus other guests (and the host's workers)
   const seen = new Set();
+  for (const t of trucks) for (const st of t.seats) if (st.who !== 'me') st.who = null;
   for (const a of s.pl) {
     const id = a[0]; if (id === NET.me) continue; seen.add(id);
     let p = NET.peers.get(id);
-    if (!p) { p = { id, name: a[8], shirt: a[9], x: a[1], y: a[2], z: a[3], yaw: a[4], anim: 0, tool: 0, toolId: '', inTruck: -1 }; NET.peers.set(id, p); avatarFor(p); }
-    p.tx = a[1]; p.ty = a[2]; p.tz = a[3]; p.tyaw = a[4]; p.anim = a[5]; p.tool = a[6]; p.toolId = a[7]; p.inTruck = a[10]; p.swing = a[11];
+    if (!p) { p = { id, name: a[8], shirt: a[9], x: a[1], y: a[2], z: a[3], yaw: a[4], anim: 0, tool: 0, toolId: '', inTruck: -1, seat: 0, worker: id[0] === 'w' }; NET.peers.set(id, p); avatarFor(p); }
+    p.tx = a[1]; p.ty = a[2]; p.tz = a[3]; p.tyaw = a[4]; p.anim = a[5]; p.tool = a[6]; p.toolId = a[7]; p.inTruck = a[10]; p.seat = a[11] || 0; p.swing = a[12]; p.pack = a[13] || '';
+    if (p.inTruck >= 0) { const t = truckById(p.inTruck); if (t && t.seats[p.seat] && t.seats[p.seat].who !== 'me') t.seats[p.seat].who = id; }
   }
-  for (const [id, p] of NET.peers) if (!seen.has(id)) { dropAvatar(p); NET.peers.delete(id); }
-  for (const a of s.tr) { const t = trucks[a[0]]; if (!t) continue; t.tpos = t.tpos || new THREE.Vector3(); t.tpos.set(a[1], a[2], a[3]); t.tq = t.tq || new THREE.Quaternion(); t.tq.set(a[4], a[5], a[6], a[7]); t.tip = a[8]; t.yaw = a[9]; t.speed = a[10]; if (!t.netInit) { t.pos.copy(t.tpos); t.q.copy(t.tq); t.netInit = true; } }
+  for (const [id, p] of NET.peers) if (!seen.has(id)) { dropAvatar(p); NET.peers.delete(id); netUI(); }
+  if (seen.size !== NET.lastSeen) { NET.lastSeen = seen.size; netUI(); }
+  for (const a of s.tr) { const t = truckById(a[0]); if (!t) continue; t.tpos = t.tpos || new THREE.Vector3(); t.tpos.set(a[1], a[2], a[3]); t.tq = t.tq || new THREE.Quaternion(); t.tq.set(a[4], a[5], a[6], a[7]); t.tip = a[8]; t.yaw = a[9]; t.speed = a[10]; if (!t.netInit) { t.pos.copy(t.tpos); t.q.copy(t.tq); t.netInit = true; } }
   for (const a of s.b) { const b = bodies.find(x => x.id === a[0]); if (!b) continue; b.tp = b.tp || b.p.clone(); b.tq = b.tq || b.q.clone(); b.tp.set(a[1], a[2], a[3]); b.tq.set(a[4], a[5], a[6], a[7]); }
+  if (s.gz) { const n = GOOSE.n; n.x = s.gz[0]; n.y = s.gz[1]; n.z = s.gz[2]; n.yaw = s.gz[3]; n.st = s.gz[4]; n.hat = s.gz[5] || null; }
 }
 // guests smooth the host's positions between snapshots
 function guestSmooth(dt) {
@@ -2101,9 +2255,9 @@ function netTick(dt) {
     if (!gotWorld) return;
     if (NET.sendT <= 0) {
       NET.sendT = 0.066;
-      NET.link.send({ p: [r2(player.x), r2(player.y), r2(player.z), r4(player.yaw), myAnimIndex(), S.tool, myToolId(), mySwing] }, { fast: true });
+      NET.link.send({ p: [r2(player.x), r2(player.y), r2(player.z), r4(player.yaw), myAnimIndex(), S.tool, myToolId(), mySwing, packSig(), S.cls, S.perks.luck || 0] }, { fast: true });
       if (held) { const tg = hold.target; NET.link.send({ a: { t: 'hold', tg: [r2(tg.x), r2(tg.y), r2(tg.z)], sp: hold.spin, tl: hold.tilt } }, { fast: true }); }
-      if (player.truck) { const f = (K.w || K.arrowup ? 1 : 0) - (K.s || K.arrowdown ? 1 : 0) + (coarse && Math.abs(stick.y) > 0.25 ? Math.sign(stick.y) : 0); const st = clamp((K.a || K.arrowleft ? 1 : 0) - (K.d || K.arrowright ? 1 : 0) - stick.x, -1, 1); NET.link.send({ a: { t: 'drive', f: clamp(f, -1, 1), s: r2(st), b: K[' '] ? 1 : 0 } }, { fast: true }); }
+      if (drv()) { const inp = localInput(); NET.link.send({ a: { t: 'drive', f: r2(clamp(inp.f, -1, 1)), s: r2(inp.s), b: inp.b } }, { fast: true }); }
     }
     return;
   }
@@ -2118,82 +2272,108 @@ function netTick(dt) {
   if (gone.length) NET.link.broadcast({ e: { t: 'del', ids: gone } });
   const psig = placed.map(it => it.type + it.x + it.z + it.rot).join('|') + S.plot;
   if (psig !== NET.placedSig) { NET.placedSig = psig; NET.link.broadcast({ e: { t: 'placed', list: placed.map(it => [it.type, it.x, it.z, it.rot]), plot: S.plot } }); }
-  const tsig = trucks.map(t => t.type).join('|');
-  if (tsig !== NET.trucksSig) { NET.trucksSig = tsig; NET.link.broadcast({ e: { t: 'trucks', list: trucks.map(t => [t.type, r2(t.pos.x), r2(t.pos.z), r4(t.yaw)]) } }); }
-  const pl = [['host', r2(player.x), r2(player.y), r2(player.z), r4(player.yaw), myAnimIndex(), S.tool, myToolId(), myNetName(), 0xb8402e, player.truck ? trucks.indexOf(player.truck) : -1, mySwing]];
-  for (const p of NET.peers.values()) pl.push([p.id, r2(p.x), r2(p.y), r2(p.z), r4(p.yaw), p.anim, p.tool, p.toolId, p.name, p.shirt, p.inTruck, p.swing || 0]);
-  for (const w of workers) pl.push(['w' + workers.indexOf(w), r2(w.x), r2(w.y), r2(w.z), r4(w.yaw + PI), w.state === 'chop' ? 4 : w.state === 'idle' ? 0 : 2, w.kind === 'logger' ? 0 : 1, 'steel', w.name, WORKERS[w.kind].shirt, -1, 0]);
-  const tr = trucks.map((t, i) => [i, r2(t.pos.x), r2(t.pos.y), r2(t.pos.z), r4(t.q.x), r4(t.q.y), r4(t.q.z), r4(t.q.w), r2(t.tip), r4(t.yaw), r2(t.speed)]);
+  const tsig = trucks.map(t => t.nid).join('|');
+  if (tsig !== NET.trucksSig) { NET.trucksSig = tsig; NET.link.broadcast({ e: { t: 'trucks', list: trucks.map(truckMsg) } }); }
+  const osig = S.orders.map(o => o.id + ':' + o.have + ':' + Math.round(o.time / 10)).join('|');
+  if (osig !== NET.ordersSig) { NET.ordersSig = osig; NET.link.broadcast({ e: { t: 'orders', list: S.orders } }); }
+  const pt = player.truck, pl = [['host', r2(player.x), r2(player.y), r2(player.z), r4(player.yaw), myAnimIndex(), S.tool, myToolId(), myNetName(), 0xb8402e, pt ? pt.nid : -1, player.seat || 0, mySwing, packSig()]];
+  for (const p of NET.peers.values()) pl.push([p.id, r2(p.x), r2(p.y), r2(p.z), r4(p.yaw), p.anim, p.tool, p.toolId, p.name, p.shirt, p.inTruck, p.seat || 0, p.swing || 0, p.pack || '']);
+  for (const w of workers) pl.push(['w' + workers.indexOf(w), r2(w.x), r2(w.y), r2(w.z), r4(w.yaw + PI), w.state === 'chop' ? 4 : w.state === 'idle' ? 0 : 2, w.kind === 'logger' ? 0 : 1, 'steel', w.name, WORKERS[w.kind].shirt, -1, 0, 0, '']);
+  const tr = trucks.map(t => [t.nid, r2(t.pos.x), r2(t.pos.y), r2(t.pos.z), r4(t.q.x), r4(t.q.y), r4(t.q.z), r4(t.q.w), r2(t.tip), r4(t.yaw), r2(t.speed)]);
   const mv = []; for (const b of bodies) if (!b.sleep || b.cargo || b.crane) mv.push([b.id, r2(b.p.x), r2(b.p.y), r2(b.p.z), r4(b.q.x), r4(b.q.y), r4(b.q.z), r4(b.q.w)]);
-  const snap = { tm: r4(S.time), st: r2(EV.storm), fe: r4(ferry.t), u: S.unlock, pl, tr, b: mv.slice(0, 120) };
+  const G = GOOSE, snap = { tm: r4(S.time), st: r2(EV.storm), fe: r4(ferry.t), u: S.unlock, pl, tr, b: mv.slice(0, 120), gz: [r2(G.x), r2(G.y), r2(G.z), r4(G.yaw), G.st, G.hat === 'me' ? 'host' : G.hat || ''] };
   for (const p of NET.peers.values()) NET.link.send({ s: snap }, p.id, { fast: true });
 }
 function netAct(a) { if (NET.guest && NET.link) NET.link.send({ a }); }
 function netEvent(e) { if (NET.host && NET.link) NET.link.broadcast({ e }); }
-function netBodyAdd() {}
 function netTreeHit(i, ang, tool) { if (NET.host) netEvent({ t: 'treeHit', i, ang: r4(ang), depth: r2(clamp(1 - tHP[i] / treeMaxHP(i), 0.08, 0.92)), cut: r2(tCut[i]), hp: r2(tHP[i]), tool }); }
 function netFell(i, dx, dz) { if (NET.host) netEvent({ t: 'fell', i, dx: r2(dx), dz: r2(dz), cut: r2(tCut[i]) }); }
 function netRegrow(i) { if (NET.host) netEvent({ t: 'regrow', i }); }
+// a public world with nobody in it stops asking the server for new players while the tab is hidden
+on(document, 'visibilitychange', () => { if (NET.host && NET.link && NET.link.lock && !NET.peers.size) { try { NET.link.lock(document.hidden); } catch (e) {} } });
 /* ---------------- ending ---------------- */
 function stopOnline(lost) {
   if (!NET.mode && !NET.link) return;
   const wasGuest = NET.guest;
-  const l = NET.link; NET.link = null; NET.mode = null;
+  const l = NET.link; NET.link = null; NET.mode = null; NET.searching = false;
   try { l && l.close(); } catch (e) {}
-  for (const p of NET.peers.values()) { releasePeer(p); dropAvatar(p); }
-  NET.peers.clear(); NET.code = ''; netBadge();
+  for (const p of NET.peers.values()) { releasePeer(p, !wasGuest); dropAvatar(p); }
+  NET.peers.clear(); NET.code = ''; NET.pub = false;
   if (wasGuest) {
     saveGuestWallet();
-    NET.ended = true;
-    const m = $('#menu'); $('#menuStats').textContent = (lost ? 'The online game ended. ' : 'You left the online game. ') + 'Your money and tools are saved. Load your own world to keep playing.';
-    m.hidden = false; $('#mResume').textContent = 'Back to my world'; setTouchMode();
-  } else { NET.status = lost ? 'The room closed.' : 'You stopped hosting.'; fillShopIf(); }
+    goHome();
+    toast(lost ? 'The world you were in closed. You are back in your own world.' : 'You are back in your own world.');
+  } else NET.status = lost ? 'The room closed.' : '';
+  fillShopIf(); netUI();
 }
-// while visiting a friend, only your wallet, tools, stats and awards are saved into your own game
+// back to your own saved world after visiting someone else's
+function goHome() {
+  gotWorld = false; NET.me = 'me';
+  clearWorld();
+  const d = load();
+  S = fresh(); S.seen.started = 1;
+  if (d && d.v >= 1) apply(d);
+  S.seen.started = 1;
+  ensureOwnTrucks();
+  redrawSigns(); buildFence(); equipAxe(); refreshBar(); spawnWorkers(); packChanged();
+  placeFerry(); for (const t of trucks) syncTruck(t, 0);
+}
+// your own vehicles are always in your own world, even ones you bought while visiting a friend
+function ensureOwnTrucks() {
+  for (const k of S.ownT) {
+    if (!TRUCKS[k] || trucks.some(t => t.owner === 'me' && t.type === k)) continue;
+    const p = k === 'pickup' ? freeParking(SPAWN.x + 14, SPAWN.z + 4) : freeParking(SHOPS.motors.x + 9, SHOPS.motors.z + 2);
+    makeTruck(k, p[0], p[1], k === 'pickup' ? PI / 2 : PI, { owner: 'me', lv: k === 'feller' ? S.fellerLv : 0, straps: S.straps });
+  }
+}
+// while visiting, only the things that are yours are saved into your own game
 function saveGuestWallet() {
   let own = null; try { own = JSON.parse(store.get(KEY) || 'null'); } catch (e) {}
   own = own || fresh();
-  for (const k of ['money', 'earned', 'axes', 'saws', 'axe', 'saw', 'ach', 'daily']) own[k] = S[k];
-  own.stats = Object.assign(own.stats || {}, { sold: S.stats.sold, trees: S.stats.trees });
+  for (const k of ['money', 'earned', 'axes', 'saws', 'axe', 'saw', 'ach', 'daily', 'gems', 'cls', 'perks', 'pack', 'rack', 'straps', 'ownT', 'fellerLv']) own[k] = JSON.parse(JSON.stringify(S[k]));
+  own.v = Math.max(own.v || 3, 3);
+  own.stats = Object.assign(own.stats || {}, { sold: S.stats.sold, trees: S.stats.trees, contracts: S.stats.contracts, hauls: S.stats.hauls, giants: S.stats.giants });
   own.seen = Object.assign(own.seen || {}, S.seen, { started: 1 });
   try { store.set(KEY, JSON.stringify(own)); } catch (e) {}
 }
-function netBadge() {
-  const e = $('#netBadge');
+// who is in this world, shown in the corner
+function netUI() {
+  const e = $('#netList');
   if (!NET.mode) { e.hidden = true; return; }
+  const rows = [];
+  const dot = c => '<i style="background:#' + c.toString(16).padStart(6, '0') + '"></i>';
+  if (NET.host) { rows.push(dot(0xb8402e) + 'You (host)'); for (const p of NET.peers.values()) rows.push(dot(p.shirt) + escapeH(p.name)); }
+  else { rows.push(dot(0xb8402e) + 'You'); for (const p of NET.peers.values()) if (!p.worker) rows.push(dot(p.shirt || 0x888888) + escapeH(p.name) + (p.id === 'host' ? ' (host)' : '')); }
+  const n = NET.host ? 1 + NET.peers.size : rows.length;
+  e.innerHTML = '<b>' + (NET.host ? (NET.pub ? 'Your world (open)' : 'Private room ' + (NET.code || '').toUpperCase()) : escapeH(NET.hostName || 'Host') + "'s world") + ' ' + n + '/4</b>' + rows.map(r => '<span>' + r + '</span>').join('');
   e.hidden = false;
-  e.textContent = NET.host ? 'Hosting room ' + (NET.code || '...').toUpperCase() + ' (' + (1 + [...NET.peers.values()].length) + '/4)' : 'Online in ' + (NET.hostName || 'a friend') + "'s world";
 }
+const escapeH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 function fillShopIf() { if (shopKind === 'online' && !$('#shop').hidden) fillShop(); }
 function fillOnline(L, T) {
   T.innerHTML = 'Play online<span class="sub">Up to 4 lumberjacks in one world</span>';
   const p = (txt, css) => { const e = document.createElement('p'); e.style.cssText = 'font-size:14px;color:#cbbfa6;margin:4px 2px;' + (css || ''); e.textContent = txt; L.append(e); return e; };
-  const btn = (txt, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'buy ' + (cls || ''); b.style.width = '100%'; b.style.height = '46px'; b.textContent = txt; b.addEventListener('click', () => { aInit(); fn(); }); L.append(b); return b; };
+  const btn = (txt, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'buy ' + (cls || ''); b.style.cssText = 'width:100%;height:46px;margin-top:6px'; b.textContent = txt; b.addEventListener('click', () => { aInit(); fn(); }); L.append(b); return b; };
   if (!ONLINE_OK) { p('Online play is not available in this browser.'); return; }
   if (NET.status) p(NET.status, 'color:#ffd25a;font-weight:700');
-  if (NET.host) {
-    if (NET.code) {
-      const c = document.createElement('div'); c.style.cssText = 'font:400 40px "Bagel Fat One",sans-serif;letter-spacing:.12em;color:#241a06;background:#ffd25a;border:2px solid #0e0c09;border-radius:6px;text-align:center;padding:6px'; c.textContent = NET.code.toUpperCase(); L.append(c);
-      btn('Copy invite link', async () => { const url = location.origin + location.pathname + '?room=' + NET.code; try { await navigator.clipboard.writeText(url); toast('Invite link copied.'); } catch (e) { toast(url); } }, 'own');
-    }
-    p('In this world: ' + ['You (host)'].concat([...NET.peers.values()].map(x => x.name)).join(', ') + '.');
-    p('Friends keep the money they earn from wood they cut, carried or loaded. Your land, machines and bridges stay yours.', 'font-size:12px');
-    btn('Stop hosting', () => { try { NET.link && NET.link.broadcast({ e: { t: 'msg', text: 'The host closed the room.' } }); } catch (e) {} stopOnline(false); }, 'no');
-    return;
+  const names = NET.host ? ['You (host)'].concat([...NET.peers.values()].map(x => x.name)) : NET.guest ? ['You'].concat([...NET.peers.values()].filter(x => !x.worker).map(x => x.name + (x.id === 'host' ? ' (host)' : ''))) : [];
+  if (names.length) p('In this world: ' + names.join(', ') + '.');
+  if (NET.host && !NET.pub && NET.code) {
+    const c = document.createElement('div'); c.style.cssText = 'font:400 40px "Bagel Fat One",sans-serif;letter-spacing:.12em;color:#241a06;background:#ffd25a;border:2px solid #0e0c09;border-radius:6px;text-align:center;padding:6px'; c.textContent = NET.code.toUpperCase(); L.append(c);
+    btn('Copy invite link', async () => { const url = location.origin + location.pathname + '?room=' + NET.code; try { await navigator.clipboard.writeText(url); toast('Invite link copied.'); } catch (e) { toast(url); } }, 'own');
   }
-  if (NET.guest) {
-    p('You are playing in ' + (NET.hostName || 'a friend') + "'s world. Your wallet and tools come with you and are saved to your own game.");
-    btn('Leave and go back to my world', () => stopOnline(false), 'no');
-    return;
-  }
-  p('Host a room and your friends join your world, or join a friend with their code. Players connect directly; some school networks block this.');
-  btn('Host my world', startHost);
-  const row2 = document.createElement('div'); row2.style.cssText = 'display:flex;gap:8px;margin-top:6px';
+  if (NET.host) p(NET.pub ? 'Your world is public: other players looking for a game can join you.' : 'Only friends with the code can join.', 'font-size:12px');
+  if (NET.guest) p('Everything you earn, buy and carry is saved in your own game. Land, sawmills and bridges here belong to ' + (NET.hostName || 'the host') + '.', 'font-size:12px');
+  if (NET.mode) btn('Play alone', () => { NET.solo = true; if (NET.host) { try { NET.link && NET.link.broadcast({ e: { t: 'msg', text: 'The host closed the world.' } }); } catch (e) {} } stopOnline(false); closeShop(); toast('Playing on your own. Press Online any time to join others.'); }, 'no');
+  else btn('Join other players', () => { NET.solo = false; closeShop(); netAuto(t => toast(t)).then(r => { if (r === 'host') toast('No open worlds right now. Yours is open, so others can join you.'); else if (r === 'solo') toast('Could not reach the online service. Playing on your own.'); }); });
+  const sec = document.createElement('h4'); sec.className = 'sec'; sec.textContent = 'Play with friends'; L.append(sec);
+  btn('Make a private room', () => { if (NET.mode) stopOnline(false); NET.solo = false; startHost(false); fillShop(); }, 'own');
+  const row2 = document.createElement('div'); row2.style.cssText = 'display:flex;gap:8px;margin-top:8px';
   const inp = document.createElement('input'); inp.maxLength = 8; inp.placeholder = 'CODE'; inp.setAttribute('aria-label', 'Room code'); inp.style.cssText = 'flex:1;min-width:0;height:44px;border:2px solid #0e0c09;border-radius:6px;background:#fff7e6;color:#241a06;font:800 20px Figtree,sans-serif;text-transform:uppercase;letter-spacing:.2em;text-align:center';
   ['keydown', 'keyup', 'keypress'].forEach(ev => inp.addEventListener(ev, e => { e.stopPropagation(); if (ev === 'keydown' && e.key === 'Enter') jb.click(); }));
-  const jb = document.createElement('button'); jb.type = 'button'; jb.className = 'buy'; jb.textContent = 'Join'; jb.addEventListener('click', () => { aInit(); startJoin(inp.value); });
+  const jb = document.createElement('button'); jb.type = 'button'; jb.className = 'buy'; jb.textContent = 'Join'; jb.addEventListener('click', () => { aInit(); const c = inp.value; if (NET.mode) stopOnline(false); NET.solo = false; startJoin(c, false); fillShop(); });
   row2.append(inp, jb); L.append(row2);
-  p('When you join, you play in your friend\'s world. Your own world is saved and waits for you.', 'font-size:12px');
+  p('Players connect directly; some school networks block this. When you visit, your own world is saved and waits for you.', 'font-size:12px');
 }
 
 /* ================= land plots ================= */
@@ -2329,7 +2509,7 @@ const clouds = new THREE.Group(); scene.add(clouds);
   const m = new THREE.Mesh(M.geo(), new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, transparent: true, opacity: 0.92 })); m.frustumCulled = false; clouds.add(m);
 })();
 // the merged town batch is split into blocks so off-screen parts are culled
-(function finishTown() {
+function finishTown() {
   const cs = 200;
   for (const key in BAT) {
     const src = BAT[key], P = src.p, N = src.n, C = src.c, U = src.u, cells = new Map();
@@ -2341,7 +2521,7 @@ const clouds = new THREE.Group(); scene.add(clouds);
     }
     for (const b of cells.values()) scene.add(b.mesh(bmat(key)));
   }
-})();
+}
 
 /* ================= particles ================= */
 const PMAX = 240;
@@ -2498,11 +2678,13 @@ function makeLumberjack(o) {
     const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.05, 16, 1, true), bm); rim.position.y = -0.005; rim.scale.z = 1.12; hat.add(rim);
     const pom = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 6), lam(0xf2ead8)); pom.position.y = 0.12; hat.add(pom);
   }
+  let hatRef = null;
+  if (bones.Head) hatRef = bones.Head.children[bones.Head.children.length - 1];
   const hand = new THREE.Group();
   if (bones.hand_r) { bones.hand_r.add(hand); hand.position.set(0.085, -0.01, 0.02); hand.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(0.42, 0.52, -0.74).normalize()); }
   const mx = new THREE.AnimationMixer(root), acts = {};
   const act = n => acts[n] || (acts[n] = mx.clipAction(clipOf(n)));
-  const ch = { g, root, hand, real: true, base: null, shot: null, mixer: mx };
+  const ch = { g, root, hand, real: true, base: null, shot: null, mixer: mx, hat: hatRef };
   ch.loop = (n, ts) => {
     ts = ts == null ? 1 : ts;
     if (ch.base === n) { act(n).timeScale = ts; return; }
@@ -2549,6 +2731,21 @@ function boxMan(o) {
   return ch;
 }
 
+// wood carried on your back: a little stack of logs strapped to the lumberjack
+const PACK_G = new THREE.CylinderGeometry(0.085, 0.085, 0.95, 8); PACK_G.rotateZ(PI / 2);
+const PACK_M = {};
+function setPackVis(ch, list) {
+  const sig = list.join(',');
+  if (ch.packSig === sig) return; ch.packSig = sig;
+  if (!ch.pack) { ch.pack = new THREE.Group(); ch.pack.position.set(0, 1.12, -0.24); ch.g.add(ch.pack); }
+  while (ch.pack.children.length) ch.pack.remove(ch.pack.children[0]);
+  list.slice(0, 10).forEach((sp, i) => {
+    const m = new THREE.Mesh(PACK_G, PACK_M[sp] || (PACK_M[sp] = lam(SP[sp] ? SP[sp].bark : 0x6e4b30)));
+    m.position.set(0, (i >> 1) * 0.17, -(i & 1) * 0.16); m.castShadow = HQ; ch.pack.add(m);
+  });
+  if (list.length) { const st = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.05), lam(0x3a2a18)); st.position.set(0, 0.05, 0.02); st.rotation.x = 0.3; ch.pack.add(st); }
+}
+
 /* ================= tool models ================= */
 const metalMat = pmat({ tex: 'metal', metal: 0.75, rough: 0.35, color: 0xd8dde2 });
 function axeModel(a, scale) {
@@ -2580,7 +2777,7 @@ function sawModel(c, scale) {
 }
 
 /* ================= the lumberjack ================= */
-const player = { x: SPAWN.x, y: 0, z: SPAWN.z, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: -0.08, onGround: true, truck: null, swingT: 0, swingDur: 0.7, hitDone: true, walkPh: 0, safeX: SPAWN.x, safeZ: SPAWN.z, safeT: 0, gnd: null };
+const player = { x: SPAWN.x, y: 0, z: SPAWN.z, vx: 0, vy: 0, vz: 0, yaw: 0, pitch: -0.08, onGround: true, truck: null, seat: 0, swingT: 0, swingDur: 0.7, hitDone: true, walkPh: 0, safeX: SPAWN.x, safeZ: SPAWN.z, safeT: 0, gnd: null };
 player.y = hAt(player.x, player.z);
 let clock = 0, shake = 0, camMode = 0;   // camMode 0 = behind you, 1 = through your eyes
 const man = makeLumberjack({ shirt: 0x9c2a1e });
@@ -2595,9 +2792,9 @@ let vmAxe = null, vmSaw = null;
 function equipAxe() {
   const a = axeById(S.axe);
   if (man.axe) man.hand.remove(man.axe);
-  man.axe = axeModel(a); man.axe.rotation.x = PI / 2; man.axe.position.set(0, 0, -0.12); man.hand.add(man.axe);
   if (vmAxe) vm.remove(vmAxe);
-  vmAxe = axeModel(a, 0.8); vmAxe.position.set(0, -0.12, 0); vm.add(vmAxe);
+  man.axe = vmAxe = null;
+  if (!a.fists) { man.axe = axeModel(a); man.axe.rotation.x = PI / 2; man.axe.position.set(0, 0, -0.12); man.hand.add(man.axe); vmAxe = axeModel(a, 0.8); vmAxe.position.set(0, -0.12, 0); vm.add(vmAxe); }
   const sw = sawById(S.saw);
   if (man.saw) { man.hand.remove(man.saw); man.saw = null; }
   if (vmSaw) { vm.remove(vmSaw); vmSaw = null; }
@@ -2666,11 +2863,11 @@ function tbtn(id, down, up) {
   b.addEventListener('pointerdown', e => { aInit(); e.preventDefault(); b.classList.add('on'); down(); });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, () => { b.classList.remove('on'); if (up) up(); }));
 }
-tbtn('#tChop', () => { if (build) { tryPlace(); return; } if (player.truck) { K.w = true; return; } tChopHeld = true; if (S.tool === 1) grabDown(); else primaryDown(); }, () => { tChopHeld = false; K.w = false; if (S.tool === 1) dropHeld(); });
-tbtn('#tGrab', () => { if (build) { build.rot = (build.rot + 1) % 4; return; } if (player.truck) { K.s = true; return; } tGrabHeld = true; grabDown(); }, () => { tGrabHeld = false; K.s = false; dropHeld(); });
+tbtn('#tChop', () => { if (build) { tryPlace(); return; } if (player.truck) { if (drv()) K.w = true; return; } tChopHeld = true; if (S.tool === 1) grabDown(); else primaryDown(); }, () => { tChopHeld = false; K.w = false; if (S.tool === 1) dropHeld(); });
+tbtn('#tGrab', () => { if (build) { build.rot = (build.rot + 1) % 4; return; } if (player.truck) { if (drv()) K.s = true; return; } tGrabHeld = true; grabDown(); }, () => { tGrabHeld = false; K.s = false; dropHeld(); });
 tbtn('#tUse', () => { if (build) { cancelBuild(); return; } usePrompt(); });
 tbtn('#tJump', () => { if (player.truck) { tipBed(); return; } K[' '] = true; }, () => { K[' '] = false; });
-tbtn('#tTip', () => { const t = player.truck; if (t && (t.kind === 'feller' || t.kind === 'forwarder')) machineAction(); else tipBed(); });
+tbtn('#tTip', () => { const t = drv(); if (!t) { if (!player.truck) packAction(); return; } if (t && (t.kind === 'feller' || t.kind === 'forwarder')) machineAction(); else tipBed(); });
 on(window, 'keydown', e => {
   if (!alive || (!gameFocus && !locked) || (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))) return;
   const k = e.key.toLowerCase();
@@ -2688,6 +2885,7 @@ on(window, 'keydown', e => {
   else if (k === 'q') cycleAxe();
   else if (k === 'e') usePrompt();
   else if (k === 'x') usePrompt('x');
+  else if (k === 'c') packAction();
   else if (k === 'b') { if (build) cancelBuild(); else openBuild(); }
   else if (k === 'v') toggleCam();
   else if (k === 't') tipBed();
@@ -2751,7 +2949,10 @@ function primaryDown() {
   if (S.tool === 2) return;
   if (player.swingT <= 0) startSwing();
 }
-function startSwing() { mySwing++; player.swingT = player.swingDur; player.hitDone = false; sSwing(); man.once('Sword_Attack', player.swingDur * 1.05); }
+let punchAlt = 0;
+function startSwing() { mySwing++; player.swingT = player.swingDur; player.hitDone = false; sSwing(); man.once(S.axe === 'fists' ? ((punchAlt ^= 1) ? 'Punch_Jab' : 'Punch_Cross') : 'Sword_Attack', player.swingDur * 1.05); }
+// classes and perks bought with gems make every hit stronger
+const dmgMul = () => (S.cls === 'logger' ? 1.25 : 1) * (1 + 0.08 * (S.perks.arms || 0));
 // Damage to a standing tree. Used by axes, chainsaws, the feller claw and (through the host) by online friends.
 // Returns 'felled', 'hit', 'weak' or 'growing'.
 function damageTree(i, dmg, tier, fromX, fromZ, hitY, who, tool) {
@@ -2791,8 +2992,9 @@ function weakMsg(sp, isSaw) {
 function doHit() {
   updateAim();
   const a = axeById(S.axe);
+  if (gooseHit()) return;
   if (AIM.kind === 'tree') {
-    const i = AIM.i, sp = SP[TSP[i]], dmg = a.dmg * ((a.bonus && a.bonus[sp.id]) || 1);
+    const i = AIM.i, sp = SP[TSP[i]], dmg = a.dmg * ((a.bonus && a.bonus[sp.id]) || 1) * dmgMul();
     if (NET.guest) { if (a.tier < sp.tier) { sClank(); weakMsg(sp); return; } netAct({ t: 'hitTree', i, dmg, tier: a.tier, x: player.x, z: player.z, y: AIM.p.y }); chips(AIM.p.x, AIM.p.y, AIM.p.z, sp.wood, 9, 0, 0); sChop(sp.hard); return; }
     const r = damageTree(i, dmg, a.tier, player.x, player.z, AIM.p.y, 'me', 'axe');
     if (r === 'growing') { toast('This tree is still growing. Come back later.'); return; }
@@ -2801,7 +3003,7 @@ function doHit() {
     if (r === 'felled') hint('felled', 'Timber! Chop the log again to cut it into shorter pieces. ' + (coarse ? 'Hold <kbd>Grab</kbd>' : 'Hold <kbd>Right click</kbd>') + ' to drag a piece.');
     else if (!S.seen.chop1) { S.seen.chop1 = 1; hint('chopping', 'Keep chopping! The notch gets deeper with every hit.'); }
   } else if (AIM.kind === 'body') {
-    const b = AIM.b, sp = SP[b.sp], dmg = a.dmg * ((a.bonus && a.bonus[sp.id]) || 1);
+    const b = AIM.b, sp = SP[b.sp], dmg = a.dmg * ((a.bonus && a.bonus[sp.id]) || 1) * dmgMul();
     chips(AIM.p.x, AIM.p.y, AIM.p.z, sp.wood, 8, 0, 0); sChop(sp.hard * 0.8);
     if (NET.guest) { netAct({ t: 'hitBody', id: b.id, s: AIM.s, dmg, tier: a.tier }); return; }
     const r = damageBody(b, AIM.s, dmg, a.tier, 'me', 'axe');
@@ -2827,13 +3029,13 @@ function runSaw(dt) {
   const dist = Math.hypot(AIM.p.x - player.x, AIM.p.z - player.z);
   if (dist > sw.reach + 0.6) return;
   if (AIM.kind === 'tree') {
-    const i = AIM.i, sp = SP[TSP[i]], dmg = sw.dps * step;
+    const i = AIM.i, sp = SP[TSP[i]], dmg = sw.dps * step * dmgMul();
     if (sw.tier < sp.tier) { if (ok('sawweak', 900)) { sClank(); weakMsg(sp, true); } return; }
     if (NET.guest) { netAct({ t: 'hitTree', i, dmg, tier: sw.tier, x: player.x, z: player.z, y: AIM.p.y, tool: 'saw' }); sawdust(AIM.p.x, AIM.p.y, AIM.p.z, sp.wood, 0, 0); return; }
     const r = damageTree(i, dmg, sw.tier, player.x, player.z, AIM.p.y, 'me', 'saw');
     if (r === 'felled') hint('felled', 'Timber! The saw cuts logs too. ' + (coarse ? 'Hold <kbd>Grab</kbd>' : 'Hold <kbd>Right click</kbd>') + ' to drag a piece.');
   } else {
-    const b = AIM.b, sp = SP[b.sp], dmg = sw.dps * step * 1.2;
+    const b = AIM.b, sp = SP[b.sp], dmg = sw.dps * step * 1.2 * dmgMul();
     if (sw.tier < sp.tier) { if (ok('sawweak', 900)) { sClank(); weakMsg(sp, true); } return; }
     sawdust(AIM.p.x, AIM.p.y, AIM.p.z, sp.wood, 0, 0);
     if (NET.guest) { netAct({ t: 'hitBody', id: b.id, s: AIM.s, dmg, tier: sw.tier, tool: 'saw' }); return; }
@@ -2889,7 +3091,7 @@ function movePlayer(dt) {
   let f = (K.w || K.arrowup ? 1 : 0) - (K.s || K.arrowdown ? 1 : 0) + stick.y, s = (K.d || K.arrowright ? 1 : 0) - (K.a || K.arrowleft ? 1 : 0) + stick.x;
   const l = Math.hypot(f, s); if (l > 1) { f /= l; s /= l; }
   const run = K.shift || l > 0.95 && coarse;
-  const sp = (run ? 8.5 : 5.6) * (held ? 0.85 : 1) * (P.y < WATER - 0.3 ? 0.55 : 1);
+  const sp = (run ? 8.5 : 5.6) * (held ? 0.85 : 1) * (P.y < WATER - 0.3 ? 0.55 : 1) * (1 + 0.05 * (S.perks.feet || 0)) * (S.cls === 'hauler' ? 1 : Math.max(0.8, 1 - S.pack.length * 0.035));
   const fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw), rx = Math.cos(P.yaw), rz = -Math.sin(P.yaw);
   const tvx = (fx * f + rx * s) * sp, tvz = (fz * f + rz * s) * sp, acc = P.onGround ? 12 : 3;
   P.vx += (tvx - P.vx) * Math.min(1, acc * dt); P.vz += (tvz - P.vz) * Math.min(1, acc * dt);
@@ -2959,8 +3161,8 @@ function poseMan(dt) {
   if (m.axe) m.axe.visible = S.tool === 0 && !P.truck;
   if (m.saw) { m.saw.visible = S.tool === 2 && !P.truck; if (sawCutting) m.saw.position.x = (Math.random() - 0.5) * 0.01; }
   if (P.truck) {
-    const t = P.truck; m.g.position.copy(t.seatW); m.g.quaternion.copy(t.q); m.g.position.y -= 0.35;
-    m.loop('Crouch_Idle_Loop');
+    const t = P.truck, st = t.seats[P.seat] || t.seats[0]; m.g.position.copy(st.w); m.g.quaternion.copy(t.q);
+    if (st.stand) m.loop('Idle_Loop'); else { m.g.position.y -= 0.35; m.loop('Crouch_Idle_Loop'); }
   } else {
     m.g.position.set(P.x, P.y, P.z); m.g.rotation.set(0, P.yaw + PI, 0);
     const sp = Math.hypot(P.vx, P.vz);
@@ -3024,6 +3226,8 @@ function updateCamera(dt) {
 
 /* ================= trucks ================= */
 const trucks = [];
+let truckSeq = 1;
+const truckById = id => { for (const t of trucks) if (t.nid === id) return t; return null; };
 const headLight = new THREE.SpotLight(0xfff2cc, 0, 70, 0.6, 0.5, 1.2);
 scene.add(headLight); scene.add(headLight.target);
 const VMAT = {};
@@ -3047,7 +3251,8 @@ function wheelGeo(r, w) {
   for (const s of [-1, 1]) { const rim = new THREE.CylinderGeometry(r * 0.6, r * 0.6, 0.04, 14); rim.rotateZ(PI / 2); rim.translate(s * w * 0.5, 0, 0); mb.add(rim, tmpM.identity(), 0xb8bcc0); rim.dispose(); mb.box(s * (w * 0.5 + 0.02), 0, 0, 0.05, r * 0.28, r * 0.28, 0x6a6a6a); }
   return mb.geo();
 }
-function makeTruck(type, x, z, yaw) {
+function makeTruck(type, x, z, yaw, o) {
+  o = o || {};
   const T = TRUCKS[type], kind = T.kind || 'truck', W = T.W;
   const L = kind === 'feller' ? 6.2 : T.hoodL + T.cabL + T.bedL + 0.3;
   const zF = L / 2, zHood = zF - T.hoodL, zCab = zHood - T.cabL, zBedF = zCab - 0.1, zBedB = zBedF - T.bedL, fl = T.floor;
@@ -3165,7 +3370,15 @@ function makeTruck(type, x, z, yaw) {
   const t = { type, kind, T, g, bed, gate, claw, crane, wheels, parts, boxes, L, W, zF, zBedF, zBedB, wbF, wbB,
     pos: new THREE.Vector3(x, hAt(x, z), z), yaw, q: new THREE.Quaternion(), speed: 0, steer: 0, vy: 0, vel: new THREE.Vector3(), yawRate: 0,
     tip: 0, tipT: -1, cargo: [], R: new Float64Array(9), seatW: new THREE.Vector3(), safe: { x, z, yaw }, safeT: 0, wheelRot: 0, air: false, bump: 0,
-    foot: { x, y: 0, z, hx: W / 2, hy: 1.2, hz: L / 2, ry: yaw, rx: 0 }, kc: null, job: null, nid: trucks.length };
+    foot: { x, y: 0, z, hx: W / 2, hy: 1.2, hz: L / 2, ry: yaw, rx: 0 }, kc: null, job: null, nid: o.id || truckSeq++,
+    owner: o.owner || 'me', ownerName: o.ownerName || '', lv: o.lv || 0, straps: o.straps || 0, input: null, boost: 1, wob: 0, lastSpeed: 0 };
+  if (o.id) truckSeq = Math.max(truckSeq, o.id + 1);
+  // seats: 0 drives, the rest ride along (sitting in the cab or standing in the bed)
+  const sy = 0.45 + (kind === 'forwarder' ? 0.3 : 0), sz = zBedF + 0.1 + T.cabL * 0.45, bm = (zBedF + zBedB) / 2;
+  const seatDefs = kind === 'feller' ? [[-0.15, 2.25, 0.55, 0], [0.55, 2.42, -1.6, 1]]
+    : kind === 'forwarder' ? [[0.45, sy, sz, 0], [-0.45, sy, sz, 0], [0, fl, bm - 1.2, 1]]
+    : [[0.45, sy, sz, 0], [-0.45, sy, sz, 0], [0.45, fl, bm, 1], [-0.45, fl, bm - 0.5, 1]];
+  t.seats = seatDefs.map(d => ({ l: new THREE.Vector3(d[0], d[1], d[2]), stand: !!d[3], who: null, w: new THREE.Vector3() }));
   t.kc = { owner: t, boxes, ox: x, oz: z, rad: L / 2 + 3, vx: 0, vy: 0, vz: 0, wy: 0 };
   KCOLS.push(t.kc);
   settleTruck(t, true);
@@ -3217,7 +3430,8 @@ function syncTruck(t, dt) {
   }
   const kc = t.kc; kc.ox = t.pos.x; kc.oz = t.pos.z; kc.vx = t.vel.x; kc.vy = t.vel.y; kc.vz = t.vel.z; kc.wy = t.yawRate;
   t.foot.x = t.pos.x + Math.sin(t.yaw) * 0.0; t.foot.z = t.pos.z; t.foot.ry = t.yaw;
-  if (t.kind === 'feller') t.seatW.set(-0.15, 2.25, 0.55).applyMatrix4(truckM); else t.seatW.set(0.45, 0.45 + (t.kind === 'forwarder' ? 0.3 : 0), t.zBedF + 0.1 + t.T.cabL * 0.45).applyMatrix4(truckM);
+  for (const st of t.seats) st.w.copy(st.l).applyMatrix4(st.stand && t.kind !== 'feller' ? partM.copy(truckM).multiply(tipM) : truckM);
+  t.seatW.copy(t.seats[0].w);
   t.wheelRot += t.speed * dt / t.T.wr;
   for (const w of t.wheels) w.rotation.x = t.wheelRot;
   // cargo rides along
@@ -3240,44 +3454,96 @@ function detachCargo(b) {
   const k = t.cargo.indexOf(b); if (k >= 0) t.cargo.splice(k, 1);
   b.cargo = null; b.v.copy(t.vel); b.av.set(0, t.yawRate, 0); b.sleep = false; b.st = 0;
 }
+// the truck you are driving (seat 0), or null when you walk or ride along
+const drv = () => player.truck && player.seat === 0 ? player.truck : null;
 function tipBed() {
-  const t = player.truck; if (!t) return;
+  const t = drv(); if (!t) { if (player.truck) toast('Only the driver can tip the bed.'); return; }
   if (t.kind === 'feller') { toast('The Timber Claw has no bed. Press F to use the claw.'); return; }
   if (NET.guest) { netAct({ t: 'tip', ti: t.nid }); return; }
+  tipTruck(t, 'me');
+}
+function tipTruck(t, who) {
   if (t.tipT >= 0) return;
-  if (Math.abs(t.speed) > 3) { toast('Slow down before tipping the bed.'); return; }
-  t.tipT = 0; while (t.cargo.length) { const b = t.cargo[0]; detachCargo(b); b.v.x -= Math.sin(t.yaw) * 1.6; b.v.z -= Math.cos(t.yaw) * 1.6; b.v.y += 0.6; }
+  if (Math.abs(t.speed) > 3) { if (who === 'me') toast('Slow down before tipping the bed.'); return; }
+  t.tipT = 0; while (t.cargo.length) { const b = t.cargo[0]; b.owner = b.owner || who; detachCargo(b); b.v.x -= Math.sin(t.yaw) * 1.6; b.v.z -= Math.cos(t.yaw) * 1.6; b.v.y += 0.6; }
+  // anyone standing in the bed slides off the back
+  for (let k = 1; k < t.seats.length; k++) if (t.seats[k].stand && t.kind !== 'feller' && t.seats[k].who) kickSeat(t, k, 'You slid off the tipping bed!');
   sTip();
 }
-function enterTruck(t, confirmed) {
-  if (NET.guest && !confirmed) { netAct({ t: 'enter', ti: t.nid }); return; }
-  if (t.driver && !confirmed) { toast('A friend is driving that.'); return; }
+// which seat a person gets: the driver seat if it is free and they asked for it, otherwise the nearest free one
+function pickSeat(t, want) {
+  if (want === 0 && !t.seats[0].who) return 0;
+  let best = -1, bd = 1e9;
+  for (let k = 1; k < t.seats.length; k++) { if (t.seats[k].who) continue; const d = want != null && want > 0 ? Math.abs(k - want) : k; if (d < bd) { bd = d; best = k; } }
+  if (best < 0 && !t.seats[0].who) best = 0;
+  return best;
+}
+// the seat you would get by pressing E here: driver door, passenger door or the back of the bed
+function seatHere(t) {
+  const dx = player.x - t.pos.x, dz = player.z - t.pos.z, c = Math.cos(t.yaw), s = Math.sin(t.yaw);
+  const lx = c * dx - s * dz, lz = s * dx + c * dz;
+  if (t.kind !== 'feller' && lz < t.zBedF - 0.4 && t.seats.length > 2) { const k = t.seats.findIndex((q, i) => i > 0 && q.stand && !q.who); if (k > 0) return k; }
+  if (lx < -0.2 && t.seats[1] && !t.seats[1].stand && !t.seats[1].who) return 1;
+  return pickSeat(t, 0);
+}
+function seatName(t, k) { return k === 0 ? 'Drive' : t.seats[k].stand ? 'Hop on the back of' : 'Ride in'; }
+function enterTruck(t, seat, confirmed) {
+  if (seat == null) seat = seatHere(t);
+  if (seat < 0) { toast('No free seats in that one.'); return; }
+  if (NET.guest && !confirmed) { netAct({ t: 'enter', ti: t.nid, seat }); return; }
+  if (!confirmed) { if (t.seats[seat].who) { toast('Someone is sitting there.'); return; } t.seats[seat].who = 'me'; }
   if (held) dropHeld();
-  player.truck = t; player.vx = player.vz = 0; truckCam.yaw = t.yaw + PI; truckCam.pitch = -0.12; truckCam.idle = 9;
-  $('#drive').hidden = false; $('#truckName').textContent = t.T.name; $('#game').classList.add('driving');
+  player.truck = t; player.seat = seat; player.vx = player.vz = 0; truckCam.yaw = t.yaw + PI; truckCam.pitch = -0.12; truckCam.idle = 9;
+  $('#drive').hidden = false; $('#truckName').textContent = (t.owner !== 'me' && t.ownerName ? t.ownerName + "'s " : '') + t.T.name; $('#game').classList.add('driving');
+  $('#game').classList.toggle('riding', seat > 0);
   setTouchMode();
+  if (seat > 0) { $('#driveKeys').innerHTML = '<kbd>E</kbd> get out'; $('#cargoTxt').textContent = t.seats[seat].stand ? 'Hold on tight!' : 'Riding along'; sDoor(); return; }
   $('#driveKeys').innerHTML = t.kind === 'feller' ? '<kbd>F</kbd> claw <kbd>E</kbd> get out' : t.kind === 'forwarder' ? '<kbd>F</kbd> crane <kbd>T</kbd> tip <kbd>E</kbd> out' : '<kbd>E</kbd> get out <kbd>T</kbd> tip bed <kbd>H</kbd> horn';
   if (t.kind === 'feller') hint('drivefeller', 'Drive the claw up to a tree and press <kbd>F</kbd>. It grabs, saws and lays the tree down.');
   if (t.kind === 'forwarder') hint('driveforw', 'Park next to logs and press <kbd>F</kbd>: the crane loads them. Tip the bunk at Riverside Timber with <kbd>T</kbd>.');
-  hint('drive', coarse ? 'Push the stick to steer. <kbd>Chop</kbd> drives, <kbd>Grab</kbd> brakes and reverses. Tip the bed next to a belt to unload.' : '<kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to drive. <kbd>T</kbd> tips the bed to dump wood. <kbd>E</kbd> gets out.');
+  hint('drive', coarse ? 'Push the stick to steer. <kbd>Gas</kbd> drives, <kbd>Brake</kbd> brakes and reverses. Tip the bed next to a belt to unload.' : '<kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> to drive. <kbd>T</kbd> tips the bed to dump wood. <kbd>E</kbd> gets out. Friends can ride along.');
 }
-function exitTruck() {
-  const t = player.truck; if (!t) return;
+// a good spot beside a vehicle to step out to
+function exitSpot(t, side) {
   const c = Math.cos(t.yaw), s = Math.sin(t.yaw);
-  const spots = [[t.W / 2 + 0.9, t.zBedF + 0.6], [-t.W / 2 - 0.9, t.zBedF + 0.6], [0, t.zF + 1.4], [0, t.zBedB - 1.4]];
-  let ok = null;
+  const spots = side < 0 ? [[-t.W / 2 - 0.9, t.zBedF + 0.6], [t.W / 2 + 0.9, t.zBedF + 0.6], [0, t.zF + 1.4], [0, t.zBedB - 1.4]] : side > 1 ? [[0, t.zBedB - 1.4], [t.W / 2 + 0.9, t.zBedB + 0.6], [-t.W / 2 - 0.9, t.zBedB + 0.6]] : [[t.W / 2 + 0.9, t.zBedF + 0.6], [-t.W / 2 - 0.9, t.zBedF + 0.6], [0, t.zF + 1.4], [0, t.zBedB - 1.4]];
   for (const [lx, lz] of spots) {
     const x = t.pos.x + c * lx + s * lz, z = t.pos.z - s * lx + c * lz;
     if (deepAt(x, z, t.pos.y + 1, -0.95)) continue;
     let blocked = false; for (const cc of colsAt(x, z)) if (!cc.walk && circleBox(cc, x, z, PR) && cc.y + cc.hy > t.pos.y + 0.3) blocked = true;
-    if (!blocked) { ok = [x, z]; break; }
+    if (!blocked) return [x, z];
   }
-  if (!ok) ok = [t.pos.x + c * (t.W / 2 + 0.9), t.pos.z - s * (t.W / 2 + 0.9)];
-  player.truck = null; if (!NET.guest) t.speed = 0; else netAct({ t: 'exit' });
+  return [t.pos.x + c * (t.W / 2 + 0.9), t.pos.z - s * (t.W / 2 + 0.9)];
+}
+function exitTruck(quiet) {
+  const t = player.truck; if (!t) return;
+  const seat = player.seat || 0, st = t.seats[seat];
+  const ok = exitSpot(t, seat === 1 ? -1 : st && st.stand ? 2 : 1);
+  if (st && st.who === 'me') st.who = null;
+  if (NET.guest) netAct({ t: 'exit' }); else if (seat === 0) { t.speed = 0; t.input = null; }
+  player.truck = null; player.seat = 0;
   player.x = ok[0]; player.z = ok[1]; player.y = groundAt(ok[0], ok[1], t.pos.y + 1.5); player.vy = 0;
   player.yaw = t.yaw + PI; player.pitch = -0.1;
-  $('#drive').hidden = true; $('#game').classList.remove('driving'); setTouchMode(); sDoor();
+  $('#drive').hidden = true; $('#game').classList.remove('driving', 'riding'); setTouchMode(); if (!quiet) sDoor();
   engineOff();
+}
+// host: push whoever sits in seat k out of the vehicle
+function kickSeat(t, k, msg) {
+  const st = t.seats[k]; if (!st || !st.who) return;
+  if (st.who === 'me') { if (player.truck === t) { exitTruck(true); if (msg) toast(msg); } else st.who = null; return; }
+  const p = NET.peers.get(st.who); st.who = null;
+  if (p) { p.inTruck = -1; p.seat = 0; const sp = exitSpot(t, k === 1 ? -1 : t.seats[k].stand ? 2 : 1); netSend(p, { e: { t: 'out', x: r2(sp[0]), z: r2(sp[1]), msg: msg || '' } }); }
+}
+// a vehicle leaves the world (its owner went home): riders step out and its load stays where it is
+function removeTruck(t) {
+  for (let k = 0; k < t.seats.length; k++) if (t.seats[k].who) kickSeat(t, k, 'That vehicle went home with its owner.');
+  if (player.truck === t) exitTruck(true);
+  while (t.cargo.length) detachCargo(t.cargo[0]);
+  if (t.job && t.job.b) { t.job.b.crane = false; }
+  scene.remove(t.g);
+  t.g.traverse(o => { if (o.isMesh && o.geometry) o.geometry.dispose(); });
+  const k = KCOLS.indexOf(t.kc); if (k >= 0) KCOLS.splice(k, 1);
+  const i = trucks.indexOf(t); if (i >= 0) trucks.splice(i, 1);
 }
 const tCircle = [];
 function localInput() {
@@ -3290,8 +3556,9 @@ function driveTruck(t, dt, inp) {
   if (t.job) inp = null;
   let thr = inp ? inp.f : 0, steer = inp ? inp.s : 0;
   steer = clamp(steer, -1, 1);
-  if (thr > 0) t.speed += (t.speed < -0.3 ? 22 : T.acc * (1 - Math.max(0, t.speed) / T.speed)) * dt * thr;
-  else if (thr < 0) t.speed += (t.speed > 0.3 ? -22 : -T.acc * 0.6 * (1 + t.speed / 8)) * dt * -thr;
+  const vmax = T.speed * t.boost, acc = T.acc * t.boost;
+  if (thr > 0) t.speed += (t.speed < -0.3 ? 22 : acc * (1 - Math.max(0, t.speed) / vmax)) * dt * thr;
+  else if (thr < 0) t.speed += (t.speed > 0.3 ? -22 : -acc * 0.6 * (1 + t.speed / 8)) * dt * -thr;
   else t.speed -= Math.sign(t.speed) * Math.min(Math.abs(t.speed), 3.5 * dt);
   if (inp && inp.b) t.speed *= 1 - Math.min(1, 5 * dt);
   const slope = settleTruck(t, false, dt);
@@ -3328,11 +3595,36 @@ function driveTruck(t, dt, inp) {
   t.safeT -= dt; if (t.safeT <= 0 && !t.air && hAt(nx, nz) > 0.3) { t.safe.x = nx; t.safe.z = nz; t.safe.yaw = t.yaw; t.safeT = 1; }
   // flipped over a lot, or slid somewhere bad: cargo falls out
   if (upV2.y < 0.45 && t.cargo.length) while (t.cargo.length) detachCargo(t.cargo[0]);
+  loadWobble(t, dt);
+}
+// wobbly loads: hard braking, sharp turns and big bumps shake loose any wood piled above the bed walls
+function loadWobble(t, dt) {
+  const aLong = Math.abs(t.speed - t.lastSpeed) / Math.max(dt, 1e-3), aLat = Math.abs(t.speed * t.yawRate);
+  t.lastSpeed = t.speed;
+  if (!t.cargo.length || t.kind === 'feller') { t.wob = 0; return; }
+  let shake = Math.max(0, aLat - 5.5) / 5 + Math.max(0, aLong - 13) / 9 + (t.bump > 0.25 ? t.bump * 3 : 0);
+  t.bump = 0;
+  t.wob = Math.max(t.wob * Math.exp(-dt * 3), shake);
+  if (shake <= 0) return;
+  const k = STRAPS[t.straps || 0].k * (t.boost > 1 ? 0.6 : 1);
+  if (fr() > shake * dt * 2.2 * k) return;
+  const lim = t.T.floor + t.T.wall * 0.75;
+  let top = null; for (const b of t.cargo) if (b.cl && b.cl.p.y > lim && (!top || b.cl.p.y > top.cl.p.y)) top = b;
+  if (!top) return;
+  detachCargo(top);
+  const side = Math.sign(t.yawRate || 1);
+  top.v.x += Math.cos(t.yaw) * side * 2.2 - Math.sin(t.yaw) * (aLong > 13 ? Math.sign(t.lastSpeed) * 2 : 0); top.v.z += -Math.sin(t.yaw) * side * 2.2 - Math.cos(t.yaw) * (aLong > 13 ? Math.sign(t.lastSpeed) * 2 : 0); top.v.y += 1.6;
+  top.av.set((fr() - 0.5) * 3, (fr() - 0.5) * 3, (fr() - 0.5) * 3);
+  sThud(0.4);
+  const who = t.seats[0].who;
+  if (who === 'me') { toast('A log bounced off your truck! Drive gently or buy straps at Big Wheel Motors.'); hint('wobble', 'Wood piled above the bed walls can fall off on bumps, hard brakes and sharp turns. Straps help.'); }
+  else if (who && NET.host) { const p = NET.peers.get(who); if (p) netSend(p, { e: { t: 'msg', text: 'A log bounced off the truck! Drive gently or buy straps.' } }); }
 }
 function updateTrucks(dt) {
   for (const t of trucks) {
     if (NET.guest) { t.vel.set(0, 0, 0); syncTruck(t, dt); continue; }
-    const driving = player.truck === t, remote = !!t.driver;
+    const d0 = t.seats[0].who, driving = d0 === 'me' && player.truck === t, remote = !!(d0 && d0 !== 'me');
+    if (d0 !== t.lastDrv) { t.lastDrv = d0; const cl = d0 === 'me' ? S.cls : d0 && NET.peers.get(d0) ? NET.peers.get(d0).cls : ''; t.boost = cl === 'trucker' ? 1.2 : 1; if (!d0) t.input = null; }
     if (driving || remote || Math.abs(t.speed) > 0.05 || t.air) driveTruck(t, dt, driving ? (playing() ? localInput() : null) : remote ? t.input : null);
     else { t.vel.set(0, 0, 0); t.yawRate = 0; }
     if (HQ && (Math.abs(t.speed) > 0.5 || driving || remote) && ok('exh' + t.nid, 140)) { const c = Math.cos(t.yaw), s2 = Math.sin(t.yaw), ex = t.kind === 'feller' ? [t.W / 2 - 0.4, 3.2, -2.4] : [-(t.W / 2 - 0.2), 0.5, -t.L / 2]; emitSoft(t.pos.x + c * ex[0] + s2 * ex[2], t.pos.y + ex[1], t.pos.z - s2 * ex[0] + c * ex[2], -s2 * 0.5, 0.8, -c * 0.5, 2.2, 0.35, 1.6, 0x5a5856, 0.28, -0.1); }
@@ -3353,13 +3645,26 @@ function updateTrucks(dt) {
     else headLight.intensity = 0;
   }
 }
-function returnTruck(t) {
+function returnTruck(t, spot) {
   t = t || trucks[0]; if (!t) return;
   while (t.cargo.length) detachCargo(t.cargo[0]);
-  if (player.truck === t) exitTruck();
-  const spot = S.plot >= 0 ? { x: PLOTS[S.plot].x + 6, z: PLOTS[S.plot].z + (PLOTS[S.plot].z < 278 ? 10 : -10), yaw: 0 } : { x: SPAWN.x + 14, z: SPAWN.z + 4, yaw: PI / 2 };
-  t.pos.set(spot.x + trucks.indexOf(t) * 4, 0, spot.z); t.yaw = spot.yaw; t.speed = 0; t.vy = 0;
+  for (let k = 0; k < t.seats.length; k++) if (t.seats[k].who) kickSeat(t, k, '');
+  if (!spot) spot = S.plot >= 0 && t.owner === 'me' ? { x: PLOTS[S.plot].x + 6, z: PLOTS[S.plot].z + (PLOTS[S.plot].z < 278 ? 10 : -10), yaw: 0 } : { x: SPAWN.x + 14, z: SPAWN.z + 4, yaw: PI / 2 };
+  const p = freeParking(spot.x, spot.z, t);
+  t.pos.set(p[0], 0, p[1]); t.yaw = spot.yaw; t.speed = 0; t.vy = 0;
   settleTruck(t, true); syncTruck(t, 0);
+}
+// nearest place around (x, z) with no other vehicle parked on it
+function freeParking(x, z, self) {
+  for (let r = 0; r < 60; r += 4) for (let a = 0; a < (r ? 8 : 1); a++) {
+    const px = x + Math.cos(a / 8 * TAU) * r, pz = z + Math.sin(a / 8 * TAU) * r;
+    if (deepAt(px, pz, 5, -0.5) || hAt(px, pz) < 0.3) continue;
+    let free = true; const gy = hAt(px, pz); for (const c of colsAt(px, pz)) if (!c.walk && c.y + c.hy > gy + 0.4 && circleBox(c, px, pz, 3)) { free = false; break; } if (!free) continue;
+    forTrees(px, pz, 4, i => { if (tState[i] !== 2 && Math.hypot(TX[i] - px, TZ[i] - pz) < treeR(i) + 2.6) free = false; }); if (!free) continue;
+    for (const o of trucks) if (o !== self && Math.hypot(o.pos.x - px, o.pos.z - pz) < (o.L / 2 + 4)) { free = false; break; }
+    if (free) return [px, pz];
+  }
+  return [x, z];
 }
 
 /* ================= ferry ================= */
@@ -3419,7 +3724,7 @@ addInter(FERRY.booth.x, FERRY.booth.z, 3.5, () => S.unlock.f ? 'You have a ferry
 
 /* ================= machine work: the feller claw and the forwarder crane ================= */
 function machineAction() {
-  const t = player.truck; if (!t) return;
+  const t = drv(); if (!t) return;
   if (NET.guest) { netAct({ t: 'mach', ti: t.nid }); return; }
   machineDo(t, 'me');
 }
@@ -3431,7 +3736,7 @@ function machineDo(t, who) {
     let best = -1, bd = 3.2;
     forTrees(px, pz, 4, i => { if (tState[i] !== 0 && tState[i] !== 1) return; const d = Math.hypot(TX[i] - px, TZ[i] - pz) - treeR(i); if (d < bd) { bd = d; best = i; } });
     if (best < 0) { if (who === 'me') toast('Drive the claw right up to a tree, then press F.'); return; }
-    const lv = FELLER_LV[S.fellerLv];
+    const lv = FELLER_LV[t.lv || 0];
     if (treeR(best) > lv.maxR) { if (who === 'me') toast('That trunk is too thick for your claw. Upgrade it at Big Wheel Motors.', true); sDeny(); return; }
     t.job = { kind: 'fell', i: best, t: 0, cut: lv.cut, who };
     t.speed = 0;
@@ -3498,10 +3803,10 @@ function updateJobs(dt) {
 }
 
 /* ================= selling ================= */
-function sellBody(b) {
-  const v = bodyValue(b), who = b.owner && b.owner !== 'me' && b.owner !== 'worker' && b.owner !== 'storm' ? b.owner : 'me';
+function sellBody(b, dest) {
+  const v = bodyValue(b), who = b.owner && b.owner !== 'me' && b.owner !== 'worker' && b.owner !== 'storm' && NET.peers.has(b.owner) ? b.owner : 'me';
   const label = SP[b.sp].name + ' ' + KINDN[kindOf(b)];
-  orderCredit(b, who);
+  orderCredit(b, who, dest);
   if (who === 'me') { S.money += v; S.earned += v; S.stats.sold++; floatText(b.p.x, b.p.y + 1, b.p.z, '+' + money(v), label); sCoin(v); }
   else floatText(b.p.x, b.p.y + 1, b.p.z, '+' + money(v), (peerName(who) || 'Friend') + ': ' + label);
   netEvent({ t: 'sold', id: b.id, v: Math.round(v), who, label, x: b.p.x, y: b.p.y, z: b.p.z });
@@ -3673,6 +3978,7 @@ const ghostOk = new THREE.MeshLambertMaterial({ color: 0x7fe07a, transparent: tr
 const ghostBad = new THREE.MeshLambertMaterial({ color: 0xff6a50, transparent: true, opacity: 0.55, depthWrite: false });
 function openBuild() {
   if (player.truck) return;
+  if (NET.guest) { toast('You are visiting. Building is for the land in your own world.'); return; }
   if (S.plot < 0) { toast('Buy a plot of land first. Look for the For Sale signs west of town.', true); return; }
   if (!nearMyPlot(8)) { toast('Go to your land to build.', true); return; }
   openShop('build');
@@ -3748,7 +4054,7 @@ const kindOf = b => b.k || 0;
 function bestTier() { let t = 0; for (const id of S.axes) t = Math.max(t, axeById(id).tier); for (const id of S.saws) { const w = sawById(id); if (w) t = Math.max(t, w.tier); } return t; }
 function availSpecies() {
   const t = bestTier(), out = [];
-  const reach = [1, 1, 1, S.unlock.n, S.unlock.e, S.unlock.f, 1, S.unlock.n || S.unlock.e];
+  const reach = [1, 1, 1, northOpen(), eastOpen(), S.unlock.f, 1, northOpen() || eastOpen()];
   SP.forEach((s, i) => { if (s.tier <= t && reach[i]) out.push(i); });
   return out.length ? out : [0];
 }
@@ -3774,19 +4080,22 @@ function ordersTick(dt) {
   }
   orderRefill -= dt;
   const reg = S.orders.filter(o => !o.daily).length;
-  if (reg < 3 && orderRefill <= 0 && S.stats.sold > 0) { S.orders.push(makeOrder(false)); orderRefill = 25; if (!S.seen.orders1) { S.seen.orders1 = 1; hint('orders', 'Townsfolk post orders on the Order Board by the fountain. Fill them for big bonuses.'); } }
+  if (reg < 3 && orderRefill <= 0 && S.stats.sold > 0) { const h = !S.orders.some(o => o.dest != null) && (S.stats.sold > 4 || S.stats.hauls) ? makeHaul() : null; S.orders.push(h || makeOrder(false)); orderRefill = 25; if (h) { toast('New haul job: bring ' + h.qty + ' ' + SP[h.sp].name + ' ' + KINDNS[h.kind] + ' to ' + h.who + '. Look for the green beam.'); hint('haul', 'Haul jobs pay big. Load your truck, drive to the yard with the green beam and dump the wood inside the ring before time runs out.'); } if (!S.seen.orders1) { S.seen.orders1 = 1; hint('orders', 'Townsfolk post orders on the Order Board by the fountain. Fill them for big bonuses.'); } }
   if (S.daily.day !== today() && S.stats.sold > 0) { const o = makeOrder(true); o.dayKey = today(); S.orders.unshift(o); S.daily.day = today(); S.daily.done = 0; }
 }
 // called for every piece sold; returns a short note when it counts toward an order
-function orderCredit(b, who) {
+function orderCredit(b, who, dest) {
   const kind = kindOf(b);
   for (const o of S.orders) {
     if (o.sp !== b.sp || o.kind !== kind || o.have >= o.qty) continue;
+    if ((o.dest != null) !== (dest != null) || (dest != null && o.dest !== dest)) continue;
     o.have++;
     if (o.have >= o.qty) {
-      S.money += o.reward; S.earned += o.reward; S.stats.contracts++;
+      // the bonus goes to whoever delivered the last piece
+      const msg = (o.dest != null ? 'Haul job' : o.daily ? 'Daily order' : 'Order') + ' done for ' + o.who + '! Bonus ' + money(o.reward) + (o.gems ? ' and ' + o.gems + ' gem' + (o.gems > 1 ? 's' : '') : '');
+      if (who && who !== 'me' && NET.host) { const p = NET.peers.get(who); if (p) netSend(p, { e: { t: 'bonus', v: o.reward, gems: o.gems || 0, haul: o.dest != null ? 1 : 0, text: msg } }); S.stats.contracts++; }
+      else { S.money += o.reward; S.earned += o.reward; S.stats.contracts++; if (o.dest != null) S.stats.hauls++; if (o.gems) addGems(o.gems); setTimeout(() => { if (!alive) return; floatText(b.p.x, b.p.y + 2.2, b.p.z, 'Done +' + money(o.reward), o.who); sBuy(); toast(msg); }, 400); }
       if (o.daily) S.daily.done = 1;
-      setTimeout(() => { if (!alive) return; floatText(b.p.x, b.p.y + 2.2, b.p.z, 'Order done +' + money(o.reward), o.who); sBuy(); toast((o.daily ? 'Daily order' : 'Order') + ' filled for ' + o.who + '! Bonus ' + money(o.reward)); }, 400);
       S.orders.splice(S.orders.indexOf(o), 1); orderRefill = Math.min(orderRefill, 12);
     }
     return true;
@@ -3802,8 +4111,9 @@ function dailyBonus() {
   S.daily.streak = S.daily.last === yesterday() ? (S.daily.streak || 0) + 1 : 1;
   S.daily.last = t;
   const bonus = Math.round((80 + 40 * Math.min(7, S.daily.streak)) * (1 + Math.min(4, S.earned / 20000)) / 5) * 5;
-  S.money += bonus; S.earned += bonus;
-  setTimeout(() => { if (!alive) return; toast('Daily bonus: ' + money(bonus) + '! Day ' + S.daily.streak + ' in a row.'); sBuy(); }, 1500);
+  const gems = S.daily.streak % 7 === 0 ? 5 : 1;
+  S.money += bonus; S.earned += bonus; S.gems += gems;
+  setTimeout(() => { if (!alive) return; toast('Daily reward: ' + money(bonus) + ' and ' + gems + ' gem' + (gems > 1 ? 's' : '') + '! Day ' + S.daily.streak + ' in a row.'); sBuy(); }, 1500);
 }
 // the order board in town
 (function buildOrderBoard() {
@@ -3837,7 +4147,7 @@ const ACH = [
   ['east', 'Into the Murk', 'Open the East Bridge', () => !!S.unlock.e],
   ['ferry', 'All Aboard', 'Buy a ferry pass', () => !!S.unlock.f],
   ['saw', 'Rev It Up', 'Buy a chainsaw', () => S.saws.length > 0],
-  ['allaxes', 'Collector', 'Own every axe', () => S.axes.length >= AXES.length],
+  ['allaxes', 'Collector', 'Own every axe', () => AXES.every(a => S.axes.includes(a.id))],
   ['orders5', 'Reliable', 'Fill 5 orders', () => S.stats.contracts >= 5],
   ['streak3', 'Regular', 'Play 3 days in a row', () => (S.daily.streak || 0) >= 3],
   ['worker', 'The Boss', 'Hire a worker', () => S.workers.logger + S.workers.seller > 0],
@@ -3846,6 +4156,12 @@ const ACH = [
   ['giant', 'Giant Slayer', 'Fell a giant tree', () => S.stats.giants >= 1],
   ['storm', 'Storm Chaser', 'Be out in a storm', () => S.stats.storms >= 1],
   ['online', 'Better Together', 'Play online with a friend', null],
+  ['builder', 'Bridge Builder', 'Help rebuild a broken bridge', null],
+  ['goose', 'Goose Chaser', 'Get your stuff back from the goose', null],
+  ['haul', 'Long Haul', 'Finish a haul job', () => S.stats.hauls >= 1],
+  ['class', 'Specialist', 'Pick a class at the Gem Stump', () => !!S.cls],
+  ['packer', 'Pack Mule', 'Carry 5 pieces on your back at once', () => S.pack.length >= 5],
+  ['ride', 'Road Trip', 'Ride along in a friend\'s vehicle', null],
 ];
 function unlock(id) {
   if (S.ach[id]) return; const a = ACH.find(x => x[0] === id); if (!a) return;
@@ -3853,9 +4169,13 @@ function unlock(id) {
   const e = $('#award'); e.innerHTML = '<b>Award unlocked</b>' + a[1] + '<small>' + a[2] + '</small>'; e.classList.add('on'); clearTimeout(unlock.t); unlock.t = setTimeout(() => e.classList.remove('on'), 3600);
 }
 let achT = 0;
-function achTick(dt) { achT -= dt; if (achT > 0) return; achT = 1.5; for (const a of ACH) if (!S.ach[a[0]] && a[3] && a[3]()) { unlock(a[0]); break; } }
+function achTick(dt) { achT -= dt; if (achT > 0) return; achT = 1.5; if (S.stats.sold && S.daily.last !== today()) dailyBonus(); for (const a of ACH) if (!S.ach[a[0]] && a[3] && a[3]()) { unlock(a[0]); break; } }
 function onTreeFelled(i) {
-  if (TSP[i] === 5 && treeFeller[i] === 'me') unlock('glow');
+  const w = treeFeller[i];
+  if (TSP[i] === 5 && w === 'me') unlock('glow');
+  // gems for whoever felled it
+  if (w === 'me') spawnGems(TX[i], TZ[i], gemRoll(i));
+  else if (w && NET.host && NET.peers.get(w)) { const p = NET.peers.get(w); const n = tGiant[i] ? 6 : fr() < 0.3 + 0.07 * (p.luck || 0) ? 1 : 0; if (n) netSend(p, { e: { t: 'gem', x: r2(TX[i]), z: r2(TZ[i]), n } }); }
   if (tGiant[i]) endGiant(true, i);
 }
 
@@ -4041,10 +4361,368 @@ function benchTick(it, dt) {
     tmpQ.setFromAxisAngle(UPV, ry + PI / 2);
     const len = R.id === 'beam' ? clamp(it.stockL[sp], 1.5, 5) : 1;
     const b = makeBody(R.id === 'beam' ? { k: 2, sp: +sp, len, pw: 0.34, pt: 0.34, x: wx, y: it.y + 1.4, z: wz, q: tmpQ } : { k: 3, sp: +sp, len: 1, pw: 0.95, pt: 0.85, x: wx, y: it.y + 1.4, z: wz, q: tmpQ });
-    if (b) { b.val = Math.round(v); b.owner = 'me'; S.stats.crafted++; sBuild(); netBodyAdd(b); if (!S.seen.craft1) { S.seen.craft1 = 1; hint('craft', 'Crafted! Beams and furniture crates sell for a lot more than planks. Sell them at Riverside Timber.'); } }
+    if (b) { b.val = Math.round(v); b.owner = 'me'; S.stats.crafted++; sBuild(); if (!S.seen.craft1) { S.seen.craft1 = 1; hint('craft', 'Crafted! Beams and furniture crates sell for a lot more than planks. Sell them at Riverside Timber.'); } }
     break;
   }
 }
+
+/* ================= broken bridges you rebuild with planks ================= */
+const FIXB = {};
+function redrawSign(so) { so.g.clearRect(0, 0, so.cv.width, so.cv.height); so.draw(so.g, so.cv.width, so.cv.height); so.tex.needsUpdate = true; }
+(function buildBrokenBridges() {
+  for (const f of FIX) {
+    const A = f.axis === 'z' ? { x: f.x, z: f.z + 21 } : { x: f.x - 21, z: f.z }, B = f.axis === 'z' ? { x: f.x, z: f.z - 21 } : { x: f.x + 21, z: f.z };
+    const len = Math.hypot(B.x - A.x, B.z - A.z), ry = Math.atan2(B.x - A.x, B.z - A.z), mx = (A.x + B.x) / 2, mz = (A.z + B.z) / 2;
+    const yA = Math.max(hAt(A.x, A.z), 2.2), yB = Math.max(hAt(B.x, B.z), 2.2), rx = -Math.atan2(yB - yA, len);
+    const M = townMB, fx = Math.sin(ry), fz = Math.cos(ry);
+    const P = t => [lerp(A.x, B.x, t), lerp(A.z, B.z, t), lerp(yA, yB, t)];
+    // the two ends still stand; the middle third is gone
+    const seg = (t0, t1, mb) => { const [x0, z0, y0] = P(t0), [x1, z1, y1] = P(t1); const l = len * (t1 - t0); mb.box((x0 + x1) / 2, (y0 + y1) / 2 - 0.25, (z0 + z1) / 2, 8, 0.5, l, 0x7a5a3a, ry, rx, 0, 0.04); for (let i = 0; i < l; i += 1.2) { const [px, pz, py] = P(t0 + (i + 0.6) / len); mb.box(px, py + 0.02, pz, 7.6, 0.06, 1.0, i % 2.4 < 1.2 ? 0x8a6a48 : 0x7a5a3a, ry); } for (const s of [-1, 1]) { const ox = (x0 + x1) / 2 + fz * s * 3.9, oz = (z0 + z1) / 2 - fx * s * 3.9; mb.box(ox, (y0 + y1) / 2 + 0.6, oz, 0.18, 0.18, l, 0x5a3e28, ry, rx); for (let i = 0; i <= l; i += 3) { const [px, pz, py] = P(t0 + i / len); mb.box(px + fz * s * 3.9, py + 0.35, pz - fx * s * 3.9, 0.22, 0.9, 0.22, 0x4a2f1c, ry); } } };
+    seg(0, 0.36, M); seg(0.64, 1, M);
+    const mid = new MB(); seg(0.355, 0.645, mid);
+    const midMesh = mid.mesh(); midMesh.visible = false; scene.add(midMesh);
+    // broken planks hanging into the river and old pillars
+    for (const t of [0.37, 0.4, 0.6, 0.63]) { const [px, pz, py] = P(t); M.box(px + fz * (t < 0.5 ? 1.5 : -2), py - 1.2, pz - fx * (t < 0.5 ? 1.5 : -2), 2.6, 0.08, 0.9, 0x6a4a2c, ry + 0.5, t < 0.5 ? -0.9 : 0.9); }
+    for (const t of [0.2, 0.5, 0.8]) { const [px, pz, py] = P(t); for (const s of [-1, 1]) M.cyl(px + fz * s * 3, (py - 6) / 2 - (t === 0.5 ? 1.2 : 0), pz - fx * s * 3, 0.45, py + 6 - (t === 0.5 ? 2.4 : 0), 0x6a5a48, 8); }
+    for (const [t0, t1] of [[0, 0.36], [0.64, 1]]) { const [x0, z0, y0] = P(t0), [x1, z1, y1] = P(t1); addCol((x0 + x1) / 2, (y0 + y1) / 2 - 0.25, (z0 + z1) / 2, 4, 0.25, len * (t1 - t0) / 2 + (t0 ? 0.5 : 1), ry, rx, { walk: true }); for (const s of [-1, 1]) addCol((x0 + x1) / 2 + fz * s * 3.9, (y0 + y1) / 2 + 0.6, (z0 + z1) / 2 - fx * s * 3.9, 0.15, 0.9, len * (t1 - t0) / 2, ry, rx); }
+    // the repair spot: drop planks on the pallet
+    const zx = A.x - fx * 7, zz = A.z - fz * 7, zy = hAt(zx, zz);
+    M.box(zx, zy + 0.08, zz, 4.6, 0.16, 4.6, 0x8a6240, ry).box(zx, zy + 0.2, zz, 4.2, 0.08, 4.2, 0xb08a5a, ry);
+    for (const s of [-1, 1]) M.box(zx + fz * s * 2.6, zy + 0.5, zz - fx * s * 2.6, 0.16, 1, 0.16, 0x5a3e28, ry);
+    const pile = new THREE.Group(); pile.position.set(zx, zy + 0.25, zz); pile.rotation.y = ry; scene.add(pile);
+    const sx = zx + fz * 4.2, sz = zz - fx * 4.2, sy = hAt(sx, sz);
+    M.box(sx - fx * 0.0, sy + 1.2, sz, 0.18, 2.4, 0.18, 0x5a3e28, ry);
+    const tex = signTex(512, 256, (g, w, h) => {
+      const n = Math.min(S.repair[f.key] || 0, f.need), done = n >= f.need;
+      board(f.title, done ? 'Fixed! Thanks for the planks' : 'Broken. Bring ' + (f.need - n) + ' more plank' + (f.need - n === 1 ? '' : 's'), done ? '#2d5a2a' : '#7a4a22', '#fff1d0', '#ffd25a')(g, w, h * 0.72);
+      g.fillStyle = '#241a10'; g.fillRect(24, h * 0.78, w - 48, h * 0.14); g.fillStyle = done ? '#7fe07a' : '#ffd25a'; g.fillRect(28, h * 0.78 + 4, (w - 56) * n / f.need, h * 0.14 - 8);
+    });
+    const so = signs[signs.length - 1];
+    signMesh(tex, 2.4, 1.2, sx, sy + 2.6, sz, ry + PI); signMesh(tex, 2.4, 1.2, sx, sy + 2.6, sz, ry);
+    const [cx, cz, cy] = P(0.5);
+    FIXB[f.key] = { f, mid: midMesh, col: null, zone: { x: zx, z: zz, r: 3.2 }, so, pile, done: false, colArgs: [cx, cy - 0.25, cz, 4, 0.25, len * 0.15 + 0.6, ry, rx], A };
+    addInter(zx, zz, 4.5, () => FIXB[f.key].done ? null : 'Drop planks on the pallet to fix the ' + f.title + ' (' + Math.min(S.repair[f.key] || 0, f.need) + ' of ' + f.need + ')', () => toast('Planks come out of a sawmill. Drag or carry them onto the pallet.'), { key: 'fix' + f.key });
+  }
+})();
+const PILE_G = new THREE.BoxGeometry(2.2, 0.1, 0.3);
+function setFixed(key, on) {
+  const fb = FIXB[key]; if (!fb) return;
+  fb.done = on; fb.mid.visible = on;
+  if (on && !fb.col) fb.col = addCol(...fb.colArgs, { walk: true });
+  if (!on && fb.col) { removeCol(fb.col); fb.col = null; }
+  refreshPile(key); redrawSign(fb.so);
+}
+function refreshPile(key) {
+  const fb = FIXB[key], n = fb.done ? 0 : Math.min(S.repair[key] || 0, fb.f.need);
+  while (fb.pile.children.length > n) fb.pile.remove(fb.pile.children[fb.pile.children.length - 1]);
+  while (fb.pile.children.length < n) { const i = fb.pile.children.length, m = new THREE.Mesh(PILE_G, vmat('plank', 0xc8a070)); m.position.set(((i % 6) - 2.5) * 0.36, Math.floor(i / 6) * 0.12, 0); m.rotation.y = PI / 2 + (i % 3 - 1) * 0.05; fb.pile.add(m); }
+}
+// host: planks dropped on a pallet go into the bridge
+function repairTick() {
+  for (const key in FIXB) {
+    const fb = FIXB[key]; if (fb.done) continue;
+    const z = fb.zone;
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const b = bodies[i]; if (b.cargo || b === held || b.heldBy || b.crane || (b.k !== 1 && b.k !== 2)) continue;
+      if (Math.abs(b.p.x - z.x) > z.r || Math.abs(b.p.z - z.z) > z.r || b.p.y > hAt(z.x, z.z) + 4) continue;
+      addRepair(key, b.k === 2 ? 2 : 1, b.owner, b.p);
+      removeBody(b);
+    }
+  }
+}
+function addRepair(key, n, who, at) {
+  const fb = FIXB[key]; if (!fb || fb.done) return;
+  S.repair[key] = Math.min(fb.f.need, (S.repair[key] || 0) + n);
+  refreshPile(key); redrawSign(fb.so); sThud(0.25);
+  if (at) floatText(at.x, at.y + 1, at.z, S.repair[key] + ' / ' + fb.f.need, fb.f.title);
+  netEvent({ t: 'repair', key, n: S.repair[key] });
+  if (S.repair[key] >= fb.f.need) {
+    setFixed(key, true); sBuy();
+    toast('The ' + fb.f.title + ' is fixed! Everyone gets 3 gems.'); addGems(3); unlock('builder');
+    netEvent({ t: 'fixed', key });
+  }
+}
+// a route counts as open when its toll bridge is paid or its old bridge is rebuilt
+const northOpen = () => !!S.unlock.n || !!(FIXB.fw && FIXB.fw.done), eastOpen = () => !!S.unlock.e || !!(FIXB.fe && FIXB.fe.done);
+
+/* ================= haul jobs: deliver a load to a yard across the map before time runs out ================= */
+const DESTY = [];
+(function buildYards() {
+  for (const d of DESTS) {
+    const y = hAt(d.x, d.z), M = townMB;
+    M.box(d.x, y + 0.06, d.z, 14, 0.12, 14, 0x8a7a62);
+    for (let i = -6; i <= 6; i += 3) for (const s of [-1, 1]) { M.box(d.x + i, y + 0.6, d.z + s * 7, 0.2, 1.2, 0.2, 0x5a3e28); M.box(d.x + s * 7, y + 0.6, d.z + i, 0.2, 1.2, 0.2, 0x5a3e28); }
+    for (const s of [-1, 1]) { M.box(d.x, y + 0.9, d.z + s * 7, 14, 0.12, 0.1, 0x8a6240); M.box(d.x + s * 7, y + 0.9, d.z + 3.5, 0.1, 0.12, 7, 0x8a6240); }
+    // a little shed and a crane post so the yard reads from far away
+    M.box(d.x - 9.5, y + 1.5, d.z - 4, 4, 3, 4, 0x9a6a42).box(d.x - 9.5, y + 3.2, d.z - 4, 4.6, 0.3, 4.6, 0x4a5a3a);
+    addCol(d.x - 9.5, y + 1.5, d.z - 4, 2, 1.6, 2, 0, 0);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(5.2, 5.8, 40), new THREE.MeshBasicMaterial({ color: 0xffd25a, transparent: true, opacity: 0.55, depthWrite: false, fog: false }));
+    ring.rotation.x = -PI / 2; ring.position.set(d.x, y + 0.16, d.z); scene.add(ring);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 70, 10, 1, true), new THREE.MeshBasicMaterial({ color: 0x9fe08a, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false }));
+    beam.position.set(d.x, y + 35, d.z); beam.visible = false; scene.add(beam);
+    const tex = signTex(512, 160, board(d.name, 'Haul jobs drop off here', '#3d5a2a', '#fff1d0', '#ffd25a'));
+    signMesh(tex, 3.2, 1.0, d.x - 9.5, y + 4.1, d.z - 1.68, 0);
+    DESTY.push({ d, y, ring, beam });
+  }
+})();
+function destOpen(d) { return !d.need || (d.need === 'n' ? northOpen() : d.need === 'e' ? eastOpen() : true); }
+function makeHaul() {
+  const open = DESTS.map((d, i) => i).filter(i => destOpen(DESTS[i]) && !S.orders.some(o => o.dest === i));
+  if (!open.length) return null;
+  const di = open[Math.floor(fr() * open.length)], d = DESTS[di];
+  // wood that grows near the yard or on the way there
+  const near = di === 0 ? [0, 2, 6] : di === 1 ? [3, 3, 0] : [4, 0, 1];
+  const av = availSpecies(), pick = near.filter(sp => av.includes(sp)), sp = (pick.length ? pick : av)[Math.floor(fr() * (pick.length || av.length))];
+  const kind = hasMill() && fr() < 0.35 ? 1 : 0;
+  const qty = kind ? 6 + (fr() * 6 | 0) : 3 + (fr() * 4 | 0);
+  const unit = [2.0, 0.6][kind] * SP[sp].price * [1, PLANK_MUL][kind];
+  const reward = Math.max(60, Math.round(unit * qty * (1.4 + di * 0.5) / 5) * 5);
+  return { id: S.orderSeq++, who: d.name, sp, kind, qty, have: 0, reward, time: (420 + fr() * 300) | 0, daily: false, dest: di, gems: 1 + di };
+}
+// host: wood dropped inside a yard counts toward that yard's job and is paid for on the spot
+function haulTick() {
+  for (let di = 0; di < DESTY.length; di++) {
+    const Y = DESTY[di], job = S.orders.find(o => o.dest === di);
+    Y.beam.visible = !!job; Y.ring.visible = !!job;
+    if (job) Y.beam.material.opacity = 0.12 + Math.sin(clock * 3) * 0.04;
+    if (!job || NET.guest) continue;
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const b = bodies[i]; if (b.cargo || b === held || b.heldBy || b.crane) continue;
+      if (Math.abs(b.p.x - Y.d.x) > 6.5 || Math.abs(b.p.z - Y.d.z) > 6.5 || b.p.y > Y.y + 5) continue;
+      if (b.sp !== job.sp || kindOf(b) !== job.kind) { if (!b.wrongT || clock - b.wrongT > 6) { b.wrongT = clock; floatText(b.p.x, b.p.y + 1, b.p.z, 'Wrong wood', 'They want ' + SP[job.sp].name + ' ' + KINDNS[job.kind]); } continue; }
+      sellBody(b, di);
+      if (job.have >= job.qty || !S.orders.includes(job)) break;
+    }
+  }
+}
+
+/* ================= gems ================= */
+const GEMS = [], GEM_G = new THREE.OctahedronGeometry(0.2, 0), GEM_M = new THREE.MeshStandardMaterial({ color: 0x5ff0d0, emissive: 0x2fd8b8, emissiveIntensity: 0.9, roughness: 0.2, metalness: 0.3 });
+function spawnGems(x, z, n) {
+  for (let k = 0; k < n; k++) {
+    if (GEMS.length >= 24) { const o = GEMS.shift(); scene.remove(o.m); }
+    const a = fr() * TAU, r = 1.2 + fr() * 1.6, gx = x + Math.cos(a) * r, gz = z + Math.sin(a) * r;
+    const m = new THREE.Mesh(GEM_G, GEM_M); m.position.set(gx, hAt(gx, gz) + 0.5, gz); scene.add(m);
+    GEMS.push({ m, x: gx, z: gz, y: hAt(gx, gz), t: 0, ph: fr() * 6 });
+  }
+  if (n) { floatText(x, hAt(x, z) + 2, z, n > 1 ? n + ' gems!' : 'A gem!', 'Walk over it to pick it up'); sGem(); hint('gem', 'Gems drop from trees. Spend them at the Gem Stump by the fountain on classes and perks that last forever.'); }
+}
+// how many gems a tree you felled gives you
+function gemRoll(i) {
+  if (tGiant[i]) return 6;
+  let n = fr() < 0.3 + 0.07 * (S.perks.luck || 0) ? 1 : 0;
+  if (TSP[i] === 5 || TSP[i] === 7) n += fr() < 0.5 ? 1 : 0;
+  return n;
+}
+function updateGems(dt) {
+  for (let k = GEMS.length - 1; k >= 0; k--) {
+    const o = GEMS[k]; o.t += dt;
+    o.m.position.y = o.y + 0.55 + Math.sin(clock * 3 + o.ph) * 0.12; o.m.rotation.y += dt * 2.4;
+    const d = Math.hypot(player.x - o.x, player.z - o.z);
+    if (d < 1.9 && Math.abs(player.y - o.y) < 2.5 && !player.truck) { scene.remove(o.m); GEMS.splice(k, 1); addGems(1); sparkle(o.x, o.y + 0.6, o.z); continue; }
+    if (o.t > 180) { scene.remove(o.m); GEMS.splice(k, 1); }
+  }
+}
+function addGems(n) { S.gems += n; sGem(); const e = $('#gems'); if (e) { e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); } }
+function sparkle(x, y, z) { for (let i = 0; i < 6; i++) emitSoft(x, y, z, (fr() - 0.5) * 2, 1 + fr() * 2, (fr() - 0.5) * 2, 0.6, 0.14, 0.2, 0x7ff5df, 0.9, -0.5); }
+
+/* ================= carrying wood on your back ================= */
+const rackCap = () => RACKS[S.rack || 0].cap + (S.perks.back || 0) + (S.cls === 'hauler' ? 3 : 0);
+const packable = b => (b.k ? b.len <= 4.2 : b.len <= 3.1 && b.r <= 0.5);
+const itemOf = b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), Math.round(bodyValue(b) * 100) / 100];
+const itemValue = it => it[6] || bodyVol({ k: it[0], len: it[2], r: it[3], pw: it[4], pt: it[5] }) * SP[it[1]].price * (it[0] ? PLANK_MUL : 1);
+function packAction() {
+  if (!playing() || player.truck || build) return;
+  let b = held;
+  if (!b) { updateAim(); if (AIM.kind === 'body') b = AIM.b; }
+  if (b) { stowBody(b); return; }
+  if (S.pack.length) dropPack(); else toast('Aim at a short log or plank and press ' + (coarse ? 'Carry' : 'C') + ' to put it on your back.');
+}
+function stowBody(b) {
+  if (!packable(b)) { toast('Too big to carry on your back. Cut it shorter first.', true); sDeny(); return; }
+  if (S.pack.length >= rackCap()) { toast('Your back is full (' + rackCap() + ' pieces). Sell at Riverside Timber or buy a bigger rack at Ridgeline Tools.', true); sDeny(); return; }
+  if (b.heldBy && b !== held) { toast('A friend is holding that.'); return; }
+  if (held === b) { held = null; holdStrain = 0; }
+  if (NET.guest) { netAct({ t: 'stow', id: b.id }); return; }
+  if (b.cargo) detachCargo(b);
+  S.pack.push(itemOf(b)); removeBody(b); packChanged(); sGrab();
+}
+function dropPack() {
+  const it = S.pack.pop(); if (!it) return;
+  camera.getWorldDirection(camDir);
+  const x = player.x - Math.sin(player.yaw) * 1.3, z = player.z - Math.cos(player.yaw) * 1.3, y = player.y + 1.5;
+  if (NET.guest) netAct({ t: 'unpack', it, x: r2(x), y: r2(y), z: r2(z), yaw: r4(player.yaw) });
+  else { const b = makeBody({ k: it[0], sp: it[1], len: it[2], r: it[3], pw: it[4], pt: it[5], x, y, z, q: tmpQ.setFromAxisAngle(UPV, player.yaw + PI / 2), val: it[6], owner: 'me' }); if (!b) S.pack.push(it); }
+  packChanged(); sThud(0.2);
+}
+function packChanged() { setPackVis(man, S.pack.map(it => it[1])); refreshBar(); if (S.pack.length === 1) hint('pack', 'Wood on your back sells by itself when you walk into Riverside Timber. Press ' + (coarse ? 'Carry' : 'C') + ' with empty aim to drop the top piece.'); }
+// walking into the buyer's shed sells what is on your back, one piece at a time
+let packSellT = 0;
+function packSellTick(dt) {
+  if (!S.pack.length || player.truck) return;
+  const T = SELL.trig;
+  if (player.x < T.x0 - 3 || player.x > T.x1 + 9 || player.z < T.z0 - 5 || player.z > T.z1 + 5) return;
+  packSellT -= dt; if (packSellT > 0) return; packSellT = 0.18;
+  const it = S.pack.pop(), v = itemValue(it);
+  S.money += v; S.earned += v; S.stats.sold++;
+  floatText(player.x, player.y + 2.2, player.z, '+' + money(v), SP[it[1]].name + ' ' + KINDN[it[0] || 0]); sCoin(v);
+  if (NET.guest) netAct({ t: 'packSold', k: it[0], sp: it[1] }); else orderCredit({ k: it[0], sp: it[1], p: tmpV3.set(player.x, player.y, player.z).clone() }, 'me');
+  packChanged();
+  if (!S.seen.sold1) { S.seen.sold1 = 1; hint('sold', 'Sold! Spend your money at Ridgeline Tools in town for a better axe or a bigger back rack.'); }
+}
+
+/* ================= the goose: a cheeky local who steals small logs and hats ================= */
+const GOOSE = { x: -60, y: 0, z: 214, yaw: 0, st: 0, tx: -60, tz: 214, t: 0, wait: 0, carry: null, hat: null, cool: 30, flee: 0, honkT: 0, look: 0, home: { x: -62, z: 214, r: 70 }, tgt: null, tgtP: null, held: 0, vx: 0, vz: 0, n: { x: 0, z: 0, yaw: 0 } };
+GOOSE.y = hAt(GOOSE.x, GOOSE.z);
+const gooseG = (() => {
+  const g = new THREE.Group(), w = lam(0xf4f1ea), o = lam(0xf08a24), d = lam(0x2a2a2a);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 8), w); body.scale.set(0.85, 0.75, 1.35); body.position.y = 0.5; g.add(body);
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.3, 6), w); tail.rotation.x = -2.2; tail.position.set(0, 0.6, -0.45); g.add(tail);
+  const neck = new THREE.Group(); neck.position.set(0, 0.62, 0.32); g.add(neck);
+  const nm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.5, 8), w); nm.position.y = 0.22; nm.rotation.x = 0.25; neck.add(nm);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), w); head.position.set(0, 0.48, 0.1); neck.add(head);
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.17, 6), o); beak.rotation.x = PI / 2; beak.position.set(0, 0.46, 0.25); neck.add(beak);
+  for (const s of [-1, 1]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 4), d); e.position.set(s * 0.07, 0.52, 0.17); neck.add(e); }
+  const wings = [-1, 1].map(s => { const wg = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), w); wg.scale.set(0.3, 0.6, 1.1); wg.position.set(s * 0.27, 0.55, -0.02); g.add(wg); return wg; });
+  const legs = [-1, 1].map(s => { const p = new THREE.Group(); p.position.set(s * 0.1, 0.3, 0); g.add(p); const l = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.3, 5), o); l.position.y = -0.15; p.add(l); const f = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.14), o); f.position.set(0, -0.3, 0.04); p.add(f); return p; });
+  const hat = new THREE.Group(); hat.position.set(0, 0.42, 0.33); neck.add(hat); hat.visible = false;
+  const hc = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 6, 0, TAU, 0, PI * 0.55), lam(0x2e6b4a)); hc.rotation.x = PI / 2; hat.add(hc);
+  g.traverse(m => { if (m.isMesh) m.castShadow = HQ; });
+  g.scale.setScalar(1.15); scene.add(g);
+  return { g, neck, wings, legs, hat };
+})();
+const GST = ['walk', 'steal', 'run', 'hat', 'flee'];
+function gooseHome() { const a = fr() * TAU, r = fr() * GOOSE.home.r * 0.8; return [GOOSE.home.x + Math.cos(a) * r, GOOSE.home.z + Math.sin(a) * r]; }
+// everyone the goose might bother: [id, x, y, z, inTruck, hasHat]
+function goosePeople() {
+  const out = [['me', player.x, player.y, player.z, !!player.truck]];
+  for (const p of NET.peers.values()) out.push([p.id, p.x, p.y, p.z, p.inTruck != null && p.inTruck >= 0]);
+  return out;
+}
+function gooseRunFrom(px, pz) { const a = Math.atan2(GOOSE.x - px, GOOSE.z - pz) + (fr() - 0.5) * 1.2, d = 22 + fr() * 14; let tx = GOOSE.x + Math.sin(a) * d, tz = GOOSE.z + Math.cos(a) * d; if (Math.hypot(tx - GOOSE.home.x, tz - GOOSE.home.z) > GOOSE.home.r + 25 || hAt(tx, tz) < 0.4) { const h = gooseHome(); tx = h[0]; tz = h[1]; } GOOSE.tx = tx; GOOSE.tz = tz; }
+function gooseTick(dt) {
+  const G = GOOSE;
+  G.cool -= dt; G.t += dt; G.honkT -= dt;
+  const st = GST[G.st];
+  let speed = 0;
+  if (st === 'walk') {
+    G.wait -= dt;
+    if (G.wait <= 0 && Math.hypot(G.tx - G.x, G.tz - G.z) < 1) { const h = gooseHome(); G.tx = h[0]; G.tz = h[1]; G.wait = 1 + fr() * 4; }
+    speed = G.wait > 0 ? 0 : 1.8;
+    G.look -= dt;
+    if (G.look <= 0 && G.cool <= 0) {
+      G.look = 1;
+      // a small piece of wood nobody is watching?
+      let best = null, bd = 22;
+      for (const b of bodies) { if (b.cargo || b.crane || b.heldBy || b === held || b.len > 1.8 || (b.k === 0 && b.r > 0.4)) continue; const d = Math.hypot(b.p.x - G.x, b.p.z - G.z); if (d < bd && Math.hypot(b.p.x - G.home.x, b.p.z - G.home.z) < G.home.r + 15) { bd = d; best = b; } }
+      if (best && fr() < 0.6) { G.st = 1; G.tgt = best; gooseHonk(); }
+      else for (const q of goosePeople()) { if (q[4] || Math.hypot(q[1] - G.x, q[3] - G.z) > 5 || G.hatOf(q[0])) continue; if (fr() < 0.35) { G.st = 3; G.tgtP = q[0]; gooseHonk(); break; } }
+    }
+  } else if (st === 'steal') {
+    const b = G.tgt;
+    if (!b || b.gone || b.cargo || b.heldBy || b === held) { G.st = 0; G.tgt = null; }
+    else { G.tx = b.p.x; G.tz = b.p.z; speed = 3.6; if (Math.hypot(b.p.x - G.x, b.p.z - G.z) < 1.1) { G.carry = b; b.crane = true; b.sleep = false; G.st = 2; G.held = 0; const q = goosePeople().reduce((a, c) => Math.hypot(c[1] - G.x, c[3] - G.z) < Math.hypot(a[1] - G.x, a[3] - G.z) ? c : a); gooseRunFrom(q[1], q[3]); gooseHonk(); } }
+  } else if (st === 'hat') {
+    const q = goosePeople().find(c => c[0] === G.tgtP);
+    if (!q || q[4] || G.t > 30) { G.st = 0; G.tgtP = null; }
+    else { G.tx = q[1]; G.tz = q[3]; speed = 4.2; if (Math.hypot(q[1] - G.x, q[3] - G.z) < 1.2) { G.hat = q[0]; G.held = 0; G.st = 2; gooseRunFrom(q[1], q[3]); gooseHonk(); hatNews(q[0], true); } }
+  } else if (st === 'run') {
+    speed = 5.2; G.held += dt;
+    if (Math.hypot(G.tx - G.x, G.tz - G.z) < 1.2) { if (G.held > 14 || (!G.hat && G.held > 3)) gooseDrop(false); else { const q = goosePeople()[0]; gooseRunFrom(q[1], q[3]); } }
+    if (G.held > 45) gooseDrop(false);
+  } else if (st === 'flee') { speed = 6.5; G.flee -= dt; if (G.flee <= 0) { G.st = 0; const h = gooseHome(); G.tx = h[0]; G.tz = h[1]; } }
+  // walk toward the target, around trees and buildings
+  const dx = G.tx - G.x, dz = G.tz - G.z, d = Math.hypot(dx, dz);
+  if (speed > 0 && d > 0.3) {
+    const want = Math.atan2(dx, dz); let dy = want - G.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); G.yaw += dy * Math.min(1, dt * 7);
+    let nx = G.x + Math.sin(G.yaw) * speed * dt, nz = G.z + Math.cos(G.yaw) * speed * dt;
+    for (const c of colsAt(nx, nz)) { if (c.walk && colTop(c, nx, nz) < G.y + 0.6) continue; if (c.y + c.hy < G.y + 0.2 || c.y - c.hy > G.y + 1) continue; if (circleBox(c, nx, nz, 0.3)) { nx += PO.x; nz += PO.z; } }
+    forTrees(nx, nz, 2, i => { if (tState[i] === 2) return; const r = treeR(i) + 0.3, ex = nx - TX[i], ez = nz - TZ[i], e = Math.hypot(ex, ez); if (e < r && e > 1e-4) { nx = TX[i] + ex / e * r; nz = TZ[i] + ez / e * r; } });
+    if (hAt(nx, nz) > -0.4) { G.x = nx; G.z = nz; }
+    else { const h = gooseHome(); G.tx = h[0]; G.tz = h[1]; }
+  }
+  G.y = groundAt(G.x, G.z, G.y + 1);
+  G.speed = speed;
+  // whatever it carries rides in its beak
+  if (G.carry) { const b = G.carry; if (b.gone) G.carry = null; else { b.p.set(G.x + Math.sin(G.yaw) * 0.75, G.y + 0.75, G.z + Math.cos(G.yaw) * 0.75); b.q.setFromAxisAngle(UPV, G.yaw + PI / 2); qMat(b.q, b.R); b.v.set(0, 0, 0); b.av.set(0, 0, 0); } }
+}
+GOOSE.hatOf = id => GOOSE.hat === id;
+function gooseDrop(scared) {
+  const G = GOOSE;
+  if (G.carry) { const b = G.carry; b.crane = false; b.sleep = false; b.v.set(0, 1, 0); wakeB(b); G.carry = null; }
+  if (G.hat) { hatNews(G.hat, false); G.hat = null; }
+  G.st = scared ? 4 : 0; G.flee = 3; G.cool = scared ? 25 : 12; G.tgt = null; G.tgtP = null; G.t = 0;
+  if (!scared) { const h = gooseHome(); G.tx = h[0]; G.tz = h[1]; }
+}
+// someone bonked the goose: it drops everything and runs
+function scareGoose(who, px, pz) {
+  const G = GOOSE;
+  const had = !!(G.carry || G.hat);
+  gooseDrop(true); gooseRunFrom(px, pz); gooseHonk(true);
+  if (had) { if (who === 'me') unlock('goose'); else if (NET.host) { const p = NET.peers.get(who); if (p) netSend(p, { e: { t: 'award', id: 'goose' } }); } }
+}
+function hatNews(id, gone) {
+  if (id === 'me') { if (gone) toast('The goose stole your hat! Bonk it to get it back.', true); else toast('You got your hat back.'); }
+  else if (NET.host) { const p = NET.peers.get(id); if (p) netSend(p, { e: { t: 'msg', text: gone ? 'The goose stole your hat! Bonk it to get it back.' : 'You got your hat back.' } }); }
+}
+// your swing hits the goose if it is right in front of you
+function gooseHit() {
+  const G = NET.guest ? GOOSE.n : GOOSE, d = Math.hypot(G.x - player.x, G.z - player.z);
+  if (d > axeById(S.axe).reach + 0.4) return false;
+  camera.getWorldDirection(camDir);
+  const a = Math.atan2(G.x - player.x, G.z - player.z), f = Math.atan2(camDir.x, camDir.z); let da = a - f; da = Math.atan2(Math.sin(da), Math.cos(da));
+  if (Math.abs(da) > 0.7) return false;
+  if (NET.guest) netAct({ t: 'goose' }); else scareGoose('me', player.x, player.z);
+  floatText(G.x, (G.y || player.y) + 1.2, G.z, 'HONK!', '');
+  return true;
+}
+function gooseHonk(loud) {
+  const G = NET.guest ? GOOSE.n : GOOSE;
+  if (!A.ctx || Math.hypot(G.x - player.x, G.z - player.z) > 45) return;
+  if (!ok('honk', loud ? 200 : 900)) return;
+  const t = A.ctx.currentTime, v = loud ? 0.16 : 0.1;
+  tone(t, 'sawtooth', 520, 430, v, 0.16, 0.01); tone(t + 0.19, 'sawtooth', 500, 400, v, 0.2, 0.01);
+}
+// everyone draws the goose; guests follow the host's copy
+const GOOSE_N = { x: GOOSE.x, y: GOOSE.y, z: GOOSE.z, yaw: 0, st: 0, hat: null, carry: -1 };
+function drawGoose(dt) {
+  const G = NET.guest ? GOOSE.n : GOOSE, g = gooseG;
+  if (NET.guest) { const k = 1 - Math.exp(-dt * 10); g.g.position.x += (G.x - g.g.position.x) * k; g.g.position.z += (G.z - g.g.position.z) * k; g.g.position.y += (G.y - g.g.position.y) * k; let dy = G.yaw - g.g.rotation.y; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); g.g.rotation.y += dy * k; }
+  else { g.g.position.set(G.x, G.y, G.z); g.g.rotation.y = G.yaw; }
+  const st = GST[G.st] || 'walk', moving = NET.guest ? Math.hypot(G.x - g.g.position.x, G.z - g.g.position.z) > 0.03 : G.speed > 0.1, sp = st === 'run' || st === 'flee' ? 2.2 : st === 'walk' ? 1 : 1.6;
+  const ph = clock * 9 * sp;
+  g.legs[0].rotation.x = moving ? Math.sin(ph) * 0.6 : 0; g.legs[1].rotation.x = moving ? -Math.sin(ph) * 0.6 : 0;
+  g.g.rotation.z = moving ? Math.sin(ph) * 0.08 : 0;
+  const flap = st === 'flee' || st === 'run' ? Math.sin(clock * 22) * 0.7 : 0;
+  g.wings[0].rotation.z = flap; g.wings[1].rotation.z = -flap;
+  g.neck.rotation.x = st === 'steal' || st === 'hat' ? 0.7 : st === 'walk' && !moving ? Math.sin(clock * 1.3) * 0.3 + 0.3 : 0;
+  g.hat.visible = !!G.hat;
+  // the stolen hat is missing from its owner's head
+  const myHat = G.hat === (NET.guest ? NET.me : 'me');
+  if (man.hat) man.hat.visible = !myHat;
+  for (const p of NET.peers.values()) if (p.ch && p.ch.hat) p.ch.hat.visible = G.hat !== p.id;
+}
+
+/* ================= the Gem Stump: spend gems on classes and perks ================= */
+const GEMSTUMP = { x: -134, z: 174 };
+(function buildGemStump() {
+  const x = GEMSTUMP.x, z = GEMSTUMP.z, y = hAt(x, z);
+  const g = new THREE.Group(); g.position.set(x, y, z); scene.add(g);
+  const bark = pmat({ tex: 'bark', color: 0x7a5a40, rough: 0.9 }), top = pmat({ map: endTex, color: 0xd8b07a, rough: 0.8 });
+  const st = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.55, 1.1, 18), [bark, top, bark]); st.position.y = 0.55; st.castShadow = st.receiveShadow = HQ; g.add(st);
+  for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; const r = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.28, 1.3, 6), bark); r.position.set(Math.cos(a) * 1.5, 0.15, Math.sin(a) * 1.5); r.rotation.set(Math.sin(a) * 1.2, 0, -Math.cos(a) * 1.2); g.add(r); }
+  const cm = new THREE.MeshStandardMaterial({ color: 0x5ff0d0, emissive: 0x2fd8b8, emissiveIntensity: 0.8, roughness: 0.15, metalness: 0.2 });
+  for (const [cx, cz, s, ry] of [[0, 0, 1, 0], [0.45, 0.25, 0.6, 0.5], [-0.4, 0.3, 0.7, 1.1], [0.1, -0.5, 0.55, 2]]) { const c = new THREE.Mesh(GEM_G, cm); c.scale.set(s * 1.4, s * 2.6, s * 1.4); c.position.set(cx, 1.1 + s * 0.45, cz); c.rotation.y = ry; c.castShadow = HQ; g.add(c); }
+  GEMSTUMP.g = g; GEMSTUMP.m = cm;
+  addCol(x, y + 0.55, z, 1.3, 0.6, 1.3, 0, 0);
+  const tex = signTex(512, 160, board('Gem Stump', 'Classes and perks for gems', '#1f5a52', '#e8fff8', '#ffd25a'));
+  townMB.box(x + 1.9, y + 1.1, z + 0.9, 0.16, 2.2, 0.16, 0x5a3e28);
+  signMesh(tex, 2.0, 0.62, x + 1.9, y + 2.35, z + 0.98, 0); signMesh(tex, 2.0, 0.62, x + 1.9, y + 2.35, z + 0.82, PI);
+  addInter(x, z, 3.4, () => 'Spend gems at the Gem Stump (' + S.gems + ' gem' + (S.gems === 1 ? '' : 's') + ')', () => openShop('gems'), { key: 'gems' });
+})();
+
+// every town building is in: merge them into a few big meshes
+finishTown();
 
 /* ================= sound (all synthesised) ================= */
 let MUTED = false;
@@ -4092,10 +4770,11 @@ function sTool() { if (!ok('tool', 40)) return; tone(A.ctx.currentTime, 'square'
 function sThud(k) { if (!ok('thud', 150)) return; const t = A.ctx.currentTime; tone(t, 'sine', 90, 38, 0.5 * k + 0.1, 0.22); noiseB(t, 'lowpass', 700, 0.7, 0.3 * k + 0.05, 0.15); }
 function sTip() { if (!ok('tip', 300)) return; const t = A.ctx.currentTime; tone(t, 'sawtooth', 110, 85, 0.06, 0.8, 0.1); noiseB(t, 'lowpass', 400, 0.6, 0.12, 0.9); }
 function sDoor() { if (!ok('door', 150)) return; const t = A.ctx.currentTime; noiseB(t, 'bandpass', 900, 1, 0.25, 0.08); tone(t, 'sine', 210, 140, 0.18, 0.1); }
-function horn() { if (!player.truck) return; if (!ok('horn', 400)) return; const t = A.ctx.currentTime; tone(t, 'square', 330, 330, 0.07, 0.45, 0.02); tone(t, 'square', 415, 415, 0.06, 0.45, 0.02); }
+function horn() { if (!drv()) return; if (!ok('horn', 400)) return; const t = A.ctx.currentTime; tone(t, 'square', 330, 330, 0.07, 0.45, 0.02); tone(t, 'square', 415, 415, 0.06, 0.45, 0.02); }
 function sHorn() { if (!ok('fhorn', 800)) return; const t = A.ctx.currentTime; tone(t, 'sawtooth', 110, 108, 0.09, 1.2, 0.08); tone(t, 'sawtooth', 138, 136, 0.07, 1.2, 0.08); }
 function sBuy() { if (!ok('buy', 60)) return; const t = A.ctx.currentTime; [523, 659, 784, 1047].forEach((f, k) => tone(t + k * 0.06, 'triangle', f, f, 0.16, 0.14)); }
 function sCoin(v) { if (!ok('coin', 90)) return; const t = A.ctx.currentTime, n = clamp(Math.round(1 + Math.log10(1 + v)), 2, 6); for (let k = 0; k < n; k++) { tone(t + k * 0.06, 'square', 1500 + k * 120, 1500 + k * 120, 0.05, 0.07); tone(t + k * 0.06, 'sine', 2600, 2600, 0.06, 0.12); } }
+function sGem() { if (!ok('gem', 80)) return; const t = A.ctx.currentTime; [1320, 1760, 2350].forEach((f, k) => tone(t + k * 0.05, 'sine', f, f * 1.01, 0.09, 0.18)); }
 function sDeny() { if (!ok('deny', 120)) return; tone(A.ctx.currentTime, 'square', 160, 110, 0.1, 0.12); }
 function sSawIn(d) { if (!ok('sawin', 200)) return; const t = A.ctx.currentTime; noiseB(t, 'bandpass', 1600, 2, 0.4 * dk(d), 0.4, 900); }
 function sPlank(d) { if (!ok('plank', 120)) return; const t = A.ctx.currentTime; tone(t, 'triangle', 520, 300, 0.12 * dk(d), 0.06); noiseB(t, 'bandpass', 1300, 1.2, 0.15 * dk(d), 0.05); }
@@ -4143,9 +4822,15 @@ const svgClaw = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3" y="16" 
 const svgPerson = c => '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="11" r="6" fill="#e0a882" stroke="#0e0c09" stroke-width="2"/><path d="M9 36c0-10 5-15 11-15s11 5 11 15z" fill="#' + c.toString(16).padStart(6, '0') + '" stroke="#0e0c09" stroke-width="2"/></svg>';
 const svgBench = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="15" width="32" height="5" fill="#b08a5a" stroke="#0e0c09" stroke-width="2"/><path d="M8 20v14M32 20v14" stroke="#5a3e28" stroke-width="3"/><rect x="10" y="8" width="14" height="7" fill="#d8b07a" stroke="#0e0c09" stroke-width="1.5"/></svg>';
 const svgLand = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 30l8-16h16l8 16z" fill="#7cbb4e" stroke="#0e0c09" stroke-width="2" stroke-linejoin="round"/><path d="M20 8v14" stroke="#5a3e28" stroke-width="2.5"/><path d="M20 8h9l-2 3 2 3h-9" fill="#e5533d" stroke="#0e0c09" stroke-width="1.5"/></svg>';
+const svgGem = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4l12 12-12 20L8 16z" fill="#5ff0d0" stroke="#0e0c09" stroke-width="2.2" stroke-linejoin="round"/><path d="M8 16h24M20 4v32M14 16l6 20 6-20" stroke="#1d8f7a" stroke-width="1.4" fill="none"/></svg>';
+const svgFist = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="13" width="22" height="16" rx="4" fill="#e8b48a" stroke="#0e0c09" stroke-width="2"/><path d="M15 13v9M21 13v9M27 13v9M9 22h8" stroke="#a8754e" stroke-width="2"/><rect x="12" y="29" width="16" height="7" fill="#b8402e" stroke="#0e0c09" stroke-width="2"/></svg>';
+const svgLogs = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="22" width="30" height="8" rx="4" fill="#9a6a42" stroke="#0e0c09" stroke-width="2"/><rect x="8" y="12" width="26" height="8" rx="4" fill="#b8844e" stroke="#0e0c09" stroke-width="2"/><circle cx="31" cy="16" r="2.4" fill="#f0dcb0"/><circle cx="31" cy="26" r="2.4" fill="#f0dcb0"/><path d="M12 34L28 8" stroke="#3a2a18" stroke-width="2.4"/></svg>';
+const svgStrap = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="16" width="32" height="14" rx="3" fill="#b8844e" stroke="#0e0c09" stroke-width="2"/><path d="M14 10v26M26 10v26" stroke="#e5533d" stroke-width="4"/><rect x="11" y="20" width="6" height="6" fill="#c8ccd0" stroke="#0e0c09" stroke-width="1.5"/></svg>';
 function refreshBar() {
   const a = axeById(S.axe);
-  $('#s0').innerHTML = '<span class="k">1</span>' + svgAxe(a) + '<span class="n">Axe</span>';
+  $('#s0').innerHTML = '<span class="k">1</span>' + (a.fists ? svgFist : svgAxe(a)) + '<span class="n">' + (a.fists ? 'Fists' : 'Axe') + '</span>';
+  $('#gemN').textContent = S.gems;
+  const pk = $('#sPack'); pk.hidden = !S.pack.length; if (S.pack.length) pk.innerHTML = '<span class="k">C</span>' + svgLogs + '<span class="n">' + S.pack.length + '/' + rackCap() + '</span>';
   $('#s1').innerHTML = '<span class="k">2</span>' + svgHand + '<span class="n">Grab</span>';
   const inv = S.inv.mill1 + S.inv.mill2 + S.inv.mill3 + S.inv.belt + S.inv.shop1;
   const sw = sawById(S.saw);
@@ -4161,6 +4846,7 @@ $('#s0').addEventListener('click', () => { aInit(); if (S.tool === 0) cycleAxe()
 $('#s1').addEventListener('click', () => { aInit(); setTool(1); });
 $('#s2').addEventListener('click', () => { aInit(); openBuild(); });
 $('#s3').addEventListener('click', () => { aInit(); if (S.tool === 2) cycleSaw(); else setTool(2); });
+$('#sPack').addEventListener('click', () => { aInit(); packAction(); });
 let toastT = 0;
 function toast(t, bad) { const e = $('#toast'); e.textContent = t; e.classList.toggle('bad', !!bad); e.style.opacity = 1; toastT = 2.8; }
 const hintQ = []; let hintT = 0;
@@ -4170,9 +4856,11 @@ function setTouchMode() {
   if (!coarse) return;
   $('#touch').hidden = !playing();
   const c = $('#tChop'), g = $('#tGrab'), u = $('#tUse'), tp = $('#tTip'), j = $('#tJump');
+  tp.classList.remove('carry');
   if (build) { c.textContent = 'Place'; g.textContent = 'Turn'; u.textContent = 'Stop'; tp.hidden = true; j.hidden = true; g.hidden = false; }
-  else if (player.truck) { const kd = player.truck.kind; c.textContent = 'Gas'; g.textContent = 'Brake'; u.textContent = 'Exit'; tp.hidden = false; tp.textContent = kd === 'feller' ? 'Claw' : kd === 'forwarder' ? 'Crane' : 'Tip bed'; j.hidden = kd !== 'forwarder'; j.textContent = 'Tip'; g.hidden = false; tp.style.bottom = 'calc(180px + env(safe-area-inset-bottom,0px))'; tp.style.right = 'calc(116px + env(safe-area-inset-right,0px))'; }
-  else { c.textContent = S.tool === 1 ? 'Grab' : S.tool === 2 ? 'Saw' : 'Chop'; g.textContent = 'Grab'; g.hidden = S.tool === 1; u.textContent = 'Use'; tp.hidden = true; j.hidden = false; j.textContent = 'Jump'; }
+  else if (player.truck && !drv()) { c.hidden = true; g.hidden = true; u.textContent = 'Exit'; tp.hidden = true; j.hidden = true; }
+  else if (player.truck) { c.hidden = false; const kd = player.truck.kind; c.textContent = 'Gas'; g.textContent = 'Brake'; u.textContent = 'Exit'; tp.hidden = false; tp.textContent = kd === 'feller' ? 'Claw' : kd === 'forwarder' ? 'Crane' : 'Tip bed'; j.hidden = kd !== 'forwarder'; j.textContent = 'Tip'; g.hidden = false; tp.style.bottom = 'calc(180px + env(safe-area-inset-bottom,0px))'; tp.style.right = 'calc(116px + env(safe-area-inset-right,0px))'; }
+  else { tp.classList.add('carry'); c.hidden = false; c.textContent = S.tool === 1 ? 'Grab' : S.tool === 2 ? 'Saw' : S.axe === 'fists' ? 'Punch' : 'Chop'; g.textContent = 'Grab'; g.hidden = S.tool === 1; u.textContent = 'Use'; tp.hidden = false; tp.textContent = 'Carry'; tp.style.bottom = ''; tp.style.right = ''; j.hidden = false; j.textContent = 'Jump'; }
 }
 // prompts: the nearest thing you can use
 let curPrompt = null;
@@ -4192,8 +4880,12 @@ function findPrompt() {
   }
   for (const t of trucks) {
     const d = Math.hypot(px - t.pos.x, pz - t.pos.z);
-    if (d < t.L / 2 + 1.8 && d - 1 < bd) { best = { text: 'Drive the ' + t.T.name, act: () => enterTruck(t), key: 'e' }; bd = d - 1; }
+    if (d < t.L / 2 + 1.8 && d - 1 < bd) {
+      const k = seatHere(t), nm = (t.owner !== 'me' && t.ownerName ? t.ownerName + "'s " : 'the ') + t.T.name;
+      best = k < 0 ? { text: nm.charAt(0).toUpperCase() + nm.slice(1) + ' is full', act: () => toast('No free seats in that one.'), key: 'e' } : { text: seatName(t, k) + ' ' + nm, act: () => enterTruck(t, k), key: 'e' }; bd = d - 1;
+    }
   }
+  if (!best && held && packable(held)) best = { text: 'Carry it on your back (' + S.pack.length + '/' + rackCap() + ')', act: () => packAction(), key: 'c' };
   if (!best && S.tool === 1) { const it = aimItem(); if (it) best = { text: 'Pick up the ' + ITEMS[it.type].name, act: () => pickUpItem(it), key: 'x' }; }
   return best;
 }
@@ -4204,31 +4896,36 @@ const REGSUB = ['Oak and a little Maple', 'Birch', 'Maple', 'Snow Pine', 'Bogwoo
 let regNow = -1, regT = 0;
 function goalText() {
   const hasMillP = placed.some(p => p.type.startsWith('mill'));
-  if (!S.stats.trees) return 'Chop down a tree with your axe.';
-  if (!S.stats.sold) return 'Sell wood: drop it on the belt at Riverside Timber, east of town.';
+  if (!S.stats.trees) return S.axe === 'fists' ? 'Punch an oak tree until it falls. Yes, really.' : 'Chop down a tree with your axe.';
+  if (!S.stats.sold) return 'Cut the log, carry pieces on your back (' + (coarse ? 'Carry' : 'C') + ') and walk into Riverside Timber, east of town.';
+  if (!S.axes.includes('rusty')) return 'Buy the Rusty Hatchet at Ridgeline Tools (' + money(30) + '). Punching is slow!';
+  if (!S.rack) return 'Get a bigger back rack at Ridgeline Tools so you can carry more.';
   if (!S.axes.includes('steel')) return 'Buy the Steel Chopper at Ridgeline Tools (' + money(90) + ').';
   if (S.plot < 0) return 'Buy a plot of land west of town (' + money(PLOT_PRICE) + ').';
   if (!hasMill()) return 'Buy a sawmill at Bolt & Belt (' + money(350) + ').';
   if (!hasMillP) return 'Press B on your land to place your sawmill.';
   if (!S.stats.planks) return 'Feed a log into your sawmill to make planks.';
   if (!S.stats.contracts) return 'Fill an order from the Order Board by the fountain.';
-  if (!S.unlock.n) return 'Open the North Bridge (' + money(NORTH_TOLL) + ') to reach the Snow Pine.';
+  if (!S.cls) return S.gems >= CLASS_COST ? 'Pick a class at the Gem Stump by the fountain.' : 'Collect ' + CLASS_COST + ' gems from trees (' + S.gems + ' so far) to pick a class.';
+  if (!S.stats.hauls) return 'Finish a haul job: drive the wood to the yard with the green beam.';
+  if (!northOpen()) return 'Open the North Bridge (' + money(NORTH_TOLL) + ') or rebuild the Old Mill Bridge with planks.';
   if (!S.saws.length) return 'Buy the Buzz 30 Chainsaw at Ridgeline Tools (' + money(1200) + '). Hold to cut!';
   if (!hasShop()) return 'Buy a Woodshop Bench at Bolt & Belt and craft beams and furniture.';
-  if (!trucks.some(t => t.type === 'hauler')) return 'Get the Hauler XL truck at Big Wheel Motors (' + money(2500) + ').';
+  if (!S.ownT.includes('hauler')) return 'Get the Hauler XL truck at Big Wheel Motors (' + money(2500) + ').';
   if (!S.workers.logger) return 'Hire Logger Lou at Bolt & Belt to cut trees while you play.';
-  if (!S.unlock.e) return 'Open the East Bridge (' + money(EAST_TOLL) + ') to reach the Bogwood swamp.';
-  if (!trucks.some(t => t.type === 'forwarder')) return 'Buy the Big Bunk Forwarder (' + money(8000) + '): its crane loads logs for you.';
+  if (!eastOpen()) return 'Open the East Bridge (' + money(EAST_TOLL) + ') or rebuild Beaver Creek Bridge with planks.';
+  if (!S.ownT.includes('forwarder')) return 'Buy the Big Bunk Forwarder (' + money(8000) + '): its crane loads logs for you.';
   if (!S.unlock.f) return 'Buy a ferry pass at the swamp dock (' + money(FERRY_PASS) + ').';
-  if (!trucks.some(t => t.type === 'feller')) return 'Buy the Timber Claw Feller (' + money(18000) + ') and fell trees with a machine.';
+  if (!S.ownT.includes('feller')) return 'Buy the Timber Claw Feller (' + money(18000) + ') and fell trees with a machine.';
   if (!S.axes.includes('timber') && !S.saws.includes('saw3')) return 'Get a tool strong enough for Glowbark on Glimmer Isle.';
   if (!S.stats.giants) return 'Fell a giant tree. Watch for the light beam on the map.';
   if (!S.axes.includes('star')) return 'Save up for the Starsplitter, the best axe there is.';
   return 'You are a timber tycoon! Fill orders and collect every award.';
 }
-let lastMoney = -1;
+let lastMoney = -1, lastGems = -1;
 function uiTick() {
   if (S.money !== lastMoney) { lastMoney = S.money; $('#money').textContent = money(S.money); }
+  if (S.gems !== lastGems) { lastGems = S.gems; $('#gemN').textContent = S.gems; }
   // clock
   const hrs = (S.time * 24) % 24, hh = Math.floor(hrs), mm = Math.floor((hrs - hh) * 6) * 10;
   $('#clock').textContent = 'Day ' + S.day + ', ' + ((hh + 11) % 12 + 1) + ':' + String(mm).padStart(2, '0') + (hh < 12 ? ' am' : ' pm');
@@ -4305,6 +5002,8 @@ function fillShop() {
       const st = statBars([['Power', a.dmg / 34], ['Speed', (0.8 - a.swing) / 0.35], ['Reach', (a.reach - 2.8) / 1.5]]);
       L.append(row(svgAxe(a), a.name, a.desc + ' Cuts: ' + SP.filter(s => s.tier <= a.tier).map(s => s.name).join(', ') + '.', st, eq ? 'Equipped' : own ? 'Equip' : money(a.price), eq || own ? 'own' : can(a.price) ? '' : 'no', () => { if (own) { S.axe = a.id; S.tool = 0; equipAxe(); sTool(); fillShop(); } else buyAxe(a); }));
     }
+    sec('Back racks');
+    for (let i = 1; i < RACKS.length; i++) { const r = RACKS[i], own = S.rack >= i, next = S.rack === i - 1; L.append(row(svgLogs, r.name, 'Carry ' + (r.cap + (S.perks.back || 0) + (S.cls === 'hauler' ? 3 : 0)) + ' pieces of wood on your back. Walk into Riverside Timber and they sell themselves.', '', own ? 'Owned' : next ? money(r.price) : 'Locked', own ? 'own' : next && can(r.price) ? '' : 'no', () => { if (!own && next) buyRack(i); })); }
     sec('Chainsaws');
     for (const w of SAWS) {
       const own = S.saws.includes(w.id), eq = S.saw === w.id;
@@ -4324,18 +5023,32 @@ function fillShop() {
     for (const k of ['logger', 'seller']) { const w = WORKERS[k], n = S.workers[k], max = k === 'logger' ? 2 : 1, price = w.price * (1 + n); L.append(row(svgPerson(w.shirt), w.name + (n ? ' (hired' + (max > 1 ? ' x' + n : '') + ')' : ''), w.desc, '', n >= max ? 'Hired' : money(price), n >= max ? 'own' : can(price) ? '' : 'no', () => { if (n < max) buyWorker(k, price); })); }
     if (S.plot < 0) { const p = document.createElement('p'); p.className = 'tag'; p.style.cssText = 'font-size:12px;color:#cbbfa6;margin:4px 0 0'; p.textContent = 'You need your own land for sawmills, benches and workers. Plots are for sale west of town.'; L.append(p); }
   } else if (shopKind === 'motors') {
-    T.innerHTML = 'Big Wheel Motors<span class="sub">You have ' + money(S.money) + '</span>';
+    T.innerHTML = 'Big Wheel Motors<span class="sub">You have ' + money(S.money) + '. Vehicles are yours, even in a friend\'s world.</span>';
     sec('Trucks');
     for (const k of ['pickup', 'hauler']) {
-      const tr = TRUCKS[k], own = trucks.some(t => t.type === k);
-      L.append(row(svgTruck(tr.color), tr.name, k === 'pickup' ? 'Your trusty starter truck. Small bed, big heart.' : tr.desc, statBars([['Bed', tr.bedL / 6], ['Speed', tr.speed / 20]]), own ? 'Owned' : money(tr.price), own ? 'own' : can(tr.price) ? '' : 'no', () => { if (!own) buyTruck(k); }));
+      const tr = TRUCKS[k], own = S.ownT.includes(k);
+      L.append(row(svgTruck(tr.color), tr.name, k === 'pickup' ? 'Your trusty starter truck. Small bed, big heart. Seats 2, plus 2 standing in the back.' : tr.desc + ' Seats 2, plus 2 in the back.', statBars([['Bed', tr.bedL / 6], ['Speed', tr.speed / 20]]), own ? 'Owned' : money(tr.price), own ? 'own' : can(tr.price) ? '' : 'no', () => { if (!own) buyTruck(k); }));
     }
     sec('Forest machines');
     for (const k of ['forwarder', 'feller']) {
-      const tr = TRUCKS[k], own = trucks.some(t => t.type === k);
+      const tr = TRUCKS[k], own = S.ownT.includes(k);
       L.append(row(k === 'feller' ? svgClaw : svgTruck(tr.color), tr.name, tr.desc, k === 'forwarder' ? statBars([['Bunk', 1], ['Speed', tr.speed / 20]]) : statBars([['Trunk size', FELLER_LV[S.fellerLv].maxR / 1.3], ['Saw speed', 0.9 / FELLER_LV[S.fellerLv].cut]]), own ? 'Owned' : money(tr.price), own ? 'own' : can(tr.price) ? '' : 'no', () => { if (!own) buyTruck(k); }));
     }
     for (let i = 1; i < FELLER_LV.length; i++) { const u = FELLER_LV[i], own = S.fellerLv >= i, next = S.fellerLv === i - 1; L.append(row(svgClaw, u.name, 'The Timber Claw grabs trunks up to ' + (u.maxR * 2).toFixed(1) + ' m thick and saws in ' + u.cut + ' s.', '', own ? 'Owned' : next ? money(u.price) : 'Locked', own ? 'own' : next && can(u.price) ? '' : 'no', () => { if (!own && next) buyFeller(i); })); }
+    sec('Load straps');
+    for (let i = 1; i < STRAPS.length; i++) { const u = STRAPS[i], own = S.straps >= i, next = S.straps === i - 1; L.append(row(svgStrap, u.name, u.desc + ' Works on every vehicle you own.', '', own ? 'Owned' : next ? money(u.price) : 'Locked', own ? 'own' : next && can(u.price) ? '' : 'no', () => { if (!own && next) buyStraps(i); })); }
+  } else if (shopKind === 'gems') {
+    T.innerHTML = 'The Gem Stump<span class="sub">You have ' + S.gems + ' gem' + (S.gems === 1 ? '' : 's') + '. Gems drop from trees you fell.</span>';
+    sec('Class (pick one, switch any time)');
+    for (const k in CLASSES) {
+      const c = CLASSES[k], cur = S.cls === k, cost = S.cls ? CLASS_SWITCH : CLASS_COST;
+      L.append(row(svgPerson(c.color), c.name, c.desc, '', cur ? 'Your class' : cost + ' gems', cur ? 'own' : S.gems >= cost ? '' : 'no', () => { if (!cur) buyClass(k, cost); }));
+    }
+    sec('Perks (forever)');
+    for (const k in PERKS) {
+      const pk = PERKS[k], lv = S.perks[k] || 0, max = lv >= pk.max, cost = max ? 0 : pk.cost[lv];
+      L.append(row(svgGem, pk.name + (lv ? ' (level ' + lv + ')' : ''), pk.desc, statBars([['Level', lv / pk.max]]), max ? 'Maxed' : cost + ' gems', max ? 'own' : S.gems >= cost ? '' : 'no', () => { if (!max) buyPerk(k, cost); }));
+    }
   } else if (shopKind === 'orders' || shopKind === 'awards' || shopKind === 'online') { fillExtra(L, T);
   } else if (shopKind === 'build') {
     T.innerHTML = 'Build on your land<span class="sub">Pick something to place</span>';
@@ -4364,7 +5077,12 @@ function fillExtra(L, T) {
   } else if (shopKind === 'online') fillOnline(L, T);
 }
 function buySaw(w) { if (!pay(w.price, true)) return; S.saws.push(w.id); S.saw = w.id; equipAxe(); setTool(2); toast('You bought the ' + w.name + '! Press 3 for it and hold to cut.'); fillShop(); save(); hint('saw', 'Hold the button to rev the chainsaw into a tree or log. It cuts much faster than an axe.'); }
-function buyFeller(i) { if (!pay(FELLER_LV[i].price)) return; S.fellerLv = i; toast(FELLER_LV[i].name + ' fitted to your Timber Claw.'); fillShop(); save(); }
+function myUpg() { for (const t of trucks) if (t.owner === 'me') { if (t.kind === 'feller') t.lv = S.fellerLv; t.straps = S.straps; } netAct({ t: 'upg', lv: S.fellerLv, straps: S.straps }); }
+function buyStraps(i) { if (!pay(STRAPS[i].price, true)) return; S.straps = i; myUpg(); toast(STRAPS[i].name + ' for all your vehicles.'); fillShop(); save(); }
+function buyRack(i) { if (!pay(RACKS[i].price, true)) return; S.rack = i; refreshBar(); toast('The ' + RACKS[i].name + ' holds ' + rackCap() + ' pieces.'); fillShop(); save(); }
+function buyClass(k, cost) { if (S.gems < cost) { sDeny(); toast('You need ' + (cost - S.gems) + ' more gems.', true); return; } S.gems -= cost; S.cls = k; sBuy(); for (const t of trucks) t.lastDrv = undefined; refreshBar(); toast('You are now a ' + CLASSES[k].name + '! ' + CLASSES[k].desc); fillShop(); save(); }
+function buyPerk(k, cost) { if (S.gems < cost) { sDeny(); toast('You need ' + (cost - S.gems) + ' more gems.', true); return; } S.gems -= cost; S.perks[k] = (S.perks[k] || 0) + 1; sBuy(); refreshBar(); toast(PERKS[k].name + ' is now level ' + S.perks[k] + '.'); fillShop(); save(); }
+function buyFeller(i) { if (!pay(FELLER_LV[i].price, true)) return; S.fellerLv = i; myUpg(); toast(FELLER_LV[i].name + ' fitted to your Timber Claw.'); fillShop(); save(); }
 function buyWorker(k, price) { if (S.plot < 0) { toast('Workers need your land as a base. Buy a plot first.', true); sDeny(); return; } if (!pay(price)) return; S.workers[k]++; spawnWorkers(); toast(WORKERS[k].name + ' is now working on your land.'); fillShop(); save(); }
 function pay(p, personal) { if (NET.guest && !personal) { sDeny(); toast('In an online game only the host can buy that. Tools are yours to buy.', true); return false; } if (S.money < p) { sDeny(); toast('Not enough money. You need ' + money(p - S.money) + ' more.', true); return false; } S.money -= p; sBuy(); return true; }
 function buyAxe(a) { if (!pay(a.price, true)) return; S.axes.push(a.id); S.axe = a.id; S.tool = 0; equipAxe(); toast('You bought the ' + a.name + '!'); fillShop(); save(); }
@@ -4374,10 +5092,12 @@ function buyItem(k) {
 }
 function buyMotor(i) { if (!pay(MOTORS[i].price)) return; S.motor = i; refreshBelts(); toast(MOTORS[i].name + ' installed on all your belts.'); fillShop(); save(); }
 function buyTruck(k) {
-  if (!pay(TRUCKS[k].price)) return;
-  const s = SHOPS.motors, t = makeTruck(k, s.x + 9, s.z + 2, PI);
+  if (S.ownT.includes(k)) return;
+  if (!pay(TRUCKS[k].price, true)) return;
+  S.ownT.push(k);
+  if (NET.guest) netAct({ t: 'buyT', k, lv: S.fellerLv, straps: S.straps });
+  else { const s = freeParking(SHOPS.motors.x + 9, SHOPS.motors.z + 2); makeTruck(k, s[0], s[1], PI, { owner: 'me', lv: k === 'feller' ? S.fellerLv : 0, straps: S.straps }); }
   toast('Your ' + TRUCKS[k].name + ' is parked outside Big Wheel Motors.'); fillShop(); save();
-  return t;
 }
 function buyPlot(i) {
   if (S.plot >= 0) return;
@@ -4424,20 +5144,26 @@ function drawMap() {
   if (S.plot >= 0) { const p = PLOTS[S.plot], [x, y] = mapXY(p.x - PLOT_H, p.z - PLOT_H); g.strokeStyle = '#ffd25a'; g.lineWidth = 3; g.strokeRect(x, y, PLOT_H * 2 / 1.5, PLOT_H * 2 / 1.5); }
   for (const t of trucks) { const [x, y] = mapXY(t.pos.x, t.pos.z); g.fillStyle = '#' + t.T.color.toString(16).padStart(6, '0'); g.strokeStyle = '#000'; g.lineWidth = 2; g.fillRect(x - 5, y - 4, 10, 8); g.strokeRect(x - 5, y - 4, 10, 8); }
   for (const k in GATES) { const gt = GATES[k], [x, y] = mapXY(gt.x, gt.z); g.fillStyle = gt.open ? '#7fe07a' : '#e5533d'; g.beginPath(); g.arc(x, y, 5, 0, TAU); g.fill(); g.stroke(); }
+  g.textAlign = 'center'; g.font = '800 11px Figtree, Arial, sans-serif';
+  for (let i = 0; i < DESTS.length; i++) { const d = DESTS[i], [x, y] = mapXY(d.x, d.z), job = S.orders.some(o => o.dest === i); g.fillStyle = job ? '#9fe08a' : '#c8b890'; g.strokeStyle = '#000'; g.lineWidth = 2; g.fillRect(x - 6, y - 6, 12, 12); g.strokeRect(x - 6, y - 6, 12, 12); g.lineWidth = 3; g.strokeText(d.name, x, y - 11); g.fillStyle = job ? '#c8ff9a' : '#fff7e6'; g.fillText(d.name, x, y - 11); }
+  for (const k in FIXB) { const fb = FIXB[k], [x, y] = mapXY(fb.f.x, fb.f.z); g.fillStyle = fb.done ? '#7fe07a' : '#ffb03a'; g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y - 7); g.lineTo(x + 7, y + 5); g.lineTo(x - 7, y + 5); g.closePath(); g.fill(); g.stroke(); g.lineWidth = 3; g.strokeText(fb.done ? fb.f.title : fb.f.title + ' (broken)', x, y + 17); g.fillStyle = '#fff7e6'; g.fillText(fb.done ? fb.f.title : fb.f.title + ' (broken)', x, y + 17); }
+  for (const p of NET.peers.values()) { if (p.worker) continue; const [x, y] = mapXY(p.x, p.z); g.fillStyle = '#' + (p.shirt || 0x888888).toString(16).padStart(6, '0'); g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, 6, 0, TAU); g.fill(); g.stroke(); g.lineWidth = 3; g.strokeText(p.name, x, y - 10); g.fillStyle = '#fff'; g.fillText(p.name, x, y - 10); }
   const [px, py] = mapXY(player.x, player.z), yaw = player.truck ? player.truck.yaw + PI : player.yaw;
   g.save(); g.translate(px, py); g.rotate(-yaw); g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, -10); g.lineTo(7, 7); g.lineTo(0, 3); g.lineTo(-7, 7); g.closePath(); g.fill(); g.stroke(); g.restore();
 }
 
 /* ================= menu and intro ================= */
-function openMenu() { if (document.exitPointerLock && locked) document.exitPointerLock(); if (held) dropHeld(); $('#menuStats').textContent = 'Money earned so far: ' + money(S.earned) + '. Trees chopped: ' + S.stats.trees + '. Pieces sold: ' + S.stats.sold + '.'; resetArm = false; $('#mReset').textContent = 'Start a new game'; $('#menu').hidden = false; setTouchMode(); }
+function openMenu() { if (document.exitPointerLock && locked) document.exitPointerLock(); if (held) dropHeld(); $('#mSolo').hidden = !ONLINE_OK; $('#mSolo').textContent = NET.mode ? 'Play alone' : 'Join other players online'; $('#menuStats').textContent = 'Money earned so far: ' + money(S.earned) + '. Trees chopped: ' + S.stats.trees + '. Pieces sold: ' + S.stats.sold + '.'; resetArm = false; $('#mReset').textContent = 'Start a new game'; $('#menu').hidden = false; setTouchMode(); }
 function closeMenu() { $('#menu').hidden = true; setTouchMode(); }
 $('#bMenu').addEventListener('click', () => { aInit(); openMenu(); });
-$('#mResume').addEventListener('click', () => { if (NET.ended) { location.reload(); return; } closeMenu(); });
+$('#mResume').addEventListener('click', () => closeMenu());
+$('#mSolo').addEventListener('click', () => { closeMenu(); if (NET.mode) { NET.solo = true; if (NET.host) { try { NET.link && NET.link.broadcast({ e: { t: 'msg', text: 'The host closed the world.' } }); } catch (e) {} } stopOnline(false); toast('Playing on your own.'); } else { NET.solo = false; netAuto(t => toast(t)).then(r => { if (r === 'host') toast('No open worlds right now. Yours is open, so others can join you.'); else if (r === 'solo') toast('Could not reach the online service. Playing on your own.'); }); } });
+$('#mGems').addEventListener('click', () => { closeMenu(); openShop('gems'); });
 $('#mHelp').addEventListener('click', () => { closeMenu(); showIntro(true); });
 $('#mAwards').addEventListener('click', () => { closeMenu(); openShop('awards'); });
 $('#mOnline').addEventListener('click', () => { closeMenu(); openShop('online'); });
 $('#bNet').addEventListener('click', () => { aInit(); openShop('online'); });
-$('#mTruck').addEventListener('click', () => { for (const t of trucks) returnTruck(t); closeMenu(); toast('Your truck is back ' + (S.plot >= 0 ? 'on your land.' : 'in town.')); });
+$('#mTruck').addEventListener('click', () => { closeMenu(); if (NET.guest) { netAct({ t: 'returnT' }); toast('Your vehicles are back by the town square.'); return; } for (const t of trucks.slice()) if (t.owner === 'me') returnTruck(t); toast('Your vehicles are back ' + (S.plot >= 0 ? 'on your land.' : 'in town.')); });
 $('#mHome').addEventListener('click', () => { if (player.truck) exitTruck(); player.x = SPAWN.x; player.z = SPAWN.z; player.y = hAt(SPAWN.x, SPAWN.z); player.vx = player.vz = player.vy = 0; closeMenu(); });
 let resetArm = false;
 $('#mReset').addEventListener('click', () => {
@@ -4453,30 +5179,49 @@ sndIcon(); sndBtn.addEventListener('click', () => { aInit(); MUTED = !MUTED; snd
 const icStep = (body) => '<svg viewBox="0 0 40 40" aria-hidden="true">' + body + '</svg>';
 function showIntro(again) {
   const steps = [
-    [svgAxe(AXES[0]).replace(/<\/?svg[^>]*>/g, ''), 'Walk up to a tree and chop it until it falls.'],
-    ['<rect x="4" y="16" width="32" height="10" rx="5" fill="#d8b07a" stroke="#0e0c09" stroke-width="2"/><path d="M14 14v14M26 14v14" stroke="#6e4b30" stroke-width="2.5"/>', 'Chop the log into shorter pieces and drag them onto your truck.'],
-    [svgTruck(0xc9553a).replace(/<\/?svg[^>]*>/g, ''), 'Drive to Riverside Timber and tip the wood onto the belt to sell it.'],
-    [svgMill(0xd08a2a).replace(/<\/?svg[^>]*>/g, ''), 'Buy better axes, land and a sawmill. Planks sell for much more.'],
-    ['<path d="M5 30l9-18 7 10 5-6 9 14z" fill="#f0f5fa" stroke="#0e0c09" stroke-width="2" stroke-linejoin="round"/><circle cx="30" cy="10" r="4" fill="#8ff0e0" stroke="#0e0c09" stroke-width="1.5"/>', 'Pay to open bridges to snowy slopes, a swamp and a glowing island.'],
+    [svgFist.replace(/<\/?svg[^>]*>/g, ''), 'Start with your bare hands: punch a tree down, then buy an axe.'],
+    [svgLogs.replace(/<\/?svg[^>]*>/g, ''), 'Cut the log, carry pieces on your back or load your truck, and sell at Riverside Timber.'],
+    [svgTruck(0xc9553a).replace(/<\/?svg[^>]*>/g, ''), 'Haul jobs pay big. Drive gently: wood piled high can bounce off!'],
+    [svgGem.replace(/<\/?svg[^>]*>/g, ''), 'Trees drop gems. Spend them on a class and perks at the Gem Stump.'],
+    [svgPerson(0x2f6fb0).replace(/<\/?svg[^>]*>/g, ''), 'Play together online: share a truck, rebuild old bridges, and watch out for the goose.'],
   ];
   $('#introSteps').innerHTML = steps.map(s => '<li>' + icStep(s[0]) + '<span>' + s[1] + '</span></li>').join('');
   $('#introKeys').innerHTML = coarse
     ? '<span>Left side: move</span><span>Right side: look around</span><span>Chop: swing your axe</span><span>Grab: hold to drag wood</span><span>Use: talk, buy, drive</span><span>Map button: find your way</span>'
     : '<span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk, <kbd>Shift</kbd> run</span><span><kbd>Click</kbd> swing axe</span><span><kbd>Right click</kbd> hold to drag wood</span><span><kbd>E</kbd> use, buy, drive</span><span><kbd>1</kbd> <kbd>2</kbd> axe or hands, <kbd>Q</kbd> next axe</span><span><kbd>T</kbd> tip truck bed</span><span><kbd>M</kbd> map, <kbd>V</kbd> camera</span><span><kbd>B</kbd> build on your land</span>';
-  $('#introGo').textContent = S.seen.started ? 'Keep playing' : 'Start chopping';
+  $('#introGo').textContent = again ? 'Keep playing' : ONLINE_OK && !NET.mode ? 'Play' : S.seen.started ? 'Keep playing' : 'Start chopping';
+  $('#introGo').disabled = false; $('#introNet').hidden = true;
+  $('#introSolo').hidden = again || !ONLINE_OK || !!NET.mode; $('#introSolo').textContent = 'Play alone';
   $('#intro').hidden = false; setTouchMode();
 }
 let inviteCode = null;
 try { if (ONLINE_OK) inviteCode = Online.inviteCode(); } catch (e) {}
-function startGame() {
-  $('#intro').hidden = true; aInit();
+// Play: join an open world with other players (or open yours to them), then start
+function startGame(solo) {
+  aInit();
+  if (!$('#introGo').disabled && ONLINE_OK && !NET.mode && !NET.tried && !solo && $('#introGo').textContent === 'Play') {
+    NET.tried = true;
+    const st = $('#introNet'); st.hidden = false; st.textContent = 'Looking for other lumberjacks online...';
+    $('#introGo').disabled = true; $('#introSolo').textContent = 'Play alone instead';
+    const go = r => { if (r === 'cancel' || $('#intro').hidden) return; realStart(); if (r === 'host') toast('Your world is open online. Other players can join you.'); };
+    if (inviteCode) { const c = inviteCode; inviteCode = null; st.textContent = 'Joining your friend...'; startJoin(c, false).then(ok => go(ok ? 'joined' : 'solo')); }
+    else netAuto(t => { st.textContent = t; }).then(go);
+    return;
+  }
+  if (solo) { NET.solo = true; cancelSearch(); }
+  realStart();
+}
+function realStart() {
+  if ($('#intro').hidden) return;
+  $('#intro').hidden = true; $('#introGo').disabled = false;
   const first = !S.seen.started; S.seen.started = 1;
   if (!coarse) requestLock();
   setTouchMode();
-  if (inviteCode) { const c = inviteCode; inviteCode = null; openShop('online'); startJoin(c); }
-  if (first) hint('start', coarse ? 'Walk to a tree and tap <kbd>Chop</kbd> to swing your axe.' : 'Walk up to a tree and <kbd>Click</kbd> to swing your axe. Oak trees grow all around town.');
+  if (inviteCode && !NET.mode) { const c = inviteCode; inviteCode = null; openShop('online'); startJoin(c, false); }
+  if (first) hint('start', S.axe === 'fists' ? (coarse ? 'Walk to an oak and tap <kbd>Punch</kbd>. Bare hands are slow, but it works!' : 'Walk up to an oak and <kbd>Click</kbd> to punch it. Bare hands are slow, but it works!') : coarse ? 'Walk to a tree and tap <kbd>Chop</kbd> to swing your axe.' : 'Walk up to a tree and <kbd>Click</kbd> to swing your axe. Oak trees grow all around town.');
 }
-$('#introGo').addEventListener('click', startGame);
+$('#introGo').addEventListener('click', () => startGame(false));
+$('#introSolo').addEventListener('click', () => startGame(true));
 
 /* ================= day and night ================= */
 const C_TOPD = LIN(0x3f86d0), C_TOPN = LIN(0x0b1630), C_HORD = LIN(0xc4dcec), C_HORN = LIN(0x1c2a44), C_DUSK = LIN(0xf3a66a), C_STORM = LIN(0x6c747c);
@@ -4524,27 +5269,37 @@ function serialize() {
   o.lastSeen = Date.now();
   if (player.truck) { const t = player.truck; o.player = [r3(t.pos.x + 3), r3(t.pos.y), r3(t.pos.z), 0, 0]; }
   else o.player = [r3(player.x), r3(player.y), r3(player.z), r3(player.yaw), r3(player.pitch)];
-  o.drive = trucks.indexOf(player.truck);
-  o.trucks = trucks.map(t => [t.type, r3(t.pos.x), r3(t.pos.y), r3(t.pos.z), r3(t.yaw)]);
+  // only your own vehicles are saved; friends' vehicles go home with them
+  const myT = trucks.filter(t => t.owner === 'me');
+  o.drive = player.seat === 0 ? myT.indexOf(player.truck) : -1;
+  o.trucks = myT.map(t => [t.type, r3(t.pos.x), r3(t.pos.y), r3(t.pos.z), r3(t.yaw)]);
   o.placed = placed.map(it => [it.type, it.x, it.z, it.rot, it.queue.map(j => [j.sp, r3(j.len), r3(j.r), r3(j.t)]), it.out.map(p => [p.sp, r3(p.len), r3(p.pw), r3(p.pt)]), it.recipe || 0, it.stock || {}, it.stockV || {}, it.stockL || {}]);
   o.felled = FELLED.map(i => [i, Math.round(tTimer[i]), r3(tCut[i])]);
   o.growing = GROWING.map(i => [i, r3(tGrow[i])]);
-  o.bodies = bodies.filter(b => !b.crane).map(b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), r3(b.p.x), r3(b.p.y), r3(b.p.z), r3(b.q.x), r3(b.q.y), r3(b.q.z), r3(b.q.w), b.cargo ? trucks.indexOf(b.cargo) : -1, Math.round(b.val || 0)]);
+  o.bodies = bodies.filter(b => !b.crane).map(b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), r3(b.p.x), r3(b.p.y), r3(b.p.z), r3(b.q.x), r3(b.q.y), r3(b.q.z), r3(b.q.w), b.cargo ? myT.indexOf(b.cargo) : -1, Math.round(b.val || 0)]);
   o.ferry = r3(ferry.t);
   return o;
 }
-function save() { if (resetting || !S.seen.started || NET.ended) return; if (NET.guest) { saveGuestWallet(); return; } try { store.set(KEY, JSON.stringify(serialize())); } catch (e) {} }
+function save() { if (resetting || !S.seen.started) return; if (NET.guest) { saveGuestWallet(); return; } try { store.set(KEY, JSON.stringify(serialize())); } catch (e) {} }
 function load() { const s = store.get(KEY); if (!s) return null; try { return JSON.parse(s); } catch (_) { return null; } }
 function apply(d) {
   const f = fresh();
   if (d.v === 1) { d.felled = []; d.growing = []; d.v = 2; }   // the forest changed shape in v2; your money, tools, land and wood carry over
+  if (d.v === 2) {   // v3: bare hands, gems, personal vehicles, rebuilt bridges (the forest moved a little again)
+    d.felled = []; d.growing = []; d.v = 3;
+    d.ownT = [...new Set((d.trucks || []).map(t => t[0]).filter(k => TRUCKS[k]))]; if (!d.ownT.length) d.ownT = ['pickup'];
+    if (Array.isArray(d.axes) && !d.axes.includes('fists')) d.axes.unshift('fists');
+  }
   S = Object.assign(f, d);
+  S.perks = Object.assign(fresh().perks, d.perks || {}); if (!Array.isArray(S.pack)) S.pack = []; if (!Array.isArray(S.ownT) || !S.ownT.length) S.ownT = ['pickup']; S.repair = Object.assign({}, d.repair || {});
+  S.gems = Math.max(0, S.gems | 0); S.rack = clamp(S.rack | 0, 0, RACKS.length - 1); S.straps = clamp(S.straps | 0, 0, STRAPS.length - 1); if (S.cls && !CLASSES[S.cls]) S.cls = '';
   S.unlock = Object.assign(fresh().unlock, d.unlock || {}); S.inv = Object.assign(fresh().inv, d.inv || {}); S.stats = Object.assign(fresh().stats, d.stats || {}); S.seen = Object.assign({}, d.seen || {});
   S.workers = Object.assign(fresh().workers, d.workers || {}); S.daily = Object.assign(fresh().daily, d.daily || {}); S.ach = Object.assign({}, d.ach || {});
   if (!Array.isArray(S.saws)) S.saws = []; if (!Array.isArray(S.orders)) S.orders = []; if (S.saw && !S.saws.includes(S.saw)) S.saw = S.saws[0] || '';
-  if (!Array.isArray(S.axes) || !S.axes.length) S.axes = ['rusty'];
+  if (!Array.isArray(S.axes) || !S.axes.length) S.axes = ['fists'];
   for (const k of ['player', 'drive', 'trucks', 'placed', 'felled', 'growing', 'bodies', 'ferry', 'lastSeen']) delete S[k];
-  for (const t of d.trucks || []) if (TRUCKS[t[0]]) { const tr = makeTruck(t[0], t[1], t[3], t[4]); }
+  for (const t of d.trucks || []) if (TRUCKS[t[0]] && !S.ownT.includes(t[0])) S.ownT.push(t[0]);
+  for (const t of d.trucks || []) if (TRUCKS[t[0]] && !trucks.some(q => q.owner === 'me' && q.type === t[0])) makeTruck(t[0], t[1], t[3], t[4], { owner: 'me', lv: t[0] === 'feller' ? S.fellerLv : 0, straps: S.straps });
   for (const p of d.placed || []) if (ITEMS[p[0]]) { const it = placeItem(p[0], p[1], p[2], p[3] | 0); it.recipe = p[6] || 0; it.stock = p[7] || {}; it.stockV = p[8] || {}; it.stockL = p[9] || {}; for (const j of p[4] || []) it.queue.push({ sp: j[0], len: j[1], r: j[2], t: j[3] }); for (const o of p[5] || []) it.out.push({ sp: o[0], len: o[1], pw: o[2], pt: o[3] }); }
   for (const [i, tm, cut] of d.felled || []) { if (i < 0 || i >= TN || tState[i] === 2) continue; tState[i] = 2; tTimer[i] = tm; tCut[i] = cut; FELLED.push(i); setTreeInstance(i, false); setStump(i, true); }
   for (const [i, g] of d.growing || []) { if (i < 0 || i >= TN || tState[i] !== 0) continue; tState[i] = 3; tGrow[i] = g; GROWING.push(i); setTreeInstance(i, true); }
@@ -4557,12 +5312,13 @@ function apply(d) {
     if (t) { truckM.compose(t.pos, t.q, tmpS.set(1, 1, 1)).invert(); b.cl = { p: b.p.clone().applyMatrix4(truckM), q: t.q.clone().invert().multiply(b.q) }; b.cargo = t; b.sleep = false; t.cargo.push(b); }
   }
   for (const k in S.unlock) if (S.unlock[k] && GATES[k]) setGate(k, true);
+  for (const k in FIXB) { if ((S.repair[k] || 0) >= FIXB[k].f.need) setFixed(k, true); else { refreshPile(k); redrawSign(FIXB[k].so); } }
   if (d.player) { player.x = d.player[0]; player.y = d.player[1]; player.z = d.player[2]; player.yaw = d.player[3]; player.pitch = d.player[4]; }
   if (deepAt(player.x, player.z, player.y, -0.9)) { player.x = SPAWN.x; player.z = SPAWN.z; }
   player.y = Math.max(player.y, hAt(player.x, player.z));
   ferry.t = d.ferry >= 0.5 ? 1 : 0;
   camMode = S.cam ? 1 : 0;
-  if (!S.axes.includes(S.axe)) S.axe = 'rusty';
+  if (!S.axes.includes(S.axe)) S.axe = S.axes[S.axes.length - 1];
   if (S.tool === 2 && !sawById(S.saw)) S.tool = 0;
 }
 const idle = window.requestIdleCallback ? fn => window.requestIdleCallback(fn, { timeout: 2000 }) : fn => setTimeout(fn, 0);
@@ -4590,7 +5346,8 @@ function tick(dt, play) {
   updateTrucks(dt);
   updateJobs(dt);
   updateFerry(dt);
-  if (!NET.guest) { physStep(dt); updateSell(); updateMills(dt); wakeOnBelts(dt); }
+  if (!NET.guest) { physStep(dt); updateSell(); updateMills(dt); wakeOnBelts(dt); repairTick(); gooseTick(dt); }
+  haulTick(); packSellTick(dt); updateGems(dt);
   updateFalling(dt);
   treeAcc += dt; if (treeAcc > 1) { treeTick(treeAcc); treeAcc = 0; }
   if (play && !NET.guest) ordersTick(dt);
@@ -4606,7 +5363,7 @@ function frame(now) {
   poseMan(dt);
   updateBuild();
   updateGrass(false);
-  updateParts(dt); updateFloats(dt); updateSoft(dt); updateRain(dt, EV.storm); updateAvatars(dt);
+  updateParts(dt); updateFloats(dt); updateSoft(dt); updateRain(dt, EV.storm); updateAvatars(dt); drawGoose(dt);
   updateSky(dt); swayU.value = clock;
   drawBodies();
   renderer.render(scene, camera);
@@ -4631,13 +5388,13 @@ function cullWorld() {
 function start() {
   layout();
   const d = load();
-  if (d && (d.v === 1 || d.v === 2)) apply(d);
-  if (!trucks.length) makeTruck('pickup', SPAWN.x + 14, SPAWN.z + 4, PI / 2);
-  const drive = d && trucks[d.drive];
-  redrawSigns(); buildFence(); equipAxe(); refreshBar(); spawnWorkers();
+  if (d && d.v >= 1 && d.v <= 3) apply(d);
+  ensureOwnTrucks();
+  const drive = d && d.drive >= 0 && trucks.filter(t => t.owner === 'me')[d.drive];
+  redrawSigns(); buildFence(); equipAxe(); refreshBar(); spawnWorkers(); setPackVis(man, S.pack.map(it => it[1]));
   placeFerry(); for (const t of trucks) syncTruck(t, 0);
   updateGrass(true); updateCamera(0); updateSky(0);
-  if (drive) enterTruck(drive);
+  if (drive) enterTruck(drive, 0);
   showIntro();
   raf = requestAnimationFrame(frame);
   if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('40px "Bagel Fat One"'), document.fonts.load('700 20px Figtree')]).then(() => { if (alive) redrawSigns(); }).catch(() => {});
@@ -4646,7 +5403,7 @@ start();
 function dispose() {
   if (!alive) return;
   try { save(); } catch (_) {}
-  try { if (NET.mode) { try { NET.link && (NET.host ? NET.link.broadcast({ e: { t: 'msg', text: 'The host left.' } }) : 0); } catch (e) {} stopOnline(false); } } catch (_) {}
+  try { if (NET.mode) { try { NET.link && (NET.host ? NET.link.broadcast({ e: { t: 'msg', text: 'The host left.' } }) : 0); } catch (e) {} if (NET.guest) saveGuestWallet(); const l = NET.link; NET.link = null; NET.mode = null; try { l && l.close(); } catch (e) {} } else cancelSearch(); } catch (_) {}
   alive = false;
   cancelAnimationFrame(raf); clearInterval(saveIv); clearTimeout(rsT); ro.disconnect();
   for (const f of offs) f();
