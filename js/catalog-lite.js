@@ -280,5 +280,6 @@ G.push(
 {"id":"sk_orbit","name":"Orbit Pop","kind":"arcade","tint":"#0b1024","url":"/games/orbit-pop/","fmt":b=>b+' pts'},
 {"id":"sk_cannon","name":"Splitstorm","kind":"arcade","tint":"#081226","url":"/games/splitstorm/","fmt":b=>b+' pts'},
 {"id":"sk_color","name":"Hue Smash","kind":"arcade","tint":"#0d0f22","url":"/games/hue-smash/","fmt":b=>b+' pts'},
-{"id":"disaster","name":"Disaster Dash","kind":"game","tint":"#e8473c","url":"/games/disaster-dash/","wide":true,"big":true,"tags":["3D","multiplayer","survival"],"fmt":b=>b+' in a row'}
+{"id":"disaster","name":"Disaster Dash","kind":"game","tint":"#e8473c","url":"/games/disaster-dash/","wide":true,"big":true,"tags":["3D","multiplayer","survival"],"fmt":b=>b+' in a row'},
+{"id":"west3d","name":"Dusty Gulch","kind":"sim","tint":"#e0a050","url":"/games/dusty-gulch/","wide":true,"big":true,"tags":["3D","western","horses","open world"],"fmt":b=>{const u=['','K','M','B'];let i=0;while(b>=1000&&i<3){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}}
 );

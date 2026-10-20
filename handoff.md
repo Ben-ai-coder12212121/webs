@@ -66,7 +66,7 @@ Builder agents write one deliverable each to the session scratchpad (`/tmp/claud
 |---|---|---|
 | `lumber3d.js` | Lumberjack round 3 | INSTALLED (games/lumberjack-tycoon, In progress). Online by default (Play joins the busiest public world or hosts one; Play alone), own spawn and starter pickup, guests buy their own cars, passenger and truck-bed seats, bare-hands start, carry on your back, gems and classes at the Gem Stump, timed haul jobs, wobbly loads and straps, rebuildable bridges, the goose. Source in the session scratchpad `parts/` + `build.sh` |
 | `disaster.js` | Natural disaster multiplayer survival | INSTALLED as Disaster Dash (games/disaster-dash, In progress) |
-| `west3d.js` | Wild West sandbox (Westwood-inspired) | `--libs=online` |
+| `west3d.js` | Wild West sandbox (Westwood-inspired) | INSTALLED as Dusty Gulch (games/dusty-gulch, In progress) |
 | `getaway3d.js` | Road-trip getaway (Runaways-inspired) | `--libs=online` |
 | `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | none |
 | `cookempire.js` | Chemistry-teacher cook empire sim, fictional chemistry only, `age:16` | none |
