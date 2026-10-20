@@ -52,7 +52,7 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ## 3. Current state
 
-- **Live:** everything up to commit `f0146d2`, "Release: site checklist pass … [deploy]". Preview and live are identical.
+- **Live:** commit `61f6c1f` "Release: Lumberjack Tycoon round 3 … [deploy]", which is the Knuckle Through release plus only the Lumberjack round 3 page and the lighter `online.js` polling (cherry-picked at the owner's request). Everything else on preview since then (reviews, rewards, age notice, category changes, sports in progress, the new games) is NOT live yet.
 - **Last full check:** `tools/test-games.cjs` reported **272 games tested, ALL CLEAN**.
 - **Open question for the owner:** should any of the 10 in-progress games move to the main list?
 
