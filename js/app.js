@@ -1,6 +1,6 @@
 /* app.js: the game player (top bar, levels, leaderboards, full screen, random button) and the homepage grid */
 const ALLG=G.slice();const PAGE=window.PAGE_GAME||null;const gameUrl=g=>(g.url||("/games/"+g.id+"/"));
-const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'm_garden', 'm_lanelords', 'm_pet', 'm_pool', 'lumber', 'fishtycoon', 'apexgt', 'archery', 'bowling', 'breach', 'darts', 'fieldgoal', 'fishing', 'flightsim', 'gunmach', 'hillclimb', 'hoops', 'hrderby', 'hs_ice', 'hs_size', 'hs_strength', 'm_climber', 'm_hopper', 'm_raildash', 'm_spiral', 'm_wordwheel', 'openroad', 'ph_dummy', 'royale', 'rumble', 'sim_farm', 'sim_lemon', 'skyfront', 'tennis', 'virus'];
+const WIP_IDS=['neonharbor', 'hollow', 'contract', 'moonblade', 'ironpalm', 'spellbound', 'm_garden', 'm_lanelords', 'm_pet', 'm_pool', 'lumber', 'fishtycoon', 'apexgt', 'archery', 'bowling', 'breach', 'darts', 'fieldgoal', 'fishing', 'flightsim', 'gunmach', 'hillclimb', 'hoops', 'hrderby', 'hs_ice', 'hs_size', 'hs_strength', 'm_climber', 'm_hopper', 'm_raildash', 'm_spiral', 'm_wordwheel', 'openroad', 'ph_dummy', 'royale', 'rumble', 'sim_farm', 'sim_lemon', 'skyfront', 'tennis', 'virus', 'cards', 'sim_town', 'penalty', 'golf', 'airhockey', 'ski', 'kart', 'sk_orbit', 'sk_cannon', 'sk_color', 'disaster', 'west3d', 'getaway3d', 'cookempire', 'growop', 'sk_hole', 'hustle3d', 'climb3d'];
 const WIP=G.filter(g=>WIP_IDS.includes(g.id));
 WIP.forEach(g=>G.splice(G.indexOf(g),1));
 const stage=$('#stage'),arena=$('#arena'),statEl=$('#stat'),grid=$('#grid');
@@ -24,14 +24,14 @@ const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','sma
   const name=()=>S.get('lb_name','');
   async function probe(){if(ok!==null)return ok;if(location.protocol==='file:'){ok=false;return ok}try{const r=await fetch(API+'?probe=1',{cache:'no-store'});ok=r.ok&&(await r.json()).ok===true}catch(e){ok=false}return ok}
   let tT=0;function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('on'),4200)}
-  async function send(k,g,v,lower,quiet){if(!await probe()||!name())return null;try{const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({game:k,name:name(),score:v,lower:!!lower,id:cid()})});if(!r.ok)return null;const j=await r.json();if(!quiet&&j.rank)toast('New best in '+g.name+'! You’re #'+j.rank+' of '+j.total+' on the leaderboard');if(cur&&cur.k===k&&!panel.hidden)refresh();return j}catch(e){return null}}
+  async function send(k,g,v,lower,quiet){if(!await probe()||!name())return null;try{const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({game:k,name:name(),score:v,lower:!!lower,id:cid(),jersey:(()=>{try{return RW.code()}catch(e){return''}})()})});if(!r.ok)return null;const j=await r.json();if(!quiet&&j.rank)toast('New best in '+g.name+'! You’re #'+j.rank+' of '+j.total+' on the leaderboard');if(cur&&cur.k===k&&!panel.hidden)refresh();return j}catch(e){return null}}
   function best(g,k,v,lower){if(!eligible(g))return;lower=!!(lower||g.lower);const p=pend[k]||(pend[k]={});clearTimeout(p.t);p.t=setTimeout(()=>{delete pend[k];if(!name()){if(ok!==false&&!shown){shown=true;probe().then(o=>{if(o)toast('New best! Tap the trophy to put it on the leaderboard')})}return}send(k,g,v,lower)},2500)}
   const ago=t=>{const s=Math.max(1,Math.round((Date.now()-t)/1000));return s<60?s+'s ago':s<3600?Math.round(s/60)+'m ago':s<86400?Math.round(s/3600)+'h ago':Math.round(s/86400)+'d ago'};
   function keyInfo(g){const k=bestKey(g);const l=g.levels?S.get('lvl_'+g.id,1):1;return{k,label:g.levels?LVN2[l]:''}}
   async function refresh(){if(!cur)return;const {g,k,label}=cur;try{const r=await fetch(API+'?game='+encodeURIComponent(k)+'&id='+cid(),{cache:'no-store'});const j=await r.json();if(!cur||cur.k!==k)return;render(j)}catch(e){panel.querySelector('.lbl').innerHTML='<p class="lbmuted">Couldn’t reach the leaderboard. Retrying…</p>'}}
   function render(j){const {g,label}=cur;const L=panel.querySelector('.lbl');const fmt=v=>{try{return g.fmt(v)}catch(e){return String(v)}};
-    if(!j.top||!j.top.length){L.innerHTML='<p class="lbmuted">No scores yet. Be the first!</p>'}else L.innerHTML='<ol>'+j.top.map((e,i)=>'<li class="'+(e.me?'me':'')+'"><b>'+(i<3?'<i class="lbm lbm'+(i+1)+'">'+(i+1)+'</i>':(i+1)+'.')+'</b><span class="lbn"></span><span class="s">'+fmt(e.s)+'</span><small>'+ago(e.t)+'</small></li>').join('')+'</ol>';
-    L.querySelectorAll('li .lbn').forEach((s,i)=>{s.textContent=j.top[i].n});
+    if(!j.top||!j.top.length){L.innerHTML='<p class="lbmuted">No scores yet. Be the first!</p>'}else L.innerHTML='<ol>'+j.top.map((e,i)=>'<li class="'+(e.me?'me':'')+'"><b>'+(i<3?'<i class="lbm lbm'+(i+1)+'">'+(i+1)+'</i>':(i+1)+'.')+'</b><span class="lbj"></span><span class="lbn"></span><span class="s">'+fmt(e.s)+'</span><small>'+ago(e.t)+'</small></li>').join('')+'</ol>';
+    L.querySelectorAll('li .lbn').forEach((s,i)=>{s.textContent=j.top[i].n});L.querySelectorAll('li .lbj').forEach((s,i)=>{try{s.innerHTML=RW.mini(j.top[i].j)}catch(e){}});
     const you=panel.querySelector('.lbyou');const mine=S.get(cur.k,null);
     if(j.you)you.innerHTML='You: <b>#'+j.you.rank+'</b> of '+j.total+' · '+fmt(j.you.s);else if(!name())you.textContent='Set a name to join the leaderboard'+(mine!=null?' with your best: '+fmt(mine):'.');else if(mine!=null)you.textContent='Your best '+fmt(mine)+' is being submitted…';else you.textContent='Play to get on the board! '+j.total+' players so far.';
     panel.querySelector('.lblive').textContent='● Live · updated '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit',second:'2-digit'})}
@@ -52,7 +52,12 @@ const LB=(function(){const API='/api/lb',SKIP=new Set(['toy','chill','info','sma
   return{best,open,close:()=>{closePanel();btn.hidden=true},eligible,probe,toast,share,send,name,cid}})();
 const DOC_TITLE=document.title;
 function openGame(g){if(g.id!==PAGE){location.href=gameUrl(g);return}setTimeout(()=>{try{rotCheck()}catch(e){}},700);if(ctx){ctx.dispose();if(ctx.extra)ctx.extra()}current=g;arena.innerHTML='';arena.classList.toggle('wide',!!g.wide);statEl.textContent='';$('#stTitle').textContent=g.name;stage.hidden=false;document.body.style.overflow='hidden';const lv=$('#lvl');lv.hidden=!g.levels;if(g.levels){const l=S.get('lvl_'+g.id,1);lv.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.l===l))}stage.scrollTop=0;
-  ctx=makeCtx(g);try{HIST.open(g);touchStreak();checkBadges()}catch(e){}try{TRACK.open(g)}catch(e){}try{syncBeat()}catch(e){}try{document.title=g.name+' · Play free on Detourr'}catch(e){}try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;gfxBtn.hidden=true;[600,2500,6000].forEach(ms=>setTimeout(()=>{if(current===g)checkGfx()},ms));if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}}
+  if(g.age&&S.get('age_ok',0)<g.age){ageGate(g);return}
+  ctx=makeCtx(g);try{HIST.open(g);touchStreak();checkBadges()}catch(e){}try{TRACK.open(g)}catch(e){}try{RATE.bar(g)}catch(e){}try{syncBeat()}catch(e){}try{document.title=g.name+' · Play free on Detourr'}catch(e){}try{LB.open(g)}catch(e){}const r=g.run(arena,ctx);if(typeof r==='function')ctx.extra=r;gfxBtn.hidden=true;[600,2500,6000].forEach(ms=>setTimeout(()=>{if(current===g)checkGfx()},ms));if(fsEl()){setTimeout(fsFit,60);setTimeout(fsFit,1500)}}
+/* games with an age field (e.g. age:16) ask once before they start; they also stay out of Classroom mode and random picks */
+function ageGate(g){const box=el('div',{class:'agegate'},el('h2',null,'For players '+g.age+' and up'),el('p',null,g.name+' has mature themes (crime, drugs or violence played for comedy). It is fiction, not advice.'),el('div',{class:'agebtns'}));
+  const ok=el('button',{class:'btn primary',type:'button'},'I am '+g.age+' or older, play'),no=el('button',{class:'btn',type:'button'},'Take me back');
+  ok.addEventListener('click',()=>{S.set('age_ok',g.age);try{TRACK.ev('age_ok',{game_id:g.id})}catch(e){}openGame(g)});no.addEventListener('click',()=>{location.href='/'});box.lastChild.append(ok,no);arena.append(box);setTimeout(()=>ok.focus(),50)}
 function closeGame(){try{TRACK.stop()}catch(e){}if(PAGE){location.href='/';return}try{HIST.close()}catch(e){}try{LB.close()}catch(e){}try{document.title=DOC_TITLE}catch(e){}try{if(fsEl())fsExit()}catch(e){}try{rotq.classList.remove('on');rotSkip=false}catch(e){}if(ctx){ctx.dispose();if(ctx.extra)ctx.extra();ctx=null}current=null;arena.innerHTML='';stage.hidden=true;document.body.style.overflow='';renderGrid();try{history.replaceState(null,'',location.pathname)}catch(e){}}
 const isBig=g=>g.big!=null?g.big:(g.kind==='hero'||g.kind==='shooter'||/with3D|runShooter/.test(String(g.run)));
 let rndMode=S.get('rndMode','all');
@@ -60,7 +65,7 @@ function syncRnd(){document.querySelectorAll('#rndMode button').forEach(b=>b.cla
 document.querySelectorAll('#rndMode button').forEach(b=>b.addEventListener('click',()=>{rndMode=b.dataset.m;S.set('rndMode',rndMode);beep(500,.05,'triangle');syncRnd()}));
 syncRnd();
 function rnd01(){try{const u=new Uint32Array(1);crypto.getRandomValues(u);return u[0]/4294967296}catch(e){return Math.random()}}
-function surprise(want){const fit=g=>!want||want==='any'||meta(g).d===+want;let pool=G.filter(g=>g!==current&&fit(g)&&poolOK(g));const newbie=Object.keys(HIST.get()).length<5;if(newbie){const top=pool.filter(g=>TOP_PICKS.includes(g.id)),core=pool.filter(g=>CORE.has(g.id));if(top.length>=3)pool=top;else if(core.length>=3)pool=core}if(!pool.length)pool=G.filter(g=>g!==current&&poolOK(g));if(!pool.length)pool=G.filter(g=>g!==current);let seen=S.get('rndSeen',[]);const keep=Math.floor(pool.length*.6);let fresh=pool.filter(g=>!seen.includes(g.id));if(!fresh.length){seen=[];fresh=pool}const g=fresh[Math.floor(rnd01()*fresh.length)];seen.push(g.id);if(seen.length>keep)seen=seen.slice(-keep);S.set('rndSeen',seen);try{TRACK.ev('random_game',{game_id:g.id,time_pick:String(want||'any'),new_player:newbie?'yes':'no'})}catch(e){}spinTo(g)}
+function surprise(want){const fit=g=>!want||want==='any'||meta(g).d===+want;let pool=G.filter(g=>g!==current&&fit(g)&&randOK(g));const newbie=Object.keys(HIST.get()).length<5;if(newbie){const top=pool.filter(g=>TOP_PICKS.includes(g.id)),core=pool.filter(g=>CORE.has(g.id));if(top.length>=3)pool=top;else if(core.length>=3)pool=core}if(!pool.length)pool=G.filter(g=>g!==current&&randOK(g));if(!pool.length)pool=G.filter(g=>g!==current);let seen=S.get('rndSeen',[]);const keep=Math.floor(pool.length*.6);let fresh=pool.filter(g=>!seen.includes(g.id));if(!fresh.length){seen=[];fresh=pool}const g=fresh[Math.floor(rnd01()*fresh.length)];seen.push(g.id);if(seen.length>keep)seen=seen.slice(-keep);S.set('rndSeen',seen);try{TRACK.ev('random_game',{game_id:g.id,time_pick:String(want||'any'),new_player:newbie?'yes':'no'})}catch(e){}spinTo(g)}
 $('#back').addEventListener('click',closeGame);
 $('#again').addEventListener('click',()=>surprise());
 const fsBtn=$('#fs'),fsApi=()=>document.fullscreenElement||document.webkitFullscreenElement||null,fsEl=()=>fsApi()||(stage.classList.contains('pfs')?stage:null);
@@ -105,7 +110,7 @@ const mobileOK=g=>!PC_ONLY.has(g.id);
 const isPhone=(()=>{try{return matchMedia('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<900}catch(e){return false}})();
 let mobileMode=S.get('mobileMode',null);
 if(mobileMode==null)mobileMode=isPhone;
-const poolOK=g=>(!mobileMode||mobileOK(g))&&modeOK(g);
+const poolOK=g=>(!mobileMode||mobileOK(g))&&modeOK(g),randOK=g=>poolOK(g)&&!g.age;
 function syncMob(){document.querySelectorAll('.mobtog').forEach(b=>{b.classList.toggle('on',!!mobileMode);b.setAttribute('aria-pressed',mobileMode?'true':'false')})}
 function setMobile(v){mobileMode=!!v;S.set('mobileMode',mobileMode);syncMob();renderGrid();if(typeof renderQuick==='function')try{renderQuick()}catch(e){}}
 document.querySelectorAll('.mobtog').forEach(b=>b.addEventListener('click',()=>setMobile(!mobileMode)));
@@ -134,12 +139,15 @@ function meta(g){return META[g.id]||{d:['toy','chill','info'].includes(g.kind)?1
 const CORE=new Set(['snake','flap','reaction','typing','stack','breakout','whack','aim','simon','wyr','odd','math','stroop','hype','jetpack','georush','crazywheel','ballbreak','octagon','babel','mindreader','toast','hillclimb','2048','mines','word','sudoku','nonogram','parking','gems','blockfit','pipes','spotdiff','wordsearch','jigsaw','chess','c4','fourcolors','solitaire','battleship','cook_pizza','dotsboxes','slime','sand2','popit','pencils','bubbles','kaleido','pixel','gt_dust','plinko','cloth','ph_buddy','ph_castle','ph_wreck','toy_screen','io_hole','io_blob','io_noodle','io_paper','io_tanks','io_sumo','geo_flags','geo_bigger','geo_wai','geo_country','kart','hoops','bowling','tune','hs_havoc','hs_villain','hs_kaiju','stillshot','rumble']);
 const durLabel=g=>{const d=meta(g).d;return d>=15?'15+ min':d+' min'};
 /* modes: filters that apply to the random button, the time picks, "Another detourr" and the grid */
-const MODES={big:'Big games only',quick:'Quick games',class:'Classroom-friendly'};
+const MODES={games:'Games only',big:'Big games only',quick:'Quick games',class:'Classroom-friendly'};
+/* "Games only" hides toys, random stuff, facts and chill toys, for people who want strictly games */
+// "Games only" (owner: strictly game games): no toys, facts or random stuff, and no word or brain puzzles, quizzes or escape rooms
+const NOT_GAMES=['toy','info','weird','chill','puzzle','escape','geo'],NOT_GAME_IDS=new Set(['hangman','memory','simon','typing','stroop','nummem','odd','tune','pianolearn','beatmaker']);
 /* the big games: superheroes, 3D worlds, sims and story games (what the old "Big games" random button picked) */
 const MAJOR=new Set(['openroad','apexgt','wanted','zsurv','stillshot','fishing','flightsim','skyfront','rumble','breach','royale','e3_study','e3_sub','e3_cabin','kart','octagon','jetpack','sim_farm','sim_town','sim_tractor','geo_wai','powerlab','gunsim','goose','ph_buddy','knuckle','bunker','m_bowduel']);
 const isMajor=g=>!!(g.major||g.kind==='hero'||MAJOR.has(g.id));
-let modes=Object.assign({big:false,quick:false,class:false},S.get('modes',{}));delete modes.silent;delete modes.kb;/* the Silent and Keyboard-only filters were removed */
-function modeOK(g){const m=meta(g);if(modes.big&&!isMajor(g))return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.kind==='hero'||g.kind==='shooter'))return false;return true}
+let modes=Object.assign({games:false,big:false,quick:false,class:false},S.get('modes',{}));delete modes.silent;delete modes.kb;/* the Silent and Keyboard-only filters were removed */
+function modeOK(g){const m=meta(g);if(modes.games&&(NOT_GAMES.includes(g.kind)||NOT_GAME_IDS.has(g.id)))return false;if(modes.big&&!isMajor(g))return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.age||g.kind==='hero'||g.kind==='shooter'))return false;return true}
 function syncModes(){document.querySelectorAll('#modes button').forEach(b=>{const on=!!modes[b.dataset.m];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false')})}
 function setMode(k,v){modes[k]=v;S.set('modes',modes);syncModes();renderGrid();try{renderQuick()}catch(e){}}
 document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.m,!modes[b.dataset.m]);beep(600,.05,'triangle',.05)}));
@@ -156,7 +164,7 @@ function noteScore(g,v,lower){const t=today();const d=S.get('dayScores',{d:0,s:{
   if(beatTarget!=null&&!beatWon&&(lower?v<beatTarget:v>beatTarget)){beatWon=true;syncBeat();try{LB.toast('You beat your friend’s score! Send them yours back.')}catch(e){}}}
 function streak(){const st=S.get('streak',{last:0,n:0,max:0});if(st.last<today()-1)st.n=0;return st}
 function touchStreak(){const t=today();const st=S.get('streak',{last:0,n:0,max:0});if(st.last===t)return;st.n=st.last===t-1?st.n+1:1;st.last=t;st.max=Math.max(st.max||0,st.n);S.set('streak',st)}
-function renderDaily(){['#daily','#dailyW'].forEach(q=>{const b=$(q);if(b){renderDailyInto(b);renderBadges(b)}})}
+function renderDaily(){['#daily','#dailyW'].forEach(q=>{const b=$(q);if(b){renderDailyInto(b);renderBadges(b);try{RW.card(b)}catch(e){}}})}
 function renderDailyInto(box){box.innerHTML='';const g=dailyGame();const st=streak();const t=today();
   if(g){const done=S.get('dailyDone_'+t,false),sc=dayScores()[g.id];let v='';try{v=sc!=null?g.fmt(sc):''}catch(e){}
     box.append(el('a',{class:'dc'+(done?' done':''),href:gameUrl(g)},el('span',{class:'ic',html:ico(done?'check':'calendar')}),el('span',null,el('b',null,done?'Challenge done: '+v:'Today’s challenge: '+g.name),done?'New one tomorrow · tap to beat it again':'Set any score today · '+durLabel(g))))}
@@ -223,6 +231,131 @@ const TRACK=(()=>{const ok=()=>typeof gtag==='function',ev=(n,p)=>{try{if(ok())g
   // one new_best per game per minute at most: some games report a rising score every frame
   const best=g=>{const t=Date.now();if(t-(lastBest[g.id]||0)<6e4)return;lastBest[g.id]=t;ev('new_best',{game_id:g.id})};
   return{ev,open,stop,best,dev,visits:v}})();
+/* Ratings and reviews (netlify/functions/reviews.mjs). Games: a 5-star bar under the game once you've started playing,
+   and the average on homepage tiles once 3 players have rated. Site: the "What players think" section on the homepage. */
+const RATE=(()=>{const cid=()=>{let v=S.get('lb_id',null);if(!v||!/^[a-z0-9]{8,40}$/.test(v)){v=(Math.random().toString(36).slice(2)+Date.now().toString(36)).replace(/[^a-z0-9]/g,'').slice(0,24);S.set('lb_id',v)}return v};const API='/api/reviews',P='<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>';
+  const star=(on,sz)=>'<svg viewBox="0 0 24 24" width="'+(sz||18)+'" height="'+(sz||18)+'" aria-hidden="true" class="rstar'+(on?' on':'')+'">'+P+'</svg>';
+  const stars=(v,sz)=>[1,2,3,4,5].map(i=>star(v>=i-.25,sz)).join('');
+  const get=q=>fetch(API+q,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  const post=b=>fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({id:cid()},b))}).then(r=>r.json()).catch(()=>({error:'Could not reach the server. Try again in a moment.'}));
+  let sum=null;
+  // game page: "Rate this game" bar, shown after the first click, tap or key in the game (or after 40 s)
+  function bar(g){const old=document.querySelector('.ratebar');if(old)old.remove();if(!stage||!arena)return;
+    const b=el('div',{class:'ratebar',hidden:true});const row=el('div',{class:'rrow',role:'radiogroup','aria-label':'Rate '+g.name});const info=el('span',{class:'rinfo'},'');
+    // the five buttons are made once; hovering only recolours them (rebuilding under the pointer swallowed clicks)
+    let mine=0;const btns=[];const draw=hov=>btns.forEach((bt,k)=>{bt.querySelector('svg').classList.toggle('on',(hov||mine)>=k+1);bt.setAttribute('aria-checked',String(mine===k+1))});
+    for(let i=1;i<=5;i++){const bt=el('button',{type:'button',class:'rbtn',role:'radio','aria-checked':'false','aria-label':i+' star'+(i>1?'s':''),html:star(false,22)});bt.addEventListener('mouseenter',()=>draw(i));bt.addEventListener('focus',()=>draw(i));
+      bt.addEventListener('click',()=>{mine=i;draw();info.textContent='Saving…';post({op:'rate',game:g.id,stars:i}).then(r=>{if(r&&!r.error){info.textContent='Thanks! '+r.avg.toFixed(1)+' from '+r.n+' player'+(r.n===1?'':'s');try{TRACK.ev('rate_game',{game_id:g.id,stars:i})}catch(e){}}else info.textContent=(r&&r.error)||'Could not save'})});row.append(bt);btns.push(bt)}
+    row.addEventListener('mouseleave',()=>draw());draw();
+    b.append(el('b',null,'Rate '+g.name),row,info);arena.after(b);
+    get('?game='+g.id+'&id='+cid()).then(r=>{if(!r||r.error)return;mine=r.mine||0;draw();info.textContent=r.n?r.avg.toFixed(1)+' from '+r.n+' player'+(r.n===1?'':'s'):'Be the first to rate it'});
+    const show=()=>{b.hidden=false};let done=false;const once=()=>{if(done)return;done=true;show()};
+    arena.addEventListener('pointerdown',once,{once:true,capture:true});document.addEventListener('keydown',once,{once:true});setTimeout(once,40000)}
+  // homepage tiles: average rating once at least 3 players rated
+  function decorate(){if(!sum)return;document.querySelectorAll('#grid a.tile').forEach(a=>{if(a.querySelector('.rt'))return;const g=ALLG.find(x=>gameUrl(x)===a.getAttribute('href'));const v=g&&sum[g.id];if(!v||v[1]<3)return;const m=a.querySelector('.meta');if(m)m.append(el('span',{class:'rt',title:v[1]+' ratings',html:star(true,13)+' '+v[0].toFixed(1)}))})}
+  function loadSum(){get('?sum=1').then(r=>{if(r&&r.games){sum=r.games;decorate()}})}
+  // homepage: what players think of the site
+  function site(){const box=$('#reviews');if(!box)return;let st=null,pick=0,msg='',bad=false,busy=false;
+    const ago=t=>{const m=Math.round((Date.now()-t)/6e4);return m<60?Math.max(1,m)+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago'};
+    function render(){box.innerHTML='';box.append(el('h2',{id:'revH'},'What players think of Detourr'));
+      const top=el('div',{class:'rtop'});
+      if(st&&st.n){top.append(el('div',{class:'ravg'},el('b',null,st.avg.toFixed(1)),el('span',{class:'rs',html:stars(st.avg,20)}),el('small',null,st.n+' review'+(st.n===1?'':'s'))));
+        const d=el('div',{class:'rdist'});for(let i=5;i>=1;i--){const n=st.dist[i-1],w=st.n?Math.round(n/st.n*100):0;d.append(el('div',{class:'rd'},el('span',null,i+''),el('i',null,el('u',{style:'width:'+w+'%'})),el('em',null,n+'')))}top.append(d)}
+      else top.append(el('p',{class:'rnone'},st?'No reviews yet. Be the first!':'Loading reviews…'));
+      const f=el('form',{class:'rform'});f.append(el('b',null,st&&st.mine?'Update your review':'Rate Detourr'));const sr=el('div',{class:'rrow',role:'radiogroup','aria-label':'Your rating'});
+      for(let i=1;i<=5;i++){const bt=el('button',{type:'button',class:'rbtn',role:'radio','aria-checked':String(pick===i),'aria-label':i+' star'+(i>1?'s':''),html:star(pick>=i,28)});bt.addEventListener('click',()=>{pick=i;render()});sr.append(bt)}
+      const ta=el('textarea',{id:'revText',maxlength:'240',rows:'2',placeholder:'What do you like? What should we add? (optional)'});ta.value=f.dataset.t||draftT;ta.addEventListener('input',()=>draftT=ta.value);
+      const nm=el('input',{id:'revName',maxlength:'16',placeholder:'Name (optional)',autocomplete:'off'});nm.value=draftN;nm.addEventListener('input',()=>draftN=nm.value);
+      const go=el('button',{type:'submit',class:'btn primary'},busy?'Sending…':'Post review');if(busy)go.disabled=true;
+      f.append(sr,ta,el('div',{class:'rfrow'},nm,go));if(msg)f.append(el('p',{class:'rmsg'+(bad?' bad':'')},msg));
+      f.addEventListener('submit',e=>{e.preventDefault();if(!pick){msg='Pick 1 to 5 stars first.';bad=true;render();return}busy=true;msg='';render();
+        post({op:'review',stars:pick,text:draftT,name:draftN}).then(r=>{busy=false;if(r&&!r.error){st=r;msg='Thanks for the review!';bad=false;draftT='';try{TRACK.ev('review_site',{stars:pick})}catch(e){}}else{msg=(r&&r.error)||'Could not post that.';bad=true}render()})});
+      top.append(f);box.append(top);
+      if(st&&st.recent.length){const ul=el('ul',{class:'rlist'});st.recent.slice(0,12).forEach(r=>ul.append(el('li',null,el('span',{class:'rs',html:stars(r.s,14)}),el('p',null,r.x),el('small',null,(r.n||'A player')+' · '+ago(r.t)))));box.append(ul)}}
+    let draftT='',draftN=S.get('lb_name','')||'';render();
+    get('?site=1&id='+cid()).then(r=>{st=r&&!r.error?r:{avg:0,n:0,dist:[0,0,0,0,0],recent:[]};if(st.mine)pick=st.mine.s;render()})}
+  return{bar,decorate,loadSum,site}})();
+/* Rewards: 1 point per minute of active play (a game open, the tab visible, a click, tap or key in the last minute), a daily
+   bonus after 10 minutes of play that grows with back-to-back days, and a shop on the homepage: card packs for the card game
+   (S 'rw_packs'), patches, and jerseys that take days of play (the top ones a full week). The jersey you wear shows next to your
+   name on leaderboards. Everything stays on this device. No points while the game is closed. */
+const RW=(()=>{const PACK_GAME='cards',K='rw';
+  const T={club:[2880,'Club'],pro:[5760,'Pro'],legend:[10080,'Legend']};
+  const JERSEYS=[['j1','Fire Red','#d8392b','#ffffff','plain','club'],['j2','Ocean Blue','#2563c9','#ffffff','plain','club'],['j3','Forest','#1f7a46','#f4d35e','plain','club'],['j4','Midnight','#1d1d2b','#ff7a1a','plain','club'],['j5','Snow','#f3f1ea','#d8392b','plain','club'],['j6','Sunrise','#ff8a1a','#1d1d2b','plain','club'],
+    ['j7','Candy Stripe','#ffffff','#d8392b','stripes','pro'],['j8','Clover Hoops','#1f7a46','#ffffff','hoops','pro'],['j9','Gold Sash','#1d1d2b','#f2b631','sash','pro'],['j10','Split','#2563c9','#f4d35e','halves','pro'],['j11','Chevron','#1d2b4a','#ff8a1a','chevron','pro'],['j12','Pinstripe','#8a8f99','#1d2b4a','pin','pro'],
+    ['j13','Golden','#f2b631','#1d1d2b','stars','legend'],['j14','Lava','#1d1d2b','#ff5a1a','flames','legend'],['j15','Glacier','#bfe6f5','#2563c9','crystal','legend'],['j16','Camo','#56653a','#2f3a20','camo','legend'],['j17','Neon Grid','#14161f','#29d3c2','grid','legend'],['j18','Detourr Original','#161616','#ff7a1a','crest','legend']];
+  const PATCHES=[['p1','Star',300,'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],['p2','Bolt',300,'M13 3L5 14h6l-1 7 8-11h-6z'],['p3','Heart',720,'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z'],['p4','Flame',720,'M12 3c1 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-6 1-9z'],['p5','Crown',1440,'M4 17l1-10 4 4 3-6 3 6 4-4 1 10z'],['p6','Road Sign',1440,'M12 3l9 9-9 9-9-9z']];
+  const PACKS=[['k1','Card pack',60,1],['k5','Bundle of 5 packs',270,5]];
+  const st=()=>{const s=S.get(K,null)||{};s.sec=s.sec||0;s.bonus=s.bonus||0;s.spent=s.spent||0;s.own=s.own||[];s.told=s.told||[];if(s.num==null)s.num=7;return s};
+  const pts=s=>Math.floor(s.sec/60)+s.bonus-s.spent;
+  const hm=m=>{m=Math.max(0,Math.ceil(m));const h=Math.floor(m/60);return h?h+' h'+(m%60?' '+m%60+' min':''):m+' min'};
+  const J=id=>JERSEYS.find(j=>j[0]===id),P=id=>PATCHES.find(p=>p[0]===id);
+  const cost=it=>it[5]?T[it[5]][0]:it[2];
+  /* jersey art, 120x120. back=true shows the name and number. */
+  let uid=0;
+  const BODY='M40 12L26 17 7 35l13 17 10-7v63h60V45l10 7 13-17-19-18-14-5';
+  function art(j,o){o=o||{};const [,,b,a,pat]=j,id='rwc'+(++uid),W=(x,y,w,h)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+a+'"/>';let p='';
+    if(pat==='stripes')for(let x=20;x<110;x+=16)p+=W(x,0,7,120);
+    else if(pat==='hoops')for(let y=30;y<115;y+=18)p+=W(0,y,120,8);
+    else if(pat==='sash')p='<path d="M25 20h22l60 90H85z" fill="'+a+'"/>';
+    else if(pat==='halves')p=W(60,0,60,120);
+    else if(pat==='chevron')p='<path d="M20 40l40 30 40-30v14L60 84 20 54z" fill="'+a+'"/>';
+    else if(pat==='pin')for(let x=24;x<110;x+=9)p+=W(x,0,1.6,120);
+    else if(pat==='stars')for(const [x,y] of [[40,40],[78,34],[56,64],[38,88],[82,80],[64,100]])p+='<path transform="translate('+(x-6)+' '+(y-6)+') scale(.5)" d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="'+a+'" opacity=".55"/>';
+    else if(pat==='flames')p='<path d="M28 110c0-14 6-18 8-30 5 8 4 14 8 18 2-12 8-18 8-34 8 12 10 22 10 30 3-6 6-10 6-20 8 10 10 22 10 36z" fill="'+a+'"/><path d="M40 110c0-8 4-10 6-18 3 6 3 10 6 12 2-8 5-10 5-20 5 8 6 14 6 20 2-4 4-6 4-12 5 6 6 12 6 18z" fill="#ffd23f"/>';
+    else if(pat==='crystal')p='<path d="M30 110l14-34 12 34zM58 110l16-50 14 50zM20 70l10-24 8 24zM72 44l8-18 8 18z" fill="'+a+'" opacity=".45"/>';
+    else if(pat==='camo')p='<path d="M20 30c10-6 22 4 18 12s-20 4-18-12zM62 50c14-4 24 6 16 14s-26 0-16-14zM30 80c10-2 18 8 10 14s-22-2-10-14zM74 92c8-4 18 2 14 10s-20 2-14-10zM70 18c8 0 12 8 6 10s-12-6-6-10z" fill="'+a+'"/><path d="M44 58c6-2 10 4 6 8s-12-2-6-8zM88 40c6 0 8 6 4 8s-10-4-4-8zM50 100c6-2 10 4 6 6s-10-2-6-6z" fill="#8a7a4a"/>';
+    else if(pat==='grid'){for(let x=20;x<110;x+=12)p+=W(x,0,1.2,120);for(let y=20;y<115;y+=12)p+=W(0,y,120,1.2)}
+    else if(pat==='crest'&&!o.back)p='<path d="M60 42l14 14-14 14-14-14z" fill="none" stroke="'+a+'" stroke-width="3.5"/><path d="M57 63v-5c0-2 1-3 2-4l2-2c1-1 1-2 1-3v-1" fill="none" stroke="'+a+'" stroke-width="2.6"/>';
+    const neck=o.back?'M42 13q18 6 36 0':'M40 12q20 16 40 0',trim='<path d="'+neck+'" fill="none" stroke="'+a+'" stroke-width="5" stroke-linecap="round"/><path d="M7 35l13 17M113 35l-13 17" stroke="'+a+'" stroke-width="5"/>';
+    let txt='';if(o.back){const nm=String(o.name||'PLAYER').toUpperCase().slice(0,12).replace(/[<&>"]/g,''),fs=nm.length>8?8.5:11;
+      txt='<text x="60" y="46" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="'+fs+'" fill="'+a+'" stroke="'+b+'" stroke-width=".6" letter-spacing=".5">'+nm+'</text><text x="60" y="92" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="38" fill="'+a+'" stroke="'+b+'" stroke-width="1.6" paint-order="stroke">'+(o.num|0)+'</text>'}
+    let pt='';const pa=o.patch&&P(o.patch);if(pa){const cx=o.back?20:78,cy=o.back?36:30;pt='<circle cx="'+cx+'" cy="'+cy+'" r="10" fill="#fffdf6" stroke="#1d1a2f" stroke-width="2"/><path transform="translate('+(cx-7)+' '+(cy-7)+') scale(.58)" d="'+pa[3]+'" fill="#ff7a1a" stroke="#1d1a2f" stroke-width="2" stroke-linejoin="round"/>'}
+    return '<svg class="rwj" viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="'+id+'"><path d="'+BODY+'q-20 '+(o.back?6:16)+'-40 0z"/></clipPath></defs><g clip-path="url(#'+id+')"><rect width="120" height="120" fill="'+b+'"/>'+p+trim+'</g><path d="'+BODY+'q-20 '+(o.back?6:16)+'-40 0z" class="rwo" fill="none" stroke-width="3" stroke-linejoin="round"/>'+txt+pt+'</svg>'}
+  const patchArt=pa=>'<svg class="rwj" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#fffdf6" stroke="#1d1a2f" stroke-width="1.5"/><path transform="translate(4.6 4.6) scale(.62)" d="'+pa[3]+'" fill="#ff7a1a" stroke="#1d1a2f" stroke-width="2" stroke-linejoin="round"/></svg>';
+  const packArt=n=>'<svg class="rwj" viewBox="0 0 60 60" aria-hidden="true">'+(n>1?'<rect x="20" y="8" width="30" height="42" rx="4" fill="#2563c9" stroke="#1d1a2f" stroke-width="2.5" transform="rotate(10 35 29)"/>':'')+'<rect x="12" y="10" width="30" height="42" rx="4" fill="#ff7a1a" stroke="#1d1a2f" stroke-width="2.5"/><path d="M27 20l7 7-7 7-7-7z" fill="#fffdf6" stroke="#1d1a2f" stroke-width="2"/><path d="M14 44h26" stroke="#1d1a2f" stroke-width="2"/></svg>';
+  /* leaderboard code: jersey id plus patch, e.g. "j7.p2" */
+  const code=()=>{const s=st();return s.eq&&J(s.eq)?s.eq+(s.patch&&P(s.patch)?'.'+s.patch:''):''};
+  const mini=c=>{const [j,p]=String(c||'').split('.');const jj=J(j);return jj?art(jj,{patch:p}):''};
+  /* earning */
+  let lastIn=0;for(const e of ['pointerdown','pointermove','keydown','touchstart','wheel'])addEventListener(e,()=>{lastIn=Date.now()},{capture:true,passive:true});
+  function tick(){if(!current||document.hidden||Date.now()-lastIn>6e4)return;const s=st(),now=Date.now();
+    if(s.last&&now-s.last<4e3)return; // another tab already counted these seconds
+    const p0=pts(s);s.last=now;s.sec+=5;const d=today();if(s.day!==d){s.streak=s.day===d-1&&s.dsec>=600?(s.streak||1)+1:1;s.day=d;s.dsec=0}s.dsec=(s.dsec||0)+5;
+    let msg='';if(s.dsec===600){const b=Math.min(30,5+5*s.streak);s.bonus+=b;msg='Daily bonus: +'+b+' reward points'+(s.streak>1?' ('+s.streak+' days in a row)':'')}
+    const p1=pts(s);if(!msg&&Math.floor(p1/30)>Math.floor(p0/30))msg='+30 reward points from playing. You have '+p1+'.';
+    for(const it of [...PACKS.slice(0,1),...PATCHES,...JERSEYS]){const c=cost(it);if(p1>=c&&p0<c&&!s.own.includes(it[0])&&!s.told.includes(it[0])){s.told.push(it[0]);msg='You have '+p1+' points: '+it[1]+' is ready in Rewards on the homepage!';break}}
+    S.set(K,s);if(msg)try{LB.toast(msg)}catch(e){}}
+  if(PAGE)setInterval(tick,5e3);
+  /* the shop */
+  let dlg=null;
+  function buy(it,kind){const s=st(),c=cost(it);if(pts(s)<c)return;s.spent+=c;if(kind==='pack')S.set('rw_packs',S.get('rw_packs',0)+it[3]);else{s.own.push(it[0]);if(kind==='jersey')s.eq=it[0];else s.patch=it[0]}S.set(K,s);try{TRACK.ev('reward_buy',{item:it[0]})}catch(e){}draw()}
+  function item(artH,name,sub,btn){return el('div',{class:'rwi'},el('div',{class:'rwa',html:artH}),el('b',null,name),el('small',null,sub),btn)}
+  function draw(){if(!dlg)return;const s=st(),p=pts(s),card=dlg.querySelector('.rwcard'),eq=J(s.eq),nm=(LB.name&&LB.name())||'';card.innerHTML='';
+    const close=el('button',{class:'btn',type:'button'},'Close');close.addEventListener('click',hide);
+    const next=[...PATCHES,...JERSEYS].filter(it=>!s.own.includes(it[0])).sort((x,y)=>cost(x)-cost(y)).find(it=>cost(it)>p);
+    const locker=el('div',{class:'rwlock'},el('div',{class:'rwbig',html:eq?art(eq,{back:true,name:nm||'PLAYER',num:s.num,patch:s.patch}):'<svg class="rwj" viewBox="0 0 120 120" aria-hidden="true"><path d="'+BODY+'q-20 6-40 0z" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="6 5" stroke-linejoin="round" opacity=".5"/></svg>'}),
+      el('div',null,el('div',{class:'rwpts'},el('b',null,String(p)),' points'),el('p',null,'Played here: '+hm(s.sec/60)+'. '+(next?'Next up: '+next[1]+' in '+hm(cost(next)-p)+' of play.':'You own everything. Legend.')),
+        next?el('div',{class:'rwbar'},el('i',{style:'width:'+Math.min(100,p/cost(next)*100).toFixed(1)+'%'})):'',
+        eq?el('label',{class:'rwnum'},'Number ',(()=>{const i=el('input',{type:'number',min:'0',max:'99',value:String(s.num)});i.addEventListener('change',()=>{const t=st();t.num=Math.max(0,Math.min(99,Math.round(+i.value)||0));S.set(K,t);draw()});return i})()):el('p',{class:'rwmuted'},'Your first jersey comes after 48 hours of play. It shows next to your name on every leaderboard.')));
+    const how=el('p',{class:'rwhow'},'Earn 1 point for every minute you actually play a game (clicking, tapping or pressing keys). Play 10 minutes in a day for a daily bonus that grows when you come back on back-to-back days. Points stay on this device, and nothing is earned while games are closed.');
+    const packs=el('div',{class:'rwgrid'}),pg=ALLG.find(g=>g.id===PACK_GAME&&!HIDDEN.has(g.id));
+    PACKS.forEach(it=>{const b=el('button',{class:'btn'+(p>=it[2]?' primary':''),type:'button'},p>=it[2]?'Get for '+it[2]:it[2]+' points');if(p<it[2])b.disabled=true;b.addEventListener('click',()=>buy(it,'pack'));packs.append(item(packArt(it[3]),it[1],it[3]>1?'5 free packs, 10% off':'A free pack to open',b))});
+    const nP=S.get('rw_packs',0),packNote=el('p',{class:'rwmuted'},nP?'You have '+nP+' free pack'+(nP>1?'s':'')+' waiting. ':'',pg?el('a',{href:gameUrl(pg)},'Open them in '+pg.name):'Packs open in the card game.');
+    const own=(it,kind)=>{const has=s.own.includes(it[0]),c=cost(it),on=kind==='jersey'?s.eq===it[0]:s.patch===it[0];let b;
+      if(has){b=el('button',{class:'btn'+(on?' on':''),type:'button'},on?'Wearing':'Wear');b.addEventListener('click',()=>{const t=st();if(kind==='jersey')t.eq=on?null:it[0];else t.patch=on?null:it[0];S.set(K,t);draw()})}
+      else if(p>=c){b=el('button',{class:'btn primary',type:'button'},'Get for '+c);b.addEventListener('click',()=>buy(it,kind))}
+      else{b=el('button',{class:'btn',type:'button'},hm(c-p)+' to go');b.disabled=true}
+      return item(kind==='jersey'?art(it,{patch:s.patch}):patchArt(it),it[1],(kind==='jersey'?T[it[5]][1]+' · ':'')+c+' points ('+hm(c)+' of play)',b)};
+    const patches=el('div',{class:'rwgrid'});PATCHES.forEach(it=>patches.append(own(it,'patch')));
+    const jer=el('div',null);for(const t of ['club','pro','legend']){const g=el('div',{class:'rwgrid'});JERSEYS.filter(j=>j[5]===t).forEach(it=>g.append(own(it,'jersey')));jer.append(el('h4',null,T[t][1]+' jerseys · '+hm(T[t][0])+' of play each'),g)}
+    card.append(close,el('h2',{id:'rwH'},'Rewards'),locker,how,el('h3',null,'Card packs'),packs,packNote,el('h3',null,'Patches'),patches,el('h3',null,'Jerseys'),jer)}
+  function hide(){if(dlg){dlg.hidden=true;document.body.style.overflow=''}}
+  function show(){if(!dlg){dlg=el('div',{id:'rewards',role:'dialog','aria-modal':'true','aria-labelledby':'rwH'},el('div',{class:'rwcard'}));dlg.hidden=true;dlg.addEventListener('click',e=>{if(e.target===dlg)hide()});addEventListener('keydown',e=>{if(e.key==='Escape')hide()});document.body.append(dlg)}
+    draw();dlg.hidden=false;document.body.style.overflow='hidden';try{TRACK.ev('rewards_open')}catch(e){}}
+  /* the homepage card next to the badges */
+  function card(box){const s=st(),p=pts(s),eq=J(s.eq);const b=el('button',{class:'dc rwdc',type:'button'},el('span',{class:'ic',html:eq?art(eq,{patch:s.patch}):packArt(1)}),el('span',null,el('b',null,p+' reward points'),'Packs, patches and jerseys'));b.addEventListener('click',show);box.append(b)}
+  return{code,mini,show,card,pts:()=>pts(st())}})();
 /* First screen of the homepage: Continue playing (newest games in this device's history) and Top games, as picture cards. */
 function renderHero(){const box=$('#heroGames');if(!box)return;box.innerHTML='';const h=HIST.get(),find=id=>G.find(g=>g.id===id)||WIP.find(g=>g.id===id);
   const cont=Object.keys(h).filter(find).sort((a,b)=>(h[b].t||0)-(h[a].t||0)).slice(0,3).map(find);
@@ -274,7 +407,7 @@ let spinning=false;
 let artP=null;function loadArt(){if(G.every(x=>x.art))return Promise.resolve();return artP||(artP=new Promise(r=>{const s=document.createElement('script');s.src='/js/catalog-art.js';s.onload=()=>{const A=window.GART||{};G.forEach(x=>{if(!x.art&&A[x.id])x.art=A[x.id]});r()};s.onerror=()=>{artP=null;r()};document.head.append(s)}))}
 if(G.some(x=>!x.art))setTimeout(()=>{(window.requestIdleCallback||setTimeout)(()=>loadArt())},2500);
 function spinTo(g){if(spinning)return;if(G.some(x=>!x.art)){spinning=true;Promise.race([loadArt(),new Promise(r=>setTimeout(r,900))]).then(()=>{spinning=false;if(G.some(x=>!x.art))G.forEach(x=>{if(!x.art)x.art='<g transform="translate(42 18) scale(1.5)" fill="none" stroke="#1D1A2F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+icoPath(kindIco(x))+'</g>'});spinTo(g)});return}spinning=true;const n=S.get('detours',0)+1;S.set('detours',n);updDetourrs();
-  const quick=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;const pool=G.filter(x=>x!==g&&x!==current&&poolOK(x));const seq=[];let prev=null;for(let i=0;i<(quick?2:15);i++){let x;do{x=pick(pool)}while(x===prev&&pool.length>1);seq.push(x);prev=x}seq.push(g);
+  const quick=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;const pool=G.filter(x=>x!==g&&x!==current&&randOK(x));const seq=[];let prev=null;for(let i=0;i<(quick?2:15);i++){let x;do{x=pick(pool)}while(x===prev&&pool.length>1);seq.push(x);prev=x}seq.push(g);
   const ov=el('div',{class:'spin',role:'status','aria-live':'polite'});ov.innerHTML='<div class="spinbox"><div class="spinlbl">Detourr #'+n+'</div><div class="reel"><div class="pin"></div><div class="rcard"></div></div><div class="spinsub">Spinning…</div></div>';document.body.append(ov);
   const card=ov.querySelector('.rcard'),sub=ov.querySelector('.spinsub');
   const show=(x,land)=>{card.style.background=x.tint||'#fff';card.innerHTML='<svg viewBox="0 0 120 72" aria-hidden="true">'+(x.art||'')+'</svg><b></b>';card.querySelector('b').textContent=x.name;card.classList.remove('tick','land');void card.offsetWidth;card.classList.add(land?'land':'tick')};
@@ -284,7 +417,7 @@ function spinTo(g){if(spinning)return;if(G.some(x=>!x.art)){spinning=true;Promis
     beep(260+i*28,.035,'square',.03);i++;const t=i/seq.length;setTimeout(step,quick?60:45+Math.pow(t,3)*250)};
   ov.addEventListener('click',()=>{if(i<seq.length-1){i=seq.length-1}});step()}
 updDetourrs();
-function renderForYou(){const recs=recommend(40).filter(r=>poolOK(r.g)).slice(0,18);const h=HIST.get();const n=Object.keys(h).length;
+function renderForYou(){const recs=recommend(40).filter(r=>randOK(r.g)).slice(0,18);const h=HIST.get();const n=Object.keys(h).length;
   grid.append(el('div',{class:'sec fysec'},el('h3',{html:ico('sparkle')+' Recommended for you'}),el('span',null,n?'Picked from the '+n+' game'+(n>1?'s':'')+' you’ve played. The more you play, the better it gets.':'You haven’t played anything yet, so here are the favourites. Play a few and this tab learns what you like.')));
   recs.forEach(({g,why})=>{const t=el('a',{class:'tile',href:gameUrl(g)},el('div',{class:'art',style:'background:'+g.tint,html:'<svg viewBox="0 0 120 72" aria-hidden="true">'+g.art+'</svg>'}),el('div',{class:'txt'},el('small',{class:'why'},why),el('b',null,g.name),el('span',null,g.blurb),el('div',{class:'meta'},el('em',null,KIND[g.kind]||''),el('span',null,''))));grid.append(t)});
   if(n){const c=el('button',{class:'linkbtn fyclear',type:'button'},'Clear my play history');c.addEventListener('click',()=>{S.set('hist',{});renderGrid()});grid.append(el('div',{class:'sec'},c))}}
@@ -293,7 +426,7 @@ const QUICK_KINDS=['toy','info','weird','chill','game','casual','arcade','puzzle
 function renderContinue(){const h=HIST.get();const recent=G.filter(g=>h[g.id]&&poolOK(g)).sort((a,b)=>h[b.id].t-h[a.id].t).slice(0,3);if(!recent.length)return;
   grid.append(el('div',{class:'sec qsec'},el('h3',{html:ico('back')+' Continue'}),el('span',null,'Pick up where you left off.')));
   recent.forEach(g=>{const best=S.get(bestKey(g),null);let b='';try{b=best!=null&&g.fmt?'Best: '+g.fmt(best):''}catch(e){}grid.append(el('a',{class:'tile qtile',href:gameUrl(g)},el('div',{class:'art',style:'background:'+g.tint,html:'<svg viewBox="0 0 120 72" aria-hidden="true">'+g.art+'</svg>'}),el('div',{class:'txt'},el('b',null,g.name),el('span',null,g.blurb),el('div',{class:'meta'},el('em',null,KIND[g.kind]+' · '+durLabel(g)),el('span',null,b)))))})}
-function renderQuick(){const pool=G.filter(g=>CORE.has(g.id)&&QUICK_KINDS.includes(g.kind)&&poolOK(g)&&!(typeof isBig==='function'&&isBig(g)&&g.kind!=='geo'));const w=g=>['toy','info','weird','chill'].includes(g.kind)?2.2:1;const pick2=[];const left=pool.slice();while(pick2.length<8&&left.length){let tot=left.reduce((a,g)=>a+w(g),0),r=Math.random()*tot,k=0;for(;k<left.length-1;k++){r-=w(left[k]);if(r<=0)break}pick2.push(left.splice(k,1)[0])}
+function renderQuick(){const pool=G.filter(g=>CORE.has(g.id)&&QUICK_KINDS.includes(g.kind)&&randOK(g)&&!(typeof isBig==='function'&&isBig(g)&&g.kind!=='geo'));const w=g=>['toy','info','weird','chill'].includes(g.kind)?2.2:1;const pick2=[];const left=pool.slice();while(pick2.length<8&&left.length){let tot=left.reduce((a,g)=>a+w(g),0),r=Math.random()*tot,k=0;for(;k<left.length-1;k++){r-=w(left[k]);if(r<=0)break}pick2.push(left.splice(k,1)[0])}
   const sh=el('button',{class:'btn qshuf',type:'button',html:ico('shuffle')+' Shuffle'});sh.addEventListener('click',()=>{beep(500,.05,'triangle');renderGrid()});
   grid.append(el('div',{class:'sec qsec'},el('h3',{html:ico('bolt')+' Quick detourrs'}),el('span',null,'Ten seconds to ten minutes: satisfying toys, weird little games, cool facts and quick brain-teasers. Hit shuffle for a new batch.'),sh));
   pick2.forEach(g=>{const t=el('a',{class:'tile qtile',href:gameUrl(g)},el('div',{class:'art',style:'background:'+g.tint,html:'<svg viewBox="0 0 120 72" aria-hidden="true">'+g.art+'</svg>'}),el('div',{class:'txt'},el('b',null,g.name),el('span',null,g.blurb),el('div',{class:'meta'},el('em',null,KIND[g.kind]||''),el('span',null,''))));grid.append(t)})}
@@ -324,7 +457,9 @@ $('#aboutClose').addEventListener('click',closeAbout);
 about.addEventListener('click',e=>{if(e.target===about)closeAbout()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!about.hidden)closeAbout()});
 $('#imgCredits').addEventListener('click',()=>{const L=$('#imgList');if(!L.hidden){L.hidden=true;return}L.innerHTML='';(window.HYPE_CREDITS||[]).forEach(([t,f,a,l,u])=>{const p=el('p',null,el('b',null,t+': '),'“'+f+'” by '+a+', '+l+' ');p.append(el('a',{href:u,target:'_blank',rel:'noopener'},'(source)'));L.append(p)});if(!L.children.length)L.append(el('p',null,'No photos loaded.'));L.hidden=false});
+{const _rg=renderGrid;renderGrid=function(){_rg.apply(this,arguments);try{RATE.decorate()}catch(e){}}}
 renderGrid();try{renderDaily()}catch(e){}try{renderHero()}catch(e){}
+if(!PAGE){try{RATE.loadSum();RATE.site()}catch(e){}}
 /* each game has its own page; old /#id links from before the split are sent there */
 if(PAGE){const g=ALLG.find(x=>x.id===PAGE);if(g)openGame(g)}else{const h=(location.hash||'').slice(1);const old=h&&ALLG.find(g=>g.id===h);if(old)location.replace(gameUrl(old));addEventListener('hashchange',()=>{const g=ALLG.find(x=>x.id===location.hash.slice(1));if(g)location.replace(gameUrl(g))})}
 /* Dark / Light toggle: dark is the default; the choice is saved per device (the head script applies it before first paint).

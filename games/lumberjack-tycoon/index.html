@@ -188,6 +188,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #tTip.carry{right:calc(118px + env(safe-area-inset-right,0px));bottom:calc(236px + env(safe-area-inset-bottom,0px));width:58px;height:58px;font-size:11px}
 .g-short #tTip.carry{right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(74px + env(safe-area-inset-bottom,0px));width:46px;height:46px;font-size:10px}
 #introNet{color:var(--gold);font-weight:700;min-height:1.3em}
+.hasDebt #goal{top:78px}.hasDebt #order{top:146px}.g-touch.hasDebt #bar{top:calc(76px + env(safe-area-inset-top,0px))}
+#debtTxt{grid-column:2/4;font-size:11px;font-weight:800;color:#ff9a7a;white-space:nowrap}
 .riding #cross{display:none}
 .gorow{display:flex;gap:8px}.gorow .go{flex:2}.gorow .go2{flex:1;margin-top:0;height:50px}
 `;
@@ -195,7 +197,7 @@ const LT_HTML = `<div id="game">
 <canvas id="gl" tabindex="-1" aria-label="A 3D forest. Walk up to a tree and chop it with your axe."></canvas>
 <div id="vig"></div>
 <div id="hud">
- <div id="moneyBox" class="plate"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#ffd25a" stroke="#0e0c09" stroke-width="2.5"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#c99a1c" stroke-width="2"/><path d="M16 10v12M13 13.5c0-1.4 1.3-2 3-2s3 .7 3 2-1.3 1.8-3 2.4-3 1.1-3 2.4 1.3 2 3 2 3-.6 3-2" stroke="#7a5a08" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span id="money">0</span><span id="gems" title="Gems"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l6 6-6 10-6-10z" fill="#5ff0d0" stroke="#0e0c09" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 8h12M10 2v16" stroke="#1d8f7a" stroke-width="1"/></svg><b id="gemN">0</b></span><span id="axeName"></span></div>
+ <div id="moneyBox" class="plate"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="#ffd25a" stroke="#0e0c09" stroke-width="2.5"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="#c99a1c" stroke-width="2"/><path d="M16 10v12M13 13.5c0-1.4 1.3-2 3-2s3 .7 3 2-1.3 1.8-3 2.4-3 1.1-3 2.4 1.3 2 3 2 3-.6 3-2" stroke="#7a5a08" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span id="money">0</span><span id="gems" title="Gems"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2l6 6-6 10-6-10z" fill="#5ff0d0" stroke="#0e0c09" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 8h12M10 2v16" stroke="#1d8f7a" stroke-width="1"/></svg><b id="gemN">0</b></span><span id="axeName"></span><span id="debtTxt" hidden></span></div>
  <div id="goal" class="plate" hidden></div>
  <div id="order" class="plate" hidden></div>
  <div id="netTags"></div>
@@ -213,7 +215,7 @@ const LT_HTML = `<div id="game">
  <div id="prompt" class="plate" hidden></div>
  <div id="swing"><i></i></div>
  <div id="drive" class="plate" hidden><span id="truckName"></span><b id="speedo">0 km/h</b><span id="cargoTxt"></span><span class="keys" id="driveKeys"><kbd>E</kbd> get out <kbd>T</kbd> tip bed <kbd>H</kbd> horn</span></div>
- <div id="bar"><button class="slot on" id="s0" type="button" aria-label="Axe (1)"><span class="k">1</span><span class="n">Axe</span></button><button class="slot" id="s1" type="button" aria-label="Hands (2)"><span class="k">2</span><span class="n">Grab</span></button><button class="slot" id="s3" type="button" aria-label="Chainsaw (3)" hidden><span class="k">3</span><span class="n">Saw</span></button><button class="slot" id="s2" type="button" aria-label="Build (B)" hidden><span class="k">B</span><span class="n">Build</span></button><button class="slot pk" id="sPack" type="button" aria-label="Wood on your back (C)" hidden></button></div>
+ <div id="bar"><button class="slot on" id="s0" type="button" aria-label="Axe (1)"><span class="k">1</span><span class="n">Axe</span></button><button class="slot" id="s1" type="button" aria-label="Hands (2)"><span class="k">2</span><span class="n">Grab</span></button><button class="slot" id="s3" type="button" aria-label="Chainsaw (3)" hidden><span class="k">3</span><span class="n">Saw</span></button><button class="slot" id="s4" type="button" aria-label="Crane remote (4)" hidden><span class="k">4</span><span class="n">Crane</span></button><button class="slot" id="s2" type="button" aria-label="Build (B)" hidden><span class="k">B</span><span class="n">Build</span></button><button class="slot pk" id="sPack" type="button" aria-label="Wood on your back (C)" hidden></button></div>
  <div id="resume" class="plate" hidden>Click to play</div>
 </div>
 <div id="touch" hidden>
@@ -275,14 +277,14 @@ const LC = hex => tmpC.set(hex).convertSRGBToLinear();
 /* ================= game data ================= */
 // tree species: price is dollars per cubic metre of log; tier is the axe tier needed to cut it
 const SP = [
-  { id: 'oak', name: 'Oak', bark: 0x6e4b30, wood: 0xd8b07a, leaf: 0x4f8f3a, price: 11, hard: 1, tier: 0, dens: 1, r: [0.28, 0.4], h: [6, 8.5], regrow: [240, 360] },
-  { id: 'birch', name: 'Birch', bark: 0xe9e5da, wood: 0xf2e2bd, leaf: 0x9cc84a, price: 15, hard: 1.2, tier: 0, dens: 0.9, r: [0.22, 0.31], h: [8.5, 12], regrow: [240, 360] },
-  { id: 'maple', name: 'Maple', bark: 0x5b3e2b, wood: 0xe8c494, leaf: 0xe0702a, price: 21, hard: 1.6, tier: 0, dens: 1.05, r: [0.3, 0.42], h: [6.5, 9], regrow: [300, 420] },
-  { id: 'pine', name: 'Snow Pine', bark: 0x4d3727, wood: 0xead2a0, leaf: 0x2f5e3f, price: 26, hard: 2.4, tier: 1, dens: 0.8, r: [0.3, 0.46], h: [10, 15], regrow: [300, 450] },
-  { id: 'bog', name: 'Bogwood', bark: 0x3e3b2e, wood: 0xa4593f, leaf: 0x5d6b2f, price: 52, hard: 3.6, tier: 2, dens: 1.3, r: [0.45, 0.66], h: [7, 10], regrow: [420, 600] },
-  { id: 'glow', name: 'Glowbark', bark: 0xd5dde0, wood: 0x8ff0e0, leaf: 0x5ff0d0, price: 120, hard: 6.5, tier: 4, dens: 1.1, r: [0.78, 1.0], h: [11, 15], regrow: [700, 1000] },
-  { id: 'cherry', name: 'Cherry', bark: 0x6a4038, wood: 0xe0a080, leaf: 0xf3b8c8, price: 34, hard: 2, tier: 1, dens: 1, r: [0.28, 0.4], h: [6, 8.5], regrow: [300, 450] },
-  { id: 'iron', name: 'Ironwood', bark: 0x34302c, wood: 0x7a5640, leaf: 0x4a6a44, price: 85, hard: 4.8, tier: 3, dens: 1.4, r: [0.5, 0.7], h: [9, 12], regrow: [500, 700] },
+  { id: 'oak', name: 'Oak', bark: 0x6e4b30, wood: 0xd8b07a, leaf: 0x3a9a2e, price: 11, hard: 1, tier: 0, dens: 1, r: [0.28, 0.4], h: [6, 8.5], regrow: [240, 360] },
+  { id: 'birch', name: 'Birch', bark: 0xe9e5da, wood: 0xf2e2bd, leaf: 0x86c63e, price: 15, hard: 1.2, tier: 0, dens: 0.9, r: [0.22, 0.31], h: [8.5, 12], regrow: [240, 360] },
+  { id: 'maple', name: 'Maple', bark: 0x5b3e2b, wood: 0xe8c494, leaf: 0xe2701e, price: 21, hard: 1.6, tier: 0, dens: 1.05, r: [0.3, 0.42], h: [6.5, 9], regrow: [300, 420] },
+  { id: 'pine', name: 'Snow Pine', bark: 0x4d3727, wood: 0xead2a0, leaf: 0x2a7240, price: 26, hard: 2.4, tier: 1, dens: 0.8, r: [0.3, 0.46], h: [10, 15], regrow: [300, 450] },
+  { id: 'bog', name: 'Bogwood', bark: 0x3e3b2e, wood: 0xa4593f, leaf: 0x6c8e32, price: 52, hard: 3.6, tier: 2, dens: 1.3, r: [0.45, 0.66], h: [7, 10], regrow: [420, 600] },
+  { id: 'glow', name: 'Glowbark', bark: 0xd5dde0, wood: 0x8ff0e0, leaf: 0x4fe0c4, price: 120, hard: 6.5, tier: 4, dens: 1.1, r: [0.78, 1.0], h: [11, 15], regrow: [700, 1000] },
+  { id: 'cherry', name: 'Cherry', bark: 0x6a4038, wood: 0xe0a080, leaf: 0xf09cc0, price: 34, hard: 2, tier: 1, dens: 1, r: [0.28, 0.4], h: [6, 8.5], regrow: [300, 450] },
+  { id: 'iron', name: 'Ironwood', bark: 0x34302c, wood: 0x7a5640, leaf: 0x357436, price: 85, hard: 4.8, tier: 3, dens: 1.4, r: [0.5, 0.7], h: [9, 12], regrow: [500, 700] },
 ];
 const PLANK_MUL = 3.6;
 const AXES = [
@@ -315,7 +317,7 @@ const WORKERS = {
 const PRODUCTS = [{ id: 'beam', name: 'Beam', planks: 2, mul: 1.35 }, { id: 'crate', name: 'Furniture crate', planks: 3, mul: 1.9 }];
 const TRUCKS = {
   pickup: { name: 'Old Pickup', price: 0, color: 0xc9553a, W: 2.1, bedW: 1.86, bedL: 2.6, wall: 0.5, floor: 0.95, hoodL: 1.0, cabL: 1.4, cabH: 1.95, wb: 3.1, wr: 0.45, speed: 19, acc: 8, desc: '' },
-  hauler: { name: 'Hauler XL', price: 2500, color: 0x3d7bb0, W: 2.5, bedW: 2.3, bedL: 5.4, wall: 0.75, floor: 1.1, hoodL: 1.2, cabL: 1.5, cabH: 2.3, wb: 4.6, wr: 0.55, speed: 18, acc: 7, desc: 'A long flatbed truck with tall sides. Carries twice as much wood.' },
+  hauler: { name: 'Hauler XL', price: 2500, color: 0xf2b51e, W: 2.5, bedW: 2.3, bedL: 5.4, wall: 0.75, floor: 1.1, hoodL: 1.2, cabL: 1.5, cabH: 2.3, wb: 4.6, wr: 0.55, speed: 18, acc: 7, desc: 'A long flatbed truck with tall sides. Carries twice as much wood.' },
   forwarder: { name: 'Big Bunk Forwarder', kind: 'forwarder', price: 8000, color: 0x2f7a3a, W: 2.7, bedW: 2.5, bedL: 6, wall: 1.1, floor: 1.35, hoodL: 1.4, cabL: 1.7, cabH: 2.6, wb: 5.2, wr: 0.68, speed: 12, acc: 5, desc: 'A forest machine with a crane. Press F next to logs and it loads them for you.' },
   feller: { name: 'Timber Claw Feller', kind: 'feller', price: 18000, color: 0xf2b51e, W: 3.0, bedW: 0, bedL: 0, wall: 0, floor: 1.4, hoodL: 1.6, cabL: 2.0, cabH: 3.7, wb: 3.6, wr: 0.95, speed: 9, acc: 4, desc: 'Drive up to a tree and press F: the claw hugs it, saws it and lays it down.' },
 };
@@ -348,8 +350,8 @@ const PLOT_PRICE = 150, NORTH_TOLL = 600, EAST_TOLL = 2500, FERRY_PASS = 10000;
 const DAY_LEN = 720;
 
 function fresh() {
-  return { v: 3, money: 0, earned: 0, axes: ['fists'], axe: 'fists', gems: 0, cls: '', perks: { arms: 0, luck: 0, back: 0, feet: 0 }, pack: [], rack: 0, straps: 0, ownT: ['pickup'], repair: {}, tool: 0, plot: -1, unlock: { n: 0, e: 0, f: 0 }, motor: 0,
-    inv: { mill1: 0, mill2: 0, mill3: 0, belt: 0, shop1: 0 }, placed: [], trucks: [], time: 0.3, day: 1, cam: 0, seen: {}, stats: { trees: 0, sold: 0, planks: 0, crafted: 0, contracts: 0, giants: 0, storms: 0, hauls: 0 },
+  return { v: 4, money: 0, earned: 0, axes: ['fists'], axe: 'fists', gems: 0, cls: '', perks: { arms: 0, luck: 0, back: 0, feet: 0 }, pack: [], rack: 0, straps: 0, ownT: ['pickup'], repair: {}, tool: 0, plot: -1, unlock: { n: 0, e: 0, f: 0 }, motor: 0,
+    inv: { mill1: 0, mill2: 0, mill3: 0, belt: 0, shop1: 0 }, placed: [], trucks: [], time: 0.3, day: 1, cam: 2, debt: 5000, remote: 0, seen: {}, stats: { trees: 0, sold: 0, planks: 0, crafted: 0, contracts: 0, giants: 0, storms: 0, hauls: 0 },
     saws: [], saw: '', fellerLv: 0, workers: { logger: 0, seller: 0 }, orders: [], orderSeq: 1, daily: { day: '', done: 0, streak: 0, last: '' }, ach: {} };
 }
 let S = fresh();
@@ -373,7 +375,7 @@ function loadArt(onp) {
     if (HQ) jobs.push(() => img('tex/' + k + '_nor.jpg', false).then(t => { (ART.tex[k] = ART.tex[k] || {}).n = t; }));
   }
   for (const k of ['fol_broad', 'fol_pine', 'fol_maple']) jobs.push(() => img('tex/' + k + '.png', true).then(t => { ART.img[k] = t; }));
-  const glb = (k, path) => () => new Promise(res => new T.GLTFLoader().load(ART_BASE + path, g => { ART.glb[k] = g; res(); }, undefined, () => res()));
+  const glb = (k, path) => () => new Promise(res => new T.GLTFLoader().load(ART_BASE + path, g => { g.scene.traverse(o => { if (o.isMesh) for (const m of [].concat(o.material)) if (m && m.metalness != null) { m.metalness = Math.min(m.metalness, 0.05); m.roughness = Math.max(m.roughness, 0.6); } }); ART.glb[k] = g; res(); }, undefined, () => res()));
   jobs.push(glb('anims', 'chars/q_anims.glb'), glb('head', 'chars/q_head.glb'), glb('peasant', 'chars/q_peasant.glb'), glb('hatchet', 'models/hatchet.glb'), glb('boulder', 'models/boulder.glb'));
   if (HQ) jobs.push(() => new Promise(res => new T.RGBELoader().setDataType(T.UnsignedByteType).load(ART_BASE + 'hdr/day.hdr', h => { ART.hdr = h; res(); }, undefined, () => res())));
   let done = 0;
@@ -399,9 +401,19 @@ let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: HQ, powerPreference: 'high-performance' }); }
 catch (e) { const er = $('#err'); er.hidden = false; er.textContent = 'This browser could not start 3D graphics (WebGL), which this game needs.'; return () => { shadow.innerHTML = ''; }; }
 renderer.setPixelRatio(1);
+// Painted toon look: light falls off in two soft bands instead of a smooth gradient, and the final colour is a
+// little more saturated. Patched into three's shader pieces while the game runs and put back on exit.
+const CHUNK0 = {}, SC = THREE.ShaderChunk;
+const patchChunk = (k, f) => { if (!SC[k]) return; CHUNK0[k] = SC[k]; SC[k] = f(SC[k]); };
+patchChunk('lights_pars_begin', s => 'float toonR(float x) { return smoothstep(-0.04, 0.1, x) * 0.6 + smoothstep(0.28, 0.6, x) * 0.4; }\n' + s);
+patchChunk('lights_physical_pars_fragment', s => s.split('float dotNL = saturate( dot( geometry.normal, directLight.direction ) );').join('float dotNL = toonR( dot( geometry.normal, directLight.direction ) );'));
+patchChunk('lights_lambert_vertex', s => s.split('saturate( dotNL )').join('toonR( dotNL )'));
+patchChunk('tonemapping_pars_fragment', s => s + '\nvec3 toonGrade(vec3 c) { float l = dot(c, vec3(0.2126, 0.7152, 0.0722)); c = max(mix(vec3(l), c, 1.28), 0.0); return c; }\n');
+patchChunk('tonemapping_fragment', s => s + '\n#if defined( TONE_MAPPING )\ngl_FragColor.rgb = toonGrade(gl_FragColor.rgb);\n#endif\n');
+const unpatchChunks = () => { for (const k in CHUNK0) SC[k] = CHUNK0[k]; };
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;
+renderer.toneMappingExposure = 0.92;
 renderer.shadowMap.enabled = HQ;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
@@ -410,7 +422,7 @@ const camera = new THREE.PerspectiveCamera(66, 16 / 9, 0.1, FOG_FAR + 25);
 camera.rotation.order = 'YXZ';
 scene.add(camera);
 scene.fog = new THREE.FogExp2(0xcfe4f2, HQ ? 0.0075 : 0.011);
-const hemi = new THREE.HemisphereLight(0xd6ebff, 0x5a4a32, HQ ? 0.35 : 0.9); scene.add(hemi);
+const hemi = new THREE.HemisphereLight(0xd6ebff, 0x6a8a3a, HQ ? 0.5 : 1.0); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xfff1d6, 2.6); scene.add(sun); scene.add(sun.target);
 const SHR = 42;
 if (HQ) {
@@ -441,6 +453,12 @@ function pmat(o) {
     return m;
   }
   return new THREE.MeshLambertMaterial(base);
+}
+// painted look for photo textures: keep their light and dark detail, take the colour from the material tint
+function flatTex(m, mul) {
+  const prev = m.onBeforeCompile;
+  m.onBeforeCompile = sh => { if (prev && prev !== THREE.Material.prototype.onBeforeCompile) prev(sh); sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\n vec4 texelColor = mapTexelToLinear(texture2D(map, vUv)); float tl = dot(texelColor.rgb, vec3(0.3, 0.59, 0.11)); diffuseColor.rgb *= clamp(mix(1.0, tl * ' + mul.toFixed(2) + ', 0.6), 0.45, 1.5);\n#endif'); };
+  m.customProgramCacheKey = () => 'flat' + mul; return m;
 }
 // sky dome: drawn first with no depth so everything else covers it
 const skyU = { top: { value: new THREE.Color(0x4f9fe0) }, hor: { value: new THREE.Color(0xcfe4f2) }, sunDir: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color(1, 0.9, 0.7) }, moonDir: { value: new THREE.Vector3(0, -1, 0) }, night: { value: 0 } };
@@ -715,8 +733,8 @@ const roadAt = (x, z) => RDG[gi(x, z)] / 255;
 const TCOL = new Float32Array(GN * GN * 3), SPA = new Float32Array(GN * GN * 4), SPB = new Float32Array(GN * GN * 3), TTINT = new Float32Array(GN * GN * 3);
 (function splatTerrain() {
   const n = new THREE.Vector3();
-  const TINT = [[1, 1, 1], [1.08, 1.1, 0.95], [1.12, 0.98, 0.78], [0.95, 1, 1.02], [0.82, 0.86, 0.72], [0.85, 1.05, 1.0], [1, 1, 1]];
-  const MAPC = { g: [111, 150, 74], f: [120, 108, 62], m: [86, 74, 52], r: [130, 132, 136], gr: [168, 140, 98], s: [215, 196, 146], sn: [240, 245, 250] };
+  const TINT = [[1, 1, 1], [1.12, 1.08, 0.9], [1.3, 1.0, 0.6], [0.95, 1, 1.02], [0.85, 0.92, 0.62], [0.85, 1.08, 1.0], [1, 1, 1]];
+  const MAPC = { g: [104, 186, 52], f: [110, 168, 50], m: [150, 106, 60], r: [140, 140, 148], gr: [204, 150, 84], s: [232, 210, 150], sn: [240, 245, 250] };
   for (let j = 0; j < GN; j++) for (let i = 0; i < GN; i++) {
     const k = j * GN + i, x = -HALF + i * GS, z = -HALF + j * GS, h = HG[k], reg = RG[k];
     nAt(x, z, n);
@@ -750,9 +768,10 @@ const CH = 60, CHN = 15;                // 15 x 15 chunks of 60 m for terrain an
 // blends six ground textures by the per-vertex weights, with matching normal maps on high graphics
 function makeTerrainMat() {
   const T = (k, kind) => tx(k, kind);
-  const m = HQ ? std({ vertexColors: true, roughness: 0.95, envI: 0.6 }) : new THREE.MeshLambertMaterial({ vertexColors: true });
+  // matte painted ground: no shine at low sun angles (and cheaper than the physical material)
+  const m = new THREE.MeshLambertMaterial({ vertexColors: true });
   m.map = T('grass', 'c');
-  if (HQ && T('grass', 'n')) { m.normalMap = T('grass', 'n'); m.normalScale = new THREE.Vector2(0.9, 0.9); }
+
   const have = !!m.map;
   m.onBeforeCompile = sh => {
     const U = { tG: T('grass', 'c'), tF: T('forest', 'c'), tM: T('mud', 'c'), tR: T('rock', 'c'), tV: T('gravel', 'c'), tS: T('sand', 'c'), nF: T('forest', 'n') || T('grass', 'n'), nR: T('rock', 'n') || T('grass', 'n'), nV: T('gravel', 'n') || T('grass', 'n') };
@@ -764,7 +783,10 @@ function makeTerrainMat() {
       'vec3 cG = vec3(0.88, 1.06, 0.72) * mix(mapTexelToLinear(texture2D(tG, wuv * 0.22)).rgb, mapTexelToLinear(texture2D(tG, wuv * 0.041)).rgb, 0.35);',
       'vec3 cF = mapTexelToLinear(texture2D(tF, wuv * 0.2)).rgb, cM = mapTexelToLinear(texture2D(tM, wuv * 0.25)).rgb, cR = mapTexelToLinear(texture2D(tR, wuv * 0.2)).rgb, cV = mapTexelToLinear(texture2D(tV, wuv * 0.3)).rgb, cS = mapTexelToLinear(texture2D(tS, wuv * 0.15)).rgb;',
       'vec3 tc = cG * vSa.x + cF * vSa.y + cM * vSa.z + cR * vSa.w + cV * vSb.x + cS * vSb.y + vec3(0.72, 0.76, 0.82) * vSb.z;',
-      'diffuseColor.rgb *= tc;'].join('\n') : '');
+      // painted look: flat, saturated base colours with only a little of the photo texture showing through
+      'vec3 fc = vec3(0.075, 0.30, 0.02) * vSa.x + vec3(0.09, 0.26, 0.025) * vSa.y + vec3(0.36, 0.17, 0.06) * vSa.z + vec3(0.30, 0.30, 0.33) * vSa.w + vec3(0.62, 0.33, 0.11) * vSb.x + vec3(0.80, 0.66, 0.36) * vSb.y + vec3(0.82, 0.88, 0.95) * vSb.z;',
+      'float tl = dot(tc, vec3(0.3, 0.59, 0.11)) / max(dot(fc, vec3(0.3, 0.59, 0.11)) * 0.55, 0.02);',
+      'diffuseColor.rgb *= fc * mix(1.0, clamp(tl, 0.55, 1.45), 0.4);'].join('\n') : '');
     if (HQ && m.normalMap) fs = fs.replace('#include <normal_fragment_maps>', [
       'vec3 tnm = texture2D(normalMap, vUv * 0.22).xyz * (vSa.x + vSb.y + vSb.z) + texture2D(nF, vUv * 0.2).xyz * (vSa.y + vSa.z) + texture2D(nR, vUv * 0.2).xyz * vSa.w + texture2D(nV, vUv * 0.3).xyz * vSb.x;',
       'tnm = tnm * 2.0 - 1.0; tnm.xy *= normalScale;',
@@ -1183,11 +1205,18 @@ const birchTex = canvasTex(256, 512, (g, w, h) => {
 });
 const endTex = canvasTex(256, 256, (g, w, h) => {
   const c = w / 2;
-  g.fillStyle = '#e6c99a'; g.fillRect(0, 0, w, h);
-  for (let r = c; r > 2; r -= 3 + rnd2() * 5) { g.strokeStyle = 'rgba(120,80,40,' + (0.18 + rnd2() * 0.25) + ')'; g.lineWidth = 1 + rnd2() * 1.5; g.beginPath(); g.ellipse(c + (rnd2() - 0.5) * 2, c + (rnd2() - 0.5) * 2, r, r * (0.97 + rnd2() * 0.05), 0, 0, TAU); g.stroke(); }
-  g.fillStyle = 'rgba(90,55,25,.7)'; g.beginPath(); g.arc(c, c, 4, 0, TAU); g.fill();
-  for (let i = 0; i < 3; i++) { const a = rnd2() * TAU; g.strokeStyle = 'rgba(70,40,20,.45)'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(c + Math.cos(a) * 8, c + Math.sin(a) * 8); g.lineTo(c + Math.cos(a) * c * (0.4 + rnd2() * 0.4), c + Math.sin(a) * c * (0.4 + rnd2() * 0.4)); g.stroke(); }
-  g.strokeStyle = 'rgba(70,45,25,.95)'; g.lineWidth = w * 0.07; g.beginPath(); g.arc(c, c, c - w * 0.035, 0, TAU); g.stroke();
+  g.fillStyle = '#f0bf78'; g.fillRect(0, 0, w, h);
+  const gr = g.createRadialGradient(c, c, 4, c, c, c); gr.addColorStop(0, '#f6d090'); gr.addColorStop(1, '#e2a45c'); g.fillStyle = gr; g.beginPath(); g.arc(c, c, c, 0, TAU); g.fill();
+  for (let r = c - 14, k = 0; r > 4; r -= 7 + rnd2() * 5, k++) { g.strokeStyle = 'rgba(150,84,34,' + (0.45 + rnd2() * 0.3) + ')'; g.lineWidth = 2.5 + rnd2() * 2; g.beginPath(); g.ellipse(c + (rnd2() - 0.5) * 3, c + (rnd2() - 0.5) * 3, r, r * (0.95 + rnd2() * 0.06), 0, 0, TAU); g.stroke(); }
+  g.fillStyle = 'rgba(140,76,30,.9)'; g.beginPath(); g.arc(c, c, 5, 0, TAU); g.fill();
+  for (let i = 0; i < 2; i++) { const a = rnd2() * TAU; g.strokeStyle = 'rgba(120,64,26,.55)'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(c + Math.cos(a) * 8, c + Math.sin(a) * 8); g.lineTo(c + Math.cos(a) * c * 0.6, c + Math.sin(a) * c * 0.6); g.stroke(); }
+  g.strokeStyle = '#6a3e1e'; g.lineWidth = w * 0.09; g.beginPath(); g.arc(c, c, c - w * 0.045, 0, TAU); g.stroke();
+  g.strokeStyle = '#8a5a2e'; g.lineWidth = w * 0.025; g.beginPath(); g.arc(c, c, c - w * 0.1, 0, TAU); g.stroke();
+});
+// soft painted clumps that break up the leaf balls
+const LEAFN = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = '#9a9a9a'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 420; i++) { const x = rnd2() * w, y = rnd2() * h, r = 6 + rnd2() * 18, v = 110 + rnd2() * 120 | 0; const gr = g.createRadialGradient(x, y - r * 0.3, 1, x, y, r); gr.addColorStop(0, 'rgba(' + v + ',' + v + ',' + v + ',.9)'); gr.addColorStop(1, 'rgba(' + (v - 60) + ',' + (v - 60) + ',' + (v - 60) + ',0)'); g.fillStyle = gr; for (const ox of [-w, 0, w]) for (const oy of [-h, 0, h]) { g.beginPath(); g.arc(x + ox, y + oy, r, 0, TAU); g.fill(); } }
 });
 const leafFallback = () => canvasTex(256, 256, (g, w, h) => { for (let i = 0; i < 140; i++) { const x = 30 + rnd2() * (w - 60), y = 30 + rnd2() * (h - 60), a = rnd2() * TAU, v = 90 + rnd2() * 80 | 0; g.fillStyle = 'rgb(' + (v * 0.45 | 0) + ',' + v + ',' + (v * 0.35 | 0) + ')'; g.beginPath(); g.ellipse(x, y, 12, 5, a, 0, TAU); g.fill(); } });
 const FOL = { broad: ART.img.fol_broad || leafFallback(), pine: ART.img.fol_pine || leafFallback(), maple: ART.img.fol_maple || leafFallback() };
@@ -1219,16 +1248,47 @@ function branchInto(mb, x0, y0, z0, x1, y1, z1, r) {
   for (let i = 0; i < P.length / 3; i++) { mb.p.push(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]); mb.n.push(N[i * 3], N[i * 3 + 1], N[i * 3 + 2]); mb.u.push(U[i * 2], U[i * 2 + 1] * l / 1.2); mb.c.push(0.85, 0.85, 0.85); }
   ng.dispose();
 }
+// a fluffy leaf ball: a lumpy sphere whose normals lean out from the whole crown, so canopies shade like soft clouds
+const BLOBG = [0, 1, 2].map(d => new THREE.IcosahedronGeometry(1, d));
+function blobInto(mb, cx, cy, cz, rx, ry, rz, det, col, ccx, ccy, ccz, seed) {
+  const P = BLOBG[det].attributes.position.array;
+  for (let i = 0; i < P.length; i += 3) {
+    const dx = P[i], dy = P[i + 1], dz = P[i + 2];
+    const j = 1 + (h2(Math.round(dx * 40), Math.round(dy * 40) + seed * 7, Math.round(dz * 40)) - 0.5) * 0.22;
+    const x = cx + dx * rx * j, y = cy + dy * ry * j, z = cz + dz * rz * j;
+    mb.p.push(x, y, z);
+    let nx = dx * 0.55 + (x - ccx) * 0.25, ny = dy * 0.55 + (y - ccy) * 0.25 + 0.05, nz = dz * 0.55 + (z - ccz) * 0.25; const l = Math.hypot(nx, ny, nz) || 1; mb.n.push(nx / l, ny / l, nz / l);
+    const up = clamp((dy + 1) / 2, 0, 1), ao = 0.42 + up * 0.66;
+    mb.c.push(col[0] * ao, col[1] * ao, col[2] * ao);
+    mb.u.push(Math.atan2(dz, dx) / TAU * 2 + seed * 0.37, dy * 0.8 + seed * 0.21);
+  }
+}
+// a stack of cones for pines
+function coneInto(mb, y, r, h, col, seg) {
+  const g = new THREE.ConeGeometry(r, h, seg, 2, false).toNonIndexed(); g.translate(0, y + h / 2, 0);
+  const P = g.attributes.position.array, U = g.attributes.uv.array;
+  for (let i = 0; i < P.length / 3; i++) {
+    const x = P[i * 3], yy = P[i * 3 + 1], z = P[i * 3 + 2]; const dr = Math.hypot(x, z) || 1;
+    const lump = 1 + (h2(Math.round(x * 30), Math.round(yy * 30), Math.round(z * 30)) - 0.5) * 0.18;
+    mb.p.push(x * lump, yy, z * lump);
+    let nx = x / dr, ny = 0.9, nz = z / dr; if (yy <= y + 0.01) { nx = 0; ny = -1; nz = 0; } const l = Math.hypot(nx, ny, nz); mb.n.push(nx / l, ny / l, nz / l);
+    const up = clamp((yy - y) / h, 0, 1), ao = 0.7 + up * 0.4 - (yy <= y + 0.01 ? 0.25 : 0);
+    mb.c.push(col[0] * ao, col[1] * ao, col[2] * ao); mb.u.push(U[i * 2] * 2, U[i * 2 + 1]);
+  }
+  g.dispose();
+}
+// leaf colours per species (painted, saturated)
+const LEAFC = { oak: [0x3a9a2e, 0x4cae36, 0x2e8428, 0x5cbc3c], birch: [0x86c63e, 0x9ed24c, 0x74b434], maple: [0xe2701e, 0xec8a2a, 0xd0521e, 0xeea83a], pine: [0x2a7240, 0x34804a, 0x22623a], bog: [0x6c8e32, 0x7e9e40, 0x5c7c2a], glow: [0x4fe0c4, 0x7ff0dc, 0x34c8b0], cherry: [0xf09cc0, 0xf6b6d0, 0xe680ac], iron: [0x357436, 0x40843e, 0x2c622e] };
 // species models: R and H are the reference trunk radius and height the instance scale is applied to
 const SPEC = {
-  oak: { R: 0.35, H: 7, fol: 'broad', tint: 0xa8d08a, bark: 0xb39a88, crown: [[0, 6.3, 0, 2.7, 1.8, 2.7, 26], [1.4, 5.3, 0.6, 1.8, 1.3, 1.8, 10], [-1.3, 5.6, -0.6, 1.9, 1.3, 1.9, 10], [0.2, 7.6, -0.3, 1.7, 1.1, 1.7, 8]], card: 1.9, br: 4 },
+  oak: { R: 0.35, H: 7, fol: 'broad', tint: 0xa8d08a, bark: 0xa8704a, crown: [[0, 6.3, 0, 2.7, 1.8, 2.7, 26], [1.4, 5.3, 0.6, 1.8, 1.3, 1.8, 10], [-1.3, 5.6, -0.6, 1.9, 1.3, 1.9, 10], [0.2, 7.6, -0.3, 1.7, 1.1, 1.7, 8]], card: 1.9, br: 4 },
   birch: { R: 0.27, H: 10.5, fol: 'broad', tint: 0xd8ec9a, bark: 0xffffff, birch: true, crown: [[0, 8.6, 0, 1.7, 2.6, 1.7, 24], [0.6, 6.9, 0.2, 1.3, 1.4, 1.3, 10], [-0.1, 10.4, 0, 1.1, 1.1, 1.1, 6]], card: 1.5, br: 3 },
-  maple: { R: 0.37, H: 7.5, fol: 'maple', tint: 0xffe0c0, bark: 0xa08878, crown: [[0, 6.4, 0, 2.8, 1.9, 2.8, 30], [1.7, 5.5, 0, 1.9, 1.3, 1.9, 10], [-1.6, 5.6, 0.4, 2.0, 1.3, 2.0, 10]], card: 2.0, br: 4 },
-  pine: { R: 0.42, H: 13.5, fol: 'pine', tint: 0x9fc29a, bark: 0x9a8070, pine: true, card: 2.2, br: 0 },
-  bog: { R: 0.58, H: 9, fol: 'broad', tint: 0x7f8a52, bark: 0x7a7468, flare: 1.75, wob: 0.18, crown: [[0, 8.1, 0, 2.9, 1.1, 2.9, 26], [1.8, 7.3, 0.6, 2.0, 0.9, 2.0, 8], [-1.8, 7.5, -0.5, 2.0, 0.9, 2.0, 8]], card: 2.1, br: 5 },
+  maple: { R: 0.37, H: 7.5, fol: 'maple', tint: 0xffe0c0, bark: 0x9a6448, crown: [[0, 6.4, 0, 2.8, 1.9, 2.8, 30], [1.7, 5.5, 0, 1.9, 1.3, 1.9, 10], [-1.6, 5.6, 0.4, 2.0, 1.3, 2.0, 10]], card: 2.0, br: 4 },
+  pine: { R: 0.42, H: 13.5, fol: 'pine', tint: 0x9fc29a, bark: 0x9a6a46, pine: true, card: 2.2, br: 0 },
+  bog: { R: 0.58, H: 9, fol: 'broad', tint: 0x7f8a52, bark: 0x7a6a50, flare: 1.75, wob: 0.18, crown: [[0, 8.1, 0, 2.9, 1.1, 2.9, 26], [1.8, 7.3, 0.6, 2.0, 0.9, 2.0, 8], [-1.8, 7.5, -0.5, 2.0, 0.9, 2.0, 8]], card: 2.1, br: 5 },
   glow: { R: 0.95, H: 14.5, fol: 'broad', tint: 0x9ff8e8, bark: 0xe8f2f2, crown: [[0, 12.8, 0, 3.8, 2.6, 3.8, 34], [2.6, 11.3, 0.8, 2.6, 1.6, 2.6, 12], [-2.4, 11.6, -0.8, 2.7, 1.7, 2.7, 12]], card: 2.8, br: 5 },
-  cherry: { R: 0.34, H: 7, fol: 'broad', tint: 0xffc8d6, bark: 0xa07870, crown: [[0, 6, 0, 2.6, 1.6, 2.6, 26], [1.4, 5.2, 0.5, 1.7, 1.1, 1.7, 9], [-1.3, 5.4, -0.6, 1.7, 1.1, 1.7, 9]], card: 1.8, br: 4 },
-  iron: { R: 0.6, H: 10.5, fol: 'broad', tint: 0x7d9a74, bark: 0x6a625c, wob: 0.08, crown: [[0, 9.2, 0, 3.1, 1.8, 3.1, 28], [1.9, 8.1, 0.5, 2.0, 1.2, 2.0, 10], [-1.9, 8.3, -0.6, 2.0, 1.2, 2.0, 10]], card: 2.2, br: 5 },
+  cherry: { R: 0.34, H: 7, fol: 'broad', tint: 0xffc8d6, bark: 0x9a5e4c, crown: [[0, 6, 0, 2.6, 1.6, 2.6, 26], [1.4, 5.2, 0.5, 1.7, 1.1, 1.7, 9], [-1.3, 5.4, -0.6, 1.7, 1.1, 1.7, 9]], card: 1.8, br: 4 },
+  iron: { R: 0.6, H: 10.5, fol: 'broad', tint: 0x7d9a74, bark: 0x5e4c40, wob: 0.08, crown: [[0, 9.2, 0, 3.1, 1.8, 3.1, 28], [1.9, 8.1, 0.5, 2.0, 1.2, 2.0, 10], [-1.9, 8.3, -0.6, 2.0, 1.2, 2.0, 10]], card: 2.2, br: 5 },
 };
 const TPL = SP.map((sp, si) => {
   const C = SPEC[sp.id], R = C.R, Hh = C.H, trunk = new MB(), leaves = new MB(), ft = new MB(), fl = new MB();
@@ -1236,25 +1296,27 @@ const TPL = SP.map((sp, si) => {
   trunkInto(trunk, R, Hh, HQ ? 9 : 7, C.flare, C.wob);
   trunkInto(ft, R, Hh, 5, C.flare, 0);
   let crownY = Hh * 0.55;
-  const jt = () => { const v = 0.82 + wr() * 0.3; return [tint[0] * v, tint[1] * v, tint[2] * v]; };
+  const pal = LEAFC[sp.id].map(c => col3(c));
+  const pc = () => { const c = pal[Math.floor(wr() * pal.length)], v = 0.92 + wr() * 0.16; return [c[0] * v, c[1] * v, c[2] * v]; };
+  let seed = si * 13;
   if (C.pine) {
-    crownY = 2.4;
-    for (let k = 0; k < 8; k++) {
-      const y = 2.4 + k * 1.45, r = 3.3 * (1 - k / 8.6) + 0.35, n = Math.max(3, 8 - k);
-      for (let q = 0; q < n; q++) { const a = q / n * TAU + k * 0.7 + wr() * 0.4, d = r * 0.5; card(leaves, Math.cos(a) * d, y, Math.sin(a) * d, r * 1.05, -a + PI / 2, -1.25 + wr() * 0.3, 0, y + 0.5, 0, jt()); }
-      for (let q = 0; q < 2; q++) { const a = wr() * TAU; card(leaves, Math.cos(a) * r * 0.25, y + 0.5, Math.sin(a) * r * 0.25, r * 0.9, wr() * PI, 0, 0, y, 0, jt()); }
-    }
-    card(leaves, 0, Hh + 0.6, 0, 1.6, 0, 0, 0, Hh, 0, jt()); card(leaves, 0, Hh + 0.6, 0, 1.6, PI / 2, 0, 0, Hh, 0, jt());
-    for (let k = 0; k < 4; k++) { const y = 3 + k * 2.8, r = 3.3 * (1 - k / 4.5) + 0.4; for (let q = 0; q < 3; q++) { const a = q / 3 * TAU + k; card(fl, Math.cos(a) * r * 0.45, y, Math.sin(a) * r * 0.45, r * 1.3, -a + PI / 2, -1.2, 0, y + 0.5, 0, tint); } }
+    crownY = 2.2;
+    const n = 5;
+    for (let k = 0; k < n; k++) { const t = k / n, y = 2.2 + t * (Hh - 2.6), r = 3.0 * (1 - t * 0.78) + 0.3, h = 3.4 - t * 1.2; coneInto(leaves, y, r, h, pc(), HQ ? 10 : 8); }
+    coneInto(fl, 2.4, 3.0, Hh * 0.55, pal[0], 5); coneInto(fl, 2.4 + Hh * 0.38, 2.0, Hh * 0.45, pal[1], 5);
   } else {
-    for (const [cx, cy, cz, rx, ry, rz, n0] of C.crown) {
-      const n = Math.round(n0 * (HQ ? 1.7 : 1.1));
-      for (let q = 0; q < n; q++) {
-        const u = wr() * TAU, v = Math.acos(wr() * 2 - 1), rr0 = Math.cbrt(wr()) * 0.85;
-        const x = cx + Math.sin(v) * Math.cos(u) * rx * rr0, y = cy + Math.cos(v) * ry * rr0, z = cz + Math.sin(v) * Math.sin(u) * rz * rr0;
-        card(leaves, x, y, z, C.card * (HQ ? 0.7 : 0.85) * (0.8 + wr() * 0.45), wr() * TAU, (wr() - 0.5) * 1.4, cx, cy, cz, jt());
+    let first = true;
+    for (const [cx, cy, cz, rx, ry, rz] of C.crown) {
+      // the main crown: a big core ball with smaller balls bulging out of it; side crowns are single balls
+      blobInto(leaves, cx, cy, cz, rx * (first ? 0.82 : 0.95), ry * (first ? 0.86 : 1), rz * (first ? 0.82 : 0.95), 1, pc(), cx, cy, cz, seed++);
+      const nb = first ? (HQ ? 4 : 3) : 0;
+      for (let q = 0; q < nb; q++) {
+        const a = q / nb * TAU + wr() * 0.8, el = (wr() - 0.25) * 1.1, s0 = 0.46 + wr() * 0.2;
+        const x = cx + Math.cos(a) * Math.cos(el) * rx * 0.62, y = cy + Math.sin(el) * ry * 0.55, z = cz + Math.sin(a) * Math.cos(el) * rz * 0.62;
+        blobInto(leaves, x, y, z, rx * s0, ry * s0 * 1.1, rz * s0, 1, pc(), cx, cy, cz, seed++);
       }
-      for (let q = 0; q < Math.max(2, n / 6); q++) { const a = q / Math.max(2, n / 6) * TAU; card(fl, cx + Math.cos(a) * rx * 0.4, cy, cz + Math.sin(a) * rz * 0.4, Math.max(rx, ry) * 1.6, a, (wr() - 0.5) * 0.5, cx, cy, cz, tint); }
+      if (first) { let mx = 0; for (const e of C.crown) mx = Math.max(mx, Math.hypot(e[0], e[2]) + e[3]); blobInto(fl, cx, cy - ry * 0.1, cz, mx * 0.95, ry * 1.25, mx * 0.95, 0, pal[0], cx, cy, cz, seed++); }
+      first = false;
       crownY = Math.min(crownY, cy - ry * 0.7);
     }
     for (let b = 0; b < C.br; b++) { const a = b / C.br * TAU + wr(), y0 = crownY + wr() * 1.5, l = 1.2 + wr() * 1.3; branchInto(trunk, 0, y0, 0, Math.cos(a) * l, y0 + 0.8 + wr(), Math.sin(a) * l, R * 0.35); }
@@ -1284,9 +1346,9 @@ function barkMat(birch, far) { const m = pmat({ map: birch ? birchTex : tx('bark
 // trunk and leaves in one draw: the shader picks the bark or the leaf texture per vertex
 function treeMat(sp, far) {
   const C = SPEC[SP[sp].id], glow = SP[sp].id === 'glow';
-  const m = pmat({ map: C.birch ? birchTex : tx('bark', 'c'), nor: tx('bark', 'n'), vc: true, side: THREE.DoubleSide, alphaTest: 0.42, rough: 0.85, emissive: glow ? 0x3fd8c0 : null, ei: 0.35, envI: 0.7 });
+  const m = pmat({ map: C.birch ? birchTex : tx('bark', 'c'), nor: tx('bark', 'n'), vc: true, rough: 0.9, emissive: glow ? 0x3fd8c0 : null, ei: 0.35, envI: 0.5 });
   m.onBeforeCompile = sh => {
-    sh.uniforms.leafMap = { value: FOL[C.fol] }; sh.uniforms.uTime = swayU; sh.uniforms.uWind = windU;
+    sh.uniforms.leafMap = { value: LEAFN }; sh.uniforms.uTime = swayU; sh.uniforms.uWind = windU;
     sh.uniforms.uCam = lodU.cam; sh.uniforms.uNear = lodU.near; sh.uniforms.uFar = lodU.far;
     sh.vertexShader = 'attribute float kind; varying float vKind; uniform float uTime, uWind; uniform vec3 uCam; uniform float uNear, uFar;\n' + sh.vertexShader
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKind = kind;\n#ifdef USE_INSTANCING\n float swPh = instanceMatrix[3].x * 0.21 + instanceMatrix[3].z * 0.17;\n float swK = kind * max(0.0, position.y - 3.0) * ' + (far ? '0.012' : '0.02') + ' * (1.0 + uWind * 3.0);\n transformed.x += sin(uTime * (1.3 + uWind) + swPh) * swK; transformed.z += cos(uTime * 1.1 + swPh * 1.3) * swK * 0.7;\n#endif')
@@ -1294,7 +1356,7 @@ function treeMat(sp, far) {
     sh.vertexShader = 'varying float vCamD;\n' + sh.vertexShader;
     // leaves right in front of the camera dissolve so the view never gets stuck inside a crown
     sh.fragmentShader = 'uniform sampler2D leafMap; varying float vKind; varying float vCamD;\n' + sh.fragmentShader
-      .replace('#include <map_fragment>', 'if (vKind > 0.5 && vCamD < 2.4) discard;\n#ifdef USE_MAP\n vec4 texelColor = vKind > 0.5 ? texture2D(leafMap, vUv) : texture2D(map, vUv); texelColor = mapTexelToLinear(texelColor); diffuseColor *= texelColor;\n#endif')
+      .replace('#include <map_fragment>', 'if (vKind > 0.5 && vCamD < 2.4) discard;\n#ifdef USE_MAP\n if (vKind > 0.5) { float ln = texture2D(leafMap, vUv).r; diffuseColor.rgb *= mix(0.62, 1.22, ln); }\n else { vec4 texelColor = mapTexelToLinear(texture2D(map, vUv)); float tl = dot(texelColor.rgb, vec3(0.3, 0.59, 0.11)); diffuseColor.rgb *= ' + (C.birch ? 'texelColor.rgb * 1.05' : 'clamp(mix(1.0, tl * 3.4, 0.6), 0.45, 1.5)') + '; }\n#endif')
       .replace('#include <normal_fragment_maps>', 'if (vKind < 0.5) {\n#include <normal_fragment_maps>\n}')
       .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance *= vKind;');
   };
@@ -1312,10 +1374,11 @@ function treeDepthMat(fol) {
   m.customProgramCacheKey = () => 'tdepth' + fol;
   return treeDepth[fol] = m;
 }
-const MATS_T = SP.map((sp, i) => { const C = SPEC[sp.id]; return { near: treeMat(i, false), far: treeMat(i, true), sbark: pmat({ map: C.birch ? birchTex : tx('bark', 'c'), nor: tx('bark', 'n'), vc: true, rough: 0.95 }), sleaf: pmat({ map: FOL[C.fol], alphaTest: 0.42, side: THREE.DoubleSide, vc: true, rough: 0.75, emissive: sp.id === 'glow' ? 0x3fd8c0 : null, ei: 0.35 }) }; });
+const MATS_T = SP.map((sp, i) => { const C = SPEC[sp.id]; return { near: treeMat(i, false), far: treeMat(i, true), sbark: C.birch ? pmat({ map: birchTex, vc: true, rough: 0.95 }) : flatTex(pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), vc: true, rough: 0.95 }), 3.4), sleaf: pmat({ map: LEAFN, vc: true, rough: 0.8, emissive: sp.id === 'glow' ? 0x3fd8c0 : null, ei: 0.35 }) }; });
 // shadows from leaf cards respect their cut-out shape
 const leafDepth = {};
 function depthFor(fol) { if (!leafDepth[fol]) leafDepth[fol] = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: FOL[fol], alphaTest: 0.42, side: THREE.DoubleSide }); return leafDepth[fol]; }
+for (const m of MATS_T) m.sleaf.color.setScalar(1.55);
 const glowMat = MATS_T[5].near, glowMatS = MATS_T[5].sleaf;
 
 // placement
@@ -1391,7 +1454,7 @@ const treeMatrix = (i, out) => {
 })();
 function mkTreeMesh(geo, mat, list, sp, isBark, far) {
   const m = new THREE.InstancedMesh(geo, mat, list.length), bt = barkTint(sp);
-  if (HQ && !far) { m.castShadow = true; m.receiveShadow = true; m.customDepthMaterial = treeDepthMat(SPEC[SP[sp].id].fol); }
+  if (HQ && !far) { m.castShadow = true; m.receiveShadow = true; }
   list.forEach((i, n) => {
     m.setMatrixAt(n, far ? farMatrix(i, tmpM) : treeMatrix(i, tmpM));
     const v = 0.85 + h2(i, 1, 3) * 0.3;
@@ -1435,7 +1498,7 @@ const stumpGeo = (() => {
   const out = new THREE.BufferGeometry(); out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); out.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); out.computeVertexNormals();
   out.addGroup(0, sideN, 0); out.addGroup(sideN, top.length * 3, 1); ng.dispose(); return out;
 })();
-const stumps = new THREE.InstancedMesh(stumpGeo, [pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), rough: 0.95 }), endMat], STUMP_N);
+const stumps = new THREE.InstancedMesh(stumpGeo, [flatTex(pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), rough: 0.95 }), 3.4), endMat], STUMP_N);
 stumps.frustumCulled = false; stumps.count = STUMP_N; if (HQ) { stumps.castShadow = true; stumps.receiveShadow = true; }
 for (let i = 0; i < STUMP_N; i++) { stumps.setMatrixAt(i, ZERO_M); stumps.setColorAt(i, tmpC.set(0xffffff)); }
 scene.add(stumps);
@@ -1471,7 +1534,7 @@ function notchGeo(i, depth, ang) {
   g.computeVertexNormals(); g.addGroup(0, nb, 0); g.addGroup(nb, wood.length * 3, 1); return g;
 }
 const endMatV = pmat({ map: endTex, vc: true, rough: 0.9 });
-function crownMesh(sp) { const m = new THREE.Mesh(TPL[sp].crown, MATS_T[sp].sleaf); if (HQ) { m.castShadow = true; m.customDepthMaterial = depthFor(SPEC[SP[sp].id].fol); } return m; }
+function crownMesh(sp) { const m = new THREE.Mesh(TPL[sp].crown, MATS_T[sp].sleaf); if (HQ) m.castShadow = true; return m; }
 function activate(i, ang, hitY) {
   let a = ACTIVE.find(o => o.i === i);
   if (a) return a;
@@ -1506,7 +1569,7 @@ function fell(a, dirX, dirZ, quiet) {
   const L = h - cy;
   const pivot = new THREE.Group(); pivot.position.set(TX[i], TY[i] + cy, TZ[i]);
   const tg = new THREE.Group(); pivot.add(tg);
-  const bm = logBarkMat.clone(); const bt = barkTint(sp); bm.color.setRGB(bt[0], bt[1], bt[2]);
+  const bm = flatTex(logBarkMat.clone(), 3.4); const bt = barkTint(sp); bm.color.setRGB(bt[0], bt[1], bt[2]);
   const logM = new THREE.Mesh(LOGSIDE_G, bm); logM.scale.set(L, r, r); logM.rotation.z = PI / 2; logM.position.y = L / 2;
   const cm = logEndMat.clone(); cm.color.copy(LIN(SP[sp].wood));
   const caps = new THREE.Mesh(LOGCAP_G, cm); caps.scale.copy(logM.scale); caps.rotation.copy(logM.rotation); caps.position.copy(logM.position);
@@ -1538,11 +1601,16 @@ function updateFalling(dt) {
     const mid = f.L / 2, cx = px + f.dx * s * mid, cy2 = py + c * mid, cz = pz + f.dz * s * mid;
     tmpV.set(f.dx * s, c, f.dz * s).normalize();
     tmpQ.setFromUnitVectors(XV, tmpV);
-    const b = NET.guest ? null : makeBody({ k: 0, sp: f.sp, len: f.L, r: f.r, x: cx, y: cy2 + 0.05, z: cz, q: tmpQ });
-    if (b) b.owner = treeFeller[f.i] || 'me';
-    if (b) {
-      const vt = f.om * mid * 0.5; b.v.set(f.dx * c * vt, -s * vt, f.dz * c * vt);
-      b.av.set(fallAxis.x * f.om * 0.4, 0, fallAxis.z * f.om * 0.4);
+    // the trunk breaks into chunks when it slams down: pieces short enough to carry or load
+    const n = NET.guest ? 0 : clamp(Math.round(f.L / 3.1), 1, 5), pl = f.L / n;
+    for (let q = 0; q < n; q++) {
+      const off = -f.L / 2 + pl * (q + 0.5);
+      const b = makeBody({ k: 0, sp: f.sp, len: pl - 0.04, r: f.r, x: cx + tmpV.x * off, y: cy2 + tmpV.y * off + 0.08, z: cz + tmpV.z * off, q: tmpQ });
+      if (!b) continue;
+      b.owner = treeFeller[f.i] || 'me';
+      const vt = f.om * (mid + off) * 0.5; b.v.set(f.dx * c * vt, -s * vt + 0.8 + fr() * 0.8, f.dz * c * vt); b.v.x += (fr() - 0.5) * 1.2; b.v.z += (fr() - 0.5) * 1.2;
+      b.av.set(fallAxis.x * f.om * 0.4 + (fr() - 0.5), (fr() - 0.5) * 0.8, fallAxis.z * f.om * 0.4 + (fr() - 0.5));
+      if (q > 0) { const jx = cx + tmpV.x * (off - pl / 2), jy = cy2 + tmpV.y * (off - pl / 2), jz = cz + tmpV.z * (off - pl / 2); chips(jx, jy + 0.3, jz, SP[f.sp].wood, 10, 0, 0); emitSoft(jx, jy + 0.3, jz, 0, 1.2, 0, 0.7, 0.5, 1.4, 0xf0e0c0, 0.55, -0.2); }
     }
     // leaves burst into a puff
     f.crown.updateMatrixWorld(true);
@@ -1596,10 +1664,10 @@ function instUV(mat, code, key) {
   mat.onBeforeCompile = sh => { if (prev && prev !== THREE.Material.prototype.onBeforeCompile) prev(sh); sh.vertexShader = sh.vertexShader.replace('#include <uv_vertex>', '#include <uv_vertex>\n#ifdef USE_INSTANCING\n' + code + '\n#endif'); };
   mat.customProgramCacheKey = () => 'iuv' + key; return mat;
 }
-const logBarkMat = pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), rough: 0.95, envI: 0.6 });
+const logBarkMat = flatTex(pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), rough: 0.95, envI: 0.6 }), 3.4);
 const logEndMat = pmat({ map: endTex, rough: 0.85 });
 const logSideMatS = logBarkMat;
-const logSide = new THREE.InstancedMesh(LOGSIDE_G, instUV(pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), rough: 0.95, envI: 0.6 }), 'vUv.y *= length(instanceMatrix[0].xyz) * 0.45; vUv.x *= max(1.0, floor(length(instanceMatrix[1].xyz) * 4.0));', 'log'), MAXB);
+const logSide = new THREE.InstancedMesh(LOGSIDE_G, instUV(flatTex(pmat({ map: tx('bark', 'c'), nor: tx('bark', 'n'), rough: 0.95, envI: 0.6 }), 3.4), 'vUv.y *= length(instanceMatrix[0].xyz) * 0.45; vUv.x *= max(1.0, floor(length(instanceMatrix[1].xyz) * 4.0));', 'log'), MAXB);
 const logCap = new THREE.InstancedMesh(LOGCAP_G, pmat({ map: endTex, rough: 0.85 }), MAXB);
 const plankM = new THREE.InstancedMesh(PLANK_G, instUV(pmat({ map: tx('planks', 'c'), nor: tx('planks', 'n'), rough: 0.7 }), 'vUv.x *= length(instanceMatrix[0].xyz) * 0.3; vUv.y *= 0.22;', 'plank'), MAXB);
 const crateM = new THREE.InstancedMesh(PLANK_G, pmat({ map: tx('darkwood', 'c'), nor: tx('darkwood', 'n'), rough: 0.75 }), 60);
@@ -1727,7 +1795,7 @@ function buildHash() {
 const wakeB = b => { if (b.sleep) { b.sleep = false; b.st = 0; } };
 const nrmT = new THREE.Vector3();
 let held = null;
-const hold = { local: new THREE.Vector3(), target: new THREE.Vector3(), dist: 2.5, spin: 0, tilt: 0 };
+const hold = { local: new THREE.Vector3(), target: new THREE.Vector3(), dist: 2.5, spin: 0, tilt: 0, crane: false };
 const STRENGTH = 2400;
 function physStep(dt) {
   const h = dt / NSUB;
@@ -1866,13 +1934,14 @@ function holdForce(b, h, H, yaw) {
   const gx = b.p.x + R[0] * l.x + R[1] * l.y + R[2] * l.z, gy = b.p.y + R[3] * l.x + R[4] * l.y + R[5] * l.z, gz = b.p.z + R[6] * l.x + R[7] * l.y + R[8] * l.z;
   const rx = gx - b.p.x, ry = gy - b.p.y, rz = gz - b.p.z;
   const vx = b.v.x + (b.av.y * rz - b.av.z * ry), vy = b.v.y + (b.av.z * rx - b.av.x * rz), vz = b.v.z + (b.av.x * ry - b.av.y * rx);
-  const w0 = 9, T = H.target, m = Math.min(b.m, 400);
+  // the crane remote lifts anything, smoothly; hands are limited by how strong you are
+  const cr = !!H.crane, w0 = cr ? 5 : 9, T = H.target, m = cr ? b.m : Math.min(b.m, 400), cap = cr ? STRENGTH * 60 : STRENGTH;
   let fx = ((T.x - gx) * w0 * w0 - vx * 2 * w0) * m, fy = ((T.y - gy) * w0 * w0 - vy * 2 * w0) * m + b.m * GRAV * 0.97, fz = ((T.z - gz) * w0 * w0 - vz * 2 * w0) * m;
-  const fl = Math.hypot(fx, fy, fz); if (fl > STRENGTH) { const k = STRENGTH / fl; fx *= k; fy *= k; fz *= k; }
+  const fl = Math.hypot(fx, fy, fz); if (fl > cap) { const k = cap / fl; fx *= k; fy *= k; fz *= k; }
   applyImp(b, fx * h, fy * h, fz * h, rx, ry, rz);
   if (H.spin) { b.av.y += (H.spin * 2.4 - b.av.y) * Math.min(1, 8 * h); }
   if (H.tilt) { tmpV3.set(Math.cos(yaw), 0, -Math.sin(yaw)); const cur = b.av.dot(tmpV3); b.av.addScaledVector(tmpV3, (H.tilt * 2.2 - cur) * Math.min(1, 8 * h)); }
-  if (H === hold) holdStrain = fl / STRENGTH;
+  if (H === hold) holdStrain = cr ? 0 : fl / STRENGTH;
 }
 let holdStrain = 0;
 // cutting: chop the same spot on a piece until it splits in two
@@ -2035,16 +2104,20 @@ function startHost(pub) {
   const link = Online.host('lumber', { max: 4, name: myNetName() + "'s world", mode: pub ? 'pub' : 'priv' });
   NET.link = link; NET.mode = 'host'; NET.pub = !!pub; NET.me = 'me'; NET.known = new Set(bodies.map(b => b.id)); NET.placedSig = ''; NET.trucksSig = ''; NET.ordersSig = '';
   link.on('ready', code => { NET.code = code; NET.status = NET.pub ? 'Your world is open. Other players can join.' : 'Private room ready. Friends join with this code.'; fillShopIf(); netUI(); });
-  link.on('join', peer => {
+  const goneIds = new Set();
+  const addPeer = peer => {
+    if (NET.peers.has(peer.id)) return NET.peers.get(peer.id);
     const used = new Set([...NET.peers.values()].map(q => q.slot)); let slot = 0; while (used.has(slot)) slot++;
     const sp = pickSpawn();
     const p = { id: peer.id, name: peer.name, slot, shirt: SHIRTS[slot % SHIRTS.length], x: sp.x, y: hAt(sp.x, sp.z), z: sp.z, yaw: 0, anim: 0, tool: 0, toolId: 'fists', inTruck: -1, seat: 0, hold: null, spawn: sp, cls: '', luck: 0, pack: '', hello: false };
     NET.peers.set(peer.id, p); avatarFor(p);
     link.send({ e: worldMsg(p) }, peer.id);
     toast(peer.name + ' joined your world!'); sBuy(); unlock('online'); fillShopIf(); netUI();
-  });
-  link.on('leave', peer => { const p = NET.peers.get(peer.id); if (p) { releasePeer(p, true); dropAvatar(p); NET.peers.delete(peer.id); toast(p.name + ' left.'); } fillShopIf(); netUI(); });
-  link.on('msg', (m, peer) => { const p = NET.peers.get(peer.id); if (!p || !m) return; if (m.p) onPeerState(p, m.p); if (m.a) onPeerAct(p, m.a); });
+    return p;
+  };
+  link.on('join', addPeer);
+  link.on('leave', peer => { goneIds.add(peer.id); const p = NET.peers.get(peer.id); if (p) { releasePeer(p, true); dropAvatar(p); NET.peers.delete(peer.id); toast(p.name + ' left.'); } fillShopIf(); netUI(); });
+  link.on('msg', (m, peer) => { if (!m || NET.link !== link || goneIds.has(peer.id)) return; const p = NET.peers.get(peer.id) || addPeer(peer); if (m.p) onPeerState(p, m.p); if (m.a) onPeerAct(p, m.a); });
   link.on('error', msg => { NET.status = NET.pub ? '' : msg; NET.mode = null; NET.link = null; fillShopIf(); netUI(); });
   link.on('close', () => { stopOnline(true); });
 }
@@ -2082,7 +2155,7 @@ function onPeerAct(p, a) {
     if (a.tool !== 'saw' && Math.hypot(TX[a.i] - player.x, TZ[a.i] - player.z) < 50) sChop(SP[TSP[a.i]].hard);
     if (r === 'felled') netSend(p, { e: { t: 'msg', text: 'Timber!' } });
   } else if (T === 'hitBody') { const b = bodies.find(x => x.id === a.id); if (b) damageBody(b, a.s, Math.min(a.dmg, 200), a.tier, p.id, a.tool); }
-  else if (T === 'grab') { const b = bodies.find(x => x.id === a.id); if (b && !b.heldBy && b !== held && !b.crane) { if (b.cargo) detachCargo(b); b.heldBy = p.id; b.owner = p.id; b.hold = { local: new THREE.Vector3(a.l[0], a.l[1], a.l[2]), target: new THREE.Vector3(a.tg[0], a.tg[1], a.tg[2]), spin: 0, tilt: 0, yaw: p.yaw }; wakeB(b); } }
+  else if (T === 'grab') { const b = bodies.find(x => x.id === a.id); if (b && !b.heldBy && b !== held && !b.crane) { if (b.cargo) detachCargo(b); b.heldBy = p.id; b.owner = p.id; b.hold = { local: new THREE.Vector3(a.l[0], a.l[1], a.l[2]), target: new THREE.Vector3(a.tg[0], a.tg[1], a.tg[2]), spin: 0, tilt: 0, yaw: p.yaw, crane: !!a.crane }; wakeB(b); } }
   else if (T === 'hold') { const b = bodies.find(x => x.heldBy === p.id); if (b && b.hold) { b.hold.target.set(a.tg[0], a.tg[1], a.tg[2]); b.hold.spin = a.sp || 0; b.hold.tilt = a.tl || 0; b.hold.yaw = p.yaw; } }
   else if (T === 'drop') { for (const b of bodies) if (b.heldBy === p.id) { b.heldBy = null; b.hold = null; } }
   else if (T === 'enter') {
@@ -2106,6 +2179,7 @@ function onPeerAct(p, a) {
   else if (T === 'unpack') { const it = a.it; if (Array.isArray(it) && SP[it[1]] && it[2] > 0 && it[2] < 6) makeBody({ k: it[0] | 0, sp: it[1] | 0, len: +it[2], r: +it[3] || 0.1, pw: +it[4] || 0, pt: +it[5] || 0, x: +a.x, y: +a.y, z: +a.z, q: tmpQ.setFromAxisAngle(UPV, (+a.yaw || 0) + PI / 2), val: +it[6] || 0, owner: p.id }); }
   else if (T === 'packSold') { if (SP[a.sp]) orderCredit({ k: a.k | 0, sp: a.sp | 0, p: new THREE.Vector3(p.x, p.y, p.z) }, p.id); }
   else if (T === 'goose') { if (Math.hypot(GOOSE.x - p.x, GOOSE.z - p.z) < 6) scareGoose(p.id, p.x, p.z); }
+  else if (T === 'bonk') { const C = a.w === 'deer' ? DEER : RACC; if (C.on && Math.hypot(C.x - p.x, C.z - p.z) < 7) scareCritter(a.w === 'deer' ? 'deer' : 'racc', p.id); }
 }
 function netSend(p, m) { if (NET.link && NET.host) NET.link.send(m, p.id); }
 /* ---------------- guest ---------------- */
@@ -2122,12 +2196,18 @@ function startJoin(code, auto) {
     const finish = ok => { if (done) return; done = true; clearTimeout(to); resolve(ok); };
     const to = setTimeout(() => { if (done) return; if (NET.link === link && !NET.mode) { try { link.close(); } catch (e) {} NET.link = null; } NET.status = auto ? '' : 'Could not reach that world. Try again or play on your own.'; fillShopIf(); finish(false); }, auto ? 13000 : 32000);
     link.on('open', () => { if (done && auto) { try { link.close(); } catch (e) {} return; } NET.mode = 'guest'; NET.code = code; NET.hostName = link.hostName || 'Host'; NET.status = 'Connected! Waiting for the world...'; fillShopIf(); netUI();
-      link.send({ a: { t: 'hello', ownT: S.ownT, lv: S.fellerLv, straps: S.straps, cls: S.cls, luck: S.perks.luck || 0 } });
+      sendHello();
       joinWait = () => finish(true); setTimeout(() => finish(true), 5000); });
     link.on('msg', m => { if (!m) return; if (m.s) onSnap(m.s); if (m.e) onEvent(m.e); });
     link.on('error', msg => { if (NET.link === link) { NET.link = null; NET.mode = null; } NET.status = auto ? '' : msg; fillShopIf(); finish(false); });
     link.on('close', () => { if (NET.mode === 'guest' && NET.link === link) stopOnline(true); });
   });
+}
+// tell the host which vehicles are yours (sent again if your starter truck has not shown up yet)
+function sendHello(n) {
+  if (!NET.link || NET.mode !== 'guest') return;
+  NET.link.send({ a: { t: 'hello', ownT: S.ownT, lv: S.fellerLv, straps: S.straps, cls: S.cls, luck: S.perks.luck || 0 } });
+  n = n || 0; if (n < 4) setTimeout(() => { if (alive && NET.guest && !trucks.some(t => t.owner === 'me')) sendHello(n + 1); }, 3500);
 }
 let gotWorld = false;
 function clearWorld() {
@@ -2198,6 +2278,7 @@ function onEvent(e) {
   else if (e.t === 'award') unlock(e.id);
   else if (e.t === 'stowed') { S.pack.push(e.it); packChanged(); sGrab(); }
   else if (e.t === 'orders') S.orders = e.list || [];
+  else if (e.t === 'knock') { if (!player.truck) { if (held) dropHeld(); player.vx += e.x * 11; player.vz += e.z * 11; player.vy = 6; player.onGround = false; shake = Math.max(shake, 0.5); sThud(0.8); toast('The deer knocked you flying! Bonk it to scare it off.', true); } }
 }
 function peerNameG(id) { const p = NET.peers.get(id); return p ? p.name : 'A friend'; }
 // match the host's list of vehicles: add new ones, remove ones that went home
@@ -2239,6 +2320,7 @@ function onSnap(s) {
   if (seen.size !== NET.lastSeen) { NET.lastSeen = seen.size; netUI(); }
   for (const a of s.tr) { const t = truckById(a[0]); if (!t) continue; t.tpos = t.tpos || new THREE.Vector3(); t.tpos.set(a[1], a[2], a[3]); t.tq = t.tq || new THREE.Quaternion(); t.tq.set(a[4], a[5], a[6], a[7]); t.tip = a[8]; t.yaw = a[9]; t.speed = a[10]; if (!t.netInit) { t.pos.copy(t.tpos); t.q.copy(t.tq); t.netInit = true; } }
   for (const a of s.b) { const b = bodies.find(x => x.id === a[0]); if (!b) continue; b.tp = b.tp || b.p.clone(); b.tq = b.tq || b.q.clone(); b.tp.set(a[1], a[2], a[3]); b.tq.set(a[4], a[5], a[6], a[7]); }
+  for (const [k, C] of [['dz', DEER.n], ['rz', RACC.n]]) { const a = s[k]; if (a) { if (!C.on) { C.x = a[0]; C.z = a[2]; } C.on = true; C.x = a[0]; C.y = a[1]; C.z = a[2]; C.yaw = a[3]; C.st = a[4]; } else C.on = false; }
   if (s.gz) { const n = GOOSE.n; n.x = s.gz[0]; n.y = s.gz[1]; n.z = s.gz[2]; n.yaw = s.gz[3]; n.st = s.gz[4]; n.hat = s.gz[5] || null; }
 }
 // guests smooth the host's positions between snapshots
@@ -2281,7 +2363,7 @@ function netTick(dt) {
   for (const w of workers) pl.push(['w' + workers.indexOf(w), r2(w.x), r2(w.y), r2(w.z), r4(w.yaw + PI), w.state === 'chop' ? 4 : w.state === 'idle' ? 0 : 2, w.kind === 'logger' ? 0 : 1, 'steel', w.name, WORKERS[w.kind].shirt, -1, 0, 0, '']);
   const tr = trucks.map(t => [t.nid, r2(t.pos.x), r2(t.pos.y), r2(t.pos.z), r4(t.q.x), r4(t.q.y), r4(t.q.z), r4(t.q.w), r2(t.tip), r4(t.yaw), r2(t.speed)]);
   const mv = []; for (const b of bodies) if (!b.sleep || b.cargo || b.crane) mv.push([b.id, r2(b.p.x), r2(b.p.y), r2(b.p.z), r4(b.q.x), r4(b.q.y), r4(b.q.z), r4(b.q.w)]);
-  const G = GOOSE, snap = { tm: r4(S.time), st: r2(EV.storm), fe: r4(ferry.t), u: S.unlock, pl, tr, b: mv.slice(0, 120), gz: [r2(G.x), r2(G.y), r2(G.z), r4(G.yaw), G.st, G.hat === 'me' ? 'host' : G.hat || ''] };
+  const G = GOOSE, snap = { tm: r4(S.time), st: r2(EV.storm), fe: r4(ferry.t), u: S.unlock, pl, tr, b: mv.slice(0, 120), gz: [r2(G.x), r2(G.y), r2(G.z), r4(G.yaw), G.st, G.hat === 'me' ? 'host' : G.hat || ''], dz: DEER.on ? [r2(DEER.x), r2(DEER.y), r2(DEER.z), r4(DEER.yaw), DEER.st] : 0, rz: RACC.on ? [r2(RACC.x), r2(RACC.y), r2(RACC.z), r4(RACC.yaw), RACC.st] : 0 };
   for (const p of NET.peers.values()) NET.link.send({ s: snap }, p.id, { fast: true });
 }
 function netAct(a) { if (NET.guest && NET.link) NET.link.send({ a }); }
@@ -2330,8 +2412,8 @@ function ensureOwnTrucks() {
 function saveGuestWallet() {
   let own = null; try { own = JSON.parse(store.get(KEY) || 'null'); } catch (e) {}
   own = own || fresh();
-  for (const k of ['money', 'earned', 'axes', 'saws', 'axe', 'saw', 'ach', 'daily', 'gems', 'cls', 'perks', 'pack', 'rack', 'straps', 'ownT', 'fellerLv']) own[k] = JSON.parse(JSON.stringify(S[k]));
-  own.v = Math.max(own.v || 3, 3);
+  for (const k of ['money', 'earned', 'axes', 'saws', 'axe', 'saw', 'ach', 'daily', 'gems', 'cls', 'perks', 'pack', 'rack', 'straps', 'ownT', 'fellerLv', 'debt', 'remote']) own[k] = JSON.parse(JSON.stringify(S[k]));
+  own.v = Math.max(own.v || 4, 4);
   own.stats = Object.assign(own.stats || {}, { sold: S.stats.sold, trees: S.stats.trees, contracts: S.stats.contracts, hauls: S.stats.hauls, giants: S.stats.giants });
   own.seen = Object.assign(own.seen || {}, S.seen, { started: 1 });
   try { store.set(KEY, JSON.stringify(own)); } catch (e) {}
@@ -2461,23 +2543,23 @@ const BOULDERS = [];
   }
 })();
 // grass tufts in a ring around you, placed on a fixed world grid so they do not jump around as you walk
-const GRASS_N = HQ ? 6500 : 0, GR_CELL = 0.9, GR_RAD = 29;
+const GRASS_N = HQ ? 7000 : 0, GR_CELL = 0.62, GR_RAD = 26;
 let grass = null, grassCx = 1e9, grassCz = 1e9;
 if (GRASS_N) {
   // a clump of curved, tapered blades: dark at the root, bright at the tip
   const b = new MB(); const pos = [], nor = [], col = [];
-  for (let k = 0; k < 5; k++) {
-    const a = k / 5 * TAU + wr(), r0 = 0.04 + wr() * 0.08, h = 0.32 + wr() * 0.3, lean = 0.08 + wr() * 0.18, w = 0.035 + wr() * 0.02;
+  for (let k = 0; k < 6; k++) {
+    const a = k / 6 * TAU + wr(), r0 = 0.04 + wr() * 0.1, h = 0.38 + wr() * 0.34, lean = 0.1 + wr() * 0.2, w = 0.05 + wr() * 0.03;
     const bx = Math.cos(a) * r0, bz = Math.sin(a) * r0, dx = Math.cos(a + 1.3), dz = Math.sin(a + 1.3), lx = Math.cos(a) * lean, lz = Math.sin(a) * lean;
     const P = [[bx - dx * w, 0, bz - dz * w], [bx + dx * w, 0, bz + dz * w], [bx + lx * 0.4 - dx * w * 0.6, h * 0.55, bz + lz * 0.4 - dz * w * 0.6], [bx + lx * 0.4 + dx * w * 0.6, h * 0.55, bz + lz * 0.4 + dz * w * 0.6], [bx + lx, h, bz + lz]];
-    const C = [0.45, 0.45, 0.85, 0.85, 1.25];
+    const C = [0.5, 0.5, 0.95, 0.95, 1.35];
     for (const t of [[0, 1, 3], [0, 3, 2], [2, 3, 4]]) for (const q of t) { pos.push(...P[q]); nor.push(Math.cos(a) * 0.3, 1, Math.sin(a) * 0.3); col.push(C[q], C[q], C[q] * 0.95); }
   }
   b.p = pos; b.n = nor; b.c = col;
   const gm = addSway(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 0.0, 0.35);
   grass = new THREE.InstancedMesh(b.geo(), gm, GRASS_N); grass.frustumCulled = false; grass.setColorAt(0, tmpC.set(0xffffff)); grass.count = 0; if (HQ) grass.receiveShadow = true; scene.add(grass);
 }
-const GRC = [col3(0x9cc55e), col3(0xb2d46e), col3(0xd2bc62), col3(0xa2b486), col3(0x8a9450), col3(0x86c8a2)];
+const GRC = [col3(0x6cc83c), col3(0x8cd44e), col3(0xb8c44a), col3(0x82ac6c), col3(0x7a9a38), col3(0x5cd09a)];
 function updateGrass(force) {
   if (!grass) return;
   const px = player.x, pz = player.z;
@@ -2536,7 +2618,7 @@ function emit(x, y, z, vx, vy, vz, life, size, color, grav) {
   PL[i] = life; PML[i] = life; PSZ[i] = size; PSP[i] = fr() * 6; PG[i] = grav == null ? 1 : grav; PCOL[i].set(color).convertSRGBToLinear();
 }
 function chips(x, y, z, color, n, dx, dz) {
-  for (let k = 0; k < n; k++) emit(x, y, z, dx * 2 + (fr() - 0.5) * 4, 1.5 + fr() * 3, dz * 2 + (fr() - 0.5) * 4, 0.6 + fr() * 0.6, 0.06 + fr() * 0.07, k % 3 ? color : 0xf6e7c4, 1);
+  for (let k = 0; k < n; k++) emit(x, y, z, dx * 2 + (fr() - 0.5) * 4, 1.5 + fr() * 3, dz * 2 + (fr() - 0.5) * 4, 0.5 + fr() * 0.6, 0.05 + fr() * 0.07, k % 3 ? color : 0xf6e7c4, 1);
 }
 function leafBurst(x, y, z, color, n, spread) {
   for (let k = 0; k < n; k++) emit(x + (fr() - 0.5) * spread * 2, y + (fr() - 0.5) * spread, z + (fr() - 0.5) * spread * 2, (fr() - 0.5) * 3, fr() * 2.5, (fr() - 0.5) * 3, 1.2 + fr() * 1.2, 0.12 + fr() * 0.14, color, 0.25);
@@ -2641,7 +2723,7 @@ function recolorMat(m, to) {
   const x = m.clone(); const c = LIN(to);
   x.onBeforeCompile = sh => {
     sh.uniforms.qTo = { value: c }; sh.uniforms.qRef = { value: 0.288 };
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 qTo; uniform float qRef;').replace('#include <map_fragment>', '#include <map_fragment>\nif (qRef > 0.) { vec3 c = diffuseColor.rgb; float mx = max(c.r, max(c.g, c.b)); diffuseColor.rgb = mix(c, qTo * clamp(mx / qRef, .2, 2.2), clamp((diffuseColor.a - .25) / .75, 0., 1.)); }\ndiffuseColor.a = 1.;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec3 qTo; uniform float qRef;').replace('#include <map_fragment>', '#include <map_fragment>\nif (qRef > 0.) { vec3 c = diffuseColor.rgb; float mx = max(c.r, max(c.g, c.b)); vec2 pu = vUv * 26.0; float pl = step(0.62, fract(pu.x)) * 0.5 + step(0.62, fract(pu.y)) * 0.5; float pn = step(0.94, fract(pu.x + 0.3)) + step(0.94, fract(pu.y + 0.3)); vec3 plaid = qTo * mix(1.0, 0.32, pl) + vec3(0.25, 0.2, 0.12) * min(pn, 1.0) * 0.5; diffuseColor.rgb = mix(c, plaid * clamp(mx / qRef, .2, 2.2), clamp((diffuseColor.a - .25) / .75, 0., 1.)); }\ndiffuseColor.a = 1.;');
   };
   x.customProgramCacheKey = () => 'qrc'; if (x.isMeshStandardMaterial) STD.push(x);
   return RCM[key] = x;
@@ -2751,7 +2833,7 @@ const metalMat = pmat({ tex: 'metal', metal: 0.75, rough: 0.35, color: 0xd8dde2 
 function axeModel(a, scale) {
   const g = new THREE.Group(), k = scale || 1;
   const wood = pmat({ tex: 'planks', color: a.handle, rough: 0.7 });
-  const head = a.glow ? pmat({ color: a.head, emissive: a.head, ei: 0.8, metal: 0.5, rough: 0.3 }) : pmat({ tex: 'metal', color: a.head, metal: 0.8, rough: 0.35 });
+  const head = a.glow ? pmat({ color: a.head, emissive: a.head, ei: 0.8, metal: 0.5, rough: 0.3 }) : pmat({ color: a.head, metal: 0.25, rough: 0.45 });
   const hm = new THREE.Mesh(new THREE.CylinderGeometry(0.028 * k, 0.034 * k, 0.9 * k, 8), wood); hm.position.y = 0.3 * k; g.add(hm);
   const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.038 * k, 0.038 * k, 0.18 * k, 8), lam(0x2a2018)); grip.position.y = -0.05 * k; g.add(grip);
   const sh = new THREE.Shape(); sh.moveTo(-0.05, -0.07); sh.lineTo(0.12, -0.12); sh.quadraticCurveTo(0.2, 0, 0.12, 0.12); sh.lineTo(-0.05, 0.07); sh.lineTo(-0.09, 0.05); sh.lineTo(-0.09, -0.05); sh.closePath();
@@ -2784,10 +2866,26 @@ const man = makeLumberjack({ shirt: 0x9c2a1e });
 scene.add(man.g);
 man.axe = null; man.saw = null;
 // first-person arms holding the current tool
-const vm = new THREE.Group(); camera.add(vm); vm.position.set(0.3, -0.34, -0.55); vm.scale.setScalar(0.62);
-const vmArmR = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.11, 0.42), lam(0xb8402e)); vmArmR.position.set(0, -0.04, 0.2); vm.add(vmArmR);
-const vmHandR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), lam(0xe0a882)); vm.add(vmHandR);
-const vmArmL = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.11, 0.42), lam(0xb8402e)); vmArmL.position.set(-0.32, -0.08, 0.16); vmArmL.rotation.y = -0.5; vm.add(vmArmL);
+const vm = new THREE.Group(); camera.add(vm); vm.position.set(0.3, -0.34, -0.55); vm.scale.setScalar(0.7);
+// big chunky work gloves in first person
+const GLV = { glove: lam(0xe0302a), cuff: lam(0x9a1c1e), sleeve: lam(0x8a2a22), dark: lam(0x5a1414) };
+function makeGlove(side) {
+  const g = new THREE.Group(), B = (w, h, d, m, x, y, z, rx) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); if (rx) b.rotation.x = rx; g.add(b); return b; };
+  B(0.15, 0.15, 0.5, GLV.sleeve, 0, 0, 0.36); B(0.2, 0.2, 0.1, GLV.cuff, 0, 0, 0.1);
+  B(0.19, 0.16, 0.2, GLV.glove, 0, 0, -0.04); B(0.19, 0.1, 0.1, GLV.glove, 0, 0.05, -0.17, -0.5); B(0.18, 0.08, 0.08, GLV.dark, 0, -0.02, -0.16);
+  B(0.07, 0.07, 0.12, GLV.glove, side * 0.11, 0.03, -0.06, -0.3);
+  return g;
+}
+const vmArmR = makeGlove(1); vmArmR.position.set(0, -0.06, 0.04); vm.add(vmArmR);
+const vmHandR = new THREE.Group(); vm.add(vmHandR);
+const vmArmL = makeGlove(-1); vmArmL.position.set(-0.36, -0.06, 0.02); vmArmL.rotation.y = -0.25; vm.add(vmArmL);
+// the handheld crane remote
+const vmRemote = (() => { const g = new THREE.Group(), B = (w, h, d, c, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), lam(c)); b.position.set(x, y, z); g.add(b); return b; };
+  B(0.34, 0.09, 0.22, 0x3a6ec8, 0, 0, 0); B(0.3, 0.02, 0.18, 0x24324a, 0, 0.05, 0);
+  for (const sx of [-0.08, 0.08]) { const k = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.04, 10), lam(0xe8302a)); k.position.set(sx, 0.075, 0.02); g.add(k); }
+  const st = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.22, 6), lam(0x2a2a2a)); st.position.set(0.12, 0.13, -0.06); g.add(st);
+  B(0.04, 0.04, 0.04, 0xffd25a, 0.12, 0.25, -0.06);
+  g.position.set(-0.18, 0.02, -0.12); g.rotation.x = 0.5; g.visible = false; vm.add(g); return g; })();
 let vmAxe = null, vmSaw = null;
 function equipAxe() {
   const a = axeById(S.axe);
@@ -2819,7 +2917,7 @@ glc.addEventListener('mousedown', e => {
   if (e.button === 2) { rmb = true; grabDown(); }
   if (lockFailed) dragLook = { x: e.clientX, y: e.clientY };
 });
-on(window, 'mouseup', e => { if (e.button === 0) { lmb = false; if (S.tool === 1) dropHeld(); } if (e.button === 2) { rmb = false; dropHeld(); } dragLook = null; });
+on(window, 'mouseup', e => { if (e.button === 0) { lmb = false; if (S.tool === 1 || S.tool === 3) dropHeld(); } if (e.button === 2) { rmb = false; dropHeld(); } dragLook = null; });
 on(window, 'mousemove', e => {
   if (!playing()) return;
   let dx = 0, dy = 0;
@@ -2837,7 +2935,8 @@ glc.addEventListener('wheel', e => {
   if (!playing()) return; e.preventDefault();
   if (held) { hold.dist = clamp(hold.dist - Math.sign(e.deltaY) * 0.3, 1.2, 4.5); return; }
   if (build) { build.rot = (build.rot + (e.deltaY > 0 ? 1 : 3)) % 4; return; }
-  const opts = [0, 1].concat(S.saws.length ? [2] : []); setTool(opts[(opts.indexOf(S.tool) + (e.deltaY > 0 ? 1 : opts.length - 1)) % opts.length]);
+  if (held && hold.crane) { hold.dist = clamp(hold.dist - Math.sign(e.deltaY) * 0.8, 2, 24); return; }
+  const opts = [0, 1].concat(S.saws.length ? [2] : []).concat(S.remote ? [3] : []); setTool(opts[(opts.indexOf(S.tool) + (e.deltaY > 0 ? 1 : opts.length - 1)) % opts.length]);
 }, { passive: false });
 // touch: left part of the screen moves, the rest looks around
 glc.addEventListener('touchstart', e => {
@@ -2863,7 +2962,7 @@ function tbtn(id, down, up) {
   b.addEventListener('pointerdown', e => { aInit(); e.preventDefault(); b.classList.add('on'); down(); });
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, () => { b.classList.remove('on'); if (up) up(); }));
 }
-tbtn('#tChop', () => { if (build) { tryPlace(); return; } if (player.truck) { if (drv()) K.w = true; return; } tChopHeld = true; if (S.tool === 1) grabDown(); else primaryDown(); }, () => { tChopHeld = false; K.w = false; if (S.tool === 1) dropHeld(); });
+tbtn('#tChop', () => { if (build) { tryPlace(); return; } if (player.truck) { if (drv()) K.w = true; return; } tChopHeld = true; if (S.tool === 1) grabDown(); else primaryDown(); }, () => { tChopHeld = false; K.w = false; if (S.tool === 1 || S.tool === 3) dropHeld(); });
 tbtn('#tGrab', () => { if (build) { build.rot = (build.rot + 1) % 4; return; } if (player.truck) { if (drv()) K.s = true; return; } tGrabHeld = true; grabDown(); }, () => { tGrabHeld = false; K.s = false; dropHeld(); });
 tbtn('#tUse', () => { if (build) { cancelBuild(); return; } usePrompt(); });
 tbtn('#tJump', () => { if (player.truck) { tipBed(); return; } K[' '] = true; }, () => { K[' '] = false; });
@@ -2882,6 +2981,7 @@ on(window, 'keydown', e => {
   if (k === '1') { if (S.tool === 0) cycleAxe(); else setTool(0); }
   else if (k === '2') setTool(1);
   else if (k === '3') { if (S.tool === 2) cycleSaw(); else if (S.saws.length) setTool(2); else toast('Buy a chainsaw at Ridgeline Tools first.'); }
+  else if (k === '4') { if (S.remote) setTool(3); else toast('Buy a crane remote at Big Wheel Motors first.'); }
   else if (k === 'q') cycleAxe();
   else if (k === 'e') usePrompt();
   else if (k === 'x') usePrompt('x');
@@ -2895,10 +2995,12 @@ on(window, 'keydown', e => {
 });
 on(window, 'keyup', e => { const k = e.key.toLowerCase(); K[k] = false; if (k === 'r') hold.spin = 0; if (k === 'f') { hold.tilt = 0; lmb = false; } });
 on(window, 'blur', () => { for (const k in K) K[k] = false; lmb = rmb = false; dropHeld(); });
-function setTool(t) { if (held && t !== 1) dropHeld(); if (t === 2 && !sawById(S.saw)) return; if (t === 2 && !vmSaw) equipAxe(); S.tool = t; $('#axeName').textContent = t === 2 ? sawById(S.saw).name : axeById(S.axe).name; refreshBar(); }
+function setTool(t) { if (held) dropHeld(); if (t === 2 && !sawById(S.saw)) return; if (t === 3 && !S.remote) return; if (t === 2 && !vmSaw) equipAxe(); S.tool = t; $('#axeName').textContent = t === 2 ? sawById(S.saw).name : t === 3 ? 'Crane remote' : axeById(S.axe).name; refreshBar(); if (t === 3) hint('remote', 'Stand near a truck, aim at a log and hold ' + (coarse ? '<kbd>Lift</kbd>' : '<kbd>Click</kbd>') + ': the truck crane lifts it. ' + (coarse ? '' : 'Mouse wheel moves it closer or further. ') + 'Let go over the bed to drop it.'); }
 function cycleSaw() { if (S.saws.length < 2) return; const own = SAWS.filter(a => S.saws.includes(a.id)), i = own.findIndex(a => a.id === S.saw); S.saw = own[(i + 1) % own.length].id; equipAxe(); toast(sawById(S.saw).name); sTool(); }
 function cycleAxe() { if (S.tool !== 0) { setTool(0); return; } const own = AXES.filter(a => S.axes.includes(a.id)); if (own.length < 2) return; const i = own.findIndex(a => a.id === S.axe); S.axe = own[(i + 1) % own.length].id; equipAxe(); toast(axeById(S.axe).name); sTool(); }
-function toggleCam() { camMode = camMode ? 0 : 1; S.cam = camMode; }
+// camera: auto (through your eyes while chopping, behind you otherwise), always behind, or always through your eyes
+function toggleCam() { S.cam = S.cam === 2 ? 0 : S.cam === 0 ? 1 : 2; toast('Camera: ' + ['behind you', 'through your eyes', 'automatic'][S.cam]); }
+function camAuto() { camMode = S.cam === 2 ? (player.truck || S.tool === 1 || S.tool === 3 || held || build ? 0 : 1) : S.cam ? 1 : 0; }
 
 /* ================= aiming ================= */
 const AIM = { kind: null, i: -1, b: null, s: 0, t: 0, p: new THREE.Vector3(), item: null };
@@ -2945,6 +3047,7 @@ function updateAim() {
 function primaryDown() {
   if (build) { tryPlace(); return; }
   if (S.tool === 1) { grabDown(); return; }
+  if (S.tool === 3) { craneDown(); return; }
   if (player.truck) { machineAction(); return; }
   if (S.tool === 2) return;
   if (player.swingT <= 0) startSwing();
@@ -2965,7 +3068,7 @@ function damageTree(i, dmg, tier, fromX, fromZ, hitY, who, tool) {
   tHP[i] -= dmg;
   notchTree(act, clamp(1 - tHP[i] / treeMaxHP(i), 0.08, 0.92));
   const hx = TX[i] + dxp / dl * treeR(i), hz = TZ[i] + dzp / dl * treeR(i);
-  if (tool === 'saw') sawdust(hx, TY[i] + tCut[i], hz, sp.wood, dxp / dl, dzp / dl); else chips(hx, TY[i] + tCut[i], hz, sp.wood, 9, dxp / dl, dzp / dl);
+  if (tool === 'saw') sawdust(hx, TY[i] + tCut[i], hz, sp.wood, dxp / dl, dzp / dl); else { chips(hx, TY[i] + tCut[i], hz, sp.wood, 10, dxp / dl, dzp / dl); emitSoft(hx, TY[i] + tCut[i], hz, dxp / dl * 0.6, 0.4, dzp / dl * 0.6, 0.22, 0.25, 1.2, 0xfff4d8, 0.55, 0); }
   netTreeHit(i, act.ang, tool);
   if (tHP[i] <= 0) { treeFeller[i] = who || 'me'; fell(act, -dxp, -dzp); netFell(i, -dxp, -dzp); return 'felled'; }
   return 'hit';
@@ -2992,7 +3095,7 @@ function weakMsg(sp, isSaw) {
 function doHit() {
   updateAim();
   const a = axeById(S.axe);
-  if (gooseHit()) return;
+  if (gooseHit() || critterHit()) return;
   if (AIM.kind === 'tree') {
     const i = AIM.i, sp = SP[TSP[i]], dmg = a.dmg * ((a.bonus && a.bonus[sp.id]) || 1) * dmgMul();
     if (NET.guest) { if (a.tier < sp.tier) { sClank(); weakMsg(sp); return; } netAct({ t: 'hitTree', i, dmg, tier: a.tier, x: player.x, z: player.z, y: AIM.p.y }); chips(AIM.p.x, AIM.p.y, AIM.p.z, sp.wood, 9, 0, 0); sChop(sp.hard); return; }
@@ -3059,18 +3162,19 @@ function grabDown() {
   sGrab();
   hint('drag', 'Drag it into your truck bed. ' + (coarse ? '' : 'Mouse wheel moves it closer or further. Hold <kbd>R</kbd> to spin it. ') + 'Let go to drop it.');
 }
-function dropHeld() { if (held) { if (NET.guest) netAct({ t: 'drop' }); held = null; holdStrain = 0; hold.spin = hold.tilt = 0; } }
+function dropHeld() { if (held) { if (NET.guest) netAct({ t: 'drop' }); held = null; holdStrain = 0; hold.spin = hold.tilt = 0; hold.crane = false; } }
 function updateHold(dt) {
   if (!held) return;
   if (held.gone || player.truck) { dropHeld(); return; }
   camera.getWorldDirection(camDir);
-  const cx = player.x, cy = player.y + 1.35, cz = player.z;
+  const cx = hold.crane ? camera.position.x : player.x, cy = hold.crane ? camera.position.y : player.y + 1.35, cz = hold.crane ? camera.position.z : player.z;
   hold.target.set(cx + camDir.x * hold.dist, cy + camDir.y * hold.dist, cz + camDir.z * hold.dist);
+  if (hold.crane && !craneTruck()) { dropHeld(); toast('Too far from a truck for the crane to reach.'); return; }
   hold.target.y = Math.max(hold.target.y, hAt(hold.target.x, hold.target.z) + 0.25);
   const R = held.R, l = hold.local;
   const gx = held.p.x + R[0] * l.x + R[1] * l.y + R[2] * l.z, gy = held.p.y + R[3] * l.x + R[4] * l.y + R[5] * l.z, gz = held.p.z + R[6] * l.x + R[7] * l.y + R[8] * l.z;
   const far = Math.hypot(gx - hold.target.x, gy - hold.target.y, gz - hold.target.z);
-  if (far > 4.5 && !NET.guest) { hold.far += dt; if (hold.far > 0.4) { dropHeld(); toast('Too heavy or stuck. Try cutting it into smaller pieces.'); } } else hold.far = 0;
+  if (far > (hold.crane ? 9 : 4.5) && !NET.guest) { hold.far += dt; if (hold.far > 0.4) { dropHeld(); toast('Too heavy or stuck. Try cutting it into smaller pieces.'); } } else hold.far = 0;
 }
 
 /* ================= movement ================= */
@@ -3170,21 +3274,28 @@ function poseMan(dt) {
     m.loop(busy && sp < 1 ? 'Sword_Idle' : sp > 7 ? 'Sprint_Loop' : sp > 4.5 ? 'Jog_Fwd_Loop' : sp > 0.4 ? 'Walk_Loop' : busy ? 'Sword_Idle' : 'Idle_Loop', sp > 0.4 && sp <= 4.5 ? clamp(sp / 3.2, 0.6, 1.5) : 1);
   }
   m.update(dt);
-  // first-person arms
+  // first-person gloves and tools
   vm.visible = camMode === 1 && !P.truck;
   if (vm.visible) {
-    const sp = Math.hypot(P.vx, P.vz), bob = Math.sin(P.walkPh * 2) * 0.015 * Math.min(1, sp / 4);
+    const sp = Math.hypot(P.vx, P.vz), bob = Math.sin(P.walkPh * 2) * 0.015 * Math.min(1, sp / 4), fists = S.tool === 0 && S.axe === 'fists';
     if (vmAxe) vmAxe.visible = S.tool === 0;
     if (vmSaw) vmSaw.visible = S.tool === 2;
-    vmHandR.visible = vmArmR.visible = S.tool !== 1 || held;
-    vmArmL.visible = S.tool === 2 || held;
-    let a = -0.1, ry = 0;
-    if (S.tool === 0 && P.swingT > 0) { const k = 1 - P.swingT / P.swingDur; a = k < 0.4 ? lerp(-0.1, 0.9, k / 0.4) : k < 0.55 ? lerp(0.9, -1.2, (k - 0.4) / 0.15) : lerp(-1.2, -0.1, (k - 0.55) / 0.45); }
-    let vy = -0.34, vx = 0.3;
-    if (S.tool === 2) { a = sawCutting ? 0.02 : 0.12; ry = 0.12; vy = -0.27; vx = 0.24; }
-    if (held) a = -0.5;
+    vmRemote.visible = S.tool === 3;
+    vmArmR.visible = S.tool !== 1 || !!held;
+    vmArmL.visible = S.tool === 2 || S.tool === 3 || fists || !!held;
+    let a = -0.1, ry = 0, vy = -0.34, vx = 0.3, vz = -0.55;
+    vmArmR.position.set(0, -0.06, 0.04); vmArmR.rotation.set(0, 0, 0); vmArmL.position.set(-0.36, -0.06, 0.02); vmArmL.rotation.set(0, -0.25, 0);
+    if (fists) {
+      // two big gloves, one punch at a time
+      vx = 0.2; vy = -0.25; vz = -0.5; vmArmR.position.set(0.1, 0, 0); vmArmR.rotation.set(0.3, 0.12, 0); vmArmL.position.set(-0.48, 0, 0); vmArmL.rotation.set(0.3, -0.12, 0);
+      if (P.swingT > 0) { const k = 1 - P.swingT / P.swingDur, ext = k < 0.35 ? k / 0.35 : 1 - (k - 0.35) / 0.65, g = punchAlt ? vmArmR : vmArmL; g.position.z -= ext * 0.55; g.position.y += ext * 0.12; g.position.x += (punchAlt ? -1 : 1) * ext * 0.12; }
+    } else if (S.tool === 0 && P.swingT > 0) { const k = 1 - P.swingT / P.swingDur; a = k < 0.4 ? lerp(-0.1, 0.9, k / 0.4) : k < 0.55 ? lerp(0.9, -1.2, (k - 0.4) / 0.15) : lerp(-1.2, -0.1, (k - 0.55) / 0.45); }
+    if (S.tool === 0 && !fists) { vy = -0.27; vmArmR.position.set(0.0, -0.13, 0.08); vmArmR.rotation.set(0.75, 0, 0.15); }
+    if (S.tool === 2) { a = sawCutting ? 0.02 : 0.12; ry = 0.12; vy = -0.27; vx = 0.24; vmArmR.position.set(0.02, -0.08, 0.12); vmArmL.position.set(-0.2, 0.0, -0.18); vmArmL.rotation.set(0, -0.5, 0); }
+    if (S.tool === 3) { a = -0.05; vx = 0.18; vy = -0.32; vmArmR.position.set(0.02, -0.06, 0); vmArmL.position.set(-0.38, -0.06, 0); vmArmL.rotation.y = 0; }
+    if (held && !hold.crane) a = -0.5;
     const jit = S.tool === 2 && sawById(S.saw) ? (sawCutting ? 0.006 : 0.002) : 0;
-    vm.rotation.set(a, ry, 0); vm.position.set(vx + (Math.random() - 0.5) * jit, vy + bob + (Math.random() - 0.5) * jit, -0.55);
+    vm.rotation.set(a, ry, 0); vm.position.set(vx + (Math.random() - 0.5) * jit, vy + bob + (Math.random() - 0.5) * jit, vz);
   }
 }
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
@@ -4162,6 +4273,9 @@ const ACH = [
   ['class', 'Specialist', 'Pick a class at the Gem Stump', () => !!S.cls],
   ['packer', 'Pack Mule', 'Carry 5 pieces on your back at once', () => S.pack.length >= 5],
   ['ride', 'Road Trip', 'Ride along in a friend\'s vehicle', null],
+  ['deer', 'Deer Whisperer', 'Scare off a grumpy deer', null],
+  ['raccoon', 'Bandit Buster', 'Get your wood back from the raccoon', null],
+  ['debtfree', 'Debt Free', 'Pay off your loan at Pinecrest Bank', null],
 ];
 function unlock(id) {
   if (S.ach[id]) return; const a = ACH.find(x => x[0] === id); if (!a) return;
@@ -4721,6 +4835,234 @@ const GEMSTUMP = { x: -134, z: 174 };
   addInter(x, z, 3.4, () => 'Spend gems at the Gem Stump (' + S.gems + ' gem' + (S.gems === 1 ? '' : 's') + ')', () => openShop('gems'), { key: 'gems' });
 })();
 
+
+/* ================= the crane remote: work any truck's loader crane from the ground ================= */
+const REMOTE_PRICE = 60;
+// the nearest truck close enough for its crane to reach you
+function craneTruck() {
+  let best = null, bd = 22;
+  for (const t of trucks) { if (t.kind === 'feller') continue; const d = Math.hypot(t.pos.x - player.x, t.pos.z - player.z); if (d < bd) { bd = d; best = t; } }
+  return best;
+}
+function craneDown() {
+  if (player.truck || build || held) return;
+  const t = craneTruck();
+  if (!t) { toast('Stand near a truck: the remote works its loader crane.'); sDeny(); return; }
+  camera.getWorldDirection(camDir);
+  const r = rayBodies(camera.position, camDir, 30);
+  if (!r.b) { toast('Aim the crosshair at a log, then hold to lift it.'); return; }
+  const b = r.b;
+  if (b.heldBy) { toast('A friend is moving that.'); return; }
+  const at = tmpV.copy(camera.position).addScaledVector(camDir, r.t);
+  if (Math.hypot(at.x - t.pos.x, at.z - t.pos.z) > 18) { toast('That log is too far from the truck for its crane.'); return; }
+  if (b.cargo && !NET.guest) detachCargo(b);
+  held = b; hold.crane = true; wakeB(b);
+  tmpV2.copy(at).sub(b.p); const R = b.R;
+  hold.local.set(R[0] * tmpV2.x + R[3] * tmpV2.y + R[6] * tmpV2.z, R[1] * tmpV2.x + R[4] * tmpV2.y + R[7] * tmpV2.z, R[2] * tmpV2.x + R[5] * tmpV2.y + R[8] * tmpV2.z);
+  hold.dist = clamp(r.t, 2, 24); hold.far = 0;
+  if (NET.guest) { const tg = [r2(at.x), r2(at.y + 0.6), r2(at.z)]; netAct({ t: 'grab', id: b.id, l: [hold.local.x, hold.local.y, hold.local.z], tg, crane: 1 }); }
+  sCrane();
+}
+// the cable from the truck's crane post down to a yellow grapple on the log
+const craneVis = (() => {
+  const g = new THREE.Group(); g.visible = false; scene.add(g);
+  const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1, 6), lam(0x1a1a1a)); g.add(cable);
+  const claw = new THREE.Group(); g.add(claw);
+  const y = lam(0xf2b51e), d = lam(0x333333);
+  const hub = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.5), y); claw.add(hub);
+  for (const s of [-1, 1]) { const arm = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.06, 6, 10, PI * 0.9), d); arm.rotation.set(0, s > 0 ? 0 : PI, PI / 2); arm.position.set(0, -0.35, s * 0.05); claw.add(arm); }
+  return { g, cable, claw };
+})();
+function updateCraneVis() {
+  const on = held && hold.crane;
+  craneVis.g.visible = !!on;
+  if (!on) return;
+  const t = craneTruck(); if (!t) { craneVis.g.visible = false; return; }
+  const a = tmpV.set(0, t.T.cabH + 1.6, t.zBedF - 0.3).applyQuaternion(t.q).add(t.pos);
+  const R = held.R, l = hold.local, b = tmpV2.set(held.p.x + R[0] * l.x + R[1] * l.y + R[2] * l.z, held.p.y + R[3] * l.x + R[4] * l.y + R[5] * l.z + 0.45, held.p.z + R[6] * l.x + R[7] * l.y + R[8] * l.z);
+  const c = craneVis.cable, len = a.distanceTo(b);
+  c.position.copy(a).add(b).multiplyScalar(0.5); c.scale.set(1, len, 1); c.quaternion.setFromUnitVectors(UPV, tmpV3.copy(b).sub(a).normalize());
+  craneVis.claw.position.copy(b); craneVis.claw.rotation.y = player.yaw;
+}
+
+/* ================= the debt: you start out owing the bank for your gear ================= */
+const BANK = { x: -128, z: 166 };
+(function buildBank() {
+  const x = BANK.x, z = BANK.z, y = hAt(x, z), M = townMB;
+  M.box(x, y + 1.5, z, 3.4, 3, 2.6, 0xe8dcc0).box(x, y + 3.15, z, 3.9, 0.3, 3.1, 0x2f5b3a).box(x, y + 1.1, z + 1.32, 2.2, 0.1, 0.12, 0x5a3e28);
+  M.box(x, y + 1.9, z + 1.31, 2.4, 1.0, 0.04, 0x2b3f4f);
+  addCol(x, y + 1.5, z, 1.75, 1.6, 1.35, 0, 0);
+  signMesh(signTex(512, 160, board('Pinecrest Bank', 'Pay off your loan here', '#2f5b3a', '#fff1d0', '#ffd25a')), 3.2, 1.0, x, y + 3.9, z + 1.4, 0);
+  addInter(x, z + 2.4, 3.4, () => S.debt > 0 ? (S.money > 0 ? 'Pay <b>' + money(Math.min(S.money, S.debt, 500)) + '</b> toward your loan (' + money(S.debt) + ' left)' : 'You owe the bank ' + money(S.debt) + '. Sell some wood first.') : 'Your loan is paid off. Well done!', () => payDebt(), { key: 'bank' });
+})();
+function payDebt() {
+  if (S.debt <= 0) return;
+  const p = Math.min(S.money, S.debt, 500);
+  if (p <= 0) { sDeny(); toast('You need money to pay the bank. Sell some wood first.', true); return; }
+  S.money -= p; S.debt -= p; sCoin(p);
+  floatText(BANK.x, hAt(BANK.x, BANK.z) + 3, BANK.z + 1.5, '-' + money(p), S.debt > 0 ? money(S.debt) + ' left' : 'Paid off!');
+  if (S.debt <= 0) { S.debt = 0; addGems(10); unlock('debtfree'); sBuy(); toast('You paid off your loan! The bank gives you 10 gems as a thank-you.'); }
+  refreshBar(); save();
+}
+
+/* ================= wildlife: an angry deer and a sneaky raccoon ================= */
+function critterModel(kind) {
+  const g = new THREE.Group(), legs = [];
+  const B = (geo, m, x, y, z, rx, ry, rz) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.rotation.set(rx || 0, ry || 0, rz || 0); o.castShadow = HQ; g.add(o); return o; };
+  if (kind === 'deer') {
+    const fur = lam(0x9a5e32), pale = lam(0xf0e2c8), dark = lam(0x3a2414), horn = lam(0xd8c8a0);
+    const body = B(new THREE.SphereGeometry(0.5, 12, 8), fur, 0, 1.15, 0); body.scale.set(0.75, 0.7, 1.45);
+    B(new THREE.SphereGeometry(0.3, 8, 6), pale, 0, 1.1, -0.62).scale.set(1, 0.9, 0.6);
+    const neck = new THREE.Group(); neck.position.set(0, 1.35, 0.55); g.add(neck);
+    const nm = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.7, 8), fur); nm.position.set(0, 0.25, 0.12); nm.rotation.x = 0.6; neck.add(nm);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.5), fur); head.position.set(0, 0.55, 0.38); neck.add(head);
+    const nose = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.14, 0.12), dark); nose.position.set(0, 0.5, 0.66); neck.add(nose);
+    for (const s of [-1, 1]) {
+      const ear = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.22, 5), fur); ear.position.set(s * 0.17, 0.72, 0.28); ear.rotation.z = -s * 1.0; neck.add(ear);
+      const a1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.045, 0.7, 5), horn); a1.position.set(s * 0.14, 0.98, 0.3); a1.rotation.set(-0.3, 0, -s * 0.45); neck.add(a1);
+      for (let k = 0; k < 3; k++) { const t = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 0.3, 4), horn); t.position.set(s * (0.22 + k * 0.06), 1.05 + k * 0.14, 0.3 + (k - 1) * 0.08); t.rotation.set(0.5 - k * 0.3, 0, -s * (0.9 - k * 0.2)); neck.add(t); }
+    }
+    for (const [x, z] of [[-0.22, 0.45], [0.22, 0.45], [-0.22, -0.45], [0.22, -0.45]]) { const p = new THREE.Group(); p.position.set(x, 0.85, z); g.add(p); const l = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.85, 6), fur); l.position.y = -0.42; p.add(l); const h = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), dark); h.position.y = -0.85; p.add(h); legs.push(p); }
+    g.userData = { legs, neck };
+  } else {
+    const fur = lam(0x7a7a80), pale = lam(0xd8d8dc), dark = lam(0x26262a);
+    const body = B(new THREE.SphereGeometry(0.3, 10, 7), fur, 0, 0.38, 0); body.scale.set(0.85, 0.7, 1.25);
+    const head = B(new THREE.SphereGeometry(0.17, 10, 7), fur, 0, 0.5, 0.38);
+    B(new THREE.BoxGeometry(0.3, 0.09, 0.05), dark, 0, 0.53, 0.52);
+    B(new THREE.ConeGeometry(0.06, 0.16, 6), pale, 0, 0.47, 0.56, PI / 2);
+    for (const s of [-1, 1]) B(new THREE.ConeGeometry(0.06, 0.12, 4), fur, s * 0.1, 0.68, 0.34);
+    const tail = new THREE.Group(); tail.position.set(0, 0.42, -0.36); g.add(tail);
+    for (let k = 0; k < 5; k++) { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.1, 8), k % 2 ? dark : pale); r.position.set(0, 0.04 * k, -0.09 * k); r.rotation.x = 1.2; tail.add(r); }
+    for (const [x, z] of [[-0.12, 0.2], [0.12, 0.2], [-0.12, -0.2], [0.12, -0.2]]) { const p = new THREE.Group(); p.position.set(x, 0.24, z); g.add(p); const l = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.24, 5), dark); l.position.y = -0.12; p.add(l); legs.push(p); }
+    g.userData = { legs, tail };
+  }
+  g.visible = false; scene.add(g);
+  return g;
+}
+const DEER = { on: false, x: 0, y: 0, z: 0, yaw: 0, st: 0, tx: 0, tz: 0, t: 0, cool: 20, tgt: null, speed: 0, look: 0, flee: 0, n: { on: false, x: 0, y: 0, z: 0, yaw: 0, st: 0 } };
+const RACC = { on: false, x: 0, y: 0, z: 0, yaw: 0, st: 0, tx: 0, tz: 0, t: 0, cool: 90, truck: null, carry: null, speed: 0, n: { on: false, x: 0, y: 0, z: 0, yaw: 0, st: 0 } };
+const deerG = critterModel('deer'), raccG = critterModel('racc');
+// everyone the wildlife might bother: [id, x, y, z, inTruck]
+const people = () => goosePeople();
+function critterStep(C, dt, tx, tz, speed, rad) {
+  const dx = tx - C.x, dz = tz - C.z, d = Math.hypot(dx, dz);
+  C.speed = 0;
+  if (speed <= 0 || d < 0.3) return d;
+  const want = Math.atan2(dx, dz); let dy = want - C.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); C.yaw += dy * Math.min(1, dt * 6);
+  let nx = C.x + Math.sin(C.yaw) * speed * dt, nz = C.z + Math.cos(C.yaw) * speed * dt;
+  for (const c of colsAt(nx, nz)) { if (c.walk && colTop(c, nx, nz) < C.y + 0.6) continue; if (c.y + c.hy < C.y + 0.2 || c.y - c.hy > C.y + 1.5) continue; if (circleBox(c, nx, nz, rad)) { nx += PO.x; nz += PO.z; } }
+  forTrees(nx, nz, 2, i => { if (tState[i] === 2) return; const r = treeR(i) + rad, ex = nx - TX[i], ez = nz - TZ[i], e = Math.hypot(ex, ez); if (e < r && e > 1e-4) { nx = TX[i] + ex / e * r; nz = TZ[i] + ez / e * r; } });
+  if (hAt(nx, nz) > -0.3) { C.x = nx; C.z = nz; C.speed = speed; }
+  C.y = groundAt(C.x, C.z, C.y + 1);
+  return d;
+}
+const DST = ['walk', 'stare', 'charge', 'flee'];
+function deerTick(dt) {
+  const D = DEER, ps = people();
+  D.cool -= dt; D.t += dt;
+  if (!D.on) {
+    if (D.cool > 0) return;
+    // a deer shows up near someone walking in the woods
+    const q = ps.find(p => !p[4] && [0, 1, 2].includes(regionAt(p[1], p[3])) && Math.hypot(p[1] - TOWN.x, p[3] - TOWN.z) > 70);
+    D.cool = 8; if (!q) return;
+    const a = fr() * TAU, x = q[1] + Math.cos(a) * 34, z = q[3] + Math.sin(a) * 34;
+    if (hAt(x, z) < 0.8) return;
+    Object.assign(D, { on: true, x, z, y: hAt(x, z), st: 0, tx: x, tz: z, t: 0, tgt: null, flee: 0, cool: 6 });
+    return;
+  }
+  if (!ps.some(p => Math.hypot(p[1] - D.x, p[3] - D.z) < 110)) { D.on = false; D.cool = 40; return; }
+  const st = DST[D.st];
+  if (st === 'walk') {
+    if (Math.hypot(D.tx - D.x, D.tz - D.z) < 1) { D.tx = D.x + (fr() - 0.5) * 20; D.tz = D.z + (fr() - 0.5) * 20; }
+    critterStep(D, dt, D.tx, D.tz, 1.4, 0.5);
+    const q = ps.filter(p => !p[4]).sort((a, b) => Math.hypot(a[1] - D.x, a[3] - D.z) - Math.hypot(b[1] - D.x, b[3] - D.z))[0];
+    if (q && D.cool <= 0 && Math.hypot(q[1] - D.x, q[3] - D.z) < 16) { D.st = 1; D.tgt = q[0]; D.t = 0; deerSnort(); }
+  } else if (st === 'stare') {
+    const q = ps.find(p => p[0] === D.tgt); if (!q) { D.st = 0; return; }
+    critterStep(D, dt, q[1], q[3], 0.01, 0.5); D.yaw = Math.atan2(q[1] - D.x, q[3] - D.z);
+    if (D.t > 1.6) { D.st = 2; D.t = 0; }
+  } else if (st === 'charge') {
+    const q = ps.find(p => p[0] === D.tgt); if (!q || q[4]) { D.st = 3; D.flee = 3; return; }
+    const d = critterStep(D, dt, q[1], q[3], 8, 0.5);
+    if (d < 1.4) { knockPlayer(q[0], q[1] - D.x, q[3] - D.z); D.st = 3; D.flee = 2.5; D.cool = 14; }
+    else if (D.t > 5) { D.st = 3; D.flee = 2; D.cool = 10; }
+  } else {
+    D.flee -= dt; const a = Math.atan2(D.x - player.x, D.z - player.z);
+    critterStep(D, dt, D.x + Math.sin(a) * 10, D.z + Math.cos(a) * 10, 6, 0.5);
+    if (D.flee <= 0) { D.st = 0; D.tx = D.x; D.tz = D.z; }
+  }
+}
+// the deer bowls someone over: a big shove, no harm done
+function knockPlayer(id, dx, dz) {
+  const l = Math.hypot(dx, dz) || 1;
+  if (id === 'me') { if (held) dropHeld(); player.vx += dx / l * 11; player.vz += dz / l * 11; player.vy = 6; player.onGround = false; shake = Math.max(shake, 0.5); sThud(0.8); toast('The deer knocked you flying! Bonk it with your axe to scare it off.', true); hint('deer', 'Deer here are grumpy. If one lowers its antlers, step aside or bonk it.'); }
+  else if (NET.host) { const p = NET.peers.get(id); if (p) netSend(p, { e: { t: 'knock', x: r2(dx / l), z: r2(dz / l) } }); }
+}
+function deerSnort() { const C = NET.guest ? DEER.n : DEER; if (!A.ctx || Math.hypot(C.x - player.x, C.z - player.z) > 40 || !ok('snort', 600)) return; noiseB(A.ctx.currentTime, 'lowpass', 500, 0.6, 0.25, 0.3); tone(A.ctx.currentTime + 0.05, 'sawtooth', 120, 80, 0.12, 0.3, 0.02); }
+const RST = ['sneak', 'climb', 'run', 'flee'];
+function raccTick(dt) {
+  const R = RACC, ps = people();
+  R.cool -= dt; R.t += dt;
+  if (!R.on) {
+    if (R.cool > 0) return;
+    R.cool = 10;
+    // a parked truck with wood on it and somebody nearby: time for a raid
+    const t = trucks.find(t => t.cargo.length && Math.abs(t.speed) < 0.3 && !t.seats[0].who && ps.some(p => Math.hypot(p[1] - t.pos.x, p[3] - t.pos.z) < 45));
+    if (!t) return;
+    const a = fr() * TAU, x = t.pos.x + Math.cos(a) * 24, z = t.pos.z + Math.sin(a) * 24;
+    if (hAt(x, z) < 0.5) return;
+    Object.assign(R, { on: true, x, z, y: hAt(x, z), st: 0, t: 0, truck: t, carry: null });
+    return;
+  }
+  const t = R.truck, st = RST[R.st];
+  if (!ps.some(p => Math.hypot(p[1] - R.x, p[3] - R.z) < 80) || (st === 'sneak' && (!t || !trucks.includes(t) || !t.cargo.length || Math.abs(t.speed) > 0.5))) { raccDrop(); R.on = false; R.cool = 60 + fr() * 60; return; }
+  if (st === 'sneak') {
+    const bx = t.pos.x - Math.sin(t.yaw) * (t.L / 2 + 0.6), bz = t.pos.z - Math.cos(t.yaw) * (t.L / 2 + 0.6);
+    if (critterStep(R, dt, bx, bz, 3.2, 0.3) < 0.8) { R.st = 1; R.t = 0; }
+  } else if (st === 'climb') {
+    // hop up into the bed and grab the top piece
+    const top = t.cargo.reduce((a, b) => !a || b.p.y > a.p.y ? b : a, null);
+    R.y = t.pos.y + t.T.floor + 0.3 + Math.sin(Math.min(1, R.t * 2) * PI) * 0.6;
+    if (R.t > 0.8 && top) {
+      if (top.len <= 2.4) { detachCargo(top); R.carry = top; top.crane = true; top.sleep = false; }
+      else { detachCargo(top); top.v.x += Math.cos(t.yaw) * 2.5; top.v.z -= Math.sin(t.yaw) * 2.5; top.v.y += 2; top.av.set(1, 0, 1); wakeB(top); }
+      R.st = 2; R.t = 0; const q = ps[0]; const a = Math.atan2(R.x - q[1], R.z - q[3]); R.tx = R.x + Math.sin(a) * 30; R.tz = R.z + Math.cos(a) * 30;
+      for (const p of ps) if (Math.hypot(p[1] - t.pos.x, p[3] - t.pos.z) < 60) { if (p[0] === 'me') toast('A raccoon is raiding your truck! Bonk it to get your wood back.', true); else if (NET.host) { const pp = NET.peers.get(p[0]); if (pp) netSend(pp, { e: { t: 'msg', text: 'A raccoon is raiding a truck! Bonk it to get the wood back.' } }); } }
+    }
+  } else if (st === 'run') {
+    R.y = groundAt(R.x, R.z, R.y + 2);
+    if (critterStep(R, dt, R.tx, R.tz, 4.6, 0.3) < 1 || R.t > 14) { raccDrop(); R.st = 3; R.t = 0; }
+  } else { const a = Math.atan2(R.x - player.x, R.z - player.z); critterStep(R, dt, R.x + Math.sin(a) * 10, R.z + Math.cos(a) * 10, 5, 0.3); if (R.t > 4) { R.on = false; R.cool = 70 + fr() * 50; } }
+  if (R.carry) { const b = R.carry; if (b.gone) R.carry = null; else { b.p.set(R.x + Math.sin(R.yaw) * 0.5, R.y + 0.5, R.z + Math.cos(R.yaw) * 0.5); b.q.setFromAxisAngle(UPV, R.yaw + PI / 2); qMat(b.q, b.R); b.v.set(0, 0, 0); b.av.set(0, 0, 0); } }
+}
+function raccDrop() { const R = RACC; if (R.carry) { const b = R.carry; b.crane = false; b.sleep = false; b.v.set(0, 1, 0); wakeB(b); R.carry = null; } }
+// bonking wildlife: shared by the goose, the deer and the raccoon
+function critterHit() {
+  camera.getWorldDirection(camDir);
+  const f = Math.atan2(camDir.x, camDir.z), reach = axeById(S.axe).reach + 0.8;
+  const test = (C, rad) => { if (!C.on) return false; const d = Math.hypot(C.x - player.x, C.z - player.z); if (d > reach + rad) return false; let da = Math.atan2(C.x - player.x, C.z - player.z) - f; da = Math.atan2(Math.sin(da), Math.cos(da)); return Math.abs(da) < 0.75; };
+  const D = NET.guest ? DEER.n : DEER, R = NET.guest ? RACC.n : RACC;
+  if (test(D, 0.8)) { if (NET.guest) netAct({ t: 'bonk', w: 'deer' }); else scareCritter('deer', 'me'); floatText(D.x, D.y + 2, D.z, 'Shoo!', ''); sThud(0.4); return true; }
+  if (test(R, 0.3)) { if (NET.guest) netAct({ t: 'bonk', w: 'racc' }); else scareCritter('racc', 'me'); floatText(R.x, R.y + 1, R.z, 'Hey!', ''); sThud(0.3); return true; }
+  return false;
+}
+function scareCritter(w, who) {
+  if (w === 'deer') { if (!DEER.on) return; DEER.st = 3; DEER.flee = 4; DEER.cool = 20; deerSnort(); if (who === 'me') unlock('deer'); else if (NET.host) { const p = NET.peers.get(who); if (p) netSend(p, { e: { t: 'award', id: 'deer' } }); } }
+  else { if (!RACC.on) return; const had = !!RACC.carry; raccDrop(); RACC.st = 3; RACC.t = 0; if (had) { if (who === 'me') unlock('raccoon'); else if (NET.host) { const p = NET.peers.get(who); if (p) netSend(p, { e: { t: 'award', id: 'raccoon' } }); } } }
+}
+function wildTick(dt) { if (!NET.guest && S.seen.started) { deerTick(dt); raccTick(dt); } }
+function drawWild(dt) {
+  for (const [C, G, big] of [[NET.guest ? DEER.n : DEER, deerG, 1], [NET.guest ? RACC.n : RACC, raccG, 0]]) {
+    G.visible = !!C.on; if (!C.on) continue;
+    if (NET.guest) { const k = 1 - Math.exp(-dt * 10); G.position.x += (C.x - G.position.x) * k; G.position.z += (C.z - G.position.z) * k; G.position.y += (C.y - G.position.y) * k; let dy = C.yaw - G.rotation.y; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); G.rotation.y += dy * k; if (Math.hypot(C.x - G.position.x, C.z - G.position.z) > 20) G.position.set(C.x, C.y, C.z); }
+    else { G.position.set(C.x, C.y, C.z); G.rotation.y = C.yaw; }
+    const sp = NET.guest ? (C.st === 2 ? 8 : C.st === 3 ? 6 : C.st === 0 ? 1.5 : 0) : C.speed, ph = clock * (big ? 7 : 14) * Math.min(2, 0.4 + sp / 3);
+    G.userData.legs.forEach((l, i) => { l.rotation.x = sp > 0.1 ? Math.sin(ph + (i % 2 ? PI : 0) + (i > 1 ? PI / 2 : 0)) * 0.7 : 0; });
+    if (big) G.userData.neck.rotation.x = C.st === 1 || C.st === 2 ? 0.75 : Math.sin(clock * 0.8) * 0.1;
+    else G.userData.tail.rotation.y = Math.sin(clock * 6) * 0.4;
+  }
+}
+
 // every town building is in: merge them into a few big meshes
 finishTown();
 
@@ -4775,6 +5117,7 @@ function sHorn() { if (!ok('fhorn', 800)) return; const t = A.ctx.currentTime; t
 function sBuy() { if (!ok('buy', 60)) return; const t = A.ctx.currentTime; [523, 659, 784, 1047].forEach((f, k) => tone(t + k * 0.06, 'triangle', f, f, 0.16, 0.14)); }
 function sCoin(v) { if (!ok('coin', 90)) return; const t = A.ctx.currentTime, n = clamp(Math.round(1 + Math.log10(1 + v)), 2, 6); for (let k = 0; k < n; k++) { tone(t + k * 0.06, 'square', 1500 + k * 120, 1500 + k * 120, 0.05, 0.07); tone(t + k * 0.06, 'sine', 2600, 2600, 0.06, 0.12); } }
 function sGem() { if (!ok('gem', 80)) return; const t = A.ctx.currentTime; [1320, 1760, 2350].forEach((f, k) => tone(t + k * 0.05, 'sine', f, f * 1.01, 0.09, 0.18)); }
+function sCrane() { if (!ok('crane', 200)) return; const t = A.ctx.currentTime; tone(t, 'square', 90, 140, 0.05, 0.25, 0.02); tone(t, 'sine', 320, 520, 0.05, 0.2, 0.01); }
 function sDeny() { if (!ok('deny', 120)) return; tone(A.ctx.currentTime, 'square', 160, 110, 0.1, 0.12); }
 function sSawIn(d) { if (!ok('sawin', 200)) return; const t = A.ctx.currentTime; noiseB(t, 'bandpass', 1600, 2, 0.4 * dk(d), 0.4, 900); }
 function sPlank(d) { if (!ok('plank', 120)) return; const t = A.ctx.currentTime; tone(t, 'triangle', 520, 300, 0.12 * dk(d), 0.06); noiseB(t, 'bandpass', 1300, 1.2, 0.15 * dk(d), 0.05); }
@@ -4825,11 +5168,14 @@ const svgLand = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 30l8-16
 const svgGem = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4l12 12-12 20L8 16z" fill="#5ff0d0" stroke="#0e0c09" stroke-width="2.2" stroke-linejoin="round"/><path d="M8 16h24M20 4v32M14 16l6 20 6-20" stroke="#1d8f7a" stroke-width="1.4" fill="none"/></svg>';
 const svgFist = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="13" width="22" height="16" rx="4" fill="#e8b48a" stroke="#0e0c09" stroke-width="2"/><path d="M15 13v9M21 13v9M27 13v9M9 22h8" stroke="#a8754e" stroke-width="2"/><rect x="12" y="29" width="16" height="7" fill="#b8402e" stroke="#0e0c09" stroke-width="2"/></svg>';
 const svgLogs = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="22" width="30" height="8" rx="4" fill="#9a6a42" stroke="#0e0c09" stroke-width="2"/><rect x="8" y="12" width="26" height="8" rx="4" fill="#b8844e" stroke="#0e0c09" stroke-width="2"/><circle cx="31" cy="16" r="2.4" fill="#f0dcb0"/><circle cx="31" cy="26" r="2.4" fill="#f0dcb0"/><path d="M12 34L28 8" stroke="#3a2a18" stroke-width="2.4"/></svg>';
+const svgRemote = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="14" width="26" height="18" rx="3" fill="#3a6ec8" stroke="#0e0c09" stroke-width="2"/><circle cx="15" cy="23" r="3.5" fill="#e8302a" stroke="#0e0c09" stroke-width="1.5"/><circle cx="25" cy="23" r="3.5" fill="#e8302a" stroke="#0e0c09" stroke-width="1.5"/><path d="M28 14V4" stroke="#2a2a2a" stroke-width="2.5"/><circle cx="28" cy="4" r="2.5" fill="#ffd25a"/></svg>';
 const svgStrap = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="16" width="32" height="14" rx="3" fill="#b8844e" stroke="#0e0c09" stroke-width="2"/><path d="M14 10v26M26 10v26" stroke="#e5533d" stroke-width="4"/><rect x="11" y="20" width="6" height="6" fill="#c8ccd0" stroke="#0e0c09" stroke-width="1.5"/></svg>';
 function refreshBar() {
   const a = axeById(S.axe);
   $('#s0').innerHTML = '<span class="k">1</span>' + (a.fists ? svgFist : svgAxe(a)) + '<span class="n">' + (a.fists ? 'Fists' : 'Axe') + '</span>';
   $('#gemN').textContent = S.gems;
+  $('#s4').hidden = !S.remote; if (S.remote) $('#s4').innerHTML = '<span class="k">4</span>' + svgRemote + '<span class="n">Crane</span>'; $('#s4').classList.toggle('on', S.tool === 3);
+  const dt0 = $('#debtTxt'); dt0.hidden = !(S.debt > 0); $('#game').classList.toggle('hasDebt', S.debt > 0); if (S.debt > 0) dt0.textContent = 'Loan: ' + money(S.debt);
   const pk = $('#sPack'); pk.hidden = !S.pack.length; if (S.pack.length) pk.innerHTML = '<span class="k">C</span>' + svgLogs + '<span class="n">' + S.pack.length + '/' + rackCap() + '</span>';
   $('#s1').innerHTML = '<span class="k">2</span>' + svgHand + '<span class="n">Grab</span>';
   const inv = S.inv.mill1 + S.inv.mill2 + S.inv.mill3 + S.inv.belt + S.inv.shop1;
@@ -4847,6 +5193,7 @@ $('#s1').addEventListener('click', () => { aInit(); setTool(1); });
 $('#s2').addEventListener('click', () => { aInit(); openBuild(); });
 $('#s3').addEventListener('click', () => { aInit(); if (S.tool === 2) cycleSaw(); else setTool(2); });
 $('#sPack').addEventListener('click', () => { aInit(); packAction(); });
+$('#s4').addEventListener('click', () => { aInit(); setTool(3); });
 let toastT = 0;
 function toast(t, bad) { const e = $('#toast'); e.textContent = t; e.classList.toggle('bad', !!bad); e.style.opacity = 1; toastT = 2.8; }
 const hintQ = []; let hintT = 0;
@@ -4860,7 +5207,7 @@ function setTouchMode() {
   if (build) { c.textContent = 'Place'; g.textContent = 'Turn'; u.textContent = 'Stop'; tp.hidden = true; j.hidden = true; g.hidden = false; }
   else if (player.truck && !drv()) { c.hidden = true; g.hidden = true; u.textContent = 'Exit'; tp.hidden = true; j.hidden = true; }
   else if (player.truck) { c.hidden = false; const kd = player.truck.kind; c.textContent = 'Gas'; g.textContent = 'Brake'; u.textContent = 'Exit'; tp.hidden = false; tp.textContent = kd === 'feller' ? 'Claw' : kd === 'forwarder' ? 'Crane' : 'Tip bed'; j.hidden = kd !== 'forwarder'; j.textContent = 'Tip'; g.hidden = false; tp.style.bottom = 'calc(180px + env(safe-area-inset-bottom,0px))'; tp.style.right = 'calc(116px + env(safe-area-inset-right,0px))'; }
-  else { tp.classList.add('carry'); c.hidden = false; c.textContent = S.tool === 1 ? 'Grab' : S.tool === 2 ? 'Saw' : S.axe === 'fists' ? 'Punch' : 'Chop'; g.textContent = 'Grab'; g.hidden = S.tool === 1; u.textContent = 'Use'; tp.hidden = false; tp.textContent = 'Carry'; tp.style.bottom = ''; tp.style.right = ''; j.hidden = false; j.textContent = 'Jump'; }
+  else { tp.classList.add('carry'); c.hidden = false; c.textContent = S.tool === 1 ? 'Grab' : S.tool === 3 ? 'Lift' : S.tool === 2 ? 'Saw' : S.axe === 'fists' ? 'Punch' : 'Chop'; g.textContent = 'Grab'; g.hidden = S.tool === 1; u.textContent = 'Use'; tp.hidden = false; tp.textContent = 'Carry'; tp.style.bottom = ''; tp.style.right = ''; j.hidden = false; j.textContent = 'Jump'; }
 }
 // prompts: the nearest thing you can use
 let curPrompt = null;
@@ -4885,7 +5232,7 @@ function findPrompt() {
       best = k < 0 ? { text: nm.charAt(0).toUpperCase() + nm.slice(1) + ' is full', act: () => toast('No free seats in that one.'), key: 'e' } : { text: seatName(t, k) + ' ' + nm, act: () => enterTruck(t, k), key: 'e' }; bd = d - 1;
     }
   }
-  if (!best && held && packable(held)) best = { text: 'Carry it on your back (' + S.pack.length + '/' + rackCap() + ')', act: () => packAction(), key: 'c' };
+  if (!best && held && !hold.crane && packable(held)) best = { text: 'Carry it on your back (' + S.pack.length + '/' + rackCap() + ')', act: () => packAction(), key: 'c' };
   if (!best && S.tool === 1) { const it = aimItem(); if (it) best = { text: 'Pick up the ' + ITEMS[it.type].name, act: () => pickUpItem(it), key: 'x' }; }
   return best;
 }
@@ -4900,6 +5247,8 @@ function goalText() {
   if (!S.stats.sold) return 'Cut the log, carry pieces on your back (' + (coarse ? 'Carry' : 'C') + ') and walk into Riverside Timber, east of town.';
   if (!S.axes.includes('rusty')) return 'Buy the Rusty Hatchet at Ridgeline Tools (' + money(30) + '). Punching is slow!';
   if (!S.rack) return 'Get a bigger back rack at Ridgeline Tools so you can carry more.';
+  if (!S.remote) return 'Buy a crane remote at Big Wheel Motors (' + money(REMOTE_PRICE) + ') and load your truck from the ground.';
+  if (S.debt > 0 && S.earned > 600) return 'Pay off your loan at Pinecrest Bank by the fountain (' + money(S.debt) + ' left).';
   if (!S.axes.includes('steel')) return 'Buy the Steel Chopper at Ridgeline Tools (' + money(90) + ').';
   if (S.plot < 0) return 'Buy a plot of land west of town (' + money(PLOT_PRICE) + ').';
   if (!hasMill()) return 'Buy a sawmill at Bolt & Belt (' + money(350) + ').';
@@ -5029,6 +5378,8 @@ function fillShop() {
       const tr = TRUCKS[k], own = S.ownT.includes(k);
       L.append(row(svgTruck(tr.color), tr.name, k === 'pickup' ? 'Your trusty starter truck. Small bed, big heart. Seats 2, plus 2 standing in the back.' : tr.desc + ' Seats 2, plus 2 in the back.', statBars([['Bed', tr.bedL / 6], ['Speed', tr.speed / 20]]), own ? 'Owned' : money(tr.price), own ? 'own' : can(tr.price) ? '' : 'no', () => { if (!own) buyTruck(k); }));
     }
+    sec('Tools for trucks');
+    L.append(row(svgRemote, 'Crane remote', 'Works the loader crane on any truck near you: aim at a log, hold to lift it, let go over the bed. Press 4.', '', S.remote ? 'Owned' : money(REMOTE_PRICE), S.remote ? 'own' : can(REMOTE_PRICE) ? '' : 'no', () => { if (!S.remote) buyRemote(); }));
     sec('Forest machines');
     for (const k of ['forwarder', 'feller']) {
       const tr = TRUCKS[k], own = S.ownT.includes(k);
@@ -5078,6 +5429,7 @@ function fillExtra(L, T) {
 }
 function buySaw(w) { if (!pay(w.price, true)) return; S.saws.push(w.id); S.saw = w.id; equipAxe(); setTool(2); toast('You bought the ' + w.name + '! Press 3 for it and hold to cut.'); fillShop(); save(); hint('saw', 'Hold the button to rev the chainsaw into a tree or log. It cuts much faster than an axe.'); }
 function myUpg() { for (const t of trucks) if (t.owner === 'me') { if (t.kind === 'feller') t.lv = S.fellerLv; t.straps = S.straps; } netAct({ t: 'upg', lv: S.fellerLv, straps: S.straps }); }
+function buyRemote() { if (!pay(REMOTE_PRICE, true)) return; S.remote = 1; refreshBar(); setTool(3); toast('Crane remote bought! Press 4 near a truck to lift logs.'); fillShop(); save(); }
 function buyStraps(i) { if (!pay(STRAPS[i].price, true)) return; S.straps = i; myUpg(); toast(STRAPS[i].name + ' for all your vehicles.'); fillShop(); save(); }
 function buyRack(i) { if (!pay(RACKS[i].price, true)) return; S.rack = i; refreshBar(); toast('The ' + RACKS[i].name + ' holds ' + rackCap() + ' pieces.'); fillShop(); save(); }
 function buyClass(k, cost) { if (S.gems < cost) { sDeny(); toast('You need ' + (cost - S.gems) + ' more gems.', true); return; } S.gems -= cost; S.cls = k; sBuy(); for (const t of trucks) t.lastDrv = undefined; refreshBar(); toast('You are now a ' + CLASSES[k].name + '! ' + CLASSES[k].desc); fillShop(); save(); }
@@ -5224,7 +5576,7 @@ $('#introGo').addEventListener('click', () => startGame(false));
 $('#introSolo').addEventListener('click', () => startGame(true));
 
 /* ================= day and night ================= */
-const C_TOPD = LIN(0x3f86d0), C_TOPN = LIN(0x0b1630), C_HORD = LIN(0xc4dcec), C_HORN = LIN(0x1c2a44), C_DUSK = LIN(0xf3a66a), C_STORM = LIN(0x6c747c);
+const C_TOPD = LIN(0x3d9cf0), C_TOPN = LIN(0x0b1630), C_HORD = LIN(0xcfeafa), C_HORN = LIN(0x1c2a44), C_DUSK = LIN(0xf3a66a), C_STORM = LIN(0x6c747c);
 const C_SUND = LIN(0xfff1d6), C_SUNDUSK = LIN(0xffb070), C_MOON = LIN(0x9fb4ff);
 const sunDir = new THREE.Vector3();
 function nightK() { const sy = Math.sin((S.time - 0.25) * TAU); return 1 - sm01((sy + 0.08) / 0.25); }
@@ -5240,15 +5592,15 @@ function updateSky(dt) {
   skyU.top.value.lerp(C_STORM, st * 0.75).multiplyScalar(1 + EV.flash * 2); skyU.hor.value.lerp(C_STORM, st * 0.7).multiplyScalar(1 + EV.flash * 1.5);
   skyU.sunCol.value.copy(C_SUND).lerp(C_SUNDUSK, dusk).multiplyScalar(day * (1 - st * 0.9) * 4);
   scene.fog.color.copy(skyU.hor.value);
-  scene.fog.density = (HQ ? 0.0062 : 0.0105) * (1 + st * 1.6 + nk * 0.3);
+  scene.fog.density = (HQ ? 0.0052 : 0.0095) * (1 + st * 1.6 + nk * 0.3);
   starMat.opacity = nk * 0.9;
   const lightDir = sy > -0.02 ? tmpV.copy(sunDir) : tmpV.copy(sunDir).negate();
   if (lightDir.y < 0.25) { lightDir.y = 0.25; lightDir.normalize(); }
   sun.color.copy(sy > -0.02 ? tmpC.copy(C_SUND).lerp(C_SUNDUSK, dusk) : C_MOON);
-  sun.intensity = (sy > -0.02 ? 0.4 + 2.4 * day : 0.45 * nk) * (1 - st * 0.7);
-  hemi.intensity = (HQ ? 0.25 + 0.25 * day : 0.55 + 0.45 * day) + EV.flash * 3;
+  sun.intensity = (sy > -0.02 ? 0.4 + 1.9 * day : 0.45 * nk) * (1 - st * 0.7);
+  hemi.intensity = (HQ ? 0.3 + 0.3 * day : 0.55 + 0.45 * day) + EV.flash * 3;
   EV.flash = Math.max(0, EV.flash - dt * 4);
-  const ek = (0.12 + 0.88 * day) * (1 - st * 0.45); if (Math.abs(ek - envK) > 0.01) { envK = ek; for (const m of STD) m.envMapIntensity = m.userData.envI * ek; }
+  const ek = (0.1 + 0.5 * day) * (1 - st * 0.45); if (Math.abs(ek - envK) > 0.01) { envK = ek; for (const m of STD) m.envMapIntensity = (m.userData.envI == null ? 1 : m.userData.envI) * ek; }
   swayU.value = clock; windU.value = st;
   hemi.color.copy(C_HORD).lerp(C_MOON, nk * 0.6);
   // the shadow box follows you, snapped to its texel grid so shadows do not shimmer
@@ -5290,7 +5642,9 @@ function apply(d) {
     d.ownT = [...new Set((d.trucks || []).map(t => t[0]).filter(k => TRUCKS[k]))]; if (!d.ownT.length) d.ownT = ['pickup'];
     if (Array.isArray(d.axes) && !d.axes.includes('fists')) d.axes.unshift('fists');
   }
+  if (d.v === 3) { d.v = 4; if (d.debt == null) d.debt = 0; }   // v4: the starting debt is only for brand new games
   S = Object.assign(f, d);
+  if (d.debt == null) S.debt = 0;
   S.perks = Object.assign(fresh().perks, d.perks || {}); if (!Array.isArray(S.pack)) S.pack = []; if (!Array.isArray(S.ownT) || !S.ownT.length) S.ownT = ['pickup']; S.repair = Object.assign({}, d.repair || {});
   S.gems = Math.max(0, S.gems | 0); S.rack = clamp(S.rack | 0, 0, RACKS.length - 1); S.straps = clamp(S.straps | 0, 0, STRAPS.length - 1); if (S.cls && !CLASSES[S.cls]) S.cls = '';
   S.unlock = Object.assign(fresh().unlock, d.unlock || {}); S.inv = Object.assign(fresh().inv, d.inv || {}); S.stats = Object.assign(fresh().stats, d.stats || {}); S.seen = Object.assign({}, d.seen || {});
@@ -5317,9 +5671,10 @@ function apply(d) {
   if (deepAt(player.x, player.z, player.y, -0.9)) { player.x = SPAWN.x; player.z = SPAWN.z; }
   player.y = Math.max(player.y, hAt(player.x, player.z));
   ferry.t = d.ferry >= 0.5 ? 1 : 0;
-  camMode = S.cam ? 1 : 0;
+  camAuto();
   if (!S.axes.includes(S.axe)) S.axe = S.axes[S.axes.length - 1];
   if (S.tool === 2 && !sawById(S.saw)) S.tool = 0;
+  if (S.tool === 3 && !S.remote) S.tool = 0;
 }
 const idle = window.requestIdleCallback ? fn => window.requestIdleCallback(fn, { timeout: 2000 }) : fn => setTimeout(fn, 0);
 const saveIv = setInterval(() => { if (alive && !document.hidden) idle(() => { if (alive) save(); }); }, 15000);
@@ -5347,12 +5702,12 @@ function tick(dt, play) {
   updateJobs(dt);
   updateFerry(dt);
   if (!NET.guest) { physStep(dt); updateSell(); updateMills(dt); wakeOnBelts(dt); repairTick(); gooseTick(dt); }
-  haulTick(); packSellTick(dt); updateGems(dt);
+  haulTick(); packSellTick(dt); updateGems(dt); wildTick(dt);
   updateFalling(dt);
   treeAcc += dt; if (treeAcc > 1) { treeTick(treeAcc); treeAcc = 0; }
   if (play && !NET.guest) ordersTick(dt);
   achTick(dt); eventsTick(dt); workersTick(dt); netTick(dt);
-  updateCamera(dt); cullWorld();
+  camAuto(); updateCamera(dt); cullWorld();
   aimAcc += dt; if (aimAcc > 0.05) { aimAcc = 0; if (play) updateAim(); }
 }
 function frame(now) {
@@ -5363,7 +5718,7 @@ function frame(now) {
   poseMan(dt);
   updateBuild();
   updateGrass(false);
-  updateParts(dt); updateFloats(dt); updateSoft(dt); updateRain(dt, EV.storm); updateAvatars(dt); drawGoose(dt);
+  updateParts(dt); updateFloats(dt); updateSoft(dt); updateRain(dt, EV.storm); updateAvatars(dt); drawGoose(dt); drawWild(dt); updateCraneVis();
   updateSky(dt); swayU.value = clock;
   drawBodies();
   renderer.render(scene, camera);
@@ -5388,7 +5743,7 @@ function cullWorld() {
 function start() {
   layout();
   const d = load();
-  if (d && d.v >= 1 && d.v <= 3) apply(d);
+  if (d && d.v >= 1 && d.v <= 4) apply(d);
   ensureOwnTrucks();
   const drive = d && d.drive >= 0 && trucks.filter(t => t.owner === 'me')[d.drive];
   redrawSigns(); buildFence(); equipAxe(); refreshBar(); spawnWorkers(); setPackVis(man, S.pack.map(it => it[1]));
@@ -5418,6 +5773,7 @@ function dispose() {
   for (const s of signs) s.tex.dispose();
   for (const t of TPL) { t.trunk.dispose(); t.crown.dispose(); t.full.dispose(); }
   renderer.dispose(); try { renderer.forceContextLoss(); } catch (_) {}
+  unpatchChunks();
   shadow.innerHTML = '';
 }
 // test hooks for automated checks (harmless in normal play)

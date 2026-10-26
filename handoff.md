@@ -52,9 +52,29 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ## 3. Current state
 
-- **Live:** everything up to commit `f0146d2`, "Release: site checklist pass … [deploy]". Preview and live are identical.
+- **Live:** commit `61f6c1f` "Release: Lumberjack Tycoon round 3 … [deploy]", which is the Knuckle Through release plus only the Lumberjack round 3 page and the lighter `online.js` polling (cherry-picked at the owner's request). Everything else on preview since then (reviews, rewards, age notice, category changes, sports in progress, the new games) is NOT live yet.
 - **Last full check:** `tools/test-games.cjs` reported **272 games tested, ALL CLEAN**.
 - **Open question for the owner:** should any of the 10 in-progress games move to the main list?
+
+**Online polling cost (`js/lib/online.js`):** a host polls `/api/mp` every 1.3 s only while someone is connecting or for 20 s after the room changes, otherwise every 5 s (8 s in a hidden tab); heartbeats stay at 8 s (rooms go stale after 25 s). An idle public room went from about 27 calls per 30 s to about 10. Lumberjack and Disaster Dash open public rooms by default, so watch the Netlify function count.
+
+### In flight (Oct 19-20 2026 request list), if a session picks this up
+
+Builder agents write one deliverable each to the session scratchpad (`/tmp/claude-0/-home-user-webs/b2fe29ec-6401-52e7-8b76-eda5b927e5c7/scratchpad/`); the main session reviews screenshots, installs with `node tools/new-game.cjs <file> [--wip] [--libs=...]`, deletes the agent's `games/_*` test page, runs `node tools/allgames.cjs` and `tools/test-games.cjs`, commits to `preview`. Every new or rebuilt game goes to In progress. Not deployed until the owner says "deploy".
+
+| Deliverable | Game | Install |
+|---|---|---|
+| `lumber3d.js` | Lumberjack rounds 3 and 4 (round 4 on preview only: toon look from the owner's TikTok references, patched three.js shader chunks restored on exit, first-person chopping with gloved hands, trees break into ~3 m chunks, crane remote (key 4), 5,000 starting loan paid at Pinecrest Bank, aggressive deer, raccoon that raids trucks) | INSTALLED (games/lumberjack-tycoon, In progress). Online by default (Play joins the busiest public world or hosts one; Play alone), own spawn and starter pickup, guests buy their own cars, passenger and truck-bed seats, bare-hands start, carry on your back, gems and classes at the Gem Stump, timed haul jobs, wobbly loads and straps, rebuildable bridges, the goose. Source in the session scratchpad `parts/` + `build.sh` |
+| `disaster.js` | Natural disaster multiplayer survival | INSTALLED as Disaster Dash (games/disaster-dash, In progress) |
+| `west3d.js` | Wild West sandbox (Westwood-inspired) | INSTALLED as Dusty Gulch (games/dusty-gulch, In progress) |
+| `getaway3d.js` | Road-trip getaway (Runaways-inspired) | INSTALLED as Long Haul Runaway (games/long-haul-runaway, In progress) |
+| `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | INSTALLED as Corner Hustle (In progress, age notice) |
+| `cookempire.js` | Chemistry-teacher cook empire sim, fictional chemistry only, `age:16` | INSTALLED as Cook Theory (games/cook-theory, In progress, age notice) |
+| `growop.js` | Licensed grow-op tycoon, `age:16` | INSTALLED as Green Thumb Grow Co. (In progress, age notice) |
+| `hole.js` | Black hole orbit dodge, recreated from the owner's screen recording | INSTALLED as Rim Runner (games/rim-runner, In progress) |
+| `climb3d.js` | Co-op mountain climb (Fall 2: Deadpoint reference) | INSTALLED as Summit Fall (games/summit-fall, In progress) |
+
+Owner answers this round: drug games approved for 16+ players (built with the age notice); all sports games moved to In progress until the owner decides what's wrong with them; Bonk Buddy is fine now.
 
 ### Recently done (newest first)
 
@@ -125,6 +145,10 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ### Analytics and the homepage first screen (Oct 2026)
 
+- **Ratings and reviews (`RATE` in `js/app.js`, `netlify/functions/reviews.mjs`, Netlify Blobs store `reviews`):** every game page shows a "Rate this game" bar under the game (appears after the first click/key in the game or 40 s), 1 to 5 stars, changing it replaces the old rating. Homepage tiles show the real average once a game has 3+ ratings. The homepage has a "What players think of Detourr" section (`#reviews`): average, star breakdown, a review form (stars, optional text filtered with `cleanText` from ideas.mjs, optional name), recent written reviews. One live review per player id (`lb_id`), 2 reviews per day. Remove a review with `DELETE /api/reviews?review=ID&key=REVIEWS_ADMIN_KEY` (falls back to `IDEAS_ADMIN_KEY`). All numbers are real; nothing is seeded.
+- **Rewards (`RW` in `js/app.js`, styles at the end of `css/site.css`):** 1 point per minute of active play (a game open, tab visible, input in the last 60 s; ticks every 5 s on game pages, tabs don't double count via `rw.last`). Daily bonus after 10 min of play in a day: 10 points, +5 per back-to-back day up to 30. Shop (dialog `#rewards`, opened from the "reward points" card next to the badges): card packs 60 / bundle of 5 for 270 (adds to `S 'rw_packs'`, which the card game consumes; `PACK_GAME` is its id), 6 patches 300 to 1440, 18 jerseys in three tiers: Club 2880 (48 h), Pro 5760 (96 h), Legend 10080 (168 h = 7 days of play). The jersey you wear shows on the back with your leaderboard name and a number you pick, and next to your name on leaderboards (sent as `jersey` with a new best, stored as `j` by `lb.mjs`, so it appears after the player's next best). Save key `unb_rw`. Device only, like the rest of the progress. GA events `reward_buy`, `rewards_open`.
+- **Age notice (`ageGate` in `js/app.js`):** a game with `age:16` in its listing (kept by new-game.cjs and catalog-lite.cjs) shows a "For players 16 and up" card before it starts; accepting saves `unb_age_ok` (one acceptance covers every game up to that age). Age games are left out of Classroom mode and of every random or recommended pick (`randOK`), but stay in the grid and in Continue playing. Used for the owner-requested teen crime/grow games.
+- **Games only filter:** the modes row has "Games only" (owner: strictly game games), which hides `NOT_GAMES` kinds (toy, info, weird, chill, puzzle, escape, geo) and `NOT_GAME_IDS` (word, memory and brain-test games filed under other kinds: hangman, memory, simon, typing, stroop, nummem, odd, tune, pianolearn, beatmaker). Filters renamed "Simple games" and "Big games".
 - **Tracking (`TRACK` in `js/app.js`, right after `HIST`):** sends GA4 events through the page's `gtag` when present: `game_open`, `game_start` (first click, tap or key in the game), `game_time` (visible seconds, sent on hide/close/pagehide with beacon transport), `new_best` (at most once a minute per game), `random_game`, `home_pick` (first-screen cards, `source` continue/top), `filter`. User properties `visit_number` (counted on the device, a new visit after 30 min away; a wiped device shows as 1 again) and `device_kind` (chromebook/phone/tablet/computer from the user agent). The owner has to register custom dimensions in GA (event: `game_id`, `source`; user: `visit_number`, `device_kind`) and a custom metric `seconds` for these to show in reports.
 - **Homepage first screen:** `#heroGames` under the headline, filled by `renderHero()`: Continue playing (the 3 most recent games in this device's `HIST`) and Top games from `TOP_PICKS` (6 for first-time visitors). Headline and sign were made smaller so the cards fit above the fold.
 - **Random button:** players with fewer than 5 games in their history get a game from `TOP_PICKS` (was `CORE`).
@@ -171,6 +195,8 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 | Lane Lords | The computer opponent and balance need work |
 | Pocket Pet | Needs more to do |
 | Corner Pocket | The computer opponent needs tuning; aiming needs help lines |
+
+**All sports games are in progress (owner, Oct 2026: "move all sports to in progress till I figure the issues out").** penalty, golf, airhockey, ski and kart joined the ones already there; the Sports filter button on the homepage is `hidden` while it would be empty. Bring them back with `tools/release-game.cjs` and remove `hidden` from `data-f="sports"` in index.html.
 
 ### Live but needs work (from the audit)
 
