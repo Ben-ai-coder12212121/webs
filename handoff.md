@@ -64,7 +64,7 @@ Builder agents write one deliverable each to the session scratchpad (`/tmp/claud
 
 | Deliverable | Game | Install |
 |---|---|---|
-| `lumber3d.js` | Lumberjack round 3 | INSTALLED (games/lumberjack-tycoon, In progress). Online by default (Play joins the busiest public world or hosts one; Play alone), own spawn and starter pickup, guests buy their own cars, passenger and truck-bed seats, bare-hands start, carry on your back, gems and classes at the Gem Stump, timed haul jobs, wobbly loads and straps, rebuildable bridges, the goose. Source in the session scratchpad `parts/` + `build.sh` |
+| `lumber3d.js` | Lumberjack rounds 3 and 4 (round 4 on preview only: toon look from the owner's TikTok references, patched three.js shader chunks restored on exit, first-person chopping with gloved hands, trees break into ~3 m chunks, crane remote (key 4), 5,000 starting loan paid at Pinecrest Bank, aggressive deer, raccoon that raids trucks) | INSTALLED (games/lumberjack-tycoon, In progress). Online by default (Play joins the busiest public world or hosts one; Play alone), own spawn and starter pickup, guests buy their own cars, passenger and truck-bed seats, bare-hands start, carry on your back, gems and classes at the Gem Stump, timed haul jobs, wobbly loads and straps, rebuildable bridges, the goose. Source in the session scratchpad `parts/` + `build.sh` |
 | `disaster.js` | Natural disaster multiplayer survival | INSTALLED as Disaster Dash (games/disaster-dash, In progress) |
 | `west3d.js` | Wild West sandbox (Westwood-inspired) | INSTALLED as Dusty Gulch (games/dusty-gulch, In progress) |
 | `getaway3d.js` | Road-trip getaway (Runaways-inspired) | INSTALLED as Long Haul Runaway (games/long-haul-runaway, In progress) |
