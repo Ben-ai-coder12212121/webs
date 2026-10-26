@@ -69,7 +69,7 @@ Builder agents write one deliverable each to the session scratchpad (`/tmp/claud
 | `west3d.js` | Wild West sandbox (Westwood-inspired) | INSTALLED as Dusty Gulch (games/dusty-gulch, In progress) |
 | `getaway3d.js` | Road-trip getaway (Runaways-inspired) | INSTALLED as Long Haul Runaway (games/long-haul-runaway, In progress) |
 | `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | none |
-| `cookempire.js` | Chemistry-teacher cook empire sim, fictional chemistry only, `age:16` | none |
+| `cookempire.js` | Chemistry-teacher cook empire sim, fictional chemistry only, `age:16` | INSTALLED as Cook Theory (games/cook-theory, In progress, age notice) |
 | `growop.js` | Licensed grow-op tycoon, `age:16` | none |
 
 Owner answers this round: drug games approved for 16+ players (built with the age notice); all sports games moved to In progress until the owner decides what's wrong with them; Bonk Buddy is fine now.
