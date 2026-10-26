@@ -25,7 +25,8 @@ const NM = process.env.NM || path.join(ROOT, 'src/t/node_modules/');
   await p.route(/fonts\.g|wikimedia|googletagmanager/, r => r.abort());
   for (const g of games) {
     cur = g.id;
-    await p.goto(BASE + g.url);
+    // a heavy 3D page right after another can miss the load event under software WebGL: retry once without waiting for every subresource
+    await p.goto(BASE + g.url, { timeout: 60000 }).catch(() => p.goto(BASE + g.url, { waitUntil: 'domcontentloaded', timeout: 60000 }));
     await p.waitForTimeout(1600);
     const t = await p.$eval('#stTitle', e => e.textContent).catch(() => '?');
     if (t === 'Game' || t === '?') bad.push(g.id + ': did not open');
