@@ -52,13 +52,13 @@ _Last updated: 2026-09-29 (after the site checklist pass: privacy and terms page
 
 ## 3. Current state
 
-- **Live:** commit `61f6c1f` "Release: Lumberjack Tycoon round 3 … [deploy]", which is the Knuckle Through release plus only the Lumberjack round 3 page and the lighter `online.js` polling (cherry-picked at the owner's request). Everything else on preview since then (reviews, rewards, age notice, category changes, sports in progress, the new games) is NOT live yet.
-- **Last full check:** `tools/test-games.cjs` reported **272 games tested, ALL CLEAN**.
+- **Live:** commit `8f2b573` "Release: reviews and ratings, rewards, 16+ notice … [deploy]". Preview and live are identical (the release merge took preview's Lumberjack page over the earlier round 3 cherry-pick).
+- **Last full check:** `tools/test-games.cjs` reported **288 games tested, ALL CLEAN** (Oct 26 2026).
 - **Open question for the owner:** should any of the 10 in-progress games move to the main list?
 
 **Online polling cost (`js/lib/online.js`):** a host polls `/api/mp` every 1.3 s only while someone is connecting or for 20 s after the room changes, otherwise every 5 s (8 s in a hidden tab); heartbeats stay at 8 s (rooms go stale after 25 s). An idle public room went from about 27 calls per 30 s to about 10. Lumberjack and Disaster Dash open public rooms by default, so watch the Netlify function count.
 
-### In flight (Oct 19-20 2026 request list), if a session picks this up
+### Built from the Oct 19-26 2026 request lists (all installed, all In progress, all live)
 
 Builder agents write one deliverable each to the session scratchpad (`/tmp/claude-0/-home-user-webs/b2fe29ec-6401-52e7-8b76-eda5b927e5c7/scratchpad/`); the main session reviews screenshots, installs with `node tools/new-game.cjs <file> [--wip] [--libs=...]`, deletes the agent's `games/_*` test page, runs `node tools/allgames.cjs` and `tools/test-games.cjs`, commits to `preview`. Every new or rebuilt game goes to In progress. Not deployed until the owner says "deploy".
 
