@@ -141,12 +141,13 @@ const durLabel=g=>{const d=meta(g).d;return d>=15?'15+ min':d+' min'};
 /* modes: filters that apply to the random button, the time picks, "Another detourr" and the grid */
 const MODES={games:'Games only',big:'Big games only',quick:'Quick games',class:'Classroom-friendly'};
 /* "Games only" hides toys, random stuff, facts and chill toys, for people who want strictly games */
-const NOT_GAMES=['toy','info','weird','chill'];
+// "Games only" (owner: strictly game games): no toys, facts or random stuff, and no word or brain puzzles, quizzes or escape rooms
+const NOT_GAMES=['toy','info','weird','chill','puzzle','escape','geo'],NOT_GAME_IDS=new Set(['hangman','memory','simon','typing','stroop','nummem','odd','tune','pianolearn','beatmaker']);
 /* the big games: superheroes, 3D worlds, sims and story games (what the old "Big games" random button picked) */
 const MAJOR=new Set(['openroad','apexgt','wanted','zsurv','stillshot','fishing','flightsim','skyfront','rumble','breach','royale','e3_study','e3_sub','e3_cabin','kart','octagon','jetpack','sim_farm','sim_town','sim_tractor','geo_wai','powerlab','gunsim','goose','ph_buddy','knuckle','bunker','m_bowduel']);
 const isMajor=g=>!!(g.major||g.kind==='hero'||MAJOR.has(g.id));
 let modes=Object.assign({games:false,big:false,quick:false,class:false},S.get('modes',{}));delete modes.silent;delete modes.kb;/* the Silent and Keyboard-only filters were removed */
-function modeOK(g){const m=meta(g);if(modes.games&&NOT_GAMES.includes(g.kind))return false;if(modes.big&&!isMajor(g))return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.age||g.kind==='hero'||g.kind==='shooter'))return false;return true}
+function modeOK(g){const m=meta(g);if(modes.games&&(NOT_GAMES.includes(g.kind)||NOT_GAME_IDS.has(g.id)))return false;if(modes.big&&!isMajor(g))return false;if(modes.quick&&(m.d>5||isBig(g)))return false;if(modes.class&&(m.x||g.age||g.kind==='hero'||g.kind==='shooter'))return false;return true}
 function syncModes(){document.querySelectorAll('#modes button').forEach(b=>{const on=!!modes[b.dataset.m];b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false')})}
 function setMode(k,v){modes[k]=v;S.set('modes',modes);syncModes();renderGrid();try{renderQuick()}catch(e){}}
 document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>{setMode(b.dataset.m,!modes[b.dataset.m]);beep(600,.05,'triangle',.05)}));
