@@ -285,5 +285,6 @@ G.push(
 {"id":"getaway3d","name":"Long Haul Runaway","kind":"game","tint":"#ffc83d","url":"/games/long-haul-runaway/","wide":true,"big":true,"tags":["3D","driving","co-op"],"fmt":b=>Number(b).toLocaleString('en-US')+' pts'},
 {"id":"cookempire","name":"Cook Theory","kind":"sim","tint":"#47c9f2","url":"/games/cook-theory/","wide":true,"big":true,"tags":["3D","tycoon","story"],"age":16,"fmt":b=>{const u=['','K','M','B'];let i=0;while(b>=1000&&i<3){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
 {"id":"growop","name":"Green Thumb Grow Co.","kind":"sim","tint":"#6fbf45","url":"/games/green-thumb-grow-co/","wide":true,"big":true,"tags":["3D","tycoon"],"age":16,"fmt":b=>{const u=['','K','M','B'];let i=0;while(b>=1000&&i<3){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
-{"id":"sk_hole","name":"Rim Runner","kind":"arcade","tint":"#07061a","url":"/games/rim-runner/","fmt":b=>(b/10).toFixed(1)+'s'}
+{"id":"sk_hole","name":"Rim Runner","kind":"arcade","tint":"#07061a","url":"/games/rim-runner/","fmt":b=>(b/10).toFixed(1)+'s'},
+{"id":"hustle3d","name":"Corner Hustle","kind":"sim","tint":"#8df58a","url":"/games/corner-hustle/","wide":true,"big":true,"tags":["3D","sim","tycoon"],"age":16,"fmt":b=>{const u=['','K','M','B'];let i=0;while(b>=1000&&i<3){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}}
 );

@@ -68,7 +68,7 @@ Builder agents write one deliverable each to the session scratchpad (`/tmp/claud
 | `disaster.js` | Natural disaster multiplayer survival | INSTALLED as Disaster Dash (games/disaster-dash, In progress) |
 | `west3d.js` | Wild West sandbox (Westwood-inspired) | INSTALLED as Dusty Gulch (games/dusty-gulch, In progress) |
 | `getaway3d.js` | Road-trip getaway (Runaways-inspired) | INSTALLED as Long Haul Runaway (games/long-haul-runaway, In progress) |
-| `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | none |
+| `hustle3d.js` | First-person dealer sim, adult customers only, `age:16` | INSTALLED as Corner Hustle (In progress, age notice) |
 | `cookempire.js` | Chemistry-teacher cook empire sim, fictional chemistry only, `age:16` | INSTALLED as Cook Theory (games/cook-theory, In progress, age notice) |
 | `growop.js` | Licensed grow-op tycoon, `age:16` | INSTALLED as Green Thumb Grow Co. (In progress, age notice) |
 | `hole.js` | Black hole orbit dodge, recreated from the owner's screen recording | INSTALLED as Rim Runner (games/rim-runner, In progress) |
