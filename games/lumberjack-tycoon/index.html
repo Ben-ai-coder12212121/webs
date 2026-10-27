@@ -206,7 +206,7 @@ const LT_HTML = `<div id="game">
  <div id="netList" class="plate" hidden></div>
  <div id="award"></div>
  <div id="clockBox" class="plate"><svg id="clockIc" viewBox="0 0 24 24" aria-hidden="true"></svg><span id="clock"></span></div>
- <div id="topBtns"><button class="mini" id="bNet" type="button" title="Play online">Online</button><button class="mini" id="bMap" type="button" title="Map (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button><button class="mini" id="bCam" type="button" title="Camera (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></button><button class="mini" id="bSnd" type="button" title="Sound"></button><button class="mini" id="bMenu" type="button" title="Menu (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div>
+ <div id="topBtns"><button class="mini" id="bNet" type="button" title="Play online">Online</button><button class="mini" id="bInv" type="button" title="Inventory (I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></button><button class="mini" id="bMap" type="button" title="Map (M)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button><button class="mini" id="bCam" type="button" title="Camera (V)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></button><button class="mini" id="bSnd" type="button" title="Sound"></button><button class="mini" id="bMenu" type="button" title="Menu (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div>
  <div id="region"></div>
  <div id="cross"><i></i><i></i><i></i><i></i></div>
  <div id="aim" class="plate" hidden></div>
@@ -2978,6 +2978,7 @@ on(window, 'keydown', e => {
   if (!$('#intro').hidden) { if (k === 'enter') startGame(); return; }
   if (k === 'escape') { if (build) { cancelBuild(); return; } if (!$('#shop').hidden) { closeShop(); return; } if (!$('#map').hidden) { toggleMap(); return; } if (!$('#menu').hidden) { closeMenu(); return; } openMenu(); return; }
   if (k === 'm' && $('#menu').hidden && $('#shop').hidden) { toggleMap(); return; }
+  if (k === 'i' && !player.truck && (shopKind === 'inv' || $('#shop').hidden)) { toggleInventory(); return; }
   if (!playing()) return;
   if (k === ' ' || k.startsWith('arrow') || k === 'tab') e.preventDefault();
   K[k] = true;
@@ -5544,7 +5545,7 @@ function fillShop() {
       const pk = PERKS[k], lv = S.perks[k] || 0, max = lv >= pk.max, cost = max ? 0 : pk.cost[lv];
       L.append(row(svgGem, pk.name + (lv ? ' (level ' + lv + ')' : ''), pk.desc, statBars([['Level', lv / pk.max]]), max ? 'Maxed' : cost + ' gems', max ? 'own' : S.gems >= cost ? '' : 'no', () => { if (!max) buyPerk(k, cost); }));
     }
-  } else if (shopKind === 'orders' || shopKind === 'awards' || shopKind === 'online') { fillExtra(L, T);
+  } else if (shopKind === 'orders' || shopKind === 'awards' || shopKind === 'online' || shopKind === 'inv') { fillExtra(L, T);
   } else if (shopKind === 'build') {
     T.innerHTML = 'Build on your land<span class="sub">Pick something to place</span>';
     let any = false;
@@ -5555,6 +5556,35 @@ function fillShop() {
     if (!any) { const p = document.createElement('p'); p.style.cssText = 'font-size:14px;color:#cbbfa6;margin:4px 2px'; p.textContent = 'Nothing to place. Buy sawmills and belts at Bolt & Belt in town. To move something you already placed, hold your hands (2), aim at it and press X.'; L.append(p); }
   }
 }
+/* inventory (I): everything you own, with your axe, chainsaw and tools to pick from */
+function fillInventory(L, T, sec) {
+  const note = t => { const p = document.createElement('p'); p.style.cssText = 'font-size:13px;color:#cbbfa6;margin:2px 2px 6px'; p.textContent = t; L.append(p); };
+  T.innerHTML = 'Inventory<span class="sub">' + money(S.money) + ' · press I to close</span>';
+  sec('Axes');
+  const axes = ownAxes(); if (!axes.length) axes.push(FISTS);
+  for (const a of axes) { const eq = S.tool === 0 && S.axe === a.id;
+    L.append(row(svgAxe(a), a.name, a.fists ? 'Slow, but they work. Buy an axe at Ridgeline Tools.' : 'Cuts: ' + SP.filter(q => q.tier <= a.tier).map(q => q.name).join(', ') + '.', statBars([['Power', a.dmg / 34], ['Speed', (0.8 - a.swing) / 0.35], ['Reach', (a.reach - 2.8) / 1.5]]), eq ? 'In hand' : 'Hold', 'own', eq ? null : () => { if (held) dropHeld(); S.axe = a.id; S.tool = 0; equipAxe(); $('#axeName').textContent = a.name; refreshBar(); sTool(); fillShop(); })); }
+  sec('Chainsaws');
+  const saws = SAWS.filter(w => S.saws.includes(w.id));
+  if (!saws.length) note('No chainsaw yet. Ridgeline Tools sells them.');
+  for (const w of saws) { const eq = S.tool === 2 && S.saw === w.id;
+    L.append(row(svgSaw(w.color), w.name, 'Cuts: ' + SP.filter(q => q.tier <= w.tier).map(q => q.name).join(', ') + '.', statBars([['Cut speed', w.dps / 90], ['Reach', (w.reach - 2) / 1.2]]), eq ? 'In hand' : 'Hold', 'own', eq ? null : () => { S.saw = w.id; equipAxe(); setTool(2); sTool(); fillShop(); })); }
+  sec('Tools');
+  L.append(row(svgLogs, 'Hands', 'Grab, carry and throw wood. Press 2.', '', S.tool === 1 ? 'In hand' : 'Hold', 'own', S.tool === 1 ? null : () => { setTool(1); sTool(); fillShop(); }));
+  if (S.remote) L.append(row(svgRemote, 'Crane remote', 'Works the loader crane on any truck near you. Press 4.', '', S.tool === 3 ? 'In hand' : 'Hold', 'own', S.tool === 3 ? null : () => { setTool(3); sTool(); fillShop(); }));
+  if (S.autoCrane) L.append(row(svgRemote, 'Auto crane', 'Loads loose wood into your parked truck while you stand near it.', '', S.autoOn === 0 ? 'Turn on' : 'Turn off', 'own', () => { S.autoOn = S.autoOn === 0 ? 1 : 0; toast('Auto crane ' + (S.autoOn ? 'on.' : 'off.')); fillShop(); save(); }));
+  sec('Ready to place');
+  let any = false;
+  for (const k of ['mill1', 'mill2', 'mill3', 'belt', 'shop1']) { if (!S.inv[k]) continue; any = true;
+    L.append(row(k === 'belt' ? svgBelt : k === 'shop1' ? svgBench : svgMill(ITEMS[k].color), ITEMS[k].name + ' x' + S.inv[k], 'Place it on your land.', '', 'Place', 'own', () => { if (S.plot < 0 && k !== 'belt') { toast('Buy a plot of land first.', true); return; } startPlace(k); })); }
+  if (!any) note('Nothing waiting to be placed. To move something you placed, hold your hands (2), aim at it and press X.');
+  sec('Vehicles and upgrades');
+  for (const k of S.ownT || []) if (TRUCKS[k]) L.append(row(svgTruck(TRUCKS[k].color), TRUCKS[k].name, TRUCKS[k].desc || 'Your first truck.', '', 'Owned', 'own', null));
+  L.append(row(svgStrap, STRAPS[S.straps || 0].name, 'Load straps on all your vehicles.', '', 'Owned', 'own', null));
+  L.append(row(svgLogs, RACKS[S.rack || 0].name, 'Carries ' + rackCap() + ' pieces on your back' + (S.pack.length ? ' (carrying ' + S.pack.length + ' now).' : '.'), '', 'Owned', 'own', null));
+  L.append(row(svgBelt, MOTORS[S.motor || 0].name, 'Powers all your belts and mills.', '', 'Owned', 'own', null));
+}
+function toggleInventory() { if (shopKind === 'inv' && !$('#shop').hidden) closeShop(); else if ($('#menu').hidden && $('#map').hidden) openShop('inv'); }
 function fillExtra(L, T) {
   const sec = t => { const h = document.createElement('h4'); h.className = 'sec'; h.textContent = t; L.append(h); };
   if (shopKind === 'orders') {
@@ -5570,6 +5600,7 @@ function fillExtra(L, T) {
     T.innerHTML = 'Awards<span class="sub">' + n + ' of ' + ACH.length + ' unlocked</span>';
     for (const a of ACH) { const got = !!S.ach[a[0]]; L.append(row(got ? svgBolt : svgLand, a[1], a[2], '', got ? 'Unlocked' : 'Locked', got ? 'own' : 'no', null)); }
   } else if (shopKind === 'online') fillOnline(L, T);
+  else if (shopKind === 'inv') fillInventory(L, T, sec);
 }
 function buySaw(w) { if (!pay(w.price, true)) return; S.saws.push(w.id); S.saw = w.id; equipAxe(); setTool(2); toast('You bought the ' + w.name + '! Press 3 for it and hold to cut.'); fillShop(); save(); hint('saw', 'Hold the button to rev the chainsaw into a tree or log. It cuts much faster than an axe.'); }
 function myUpg() { for (const t of trucks) if (t.owner === 'me') { if (t.kind === 'feller') t.lv = S.fellerLv; t.straps = S.straps; } netAct({ t: 'upg', lv: S.fellerLv, straps: S.straps }); }
@@ -5615,6 +5646,7 @@ function toggleMap() {
 }
 $('#mapClose').addEventListener('click', toggleMap);
 $('#bMap').addEventListener('click', () => { aInit(); toggleMap(); });
+$('#bInv').addEventListener('click', () => { aInit(); toggleInventory(); });
 const mapXY = (x, z) => [(x + HALF) / (HALF * 2) * 600, (z + HALF) / (HALF * 2) * 600];
 function drawMap() {
   const cv = $('#mapCv'), g = cv.getContext('2d');
