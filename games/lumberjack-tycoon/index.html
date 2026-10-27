@@ -2904,16 +2904,18 @@ function equipAxe() {
 }
 /* ================= input ================= */
 const K = {};
-let locked = false, lockFailed = false, lmb = false, rmb = false, dragLook = null;
+let locked = false, lockFailed = false, lockRefusals = 0, lmb = false, rmb = false, dragLook = null;
 const stick = { x: 0, y: 0, id: null, ox: 0, oy: 0 };
 let lookTouch = null, tChopHeld = false, tGrabHeld = false;
 function playing() { return $('#intro').hidden && $('#menu').hidden && $('#shop').hidden && $('#map').hidden; }
-function requestLock() { if (coarse || lockFailed) return; try { const p = glc.requestPointerLock && glc.requestPointerLock(); if (p && p.catch) p.catch(() => { lockFailed = true; }); } catch (_) { lockFailed = true; } }
-on(document, 'pointerlockchange', () => { locked = shadow.pointerLockElement === glc || document.pointerLockElement === host; if (!locked) { lmb = rmb = false; if (held) dropHeld(); } });
-on(document, 'pointerlockerror', () => { lockFailed = true; });
+/* a refused lock (e.g. asked for after the online join, outside the click) is retried on the next click; only a browser that keeps refusing falls back to drag-to-look */
+function lockRefused() { if (++lockRefusals >= 3) lockFailed = true; }
+function requestLock() { if (coarse || lockFailed) return; if (!glc.requestPointerLock) { lockFailed = true; return; } if (navigator.userActivation && !navigator.userActivation.isActive) return; try { const p = glc.requestPointerLock(); if (p && p.catch) p.catch(lockRefused); } catch (_) { lockRefused(); } }
+on(document, 'pointerlockchange', () => { locked = shadow.pointerLockElement === glc || document.pointerLockElement === host; if (locked) lockRefusals = 0; if (!locked) { lmb = rmb = false; if (held) dropHeld(); } });
+on(document, 'pointerlockerror', lockRefused);
 glc.addEventListener('mousedown', e => {
   aInit(); if (!playing()) return;
-  if (!locked && !lockFailed && !coarse) { requestLock(); if (!lockFailed) return; }
+  if (!locked && !lockFailed && !coarse) { requestLock(); if (!lockFailed) { dragLook = { x: e.clientX, y: e.clientY }; return; } }
   if (e.button === 0) { lmb = true; primaryDown(); }
   if (e.button === 2) { rmb = true; grabDown(); }
   if (lockFailed) dragLook = { x: e.clientX, y: e.clientY };
