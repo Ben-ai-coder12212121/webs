@@ -286,6 +286,7 @@ const SP = [
   { id: 'glow', name: 'Glowbark', bark: 0xd5dde0, wood: 0x8ff0e0, leaf: 0x4fe0c4, price: 120, hard: 6.5, tier: 4, dens: 1.1, r: [0.78, 1.0], h: [11, 15], regrow: [700, 1000] },
   { id: 'cherry', name: 'Cherry', bark: 0x6a4038, wood: 0xe0a080, leaf: 0xf09cc0, price: 34, hard: 2, tier: 1, dens: 1, r: [0.28, 0.4], h: [6, 8.5], regrow: [300, 450] },
   { id: 'iron', name: 'Ironwood', bark: 0x34302c, wood: 0x7a5640, leaf: 0x357436, price: 85, hard: 4.8, tier: 3, dens: 1.4, r: [0.5, 0.7], h: [9, 12], regrow: [500, 700] },
+  { id: 'redwood', name: 'Redwood', bark: 0x8a4428, wood: 0xc8704a, leaf: 0x2f6a3a, price: 72, hard: 4.4, tier: 3, dens: 0.85, r: [0.85, 1.15], h: [22, 30], regrow: [600, 900] },
 ];
 const PLANK_MUL = 3.6;
 const AXES = [
@@ -604,9 +605,10 @@ MB.prototype.mesh = function (mat, shadows) {
 const BOXG = new THREE.BoxGeometry(1, 1, 1);
 
 /* ================= terrain ================= */
-// The map is 900 m across. A river runs along the north and east of the starting valley; across it are the snowy
+// The map is 1200 m across. A river runs along the north and east of the starting valley; across it are the snowy
 // pine slopes (north) and the swamp (east). A big lake in the north-east hides Glimmer Isle, reached by ferry.
-const HALF = 450, GS = 2, GN = 451, WATER = 0;
+const HALF = 600, GS = 2, GN = 601, WATER = 0;
+const WORLD_V = 2; // bump when tree placement changes: older saves drop their felled-tree list
 const HG = new Float32Array(GN * GN), RG = new Uint8Array(GN * GN), RDG = new Uint8Array(GN * GN);
 const riverW = x => -125 + 14 * Math.sin(x * 0.011 + 1.3) + 7 * Math.sin(x * 0.029);
 const riverE = z => 168 + 16 * Math.sin(z * 0.0105 + 0.4) + 6 * Math.sin(z * 0.033);
@@ -621,7 +623,7 @@ NB.z = riverW(NB.x); EB.x = riverE(EB.z);
 const FIX = [{ key: 'fw', title: 'Old Mill Bridge', x: -300, z: 0, need: 16, axis: 'z' }, { key: 'fe', title: 'Beaver Creek Bridge', x: 0, z: 40, need: 28, axis: 'x' }];
 FIX[0].z = riverW(FIX[0].x); FIX[1].x = riverE(FIX[1].z);
 // places that want wood delivered by truck (haul jobs)
-const DESTS = [{ id: 'maple', name: 'Maple Ridge Mill', x: -206, z: 372, need: '' }, { id: 'cabin', name: 'Frostpine Cabins', x: -52, z: -318, need: 'n' }, { id: 'stilt', name: 'Stilt Village', x: 262, z: 54, need: 'e' }];
+const DESTS = [{ id: 'maple', name: 'Maple Ridge Mill', x: -206, z: 372, need: '' }, { id: 'cabin', name: 'Frostpine Cabins', x: -52, z: -318, need: 'n' }, { id: 'stilt', name: 'Stilt Village', x: 262, z: 54, need: 'e' }, { id: 'lodge', name: 'Redwood Lodge', x: -182, z: 522, need: '', near: [8, 8, 3] }, { id: 'lookout', name: 'Ridgetop Lookout', x: -150, z: -440, need: 'n', near: [3, 7, 3] }, { id: 'bayou', name: 'Bayou Landing', x: 468, z: 60, need: 'e', near: [4, 7, 4] }];
 const SPAWN = { x: -118, z: 192 };
 function riverDist(x, z) {
   let d = 1e9;
@@ -630,7 +632,7 @@ function riverDist(x, z) {
   return d;
 }
 const lakeR = (x, z) => LAKE.r + 8 * Math.sin(Math.atan2(z - LAKE.z, x - LAKE.x) * 3);
-// 0 forest, 1 birch, 2 maple, 3 snow, 4 swamp, 5 isle, 6 lake
+// 0 forest, 1 birch, 2 maple, 3 snow, 4 swamp, 5 isle, 6 lake, 7 redwood canyon
 function regionOf(x, z) {
   if (Math.hypot(x - ISLE.x, z - ISLE.z) < ISLE.r + 14) return 5;
   if (Math.hypot(x - LAKE.x, z - LAKE.z) < lakeR(x, z)) return 6;
@@ -638,6 +640,7 @@ function regionOf(x, z) {
   if (z >= -150 && x > riverE(z)) return 4;
   const n = fbm(x * 0.01, z * 0.01, 2, 77) * 30;
   if (x < -270 + n && z < 205 + n) return 1;
+  if (z > 452 + n * 1.4 && x < 330) return 7;
   if (z > 338 + n && x < 60) return 2;
   return 0;
 }
@@ -646,7 +649,8 @@ function rawH(x, z, reg) {
   if (reg === 3) { const t = sm01((riverW(Math.min(x, 284)) - z - 25) / 210); h += t * (14 + ridge(x * 0.007, z * 0.007, 5) * 40); }
   else if (reg === 4) { const t = sm01((x - riverE(z) - 12) / 45); h += (0.75 + fbm(x * 0.035, z * 0.035, 2, 13) * 1.6 - h) * t; }
   else if (reg === 1) h += 1.2;
-  const e = Math.max(Math.abs(x), Math.abs(z)) - (398 + fbm(x * 0.008, z * 0.008, 2, 51) * 12); if (e > 0) h += (e * e * 0.045 + e * 0.5) * (0.45 + 0.75 * ridge(x * 0.018, z * 0.018, 53));
+  else if (reg === 7) { const t = sm01((z - 452) / 60); h += t * (4 + ridge(x * 0.012, z * 0.012, 61) * 14); }
+  const e = Math.max(Math.abs(x), Math.abs(z)) - (548 + fbm(x * 0.008, z * 0.008, 2, 51) * 12); if (e > 0) h += (e * e * 0.045 + e * 0.5) * (0.45 + 0.75 * ridge(x * 0.018, z * 0.018, 53));
   const rd = riverDist(x, z); if (rd < 17) h += (-4 - h) * (1 - sm01((rd - 8) / 9));
   const dl = Math.hypot(x - LAKE.x, z - LAKE.z), lr = lakeR(x, z);
   if (dl < lr + 25) h += (-7 - h) * (1 - sm01((dl - (lr - 15)) / 40));
@@ -675,7 +679,9 @@ const ROADS = [
   [[-120, 170], [-118, 110], [-108, 40], [-100, -40], [-100, NB.z + 22], [-100, NB.z - 22], [-96, -200], [-70, -280], [-40, -335]],
   [[0, 228], [70, 206], [EB.x - 22, 200], [EB.x + 22, 200], [240, 190], [282, 110], [300, 20], [306, -60], [308, -108]],
   [[-150, 180], [-200, 166], [-280, 140], [-335, 118]],
-  [[-150, 278], [-168, 332], [-200, 385]],
+  [[-150, 278], [-168, 332], [-200, 385], [-214, 440], [-200, 492], [-184, 511]],
+  [[-40, -335], [-82, -380], [-130, -418], [-146, -430]],
+  [[300, 20], [372, 34], [430, 52], [457, 58]],
 ];
 const ROADSEG = [];
 for (const r of ROADS) for (let i = 0; i < r.length - 1; i++) { const [ax, az] = r[i], [bx, bz] = r[i + 1]; ROADSEG.push({ ax, az, bx, bz, minx: Math.min(ax, bx) - 14, maxx: Math.max(ax, bx) + 14, minz: Math.min(az, bz) - 14, maxz: Math.max(az, bz) + 14 }); }
@@ -734,7 +740,7 @@ const roadAt = (x, z) => RDG[gi(x, z)] / 255;
 const TCOL = new Float32Array(GN * GN * 3), SPA = new Float32Array(GN * GN * 4), SPB = new Float32Array(GN * GN * 3), TTINT = new Float32Array(GN * GN * 3);
 (function splatTerrain() {
   const n = new THREE.Vector3();
-  const TINT = [[1, 1, 1], [1.12, 1.08, 0.9], [1.3, 1.0, 0.6], [0.95, 1, 1.02], [0.85, 0.92, 0.62], [0.85, 1.08, 1.0], [1, 1, 1]];
+  const TINT = [[1, 1, 1], [1.12, 1.08, 0.9], [1.3, 1.0, 0.6], [0.95, 1, 1.02], [0.85, 0.92, 0.62], [0.85, 1.08, 1.0], [1, 1, 1], [0.95, 0.98, 0.82]];
   const MAPC = { g: [104, 186, 52], f: [110, 168, 50], m: [150, 106, 60], r: [140, 140, 148], gr: [204, 150, 84], s: [232, 210, 150], sn: [240, 245, 250] };
   for (let j = 0; j < GN; j++) for (let i = 0; i < GN; i++) {
     const k = j * GN + i, x = -HALF + i * GS, z = -HALF + j * GS, h = HG[k], reg = RG[k];
@@ -747,6 +753,7 @@ const TCOL = new Float32Array(GN * GN * 3), SPA = new Float32Array(GN * GN * 4),
     else if (reg === 3) { sn = sm01((h - 8) / 7); f = (1 - sn) * nz * 0.6; g = 1 - sn - f; }
     else if (reg === 4) { m = 0.35 + sm01((1.6 - h) / 1.4) * 0.6; f = (1 - m) * 0.7; g = 1 - m - f; }
     else if (reg === 5) { f = nz * 0.5; g = 1 - f; }
+    else if (reg === 7) { f = 0.55 + nz * 0.4; m = 0.1; g = Math.max(0, 1 - f - m); }
     else { sa = 1; }
     if (nz2 > 0.72 && reg < 3) { const q = (nz2 - 0.72) * 2; m += q * 0.5; g *= 1 - q * 0.5; }
     if (h > 40) { const c = sm01((h - 40 - nz * 30) / 35); sn = sn * (1 - c) + c; g *= 1 - c; f *= 1 - c; }
@@ -765,7 +772,7 @@ const TCOL = new Float32Array(GN * GN * 3), SPA = new Float32Array(GN * GN * 4),
     for (let c = 0; c < 3; c++) TCOL[k * 3 + c] = (MAPC.g[c] * g + MAPC.f[c] * f + MAPC.m[c] * m + MAPC.r[c] * r + MAPC.gr[c] * gr + MAPC.s[c] * sa + MAPC.sn[c] * sn) / tot / 255 * t[c] * v * dk;
   }
 })();
-const CH = 60, CHN = 15;                // 15 x 15 chunks of 60 m for terrain and trees
+const CH = 60, CHN = 20;                // 20 x 20 chunks of 60 m for terrain and trees
 // blends six ground textures by the per-vertex weights, with matching normal maps on high graphics
 function makeTerrainMat() {
   const T = (k, kind) => tx(k, kind);
@@ -1279,7 +1286,7 @@ function coneInto(mb, y, r, h, col, seg) {
   g.dispose();
 }
 // leaf colours per species (painted, saturated)
-const LEAFC = { oak: [0x3a9a2e, 0x4cae36, 0x2e8428, 0x5cbc3c], birch: [0x86c63e, 0x9ed24c, 0x74b434], maple: [0xe2701e, 0xec8a2a, 0xd0521e, 0xeea83a], pine: [0x2a7240, 0x34804a, 0x22623a], bog: [0x6c8e32, 0x7e9e40, 0x5c7c2a], glow: [0x4fe0c4, 0x7ff0dc, 0x34c8b0], cherry: [0xf09cc0, 0xf6b6d0, 0xe680ac], iron: [0x357436, 0x40843e, 0x2c622e] };
+const LEAFC = { oak: [0x3a9a2e, 0x4cae36, 0x2e8428, 0x5cbc3c], birch: [0x86c63e, 0x9ed24c, 0x74b434], maple: [0xe2701e, 0xec8a2a, 0xd0521e, 0xeea83a], pine: [0x2a7240, 0x34804a, 0x22623a], bog: [0x6c8e32, 0x7e9e40, 0x5c7c2a], glow: [0x4fe0c4, 0x7ff0dc, 0x34c8b0], cherry: [0xf09cc0, 0xf6b6d0, 0xe680ac], iron: [0x357436, 0x40843e, 0x2c622e], redwood: [0x2f6a3a, 0x3a7a42, 0x265a32] };
 // species models: R and H are the reference trunk radius and height the instance scale is applied to
 const SPEC = {
   oak: { R: 0.35, H: 7, fol: 'broad', tint: 0xa8d08a, bark: 0xa8704a, crown: [[0, 6.3, 0, 2.7, 1.8, 2.7, 26], [1.4, 5.3, 0.6, 1.8, 1.3, 1.8, 10], [-1.3, 5.6, -0.6, 1.9, 1.3, 1.9, 10], [0.2, 7.6, -0.3, 1.7, 1.1, 1.7, 8]], card: 1.9, br: 4 },
@@ -1289,6 +1296,7 @@ const SPEC = {
   bog: { R: 0.58, H: 9, fol: 'broad', tint: 0x7f8a52, bark: 0x7a6a50, flare: 1.75, wob: 0.18, crown: [[0, 8.1, 0, 2.9, 1.1, 2.9, 26], [1.8, 7.3, 0.6, 2.0, 0.9, 2.0, 8], [-1.8, 7.5, -0.5, 2.0, 0.9, 2.0, 8]], card: 2.1, br: 5 },
   glow: { R: 0.95, H: 14.5, fol: 'broad', tint: 0x9ff8e8, bark: 0xe8f2f2, crown: [[0, 12.8, 0, 3.8, 2.6, 3.8, 34], [2.6, 11.3, 0.8, 2.6, 1.6, 2.6, 12], [-2.4, 11.6, -0.8, 2.7, 1.7, 2.7, 12]], card: 2.8, br: 5 },
   cherry: { R: 0.34, H: 7, fol: 'broad', tint: 0xffc8d6, bark: 0x9a5e4c, crown: [[0, 6, 0, 2.6, 1.6, 2.6, 26], [1.4, 5.2, 0.5, 1.7, 1.1, 1.7, 9], [-1.3, 5.4, -0.6, 1.7, 1.1, 1.7, 9]], card: 1.8, br: 4 },
+  redwood: { R: 1.0, H: 26, fol: 'pine', tint: 0x8fb08a, bark: 0xc0603e, pine: true, cs: 0.42, cr: 4.4, card: 3.0, br: 0 },
   iron: { R: 0.6, H: 10.5, fol: 'broad', tint: 0x7d9a74, bark: 0x5e4c40, wob: 0.08, crown: [[0, 9.2, 0, 3.1, 1.8, 3.1, 28], [1.9, 8.1, 0.5, 2.0, 1.2, 2.0, 10], [-1.9, 8.3, -0.6, 2.0, 1.2, 2.0, 10]], card: 2.2, br: 5 },
 };
 const TPL = SP.map((sp, si) => {
@@ -1301,10 +1309,12 @@ const TPL = SP.map((sp, si) => {
   const pc = () => { const c = pal[Math.floor(wr() * pal.length)], v = 0.92 + wr() * 0.16; return [c[0] * v, c[1] * v, c[2] * v]; };
   let seed = si * 13;
   if (C.pine) {
-    crownY = 2.2;
-    const n = 5;
-    for (let k = 0; k < n; k++) { const t = k / n, y = 2.2 + t * (Hh - 2.6), r = 3.0 * (1 - t * 0.78) + 0.3, h = 3.4 - t * 1.2; coneInto(leaves, y, r, h, pc(), HQ ? 10 : 8); }
-    coneInto(fl, 2.4, 3.0, Hh * 0.55, pal[0], 5); coneInto(fl, 2.4 + Hh * 0.38, 2.0, Hh * 0.45, pal[1], 5);
+    // redwoods keep a long bare trunk under a taller, wider crown
+    const y0 = C.cs ? Hh * C.cs : 2.2, r0 = C.cr || 3.0, ck = r0 / 3;
+    crownY = y0;
+    const n = C.cs ? 7 : 5;
+    for (let k = 0; k < n; k++) { const t = k / n, y = y0 + t * (Hh - 0.4 - y0), r = r0 * (1 - t * 0.78) + 0.3, h = (3.4 - t * 1.2) * ck; coneInto(leaves, y, r, h, pc(), HQ ? 10 : 8); }
+    coneInto(fl, y0 + 0.2, r0, (Hh - y0) * 0.6, pal[0], 5); coneInto(fl, y0 + (Hh - y0) * 0.42, r0 * 0.67, (Hh - y0) * 0.5, pal[1], 5);
   } else {
     let first = true;
     for (const [cx, cy, cz, rx, ry, rz] of C.crown) {
@@ -1385,10 +1395,10 @@ const glowMat = MATS_T[5].near, glowMatS = MATS_T[5].sleaf;
 // placement
 const TX = [], TZ = [], TY = [], TSP = [], TS = [], TSY = [], TROT = [];
 (function placeTrees() {
-  const DEN = [0.3, 0.52, 0.46, 0.27, 0.32, 0.2, 0];
+  const DEN = [0.3, 0.52, 0.46, 0.27, 0.32, 0.2, 0, 0.3];
   const nearRoad = (x, z) => { for (const s of ROADSEG) { if (x < s.minx || x > s.maxx || z < s.minz || z > s.maxz) continue; if (segDist(x, z, s) < 6.5) return true; } return false; };
   const n = new THREE.Vector3(), cell = 6.5;
-  for (let gz = -440; gz < 440; gz += cell) for (let gx = -440; gx < 440; gx += cell) {
+  for (let gz = -590; gz < 590; gz += cell) for (let gx = -590; gx < 590; gx += cell) {
     const x = gx + wr() * cell * 0.8, z = gz + wr() * cell * 0.8, reg = regionOf(x, z), dpick = wr(), spick = wr();
     if (dpick > DEN[reg]) continue;
     const h = hAt(x, z);
@@ -1410,6 +1420,7 @@ const TX = [], TZ = [], TY = [], TSP = [], TS = [], TSY = [], TROT = [];
     else if (reg === 2) sp = spick < 0.7 ? 2 : spick < 0.88 ? 6 : 0;
     else if (reg === 3) sp = h > 22 && spick < 0.18 ? 7 : 3;
     else if (reg === 4) { if (spick < 0.12) continue; sp = spick > 0.94 ? 7 : 4; }
+    else if (reg === 7) sp = spick < 0.62 ? 8 : spick < 0.85 ? 3 : 7;
     else sp = 5;
     const S0 = SP[sp], t = wr(), tp = TPL[sp];
     TX.push(x); TZ.push(z); TY.push(h - 0.05); TSP.push(sp);
@@ -1582,7 +1593,7 @@ function fell(a, dirX, dirZ, quiet) {
   const l = Math.hypot(dirX, dirZ) || 1;
   FALLING.push({ i, sp, r, L, cy, pivot, crown, logM, caps, dx: dirX / l, dz: dirZ / l, th: 0.02, om: 0.15, t: 0 });
   if (!quiet) sCreak();
-  if (!NET.guest) { if (!treeFeller[i] || treeFeller[i] === 'me') S.stats.trees++; onTreeFelled(i); }
+  if (!NET.guest) { if (!treeFeller[i] || treeFeller[i] === 'me') { S.stats.trees++; const st = S.stats.sp = S.stats.sp || {}; st[TSP[i]] = (st[TSP[i]] || 0) + 1; } onTreeFelled(i); }
 }
 const fallAxis = new THREE.Vector3();
 function updateFalling(dt) {
@@ -2501,13 +2512,13 @@ function buildFence() {
 const BOULDERS = [];
 (function buildRocks() {
   // small stones: rock-textured, scattered everywhere
-  const n = HQ ? 900 : 400, g0 = new THREE.DodecahedronGeometry(1, HQ ? 1 : 0); g0.scale(1, 0.62, 1);
+  const n = HQ ? 1600 : 700, g0 = new THREE.DodecahedronGeometry(1, HQ ? 1 : 0); g0.scale(1, 0.62, 1);
   { const P = g0.attributes.position.array; for (let i = 0; i < P.length; i += 3) { const k = 1 + (h2(Math.round(P[i] * 50), Math.round(P[i + 1] * 50), Math.round(P[i + 2] * 50)) - 0.5) * 0.25; P[i] *= k; P[i + 1] *= k; P[i + 2] *= k; } }
   const mb = new MB(0.8); mb.add(g0, tmpM.identity(), 0xffffff); g0.dispose();
   const m = new THREE.InstancedMesh(mb.geo(), pmat({ tex: 'rock', rough: 0.9, envI: 0.6 }), n);
   let k = 0;
   for (let tries = 0; tries < n * 6 && k < n; tries++) {
-    const x = rr(-430, 430), z = rr(-430, 430), reg = regionOf(x, z), h = hAt(x, z);
+    const x = rr(-580, 580), z = rr(-580, 580), reg = regionOf(x, z), h = hAt(x, z);
     if (h < 0.4 || roadAt(x, z) > 0 || Math.hypot(x - TOWN.x, z - TOWN.z) < 45 || Math.hypot(x - BUYER.x, z - BUYER.z) < 30) continue;
     let bad = false; for (const p of PLOTS) if (Math.abs(x - p.x) < PLOT_H + 2 && Math.abs(z - p.z) < PLOT_H + 2) bad = true; if (bad) continue;
     if (reg !== 3 && wr() < 0.45) continue;
@@ -2525,8 +2536,8 @@ const BOULDERS = [];
   if (bmMat.isMeshStandardMaterial) STD.push(bmMat);
   if (!HQ) bmMat = new THREE.MeshLambertMaterial({ map: bmMat.map });
   const per = new Map();
-  for (let tries = 0; tries < 2500 && [...per.values()].reduce((a, l) => a + l.length, 0) < (HQ ? 170 : 80); tries++) {
-    const x = rr(-420, 420), z = rr(-420, 420), reg = regionOf(x, z), h = hAt(x, z);
+  for (let tries = 0; tries < 4500 && [...per.values()].reduce((a, l) => a + l.length, 0) < (HQ ? 300 : 140); tries++) {
+    const x = rr(-570, 570), z = rr(-570, 570), reg = regionOf(x, z), h = hAt(x, z);
     if (h < 0.8 || roadAt(x, z) > 0 || reg === 6 || Math.hypot(x - TOWN.x, z - TOWN.z) < 60 || Math.hypot(x - BUYER.x, z - BUYER.z) < 40) continue;
     let bad = false; for (const p of PLOTS) if (Math.abs(x - p.x) < PLOT_H + 6 && Math.abs(z - p.z) < PLOT_H + 6) bad = true;
     for (const kk in GATES) if (Math.hypot(x - GATES[kk].x, z - GATES[kk].z) < 30) bad = true;
@@ -2587,7 +2598,7 @@ const clouds = new THREE.Group(); scene.add(clouds);
 (function buildClouds() {
   const M = new MB();
   for (let c = 0; c < 16; c++) {
-    const cx = rr(-260, 260), cz = rr(-260, 260), cy = rr(105, 135), n = 3 + (wr() * 4 | 0);
+    const cx = rr(-380, 380), cz = rr(-380, 380), cy = rr(105, 135), n = 3 + (wr() * 4 | 0);
     for (let k = 0; k < n; k++) M.add(ico(rr(7, 13), 1.6, 0.55, 1), placeM(cx + rr(-16, 16), cy + rr(-2, 3), cz + rr(-8, 8), wr() * 6), (x, y, z) => y > cy ? [1, 1, 1] : [0.86, 0.88, 0.92]);
   }
   const m = new THREE.Mesh(M.geo(), new THREE.MeshBasicMaterial({ vertexColors: true, fog: false, transparent: true, opacity: 0.92 })); m.frustumCulled = false; clouds.add(m);
@@ -3599,6 +3610,8 @@ function pickSeat(t, want) {
 }
 // the seat you would get by pressing E here: driver door, passenger door or the back of the bed
 function seatHere(t) {
+  // your own vehicle: straight into the driver's seat when it's free
+  if (t.owner === 'me' && !t.seats[0].who) return 0;
   const dx = player.x - t.pos.x, dz = player.z - t.pos.z, c = Math.cos(t.yaw), s = Math.sin(t.yaw);
   const lx = c * dx - s * dz, lz = s * dx + c * dz;
   if (t.kind !== 'feller' && lz < t.zBedF - 0.4 && t.seats.length > 2) { const k = t.seats.findIndex((q, i) => i > 0 && q.stand && !q.who); if (k > 0) return k; }
@@ -4387,6 +4400,9 @@ function dailyBonus() {
 /* ================= awards ================= */
 const ACH = [
   ['first_tree', 'Timber!', 'Fell your first tree', () => S.stats.trees >= 1],
+  ['cones10', 'Pinecone Hunter', 'Find 10 golden pinecones', () => (S.cones || []).length >= 10],
+  ['cones30', 'Every Last Cone', 'Find all 30 golden pinecones', () => (S.cones || []).length >= 30],
+  ['redwood', 'Giant Slayer', 'Fell a Redwood in Redwood Canyon', () => !!(S.stats.sp && S.stats.sp[8])],
   ['trees50', 'Forest Clearer', 'Fell 50 trees', () => S.stats.trees >= 50],
   ['trees250', 'Lumber Legend', 'Fell 250 trees', () => S.stats.trees >= 250],
   ['first_sale', 'First Paycheck', 'Sell some wood', () => S.stats.sold >= 1],
@@ -4722,13 +4738,42 @@ const DESTY = [];
     DESTY.push({ d, y, ring, beam });
   }
 })();
+/* golden pinecones: 30 hidden around the world, each worth cash the first time you find it */
+const CONES = [], CONE_V = 250;
+(function placeCones() {
+  let a = 2463; const rnd = () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const geo = new THREE.ConeGeometry(0.28, 0.75, 7), mat = new THREE.MeshStandardMaterial({ color: 0xffc83a, emissive: 0xffa000, emissiveIntensity: 0.6, metalness: 0.6, roughness: 0.3 });
+  for (let tries = 0; tries < 4000 && CONES.length < 30; tries++) {
+    const x = (rnd() * 2 - 1) * (HALF - 70), z = (rnd() * 2 - 1) * (HALF - 70), h = hAt(x, z), reg = regionOf(x, z);
+    if (h < 1 || h > 38 || reg === 6 || Math.hypot(x - TOWN.x, z - TOWN.z) < 80 || CONES.some(c => Math.hypot(c.x - x, c.z - z) < 90)) continue;
+    const m = new THREE.Mesh(geo, mat); m.position.set(x, h + 0.9, z); m.visible = false; scene.add(m);
+    const glow = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 30, 6, 1, true), new THREE.MeshBasicMaterial({ color: 0xffd25a, transparent: true, opacity: 0.12, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+    glow.position.set(x, h + 15, z); glow.visible = false; scene.add(glow);
+    CONES.push({ i: CONES.length, x, z, y: h, m, glow });
+  }
+})();
+function conesTick(dt) {
+  if (!Array.isArray(S.cones)) S.cones = [];
+  for (const c of CONES) {
+    const got = S.cones.includes(c.i), d = Math.hypot(player.x - c.x, player.z - c.z);
+    c.m.visible = !got && d < 140; c.glow.visible = !got && d < 70;
+    if (got || d > 140) continue;
+    c.m.rotation.y += dt * 1.5; c.m.position.y = c.y + 0.9 + Math.sin(clock * 2 + c.i) * 0.12;
+    if (d < 1.8 && Math.abs(player.y - c.y) < 3 && !player.truck) {
+      S.cones.push(c.i); S.money += CONE_V; S.earned += CONE_V; sCoin(CONE_V);
+      floatText(c.x, c.y + 1.6, c.z, '+' + money(CONE_V), 'Golden pinecone');
+      toast('Golden pinecone! ' + S.cones.length + ' of ' + CONES.length + ' found.' + (S.cones.length === CONES.length ? ' You found them all!' : ''));
+      save();
+    }
+  }
+}
 function destOpen(d) { return !d.need || (d.need === 'n' ? northOpen() : d.need === 'e' ? eastOpen() : true); }
 function makeHaul() {
   const open = DESTS.map((d, i) => i).filter(i => destOpen(DESTS[i]) && !S.orders.some(o => o.dest === i));
   if (!open.length) return null;
   const di = open[Math.floor(fr() * open.length)], d = DESTS[di];
   // wood that grows near the yard or on the way there
-  const near = di === 0 ? [0, 2, 6] : di === 1 ? [3, 3, 0] : [4, 0, 1];
+  const near = d.near || (di === 0 ? [0, 2, 6] : di === 1 ? [3, 3, 0] : [4, 0, 1]);
   const av = availSpecies(), pick = near.filter(sp => av.includes(sp)), sp = (pick.length ? pick : av)[Math.floor(fr() * (pick.length || av.length))];
   const kind = hasMill() && fr() < 0.35 ? 1 : 0;
   const qty = kind ? 6 + (fr() * 6 | 0) : 3 + (fr() * 4 | 0);
@@ -5382,8 +5427,8 @@ function findPrompt() {
 }
 function usePrompt(key) { key = key || 'e'; if (!playing()) return; if (player.truck) { if (key === 'e') exitTruck(); return; } const p = findPrompt(); if (!p) return; if (coarse || p.key === key) p.act(); }
 $('#prompt').addEventListener('click', () => { aInit(); if (curPrompt) curPrompt.act(); });
-const REGNAME = ['Oakvale Woods', 'Silver Birch Grove', 'Ember Maple Hills', 'Frostpine Slopes', 'Murkwater Swamp', 'Glimmer Isle', 'Big Lake'];
-const REGSUB = ['Oak and a little Maple', 'Birch', 'Maple', 'Snow Pine', 'Bogwood', 'Glowbark', ''];
+const REGNAME = ['Oakvale Woods', 'Silver Birch Grove', 'Ember Maple Hills', 'Frostpine Slopes', 'Murkwater Swamp', 'Glimmer Isle', 'Big Lake', 'Redwood Canyon'];
+const REGSUB = ['Oak and a little Maple', 'Birch', 'Maple', 'Snow Pine', 'Bogwood', 'Glowbark', '', 'Giant Redwood'];
 let regNow = -1, regT = 0;
 function goalText() {
   const hasMillP = placed.some(p => p.type.startsWith('mill'));
@@ -5455,12 +5500,12 @@ function uiTick() {
   if (ah) { if (ae.dataset.h !== ah) { ae.innerHTML = ah; ae.dataset.h = ah; } ae.hidden = false; } else ae.hidden = true;
   $('#resume').hidden = coarse || locked || lockFailed || !playing();
   // region name
-  const reg = Math.hypot(player.x - TOWN.x, player.z - TOWN.z) < 60 ? 7 : regionAt(player.x, player.z);
+  const reg = Math.hypot(player.x - TOWN.x, player.z - TOWN.z) < 60 ? 99 : regionAt(player.x, player.z);
   if (reg !== regNow) {
     if (regT <= 0 || reg !== regNow) {
       regNow = reg;
       const e = $('#region');
-      if (reg !== 6) { e.innerHTML = (reg === 7 ? 'Pinecrest' : REGNAME[reg]) + '<small>' + (reg === 7 ? 'Shops, land and trucks' : REGSUB[reg]) + '</small>'; e.style.opacity = 1; regT = 3; }
+      if (reg !== 6) { e.innerHTML = (reg === 99 ? 'Pinecrest' : REGNAME[reg]) + '<small>' + (reg === 99 ? 'Shops, land and trucks' : REGSUB[reg]) + '</small>'; e.style.opacity = 1; regT = 3; }
     }
   }
   if (!$('#map').hidden) drawMap();
@@ -5583,6 +5628,8 @@ function fillInventory(L, T, sec) {
   L.append(row(svgStrap, STRAPS[S.straps || 0].name, 'Load straps on all your vehicles.', '', 'Owned', 'own', null));
   L.append(row(svgLogs, RACKS[S.rack || 0].name, 'Carries ' + rackCap() + ' pieces on your back' + (S.pack.length ? ' (carrying ' + S.pack.length + ' now).' : '.'), '', 'Owned', 'own', null));
   L.append(row(svgBelt, MOTORS[S.motor || 0].name, 'Powers all your belts and mills.', '', 'Owned', 'own', null));
+  sec('Collection');
+  L.append(row(svgBolt, 'Golden pinecones: ' + (S.cones || []).length + ' of ' + CONES.length, 'Hidden all over the map, from the snowy peaks to Redwood Canyon. Look for a faint gold beam. Each one pays ' + money(CONE_V) + '.', statBars([['Found', (S.cones || []).length / CONES.length]]), (S.cones || []).length === CONES.length ? 'All found' : 'Keep looking', 'own', null));
 }
 function toggleInventory() { if (shopKind === 'inv' && !$('#shop').hidden) closeShop(); else if ($('#menu').hidden && $('#map').hidden) openShop('inv'); }
 function fillExtra(L, T) {
@@ -5654,7 +5701,7 @@ function drawMap() {
     mapBase = document.createElement('canvas'); mapBase.width = mapBase.height = 600;
     const mg = mapBase.getContext('2d'), img = mg.createImageData(600, 600), D = img.data;
     for (let j = 0; j < 600; j++) for (let i = 0; i < 600; i++) {
-      const x = -HALF + (i + 0.5) * 1.5, z = -HALF + (j + 0.5) * 1.5, k = gi(x, z), h = HG[k], o = (j * 600 + i) * 4;
+      const x = -HALF + (i + 0.5) * (HALF / 300), z = -HALF + (j + 0.5) * (HALF / 300), k = gi(x, z), h = HG[k], o = (j * 600 + i) * 4;
       let r, gg, b;
       if (h < 0) { const d = clamp(-h / 6, 0, 1); r = 70 - d * 30; gg = 150 - d * 40; b = 190 - d * 30; if (RG[k] === 4) { r = 80; gg = 110; b = 80; } }
       else { r = TCOL[k * 3] * 255; gg = TCOL[k * 3 + 1] * 255; b = TCOL[k * 3 + 2] * 255; const sh = clamp(1 + (HG[k] - HG[Math.max(0, k - GN - 1)]) * 0.08, 0.7, 1.3); r *= sh; gg *= sh; b *= sh; }
@@ -5665,7 +5712,7 @@ function drawMap() {
     for (let i = 0; i < TN; i += 2) { const [x, y] = mapXY(TX[i], TZ[i]); mg.fillRect(x - 1, y - 1, 2, 2); }
     mg.textAlign = 'center'; mg.textBaseline = 'middle';
     const label = (t, x, z, s, c) => { const [px, py] = mapXY(x, z); mg.font = '800 ' + (s || 13) + 'px Figtree, Arial, sans-serif'; mg.lineWidth = 4; mg.strokeStyle = 'rgba(0,0,0,.65)'; mg.strokeText(t, px, py); mg.fillStyle = c || '#fff7e6'; mg.fillText(t, px, py); };
-    label('Oakvale Woods', -60, 80, 14); label('Silver Birch Grove', -350, 60, 14); label('Ember Maple Hills', -230, 400, 14); label('Frostpine Slopes', -150, -280, 16); label('Murkwater Swamp', 310, 180, 16); label('Glimmer Isle', ISLE.x, ISLE.z - 55, 14, '#8ff0e0'); label('Big Lake', 380, -200, 12, '#d8f0ff');
+    label('Oakvale Woods', -60, 80, 14); label('Silver Birch Grove', -350, 60, 14); label('Ember Maple Hills', -230, 400, 14); label('Frostpine Slopes', -150, -280, 16); label('Murkwater Swamp', 310, 180, 16); label('Glimmer Isle', ISLE.x, ISLE.z - 55, 14, '#8ff0e0'); label('Big Lake', 380, -200, 12, '#d8f0ff'); label('Redwood Canyon', -40, 488, 15, '#ffd0b0');
     label('Pinecrest', TOWN.x, TOWN.z - 14, 15, '#ffd25a'); label('Tools', SHOPS.tools.x, SHOPS.tools.z - 12, 11); label('Mills', SHOPS.mach.x + 6, SHOPS.mach.z - 12, 11); label('Trucks', SHOPS.motors.x - 14, SHOPS.motors.z, 11);
     label('Timber buyer', BUYER.x, BUYER.z - 16, 12, '#ffd25a'); label('Land for sale', -205, 330, 11); label('North Bridge', NB.x + 34, NB.z, 11); label('East Bridge', EB.x, EB.z + 14, 11); label('Ferry', FERRY.a0.x + 20, FERRY.a0.z + 6, 11);
   }
@@ -5803,6 +5850,7 @@ function serialize() {
   o.drive = player.seat === 0 ? myT.indexOf(player.truck) : -1;
   o.trucks = myT.map(t => [t.type, r3(t.pos.x), r3(t.pos.y), r3(t.pos.z), r3(t.yaw)]);
   o.placed = placed.map(it => [it.type, it.x, it.z, it.rot, it.queue.map(j => [j.sp, r3(j.len), r3(j.r), r3(j.t)]), it.out.map(p => [p.sp, r3(p.len), r3(p.pw), r3(p.pt)]), it.recipe || 0, it.stock || {}, it.stockV || {}, it.stockL || {}]);
+  o.wv = WORLD_V;
   o.felled = FELLED.map(i => [i, Math.round(tTimer[i]), r3(tCut[i])]);
   o.growing = GROWING.map(i => [i, r3(tGrow[i])]);
   o.bodies = bodies.filter(b => !b.crane).map(b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), r3(b.p.x), r3(b.p.y), r3(b.p.z), r3(b.q.x), r3(b.q.y), r3(b.q.z), r3(b.q.w), b.cargo ? myT.indexOf(b.cargo) : -1, Math.round(b.val || 0)]);
@@ -5833,6 +5881,8 @@ function apply(d) {
   for (const t of d.trucks || []) if (TRUCKS[t[0]] && !trucks.some(q => q.owner === 'me' && q.type === t[0])) makeTruck(t[0], t[1], t[3], t[4], { owner: 'me', lv: t[0] === 'feller' ? S.fellerLv : 0, straps: S.straps });
   for (const p of d.placed || []) if (ITEMS[p[0]]) { const it = placeItem(p[0], p[1], p[2], p[3] | 0); it.recipe = p[6] || 0; it.stock = p[7] || {}; it.stockV = p[8] || {}; it.stockL = p[9] || {}; for (const j of p[4] || []) it.queue.push({ sp: j[0], len: j[1], r: j[2], t: j[3] }); for (const o of p[5] || []) it.out.push({ sp: o[0], len: o[1], pw: o[2], pt: o[3] }); }
   if (!NET.guest) alignBelts();
+  // trees are numbered by where they grow: a save from the smaller map can't keep its felled list
+  if (d.wv !== WORLD_V) { d.felled = []; d.growing = []; }
   for (const [i, tm, cut] of d.felled || []) { if (i < 0 || i >= TN || tState[i] === 2) continue; tState[i] = 2; tTimer[i] = tm; tCut[i] = cut; FELLED.push(i); setTreeInstance(i, false); setStump(i, true); }
   for (const [i, g] of d.growing || []) { if (i < 0 || i >= TN || tState[i] !== 0) continue; tState[i] = 3; tGrow[i] = g; GROWING.push(i); setTreeInstance(i, true); }
   for (const a of d.bodies || []) {
@@ -5885,7 +5935,7 @@ function tick(dt, play) {
   updateFalling(dt);
   treeAcc += dt; if (treeAcc > 1) { treeTick(treeAcc); treeAcc = 0; }
   if (play && !NET.guest) ordersTick(dt);
-  achTick(dt); eventsTick(dt); workersTick(dt); netTick(dt);
+  achTick(dt); eventsTick(dt); workersTick(dt); netTick(dt); conesTick(dt);
   camAuto(); updateCamera(dt); cullWorld();
   aimAcc += dt; if (aimAcc > 0.05) { aimAcc = 0; if (play) updateAim(); }
 }
