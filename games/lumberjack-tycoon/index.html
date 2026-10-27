@@ -2163,6 +2163,7 @@ function onPeerAct(p, a) {
     const t = truckById(a.ti); if (!t) return;
     for (const q of trucks) for (const st of q.seats) if (st.who === p.id) st.who = null;
     let seat = a.seat >= 0 && t.seats[a.seat] && !t.seats[a.seat].who ? a.seat : pickSeat(t, a.seat);
+    if (seat === 0 && t.owner !== p.id) { seat = t.seats.findIndex((q, k) => k > 0 && !q.who); if (seat < 0) { netSend(p, { e: { t: 'msg', text: 'Only the owner can drive that one, and there are no free seats.' } }); return; } }
     if (seat < 0) { netSend(p, { e: { t: 'msg', text: 'No free seats in that one.' } }); return; }
     t.seats[seat].who = p.id; p.inTruck = t.nid; p.seat = seat;
     netSend(p, { e: { t: 'seat', ti: t.nid, seat } });
@@ -3606,6 +3607,11 @@ function seatHere(t) {
 function seatName(t, k) { return k === 0 ? 'Drive' : t.seats[k].stand ? 'Hop on the back of' : 'Ride in'; }
 function enterTruck(t, seat, confirmed) {
   if (seat == null) seat = seatHere(t);
+  if (seat === 0 && !confirmed && t.owner && t.owner !== 'me') {
+    seat = t.seats.findIndex((q, k) => k > 0 && !q.who);
+    toast((t.ownerName || 'Another player') + "'s " + t.T.name + ': only the owner can drive it.' + (seat > 0 ? ' You can ride along.' : ''), seat < 0);
+    if (seat < 0) return;
+  }
   if (seat < 0) { toast('No free seats in that one.'); return; }
   if (NET.guest && !confirmed) { netAct({ t: 'enter', ti: t.nid, seat }); return; }
   if (!confirmed) { if (t.seats[seat].who) { toast('Someone is sitting there.'); return; } t.seats[seat].who = 'me'; }
@@ -4022,7 +4028,7 @@ function wakeOnBelts(dt) {
 
 /* ================= things you place on your land ================= */
 const placed = [];   // { type, x, z, rot, g, cols, ... }
-const FOOT = { mill: [1.6, 4.3], belt: [1.0, 2.0] };
+const FOOT = { mill: [1.6, 4.1], belt: [1.0, 2.0] };
 const footOf = type => type === 'belt' ? FOOT.belt : type === 'shop1' ? [1.6, 1.6] : FOOT.mill;
 function itemModel(type, mat) {
   const M = new MB(), isMill = type.startsWith('mill');
@@ -4216,6 +4222,28 @@ function snapBuild(ax, az) {
   for (const c of C) { const d = Math.min(Math.hypot(c[0] - ax, c[1] - az), Math.hypot(c[5] - ax, c[6] - az)) + (c[3] === 'corner' ? 10 : 0); if (d - (c[3] === 'corner' ? 10 : 0) < c[4] && d < bd && buildFits(type, c[0], c[1], c[2])) { bd = d; best = c; } }
   return best && best.slice(0, 4);
 }
+/* belts placed before snapping existed: line each one up with the mill or belt end it nearly touches,
+   starting at the sawmills and working outward along each line of belts */
+function alignBelts() {
+  const joins = a => { const h = footOf(a.type)[1], d = rotDir(a.rot), out = [];
+    for (const sg of [1, -1]) { const ex = a.x + sg * d[0] * h, ez = a.z + sg * d[1] * h; out.push([ex + sg * d[0] * 2, ez + sg * d[1] * 2]); } return out; };
+  const moveTo = (it, x, z) => { const k = placed.indexOf(it); removeItem(it); const nu = placeItem('belt', x, z, it.rot); placed.splice(placed.indexOf(nu), 1); placed.splice(k, 0, nu); return nu; };
+  const fitsWithout = (it, x, z) => { const k = placed.indexOf(it); placed.splice(k, 1); const ok = buildFits('belt', x, z, it.rot); placed.splice(k, 0, it); return ok; };
+  const done = new Set(), queue = placed.filter(a => a.type.startsWith('mill'));
+  queue.forEach(a => done.add(a));
+  const grow = () => { while (queue.length) { const a = queue.shift();
+    for (const it of placed.slice()) {
+      if (it.type !== 'belt' || done.has(it) || it.rot !== a.rot || !placed.includes(it)) continue;
+      for (const [x, z] of joins(a)) {
+        const dd = Math.hypot(x - it.x, z - it.z); if (dd > 1.6) continue;
+        let nu = it; if (dd > 0.01 && fitsWithout(it, x, z)) nu = moveTo(it, x, z); else if (dd > 0.01) continue;
+        done.add(nu); queue.push(nu); break;
+      }
+    } } };
+  grow();
+  // belt lines that don't touch a mill: anchor each at its first belt
+  for (const it of placed.slice()) if (it.type === 'belt' && !done.has(it) && placed.includes(it)) { done.add(it); queue.push(it); grow(); }
+}
 function updateBuild() {
   if (!build) return;
   camera.getWorldDirection(camDir);
@@ -4243,6 +4271,7 @@ function tryPlace() {
   if (!S.inv[build.type]) { cancelBuild(); return; }
   S.inv[build.type]--;
   const it = placeItem(build.type, build.x, build.z, build.prot != null ? build.prot : build.rot);
+  if (build.type !== 'belt') alignBelts();
   sBuild();
   if (build.type !== 'belt' && !S.seen.milltip) { S.seen.milltip = 1; hint('mill', 'Your sawmill is ready. Drop logs on its belt and planks come out the other end. Aim at it with your hands (<kbd>2</kbd>) and press <kbd>X</kbd> to pick it back up.'); }
   if (!S.inv[build.type]) cancelBuild();
@@ -5341,7 +5370,8 @@ function findPrompt() {
   for (const t of trucks) {
     const d = Math.hypot(px - t.pos.x, pz - t.pos.z);
     if (d < t.L / 2 + 1.8 && d - 1 < bd) {
-      const k = seatHere(t), nm = (t.owner !== 'me' && t.ownerName ? t.ownerName + "'s " : 'the ') + t.T.name;
+      let k = seatHere(t); const nm = (t.owner !== 'me' && t.ownerName ? t.ownerName + "'s " : 'the ') + t.T.name;
+      if (k === 0 && t.owner && t.owner !== 'me') k = t.seats.findIndex((q, i) => i > 0 && !q.who);
       best = k < 0 ? { text: nm.charAt(0).toUpperCase() + nm.slice(1) + ' is full', act: () => toast('No free seats in that one.'), key: 'e' } : { text: seatName(t, k) + ' ' + nm, act: () => enterTruck(t, k), key: 'e' }; bd = d - 1;
     }
   }
@@ -5770,6 +5800,7 @@ function apply(d) {
   for (const t of d.trucks || []) if (TRUCKS[t[0]] && !S.ownT.includes(t[0])) S.ownT.push(t[0]);
   for (const t of d.trucks || []) if (TRUCKS[t[0]] && !trucks.some(q => q.owner === 'me' && q.type === t[0])) makeTruck(t[0], t[1], t[3], t[4], { owner: 'me', lv: t[0] === 'feller' ? S.fellerLv : 0, straps: S.straps });
   for (const p of d.placed || []) if (ITEMS[p[0]]) { const it = placeItem(p[0], p[1], p[2], p[3] | 0); it.recipe = p[6] || 0; it.stock = p[7] || {}; it.stockV = p[8] || {}; it.stockL = p[9] || {}; for (const j of p[4] || []) it.queue.push({ sp: j[0], len: j[1], r: j[2], t: j[3] }); for (const o of p[5] || []) it.out.push({ sp: o[0], len: o[1], pw: o[2], pt: o[3] }); }
+  if (!NET.guest) alignBelts();
   for (const [i, tm, cut] of d.felled || []) { if (i < 0 || i >= TN || tState[i] === 2) continue; tState[i] = 2; tTimer[i] = tm; tCut[i] = cut; FELLED.push(i); setTreeInstance(i, false); setStump(i, true); }
   for (const [i, g] of d.growing || []) { if (i < 0 || i >= TN || tState[i] !== 0) continue; tState[i] = 3; tGrow[i] = g; GROWING.push(i); setTreeInstance(i, true); }
   for (const a of d.bodies || []) {
