@@ -3937,6 +3937,51 @@ function updateSell() {
 }
 // wood resting on any belt must stay awake so the belt can move it
 let beltWakeT = 0;
+/* belt loader: wood that reaches the end of a belt beside a parked truck is lifted over the side into the bed
+   (truck walls stand taller than the belt, so it could never roll in) */
+const lifts = [];
+function liftTarget(t, out, len) {
+  let top = t.T.floor + t.T.wall + 0.45;
+  for (const c of t.cargo) if (c.cl) top = Math.max(top, c.cl.p.y + (c.k ? c.pt : c.r) + 0.45);
+  const n = lifts.filter(l => l.t === t).length;
+  return out.set(((n % 2) - 0.5) * Math.min(0.7, t.T.bedW * 0.35), top + 0.35 * Math.floor(n / 2), Math.min((t.zBedF + t.zBedB) / 2, t.zBedF - 0.35 - len / 2)).applyQuaternion(t.q).add(t.pos);
+}
+function beltLoader(dt) {
+  for (let i = lifts.length - 1; i >= 0; i--) {
+    const L = lifts[i], b = L.b, t = L.t;
+    L.k += dt / 0.85;
+    if (b.gone || !trucks.includes(t) || !parkedBedTruck(t) || b.heldBy || b === held) { b.crane = false; b.sleep = false; lifts.splice(i, 1); continue; }
+    const k = sm01(L.k);
+    liftTarget(t, jobV, b.len);
+    b.p.lerpVectors(L.from, jobV, k); b.p.y += Math.sin(Math.min(1, L.k) * PI) * 1.2;
+    tmpE.set(0, -PI / 2, 0); jobQ.setFromEuler(tmpE).premultiply(t.q);
+    b.q.slerpQuaternions ? b.q.slerpQuaternions(L.q0, jobQ, k) : THREE.Quaternion.slerp(L.q0, jobQ, b.q, k);
+    qMat(b.q, b.R); b.v.set(0, 0, 0); b.av.set(0, 0, 0);
+    if (L.k >= 1) { b.crane = false; b.sleep = false; b.st = 0; b.v.copy(t.vel); lifts.splice(i, 1); sThud(0.25); }
+  }
+  for (const it of placed) {
+    if (it.type !== 'belt') continue;
+    const ry = it.rot * PI / 2, d = rotDir(it.rot), ex = it.x + d[0] * 2, ez = it.z + d[1] * 2;
+    let tr = null;
+    for (const t of trucks) {
+      if (!parkedBedTruck(t)) continue;
+      const dx = ex - t.pos.x, dz = ez - t.pos.z, R = t.R, lx = R[0] * dx + R[6] * dz, lz = R[2] * dx + R[8] * dz;
+      if (Math.abs(lx) < t.T.bedW / 2 + 1.4 && lz < t.zBedF + 0.4 && lz > t.zBedB - 1.4) { tr = t; break; }
+    }
+    if (!tr) continue;
+    for (const b of bodies) {
+      if (b.cargo || b.crane || b === held || b.heldBy || clock - b.belt > 0.4) continue;
+      if (Math.abs(b.p.x - it.x) > 2.6 + b.len / 2 || Math.abs(b.p.z - it.z) > 2.6 + b.len / 2 || b.p.y < it.y + 0.4 || b.p.y > it.y + 2.6) continue;
+      const hl = b.len / 2, R = b.R;
+      let [, lz] = toItem(it, b.p.x + R[0] * hl, b.p.z + R[6] * hl);
+      const [, lz2] = toItem(it, b.p.x - R[0] * hl, b.p.z - R[6] * hl);
+      const [cx0, cz0] = toItem(it, b.p.x, b.p.z);
+      if (Math.max(lz, lz2) < 1.5 || Math.abs(cx0) > 1.2 || cz0 < -2.2 || cz0 > 2.6) continue;
+      b.crane = true; b.sleep = false; lifts.push({ b, t: tr, k: 0, from: b.p.clone(), q0: b.q.clone() });
+      if (!S.seen.beltload) { S.seen.beltload = 1; hint('beltload', 'The belt is loading your truck. Keep the truck parked at the end of the belt.'); }
+    }
+  }
+}
 function wakeOnBelts(dt) {
   beltWakeT -= dt; if (beltWakeT > 0) return; beltWakeT = 0.25;
   for (const b of bodies) {
@@ -4104,10 +4149,43 @@ function startPlace(type) {
   const ghost = new THREE.Group(); ghost.add(itemModel(type, ghostOk)); scene.add(ghost);
   build = { type, rot: build ? build.rot : 0, ghost, ok: false, x: 0, z: 0 };
   setTouchMode();
-  hint('build', coarse ? 'Move to aim. <kbd>Place</kbd> puts it down, <kbd>Turn</kbd> rotates it.' : 'Aim where it should go. <kbd>Click</kbd> to place, <kbd>R</kbd> or the mouse wheel to turn it, <kbd>Esc</kbd> to stop. Belts carry wood in the direction of the yellow dots.');
+  hint('build', coarse ? 'Move to aim. <kbd>Place</kbd> puts it down, <kbd>Turn</kbd> rotates it.' : 'Aim where it should go. <kbd>Click</kbd> to place, <kbd>R</kbd> or the mouse wheel to turn it, <kbd>Esc</kbd> to stop. Belts carry wood in the direction of the yellow dots and snap onto nearby belts, mills and parked trucks. A belt that ends next to a parked truck loads it.');
 }
 function cancelBuild() { if (!build) return; scene.remove(build.ghost); build.ghost.traverse(o => { if (o.geometry && o.geometry !== BOXG) o.geometry.dispose(); }); build = null; setTouchMode(); }
 function footRect(type, x, z, rot) { const f = footOf(type), sw = rot % 2 === 1; return { x0: x - (sw ? f[1] : f[0]), x1: x + (sw ? f[1] : f[0]), z0: z - (sw ? f[0] : f[1]), z1: z + (sw ? f[0] : f[1]) }; }
+function buildFits(type, x, z, rot) {
+  const r = footRect(type, x, z, rot), P = PLOTS[S.plot];
+  if (!P || !(r.x0 > P.x - PLOT_H && r.x1 < P.x + PLOT_H && r.z0 > P.z - PLOT_H && r.z1 < P.z + PLOT_H)) return false;
+  for (const it of placed) { const q = footRect(it.type, it.x, it.z, it.rot); if (r.x0 < q.x1 - 0.05 && r.x1 > q.x0 + 0.05 && r.z0 < q.z1 - 0.05 && r.z1 > q.z0 + 0.05) return false; }
+  return true;
+}
+/* snapping: a belt or sawmill being placed lines up with the nearest belt or mill end (straight on, or a belt
+   turned sideways to catch what falls off the end), and a belt lines up with the bed of a parked truck.
+   Returns [x, z, rot, what] or null. */
+const rotDir = r => [Math.sin(r * PI / 2), Math.cos(r * PI / 2)];
+function parkedBedTruck(t) { return t.T.bedL > 0 && t.kind !== 'feller' && Math.abs(t.speed) < 0.6 && t.tip < 0.02; }
+function snapBuild(ax, az) {
+  const type = build.type; if (type === 'shop1') return null;
+  const gh = footOf(type)[1], ur = build.rot, g = rotDir(ur), C = [];
+  for (const it of placed) {
+    if (it.type === 'shop1') continue;
+    const h = footOf(it.type)[1], d = rotDir(it.rot), ox = it.x + d[0] * h, oz = it.z + d[1] * h, ix = it.x - d[0] * h, iz = it.z - d[1] * h;
+    C.push([ox + d[0] * gh, oz + d[1] * gh, it.rot, 'end', 2.5]);
+    C.push([ix - d[0] * gh, iz - d[1] * gh, it.rot, 'end', 2.5]);
+    if (type === 'belt' && (ur - it.rot + 4) % 2 === 1) C.push([ox + d[0] + g[0] * (gh - 1), oz + d[1] + g[1] * (gh - 1), ur, 'end', 2.5]);
+  }
+  if (type === 'belt') for (const t of trucks) {
+    if (!parkedBedTruck(t)) continue;
+    const rt = tmpV.set(1, 0, 0).applyQuaternion(t.q), rx = rt.x, rz = rt.z, ft = tmpV.set(0, 0, 1).applyQuaternion(t.q), fx = ft.x, fz = ft.z;
+    const gf = g[0] * fx + g[1] * fz; if (gf < -0.5) continue; // never feed through the cab
+    const bm = (t.zBedF + t.zBedB) / 2, bx = t.pos.x + fx * bm, bz = t.pos.z + fz * bm;
+    const ext = Math.abs(g[0] * rx + g[1] * rz) * (t.W / 2 + 0.15) + Math.abs(gf) * (t.T.bedL / 2 + 0.25);
+    C.push([bx - g[0] * (ext + gh), bz - g[1] * (ext + gh), ur, 'truck', 4]);
+  }
+  let best = null, bd = 1e9;
+  for (const c of C) { const d = Math.hypot(c[0] - ax, c[1] - az); if (d < c[4] && d < bd && buildFits(type, c[0], c[1], c[2])) { bd = d; best = c; } }
+  return best && best.slice(0, 4);
+}
 function updateBuild() {
   if (!build) return;
   camera.getWorldDirection(camDir);
@@ -4118,13 +4196,15 @@ function updateBuild() {
     for (; t < 40; t += 0.25) { const x = o.x + camDir.x * t, y = o.y + camDir.y * t, z = o.z + camDir.z * t; if (y < hAt(x, z)) { px = x; pz = z; break; } }
     if (t >= 40) { px = o.x + camDir.x * 12; pz = o.z + camDir.z * 12; }
   }
+  const aimX = px, aimZ = pz;
   px = Math.round(px * 2) / 2; pz = Math.round(pz * 2) / 2;
-  build.x = px; build.z = pz;
-  const r = footRect(build.type, px, pz, build.rot), P = PLOTS[S.plot];
-  let ok = r.x0 > P.x - PLOT_H && r.x1 < P.x + PLOT_H && r.z0 > P.z - PLOT_H && r.z1 < P.z + PLOT_H;
-  for (const it of placed) { const q = footRect(it.type, it.x, it.z, it.rot); if (r.x0 < q.x1 - 0.05 && r.x1 > q.x0 + 0.05 && r.z0 < q.z1 - 0.05 && r.z1 > q.z0 + 0.05) ok = false; }
+  let rot = build.rot;
+  const sn = snapBuild(aimX, aimZ);
+  if (sn) { px = sn[0]; pz = sn[1]; rot = sn[2]; }
+  build.x = px; build.z = pz; build.prot = rot; build.snap = sn ? sn[3] : null;
+  const ok = buildFits(build.type, px, pz, rot);
   build.ok = ok;
-  build.ghost.position.set(px, hAt(px, pz) + 0.02, pz); build.ghost.rotation.y = build.rot * PI / 2;
+  build.ghost.position.set(px, hAt(px, pz) + 0.02, pz); build.ghost.rotation.y = rot * PI / 2;
   build.ghost.children[0].material = ok ? ghostOk : ghostBad;
 }
 function tryPlace() {
@@ -4132,7 +4212,7 @@ function tryPlace() {
   if (!build.ok) { sDeny(); toast('It has to fit inside your land without overlapping anything.', true); return; }
   if (!S.inv[build.type]) { cancelBuild(); return; }
   S.inv[build.type]--;
-  const it = placeItem(build.type, build.x, build.z, build.rot);
+  const it = placeItem(build.type, build.x, build.z, build.prot != null ? build.prot : build.rot);
   sBuild();
   if (build.type !== 'belt' && !S.seen.milltip) { S.seen.milltip = 1; hint('mill', 'Your sawmill is ready. Drop logs on its belt and planks come out the other end. Aim at it with your hands (<kbd>2</kbd>) and press <kbd>X</kbd> to pick it back up.'); }
   if (!S.inv[build.type]) cancelBuild();
@@ -5704,7 +5784,7 @@ function tick(dt, play) {
   updateTrucks(dt);
   updateJobs(dt);
   updateFerry(dt);
-  if (!NET.guest) { physStep(dt); updateSell(); updateMills(dt); wakeOnBelts(dt); repairTick(); gooseTick(dt); }
+  if (!NET.guest) { physStep(dt); updateSell(); updateMills(dt); beltLoader(dt); wakeOnBelts(dt); repairTick(); gooseTick(dt); }
   haulTick(); packSellTick(dt); updateGems(dt); wildTick(dt);
   updateFalling(dt);
   treeAcc += dt; if (treeAcc > 1) { treeTick(treeAcc); treeAcc = 0; }
