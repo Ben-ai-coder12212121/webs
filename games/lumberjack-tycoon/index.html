@@ -346,7 +346,7 @@ const PERKS = {
 // carrying wood on your back: pieces you can hold at once, bought with coins
 const RACKS = [{ name: 'Rope sling', cap: 2 }, { name: 'Wood frame pack', price: 120, cap: 3 }, { name: 'Steel back rack', price: 600, cap: 4 }, { name: 'Pro hauling rack', price: 2400, cap: 6 }, { name: 'Giant timber rack', price: 9000, cap: 8 }];
 // straps keep a wobbly load on your truck
-const STRAPS = [{ name: 'No straps', k: 1 }, { name: 'Ratchet straps', price: 300, k: 0.35, desc: 'Logs fall off your truck much less often.' }, { name: 'Chain binders', price: 2200, k: 0.1, desc: 'Your load barely moves, even on rough roads.' }];
+const STRAPS = [{ name: 'No straps', k: 1 }, { name: 'Ratchet straps', price: 300, k: 0.35, desc: 'Logs fall off your truck much less often.' }, { name: 'Chain binders', price: 2200, k: 0.1, desc: 'Your load barely moves, even on rough roads.' }, { name: 'Steel cable lashing', price: 7500, k: 0.03, desc: 'Only the wildest jumps shake a log loose.' }, { name: 'Mag-lock bed', price: 20000, k: 0, desc: 'Magnets hold every log down. Nothing ever falls off.' }];
 const PLOT_PRICE = 150, NORTH_TOLL = 600, EAST_TOLL = 2500, FERRY_PASS = 10000;
 const DAY_LEN = 720;
 
@@ -2413,7 +2413,7 @@ function ensureOwnTrucks() {
 function saveGuestWallet() {
   let own = null; try { own = JSON.parse(store.get(KEY) || 'null'); } catch (e) {}
   own = own || fresh();
-  for (const k of ['money', 'earned', 'axes', 'saws', 'axe', 'saw', 'ach', 'daily', 'gems', 'cls', 'perks', 'pack', 'rack', 'straps', 'ownT', 'fellerLv', 'debt', 'remote']) own[k] = JSON.parse(JSON.stringify(S[k]));
+  for (const k of ['money', 'earned', 'axes', 'saws', 'axe', 'saw', 'ach', 'daily', 'gems', 'cls', 'perks', 'pack', 'rack', 'straps', 'ownT', 'fellerLv', 'debt', 'remote', 'autoCrane', 'autoOn']) own[k] = JSON.parse(JSON.stringify(S[k]));
   own.v = Math.max(own.v || 4, 4);
   own.stats = Object.assign(own.stats || {}, { sold: S.stats.sold, trees: S.stats.trees, contracts: S.stats.contracts, hauls: S.stats.hauls, giants: S.stats.giants });
   own.seen = Object.assign(own.seen || {}, S.seen, { started: 1 });
@@ -2893,7 +2893,7 @@ function equipAxe() {
   if (man.axe) man.hand.remove(man.axe);
   if (vmAxe) vm.remove(vmAxe);
   man.axe = vmAxe = null;
-  if (!a.fists) { man.axe = axeModel(a); man.axe.rotation.x = PI / 2; man.axe.position.set(0, 0, -0.12); man.hand.add(man.axe); vmAxe = axeModel(a, 0.8); vmAxe.position.set(0, -0.12, 0); vm.add(vmAxe); }
+  if (!a.fists) { man.axe = axeModel(a); man.axe.rotation.x = PI / 2; man.axe.position.set(0, 0, -0.12); man.hand.add(man.axe); vmAxe = axeModel(a, 0.8); vmAxe.rotation.y = PI; vmAxe.position.set(0, -0.12, 0); vm.add(vmAxe); }
   const sw = sawById(S.saw);
   if (man.saw) { man.hand.remove(man.saw); man.saw = null; }
   if (vmSaw) { vm.remove(vmSaw); vmSaw = null; }
@@ -2981,7 +2981,7 @@ on(window, 'keydown', e => {
   if (k === ' ' || k.startsWith('arrow') || k === 'tab') e.preventDefault();
   K[k] = true;
   if (e.repeat) return;
-  if (k === '1') { if (S.tool === 0) cycleAxe(); else setTool(0); }
+  if (k === '1') pickAxe();
   else if (k === '2') setTool(1);
   else if (k === '3') { if (S.tool === 2) cycleSaw(); else if (S.saws.length) setTool(2); else toast('Buy a chainsaw at Ridgeline Tools first.'); }
   else if (k === '4') { if (S.remote) setTool(3); else toast('Buy a crane remote at Big Wheel Motors first.'); }
@@ -2998,9 +2998,12 @@ on(window, 'keydown', e => {
 });
 on(window, 'keyup', e => { const k = e.key.toLowerCase(); K[k] = false; if (k === 'r') hold.spin = 0; if (k === 'f') { hold.tilt = 0; lmb = false; } });
 on(window, 'blur', () => { for (const k in K) K[k] = false; lmb = rmb = false; dropHeld(); });
-function setTool(t) { if (held) dropHeld(); if (t === 2 && !sawById(S.saw)) return; if (t === 3 && !S.remote) return; if (t === 2 && !vmSaw) equipAxe(); S.tool = t; $('#axeName').textContent = t === 2 ? sawById(S.saw).name : t === 3 ? 'Crane remote' : axeById(S.axe).name; refreshBar(); if (t === 3) hint('remote', 'Stand near a truck, aim at a log and hold ' + (coarse ? '<kbd>Lift</kbd>' : '<kbd>Click</kbd>') + ': the truck crane lifts it. ' + (coarse ? '' : 'Mouse wheel moves it closer or further. ') + 'Let go over the bed to drop it.'); }
+function setTool(t) { if (held) dropHeld(); if (t === 0 && S.tool !== 0) bestAxe(); if (t === 2 && !sawById(S.saw)) return; if (t === 3 && !S.remote) return; if (t === 2 && !vmSaw) equipAxe(); S.tool = t; $('#axeName').textContent = t === 2 ? sawById(S.saw).name : t === 3 ? 'Crane remote' : axeById(S.axe).name; refreshBar(); if (t === 3) hint('remote', 'Stand near a truck, aim at a log and hold ' + (coarse ? '<kbd>Lift</kbd>' : '<kbd>Click</kbd>') + ': the truck crane lifts it. ' + (coarse ? '' : 'Mouse wheel moves it closer or further. ') + 'Let go over the bed to drop it.'); }
 function cycleSaw() { if (S.saws.length < 2) return; const own = SAWS.filter(a => S.saws.includes(a.id)), i = own.findIndex(a => a.id === S.saw); S.saw = own[(i + 1) % own.length].id; equipAxe(); toast(sawById(S.saw).name); sTool(); }
-function cycleAxe() { if (S.tool !== 0) { setTool(0); return; } const own = AXES.filter(a => S.axes.includes(a.id)); if (own.length < 2) return; const i = own.findIndex(a => a.id === S.axe); S.axe = own[(i + 1) % own.length].id; equipAxe(); toast(axeById(S.axe).name); sTool(); }
+function ownAxes() { return AXES.filter(a => S.axes.includes(a.id)).sort((a, b) => b.dmg - a.dmg); }
+function bestAxe() { const own = ownAxes(); if (own.length && S.axe !== own[0].id) { S.axe = own[0].id; equipAxe(); } }
+function pickAxe() { setTool(0); }
+function cycleAxe() { if (S.tool !== 0) { pickAxe(); return; } const own = ownAxes(); if (own.length < 2) return; const i = own.findIndex(a => a.id === S.axe); S.axe = own[(i + 1) % own.length].id; equipAxe(); toast(axeById(S.axe).name); sTool(); }
 // camera: auto (through your eyes while chopping, behind you otherwise), always behind, or always through your eyes
 function toggleCam() { S.cam = S.cam === 2 ? 0 : S.cam === 0 ? 1 : 2; toast('Camera: ' + ['behind you', 'through your eyes', 'automatic'][S.cam]); }
 function camAuto() { camMode = S.cam === 2 ? (player.truck || S.tool === 1 || S.tool === 3 || held || build ? 0 : 1) : S.cam ? 1 : 0; }
@@ -3552,7 +3555,7 @@ function syncTruck(t, dt) {
   for (const b of t.cargo) { b.p.copy(b.cl.p).applyMatrix4(truckM); b.q.copy(t.q).multiply(b.cl.q); qMat(b.q, b.R); b.v.copy(t.vel); }
 }
 function tryLoad(b, t) {
-  if (t.tip > 0.02 || b.cargo || b === held) return;
+  if (t.tip > 0.02 || b.cargo || b === held || clock - b.belt < 0.4) return;
   // in the bed's space?
   const dx = b.p.x - t.pos.x, dy = b.p.y - t.pos.y, dz = b.p.z - t.pos.z, R = t.R;
   const lx = R[0] * dx + R[3] * dy + R[6] * dz, ly = R[1] * dx + R[4] * dy + R[7] * dz, lz = R[2] * dx + R[5] * dy + R[8] * dz;
@@ -3946,7 +3949,27 @@ function liftTarget(t, out, len) {
   const n = lifts.filter(l => l.t === t).length;
   return out.set(((n % 2) - 0.5) * Math.min(0.7, t.T.bedW * 0.35), top + 0.35 * Math.floor(n / 2), Math.min((t.zBedF + t.zBedB) / 2, t.zBedF - 0.35 - len / 2)).applyQuaternion(t.q).add(t.pos);
 }
+/* auto crane: while you stand near your parked truck it lifts loose wood nearby into the bed, one piece at a time */
+let autoT = 0;
+function autoCrane(dt) {
+  if (!S.autoCrane || S.autoOn === 0 || player.truck) return;
+  autoT -= dt; if (autoT > 0) return; autoT = 1.1;
+  for (const t of trucks) {
+    if (t.owner !== 'me' || !parkedBedTruck(t) || Math.hypot(player.x - t.pos.x, player.z - t.pos.z) > 14) continue;
+    if (lifts.some(l => l.t === t)) continue;
+    let top = 0; for (const c of t.cargo) if (c.cl) top = Math.max(top, c.cl.p.y);
+    if (top > t.T.floor + t.T.wall + 1.1) continue; // full
+    const bm = (t.zBedF + t.zBedB) / 2, bx = t.pos.x + Math.sin(t.yaw) * bm, bz = t.pos.z + Math.cos(t.yaw) * bm;
+    let best = null, bd = 9;
+    for (const b of bodies) {
+      if (b.cargo || b.crane || b === held || b.heldBy || b.m > 2400 || clock - b.belt < 1 || clock - (b.lifted || -99) < 6) continue;
+      const d = Math.hypot(b.p.x - bx, b.p.z - bz); if (d < bd) { bd = d; best = b; }
+    }
+    if (best) { best.crane = true; best.sleep = false; lifts.push({ b: best, t, k: 0, from: best.p.clone(), q0: best.q.clone() }); sTool(); }
+  }
+}
 function beltLoader(dt) {
+  autoCrane(dt);
   for (let i = lifts.length - 1; i >= 0; i--) {
     const L = lifts[i], b = L.b, t = L.t;
     L.k += dt / 0.85;
@@ -3957,7 +3980,7 @@ function beltLoader(dt) {
     tmpE.set(0, -PI / 2, 0); jobQ.setFromEuler(tmpE).premultiply(t.q);
     b.q.slerpQuaternions ? b.q.slerpQuaternions(L.q0, jobQ, k) : THREE.Quaternion.slerp(L.q0, jobQ, b.q, k);
     qMat(b.q, b.R); b.v.set(0, 0, 0); b.av.set(0, 0, 0);
-    if (L.k >= 1) { b.crane = false; b.sleep = false; b.st = 0; b.v.copy(t.vel); lifts.splice(i, 1); sThud(0.25); }
+    if (L.k >= 1) { b.crane = false; b.sleep = false; b.st = 0; b.lifted = clock; b.v.copy(t.vel); lifts.splice(i, 1); sThud(0.25); }
   }
   for (const it of placed) {
     if (it.type !== 'belt') continue;
@@ -3970,13 +3993,19 @@ function beltLoader(dt) {
     }
     if (!tr) continue;
     for (const b of bodies) {
-      if (b.cargo || b.crane || b === held || b.heldBy || clock - b.belt > 0.4) continue;
+      if (b.crane || b === held || b.heldBy) continue;
+      if (b.cargo) {
+        if (b.cargo !== tr) continue;
+        const dx = b.p.x - tr.pos.x, dz = b.p.z - tr.pos.z, R = tr.R, lx = R[0] * dx + R[6] * dz, lz = R[2] * dx + R[8] * dz;
+        if (lz > tr.zBedB - 0.05 && Math.abs(lx) < tr.T.bedW / 2) continue;
+      } else if (clock - b.belt > 0.4) continue;
       if (Math.abs(b.p.x - it.x) > 2.6 + b.len / 2 || Math.abs(b.p.z - it.z) > 2.6 + b.len / 2 || b.p.y < it.y + 0.4 || b.p.y > it.y + 2.6) continue;
       const hl = b.len / 2, R = b.R;
       let [, lz] = toItem(it, b.p.x + R[0] * hl, b.p.z + R[6] * hl);
       const [, lz2] = toItem(it, b.p.x - R[0] * hl, b.p.z - R[6] * hl);
       const [cx0, cz0] = toItem(it, b.p.x, b.p.z);
-      if (Math.max(lz, lz2) < 1.5 || Math.abs(cx0) > 1.2 || cz0 < -2.2 || cz0 > 2.6) continue;
+      if (Math.max(lz, lz2, cz0 + (b.k ? b.pw / 2 : b.r)) < 1.5 || Math.abs(cx0) > 1.2 || cz0 < -2.2 || cz0 > 2.6) continue;
+      if (b.cargo) detachCargo(b);
       b.crane = true; b.sleep = false; lifts.push({ b, t: tr, k: 0, from: b.p.clone(), q0: b.q.clone() });
       if (!S.seen.beltload) { S.seen.beltload = 1; hint('beltload', 'The belt is loading your truck. Keep the truck parked at the end of the belt.'); }
     }
@@ -4170,9 +4199,9 @@ function snapBuild(ax, az) {
   for (const it of placed) {
     if (it.type === 'shop1') continue;
     const h = footOf(it.type)[1], d = rotDir(it.rot), ox = it.x + d[0] * h, oz = it.z + d[1] * h, ix = it.x - d[0] * h, iz = it.z - d[1] * h;
-    C.push([ox + d[0] * gh, oz + d[1] * gh, it.rot, 'end', 2.5]);
-    C.push([ix - d[0] * gh, iz - d[1] * gh, it.rot, 'end', 2.5]);
-    if (type === 'belt' && (ur - it.rot + 4) % 2 === 1) C.push([ox + d[0] + g[0] * (gh - 1), oz + d[1] + g[1] * (gh - 1), ur, 'end', 2.5]);
+    C.push([ox + d[0] * gh, oz + d[1] * gh, it.rot, 'end', 3.5, ox, oz]);
+    C.push([ix - d[0] * gh, iz - d[1] * gh, it.rot, 'end', 3.5, ix, iz]);
+    if (type === 'belt' && (ur - it.rot + 4) % 2 === 1) C.push([ox + d[0] + g[0] * (gh - 1), oz + d[1] + g[1] * (gh - 1), ur, 'corner', 2.5, ox, oz]);
   }
   if (type === 'belt') for (const t of trucks) {
     if (!parkedBedTruck(t)) continue;
@@ -4180,10 +4209,11 @@ function snapBuild(ax, az) {
     const gf = g[0] * fx + g[1] * fz; if (gf < -0.5) continue; // never feed through the cab
     const bm = (t.zBedF + t.zBedB) / 2, bx = t.pos.x + fx * bm, bz = t.pos.z + fz * bm;
     const ext = Math.abs(g[0] * rx + g[1] * rz) * (t.W / 2 + 0.15) + Math.abs(gf) * (t.T.bedL / 2 + 0.25);
-    C.push([bx - g[0] * (ext + gh), bz - g[1] * (ext + gh), ur, 'truck', 4]);
+    C.push([bx - g[0] * (ext + gh), bz - g[1] * (ext + gh), ur, 'truck', 4, bx - g[0] * ext, bz - g[1] * ext]);
   }
   let best = null, bd = 1e9;
-  for (const c of C) { const d = Math.hypot(c[0] - ax, c[1] - az); if (d < c[4] && d < bd && buildFits(type, c[0], c[1], c[2])) { bd = d; best = c; } }
+  // distance to the new piece or to the joint, whichever is closer; a corner only wins when no straight join fits
+  for (const c of C) { const d = Math.min(Math.hypot(c[0] - ax, c[1] - az), Math.hypot(c[5] - ax, c[6] - az)) + (c[3] === 'corner' ? 10 : 0); if (d - (c[3] === 'corner' ? 10 : 0) < c[4] && d < bd && buildFits(type, c[0], c[1], c[2])) { bd = d; best = c; } }
   return best && best.slice(0, 4);
 }
 function updateBuild() {
@@ -4920,7 +4950,7 @@ const GEMSTUMP = { x: -134, z: 174 };
 
 
 /* ================= the crane remote: work any truck's loader crane from the ground ================= */
-const REMOTE_PRICE = 60;
+const REMOTE_PRICE = 60, AUTOCRANE_PRICE = 6000;
 // the nearest truck close enough for its crane to reach you
 function craneTruck() {
   let best = null, bd = 22;
@@ -5271,7 +5301,7 @@ function refreshBar() {
   $('#s0').classList.toggle('on', S.tool === 0); $('#s1').classList.toggle('on', S.tool === 1);
   setTouchMode();
 }
-$('#s0').addEventListener('click', () => { aInit(); if (S.tool === 0) cycleAxe(); else setTool(0); });
+$('#s0').addEventListener('click', () => { aInit(); if (S.tool === 0) cycleAxe(); else pickAxe(); });
 $('#s1').addEventListener('click', () => { aInit(); setTool(1); });
 $('#s2').addEventListener('click', () => { aInit(); openBuild(); });
 $('#s3').addEventListener('click', () => { aInit(); if (S.tool === 2) cycleSaw(); else setTool(2); });
@@ -5463,6 +5493,7 @@ function fillShop() {
     }
     sec('Tools for trucks');
     L.append(row(svgRemote, 'Crane remote', 'Works the loader crane on any truck near you: aim at a log, hold to lift it, let go over the bed. Press 4.', '', S.remote ? 'Owned' : money(REMOTE_PRICE), S.remote ? 'own' : can(REMOTE_PRICE) ? '' : 'no', () => { if (!S.remote) buyRemote(); }));
+    L.append(row(svgRemote, 'Auto crane' + (S.autoCrane ? (S.autoOn === 0 ? ' (off)' : ' (on)') : ''), 'Loads your parked truck for you: stand near it and the crane lifts loose logs and planks within 9 m into the bed, one after another. Tap again to turn it on or off.', '', S.autoCrane ? (S.autoOn === 0 ? 'Turn on' : 'Turn off') : money(AUTOCRANE_PRICE), S.autoCrane ? 'own' : can(AUTOCRANE_PRICE) ? '' : 'no', () => { if (!S.autoCrane) buyAutoCrane(); else { S.autoOn = S.autoOn === 0 ? 1 : 0; toast('Auto crane ' + (S.autoOn ? 'on.' : 'off.')); fillShop(); save(); } }));
     sec('Forest machines');
     for (const k of ['forwarder', 'feller']) {
       const tr = TRUCKS[k], own = S.ownT.includes(k);
@@ -5512,6 +5543,7 @@ function fillExtra(L, T) {
 }
 function buySaw(w) { if (!pay(w.price, true)) return; S.saws.push(w.id); S.saw = w.id; equipAxe(); setTool(2); toast('You bought the ' + w.name + '! Press 3 for it and hold to cut.'); fillShop(); save(); hint('saw', 'Hold the button to rev the chainsaw into a tree or log. It cuts much faster than an axe.'); }
 function myUpg() { for (const t of trucks) if (t.owner === 'me') { if (t.kind === 'feller') t.lv = S.fellerLv; t.straps = S.straps; } netAct({ t: 'upg', lv: S.fellerLv, straps: S.straps }); }
+function buyAutoCrane() { if (!pay(AUTOCRANE_PRICE, true)) return; S.autoCrane = 1; S.autoOn = 1; toast('Auto crane bought! Park your truck and stand near it: the crane loads loose wood for you.'); fillShop(); save(); }
 function buyRemote() { if (!pay(REMOTE_PRICE, true)) return; S.remote = 1; refreshBar(); setTool(3); toast('Crane remote bought! Press 4 near a truck to lift logs.'); fillShop(); save(); }
 function buyStraps(i) { if (!pay(STRAPS[i].price, true)) return; S.straps = i; myUpg(); toast(STRAPS[i].name + ' for all your vehicles.'); fillShop(); save(); }
 function buyRack(i) { if (!pay(RACKS[i].price, true)) return; S.rack = i; refreshBar(); toast('The ' + RACKS[i].name + ' holds ' + rackCap() + ' pieces.'); fillShop(); save(); }
@@ -5756,6 +5788,7 @@ function apply(d) {
   ferry.t = d.ferry >= 0.5 ? 1 : 0;
   camAuto();
   if (!S.axes.includes(S.axe)) S.axe = S.axes[S.axes.length - 1];
+  { const own = ownAxes(); if (own.length) S.axe = own[0].id; }
   if (S.tool === 2 && !sawById(S.saw)) S.tool = 0;
   if (S.tool === 3 && !S.remote) S.tool = 0;
 }
