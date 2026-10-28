@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<script>try{if(localStorage.getItem("unb_theme")==="\"light\"")document.documentElement.dataset.theme="light"}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>1v1 Gun Game | Detourr</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#121019">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6D1DVZMJG8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-6D1DVZMJG8');</script>
+<link rel="stylesheet" href="/css/fonts.css">
+<link rel="stylesheet" href="/css/site.css">
+</head><body class="gamepage">
+<script>window.PAGE_GAME="gungame1v1"</script>
+<div id="stage">
+  <div class="sbar">
+    <button class="btn" id="back" type="button">← All</button>
+    <h3 id="stTitle">Game</h3>
+    <div class="seg" id="lvl" hidden role="group" aria-label="Difficulty"><button type="button" data-l="0">Easy</button><button type="button" data-l="1">Normal</button><button type="button" data-l="2">Hard</button></div>
+    <span class="stat" id="stat"></span>
+    <button class="btn" id="lbBtn" type="button" hidden title="Leaderboard"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M10 17h4"/></svg><span class="t"> Leaderboard</span></button>
+    <button class="btn" id="fs" type="button" hidden title="Full screen"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="t"> Full screen</span></button>
+    <button class="btn" id="mute" type="button">Sound: on</button>
+    <button class="btn primary" id="again" type="button">Another detourr</button>
+  </div>
+  <div class="arena" id="arena"></div>
+</div>
+<div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
+<div class="seo">
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>1v1 Gun Game</h1><p>First-person 1v1 Gun Game on a Nuketown-style street. Every kill upgrades your weapon, from pistol to rocket launcher. Land the final kill with the knife to win. Face a bot from Easy to Veteran.</p></div></main></div>
+</div>
+<!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
+<script src="/js/core.js"></script>
+<script src="/js/catalog-lite.js"></script>
+<script>
+/* ===================== 1v1 Gun Game: game code ===================== */
+// The game itself is a standalone three.js (r160) app in ./play/ (ES modules, see play/README.md).
+// This page embeds it and records match wins as the score.
+G.push({id:'gungame1v1',name:'1v1 Gun Game',kind:'game',wide:true,big:true,tint:'#ffc21a',
+blurb:'First-person 1v1 Gun Game on a Nuketown-style street. Every kill upgrades your weapon, from pistol to rocket launcher. Land the final kill with the knife to win. Face a bot from Easy to Veteran.',
+fmt:b=>b+(b===1?' win':' wins'),
+art:'<rect x="8" y="10" width="50" height="40" rx="5" fill="#2F6FE0" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="50" height="40" rx="5" fill="#D6363C" stroke="#1D1A2F" stroke-width="3"/><text x="60" y="40" font-family="Impact,Arial Black,sans-serif" font-size="24" text-anchor="middle" fill="#FFC21A" stroke="#1D1A2F" stroke-width="2" paint-order="stroke">1v1</text><g stroke="#FFFDF6" stroke-width="3" stroke-linecap="round"><path d="M15 30H27M21 24V36"/><path d="M93 30H105M99 24V36"/></g>',
+run(root,c){
+  const box=el('div',{class:'g3'});
+  const f=el('iframe',{src:'/games/1v1-gun-game/play/',title:'1v1 Gun Game',allow:'fullscreen; autoplay',style:'border:0;width:100%;height:100%;display:block;background:#0f1724'});
+  box.append(f);root.append(box);
+  const wins=()=>c.best()||0;
+  c.stat(wins()?'Wins: '+wins():'Get a kill with every weapon. The knife kill wins.');
+  f.addEventListener('load',()=>{try{f.contentWindow.focus()}catch(e){}});
+  c.on(window,'message',e=>{
+    if(e.origin!==location.origin||e.source!==f.contentWindow)return;
+    const d=e.data;if(!d||d.gungame!=='end')return;
+    if(d.win){c.best(wins()+1);c.stat('Wins: '+wins())}
+  });
+}});
+</script>
+<script src="/js/app.js"></script>
+</body></html>
