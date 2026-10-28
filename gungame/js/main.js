@@ -46,10 +46,12 @@ class Game {
     this.state = 'menu';
     this.canvas = document.getElementById('game');
     this.isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+    // When embedded on detourr.net, follow the site's Graphics (Low) setting.
+    this.lowGfx = (() => { try { return sessionStorage.getItem('unb_gfx') === 'low'; } catch (e) { return false; } })();
 
     const r = this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: !this.isTouch, powerPreference: 'high-performance' });
-    r.setPixelRatio(Math.min(window.devicePixelRatio, this.isTouch ? 1.25 : 1.5));
-    r.shadowMap.enabled = true;
+    r.setPixelRatio(this.lowGfx ? 1 : Math.min(window.devicePixelRatio, this.isTouch ? 1.25 : 1.5));
+    r.shadowMap.enabled = !this.lowGfx;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
     r.autoClear = false;
 
@@ -70,6 +72,10 @@ class Game {
     this.effects = new Effects(this.scene);
     this.audio = new Audio();
     this.audio.setVolume(this.settings.volume);
+    // The site's Sound button stores unb_muted; a change in the parent page fires 'storage' here.
+    const siteMuted = () => { try { return JSON.parse(localStorage.getItem('unb_muted')) === true; } catch (e) { return false; } };
+    this.audio.setMuted(siteMuted());
+    window.addEventListener('storage', (e) => { if (e.key === 'unb_muted') this.audio.setMuted(siteMuted()); });
     this.camoTex = makeTextures().camo;
 
     this.player = new Fighter(this.settings.name, 'blue', false);
@@ -251,10 +257,12 @@ class Game {
       this.vm.add(g);
     };
     const rh = w.rHand;
-    limb(rh, [rh[0] + 0.1, rh[1] - 0.2, rh[2] + 0.26], [rh[0] + 0.24, rh[1] - 0.45, rh[2] + 0.6]);
+    // Arms run down and out of the frame rather than back toward the camera, so they never
+    // cross the near plane when the gun is pulled in to aim.
+    limb(rh, [rh[0] + 0.1, rh[1] - 0.24, rh[2] + 0.18], [rh[0] + 0.22, rh[1] - 0.62, rh[2] + 0.3]);
     if (w.lHand) {
       const lh = w.lHand;
-      limb(lh, [lh[0] - 0.2, lh[1] - 0.2, lh[2] + 0.22], [lh[0] - 0.36, lh[1] - 0.45, lh[2] + 0.55]);
+      limb(lh, [lh[0] - 0.18, lh[1] - 0.24, lh[2] + 0.16], [lh[0] - 0.32, lh[1] - 0.62, lh[2] + 0.28]);
     }
     this.vmFlash.material.map = this.effects.flashTex;
     this.vmFlash.position.set(0, w.model[0][1] + 0.005, w.muzzle - 0.04);
@@ -388,6 +396,10 @@ class Game {
     this.input.fire = false; this.input.ads = false;
     if (document.pointerLockElement) document.exitPointerLock();
     this.hud.showEnd(winner);
+    // tell the Detourr game page (it records wins for the leaderboard)
+    if (window.parent !== window) {
+      try { window.parent.postMessage({ gungame: 'end', win: winner === this.player, kills: this.player.kills }, location.origin); } catch (e) { /* not embedded on the same site */ }
+    }
   }
 
   spawnAt(f, s) {
@@ -679,7 +691,7 @@ class Game {
         if (after !== before) {
           this.equip(killer, after);
           if (killer === this.player) {
-            this.hud.banner('WEAPON UPGRADED', WEAPONS[after].name + (after === WEAPONS.length - 1 ? ' — FINAL WEAPON!' : ''), 'good', WEAPONS[after]);
+            this.hud.banner('WEAPON UPGRADED', WEAPONS[after].name + (after === WEAPONS.length - 1 ? '. Final weapon!' : ''), 'good', WEAPONS[after]);
             this.audio.levelUp();
           }
         } else if (killer === this.player) this.hud.banner('+1 KILL', `${this.kpw - (killer.progress % this.kpw)} more for the next weapon`, 'good');
@@ -687,7 +699,7 @@ class Game {
       }
       if (killer.streak === 3) {
         killer.uavT = 20;
-        if (killer === this.player) this.hud.toast('UAV ONLINE — enemy shown on minimap');
+        if (killer === this.player) this.hud.toast('UAV online: enemy shown on the minimap');
         else this.hud.toast('Enemy UAV spotted!');
       }
     }
@@ -714,7 +726,7 @@ class Game {
       if (i >= 0) world.boxes.splice(i, 1);
       this.audio.alarm();
       p.uavT = Math.max(p.uavT, 30);
-      this.hud.banner('☢ NUCLEAR BUNKER FOUND', 'Easter egg unlocked — free UAV!', 'good');
+      this.hud.banner('NUCLEAR BUNKER FOUND', 'Easter egg unlocked: free UAV!', 'good');
     }
   }
 
@@ -738,7 +750,7 @@ class Game {
     it.jump = I.jumpQueued; I.jumpQueued = false;
     it.crouch = I.crouchToggle || !!k.ControlLeft;
     it.fire = I.fire;
-    it.ads = I.ads;
+    it.ads = I.ads || !!k.KeyQ;
     it.reload = I.reloadQueued; I.reloadQueued = false;
     it.melee = I.meleeQueued; I.meleeQueued = false;
 
@@ -762,7 +774,7 @@ class Game {
     const moving = Math.hypot(I.mx, I.mz) > 0.1;
     f.sprinting = I.sprint && moving && f.crouch < 0.5 && !I.ads && !I.fire && f.meleeAnim <= 0;
     const adsTarget = I.ads && !f.sprinting && f.switchT <= 0 && !w.melee ? 1 : 0;
-    f.ads = adsTarget > f.ads ? Math.min(1, f.ads + dt / w.adsTime) : Math.max(0, f.ads - dt / (w.adsTime * 0.8));
+    f.ads = adsTarget ? Math.min(1, f.ads + dt / w.adsTime) : Math.max(0, f.ads - dt / (w.adsTime * 0.8));
 
     let sp = BASE_SPEED * w.moveMul;
     if (f.sprinting) sp *= 1.45;
@@ -924,14 +936,17 @@ class Game {
     x += Math.sin(this.bobPhase * 0.5) * 0.014 * bob;
     y += -Math.abs(Math.cos(this.bobPhase * 0.5)) * 0.012 * bob;
     // sway from looking around
-    this.vmSway.x = lerp(this.vmSway.x, clamp(-this.lastLookDX * 0.0004, -0.04, 0.04), Math.min(1, dt * 10));
-    this.vmSway.y = lerp(this.vmSway.y, clamp(this.lastLookDY * 0.0004, -0.04, 0.04), Math.min(1, dt * 10));
-    x += this.vmSway.x * (1 - ads * 0.8); y += this.vmSway.y * (1 - ads * 0.8);
-    ry += this.vmSway.x * 2; rx += this.vmSway.y * 2;
+    // sway follows mouse speed (not the raw per-frame delta) and fades out while aiming
+    const k = 1 - Math.exp(-dt * 7), calm = 1 - ads;
+    const vx = dt > 0 ? (this.lastLookDX || 0) / dt : 0, vy = dt > 0 ? (this.lastLookDY || 0) / dt : 0;
+    this.vmSway.x = lerp(this.vmSway.x, clamp(-vx * 0.000025, -0.03, 0.03) * calm, k);
+    this.vmSway.y = lerp(this.vmSway.y, clamp(vy * 0.000025, -0.03, 0.03) * calm, k);
+    x += this.vmSway.x; y += this.vmSway.y;
+    ry += this.vmSway.x * 1.5; rx += this.vmSway.y * 1.5;
     if (!p.onGround) y += 0.02;
     // recoil
     this.vmKick = Math.max(0, this.vmKick - dt * 0.6);
-    z += this.vmKick; rx += this.vmKick * 2.5;
+    z += this.vmKick; rx += this.vmKick * lerp(2.5, 0.8, ads);
     if (p.sprinting) { ry += 0.55; rx -= 0.2; x -= 0.05; y -= 0.04; }
     if (p.crouch > 0.5 && !ads) { rz += 0.04; }
     if (p.switchT > 0) { const k = p.switchT / 0.45; y -= k * 0.35; rx -= k * 0.8; }

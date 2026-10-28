@@ -134,10 +134,10 @@ export class Hud {
     if (!winner) { t.textContent = 'DRAW'; t.classList.add('draw'); $('endSub').textContent = 'Time ran out with the scores level.'; }
     else if (winner === p) {
       t.textContent = 'VICTORY';
-      $('endSub').textContent = p.progress >= g.maxProgress ? `You finished the ladder with the Knife!` : `Time's up — you were further up the ladder.`;
+      $('endSub').textContent = p.progress >= g.maxProgress ? `You finished the ladder with the Knife!` : `Time's up. You were further up the ladder.`;
     } else {
       t.textContent = 'DEFEAT'; t.classList.add('lose');
-      $('endSub').textContent = b.progress >= g.maxProgress ? `${b.name} got the final knife kill.` : `Time's up — ${b.name} was further up the ladder.`;
+      $('endSub').textContent = b.progress >= g.maxProgress ? `${b.name} got the final knife kill.` : `Time's up. ${b.name} was further up the ladder.`;
     }
     const row = (f, cls) => `<tr class="${cls}"><td>${esc(f.name)}</td><td>${f.kills}</td><td>${f.deaths}</td><td>${f.bestStreak}</td><td>${f.shots ? Math.round((f.hits / f.shots) * 100) : 0}%</td><td>${f.headshots}</td><td>${this.iconsWhite[Math.min(8, Math.floor(f.progress / g.kpw))]}</td></tr>`;
     $('endBody').innerHTML = row(p, 'me') + row(b, 'foe');
@@ -241,7 +241,7 @@ export class Hud {
     this.el.respawn.classList.toggle('hidden', !on);
     if (on) {
       const w = WEAPONS.find((x) => x.id === weaponId);
-      this.el.killedBy.textContent = killer ? `Killed by ${killer.name}${weaponId === 'melee' ? ' (melee)' : w ? ' — ' + w.name : ''}` : 'You killed yourself';
+      this.el.killedBy.textContent = killer ? `Killed by ${killer.name}${weaponId === 'melee' ? ' (melee)' : w ? ' with the ' + w.name : ''}` : 'You killed yourself';
       this.respawnTick(3);
     }
   }
@@ -280,7 +280,7 @@ export class Hud {
       E.wicon.innerHTML = this.iconsWhite[p.wi];
       E.wname.textContent = w.name;
       const nx = WEAPONS[p.wi + 1];
-      E.next.textContent = nx ? `NEXT: ${nx.name}` : 'FINAL WEAPON — GET THE KILL!';
+      E.next.textContent = nx ? `NEXT: ${nx.name}` : 'FINAL WEAPON: GET THE KILL!';
       E.cross.classList.toggle('knife', !!w.melee);
     }
     if (w.melee) { E.mag.textContent = '∞'; E.res.parentElement.style.display = 'none'; }
@@ -319,12 +319,12 @@ export class Hud {
 
     // power-ups
     const chips = [];
-    const P = [['speed', '#3fb6ff', '»', 'Speed Boost'], ['regen', '#3ad14a', '+', 'Health Regen'], ['damage', '#ff3d2e', '2x', 'Double Damage']];
+    const P = [['speed', '#3fb6ff', 'S', 'Speed Boost'], ['regen', '#3ad14a', '+', 'Health Regen'], ['damage', '#ff3d2e', '2x', 'Double Damage']];
     for (const [k, c, ic, label] of P) {
       const v = p.powers[k];
       if (v > 0) chips.push(`<div class="pu-chip" style="color:${c}"><span class="ic" style="background:${c};color:#fff">${ic}</span><span style="color:#fff">${label}</span><span class="bar"><i style="width:${(v / 15) * 100}%"></i></span></div>`);
     }
-    if (p.uavT > 0) chips.push(`<div class="pu-chip" style="color:#9ad0ff"><span class="ic" style="background:#4a5fd0;color:#fff">✈</span><span style="color:#fff">UAV</span><span class="bar"><i style="width:${Math.min(100, (p.uavT / 20) * 100)}%"></i></span></div>`);
+    if (p.uavT > 0) chips.push(`<div class="pu-chip" style="color:#9ad0ff"><span class="ic" style="background:#4a5fd0;color:#fff">U</span><span style="color:#fff">UAV</span><span class="bar"><i style="width:${Math.min(100, (p.uavT / 20) * 100)}%"></i></span></div>`);
     const html = chips.join('');
     if (html !== this.puHtml) { E.pu.innerHTML = html; this.puHtml = html; }
 

@@ -3,6 +3,7 @@ export class Audio {
   constructor() {
     this.ctx = null;
     this.volume = 0.7;
+    this.muted = false; // the Detourr site's Sound button
     this.noiseBuf = null;
   }
 
@@ -12,7 +13,7 @@ export class Audio {
       if (!AC) return;
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = this.volume;
+      this.master.gain.value = this.muted ? 0 : this.volume;
       const comp = this.ctx.createDynamicsCompressor();
       this.master.connect(comp);
       comp.connect(this.ctx.destination);
@@ -26,7 +27,12 @@ export class Audio {
 
   setVolume(v) {
     this.volume = v;
-    if (this.master) this.master.gain.value = v;
+    if (this.master) this.master.gain.value = this.muted ? 0 : v;
+  }
+
+  setMuted(m) {
+    this.muted = m;
+    this.setVolume(this.volume);
   }
 
   setListener(pos, fwd) {

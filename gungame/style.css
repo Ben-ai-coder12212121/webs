@@ -1,3 +1,7 @@
+/* Fonts are served with the game (school networks often block Google Fonts). Both are SIL Open Font License. */
+@font-face { font-family: 'Lilita One'; src: url('fonts/lilita-one.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Oswald'; src: url('fonts/oswald.woff2') format('woff2'); font-weight: 200 700; font-display: swap; }
+
 :root {
   --panel: rgba(14, 22, 34, 0.82);
   --panel-solid: #121b29;

@@ -13,7 +13,7 @@ Open `gungame/index.html` through any static web server (on the deployed site it
 - There's an easter egg somewhere in the back yards. Press E near it.
 
 ## Controls
-WASD to move, mouse to look, LMB to fire, RMB to aim, Shift to sprint, Space to jump, C to crouch, R to reload, V to melee, E to use, Tab for the scoreboard, Esc to pause. On phones and tablets the game shows touch controls: a stick on the left, drag on the right to look, and action buttons.
+WASD to move, mouse to look, LMB to fire, RMB or Q to aim, Shift to sprint, Space to jump, C to crouch, R to reload, V to melee, E to use, Tab for the scoreboard, Esc to pause. On phones and tablets the game shows touch controls: a stick on the left, drag on the right to look, and action buttons.
 
 ## Code layout
 | File | Purpose |
