@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0f1724">
+<title>1v1 Gun Game — Nuketown (Style)</title>
+<meta name="description" content="A browser 1v1 first-person Gun Game on a Nuketown-style map. Get a kill with every weapon — finish with the knife.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- ======================= HUD ======================= -->
+<div id="hud" class="hidden">
+  <div id="scorebox">
+    <canvas id="avatar" width="80" height="120"></canvas>
+    <div class="sb-main">
+      <div class="sb-row">
+        <div class="sb-you">YOU</div>
+        <div class="sb-score blue" id="scoreYou">0</div>
+        <div class="sb-score red" id="scoreEnemy">0</div>
+      </div>
+      <div class="sb-goal" id="goalText">First to 9</div>
+      <div class="sb-timer" id="timer">10:00</div>
+    </div>
+  </div>
+
+  <div id="ladder"></div>
+  <div id="killfeed"></div>
+
+  <div id="minimap-wrap">
+    <canvas id="minimap" width="220" height="210"></canvas>
+  </div>
+
+  <div id="powerups"></div>
+
+  <div id="weaponhud">
+    <div id="wicon"></div>
+    <div class="w-info">
+      <div id="wname">Pistol</div>
+      <div class="ammo"><span id="ammoMag">12</span><span class="res">/<span id="ammoRes">60</span></span></div>
+      <div id="nextWeapon">NEXT: SMG</div>
+    </div>
+    <div id="healthbar"><div id="healthfill"></div></div>
+  </div>
+
+  <div id="crosshair"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="dot"></i></div>
+  <div id="reddot"></div>
+  <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+  <div id="scope"><div class="lens"></div></div>
+  <div id="vignette"></div>
+  <div id="dmgflash"></div>
+  <div id="dmgIndicators"></div>
+  <div id="countdown"></div>
+  <div id="banner"><div class="b-icon"></div><div class="b-title"></div><div class="b-sub"></div></div>
+  <div id="toast"></div>
+  <div id="hint"></div>
+  <div id="lowammo"></div>
+
+  <div id="respawn" class="hidden">
+    <div class="r-killed" id="killedBy"></div>
+    <div class="r-label">Respawning In</div>
+    <div class="r-ring">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="bg"/><circle cx="50" cy="50" r="42" class="fg" id="respawnArc"/></svg>
+      <span id="respawnNum">3</span>
+    </div>
+  </div>
+
+  <div id="scoreboard" class="hidden">
+    <div class="panel">
+      <div class="sbd-head"><span>GUN GAME — NUKETOWN</span><span id="sbdTimer"></span></div>
+      <table>
+        <thead><tr><th></th><th>Player</th><th>Weapon</th><th>Lvl</th><th>K</th><th>D</th><th>Streak</th><th>Acc</th><th>HS</th></tr></thead>
+        <tbody id="sbdBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- touch controls -->
+<div id="touch" class="hidden">
+  <div id="joyZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
+  <div id="lookZone"></div>
+  <button class="tbtn" id="tFire">FIRE</button>
+  <button class="tbtn small" id="tAds">AIM</button>
+  <button class="tbtn small" id="tJump">JUMP</button>
+  <button class="tbtn small" id="tCrouch">CROUCH</button>
+  <button class="tbtn small" id="tReload">RELOAD</button>
+  <button class="tbtn small" id="tMelee">MELEE</button>
+  <button class="tbtn small hidden" id="tUse">USE</button>
+  <button class="tbtn tiny" id="tPause">II</button>
+  <button class="tbtn tiny" id="tScore">TAB</button>
+</div>
+
+<!-- ======================= MENU ======================= -->
+<div id="menu" class="hidden">
+  <div class="menu-grid">
+    <div class="menu-col left">
+      <div class="logo">
+        <div class="l1">1v1</div>
+        <div class="l2">GUN GAME</div>
+        <div class="ribbon">NUKETOWN (STYLE)</div>
+      </div>
+      <button id="playBtn" class="btn-play">PLAY</button>
+      <div class="card">
+        <h3>Match Settings</h3>
+        <label class="row"><span>Your name</span><input id="optName" maxlength="14" autocomplete="off"></label>
+        <div class="row"><span>Bot difficulty</span><div class="seg" id="optDiff"></div></div>
+        <div class="row"><span>Kills per weapon</span><div class="seg" id="optKpw"></div></div>
+        <div class="row"><span>Time limit</span><div class="seg" id="optTime"></div></div>
+        <div class="row"><span>Lighting</span><div class="seg" id="optLight"></div></div>
+        <label class="row"><span>Sensitivity <b id="sensVal"></b></span><input type="range" id="optSens" min="0.2" max="3" step="0.05"></label>
+        <label class="row"><span>Field of view <b id="fovVal"></b></span><input type="range" id="optFov" min="60" max="100" step="1"></label>
+        <label class="row"><span>Volume <b id="volVal"></b></span><input type="range" id="optVol" min="0" max="1" step="0.05"></label>
+      </div>
+    </div>
+
+    <div class="menu-col right">
+      <div class="card">
+        <h3>Character <span class="muted">— Blue Team</span></h3>
+        <div id="skinPicker" class="skins"></div>
+      </div>
+      <div class="card">
+        <h3>Map</h3>
+        <div class="maps">
+          <div class="map active"><div class="thumb nuketown"><span>Welcome to<b>NUKETOWN</b></span></div><div class="mname">Nuketown (Style)</div></div>
+          <div class="map locked"><div class="thumb desert"></div><div class="mname">Desert Base</div><div class="soon">Coming soon</div></div>
+          <div class="map locked"><div class="thumb snowy"></div><div class="mname">Snowy Base</div><div class="soon">Coming soon</div></div>
+          <div class="map locked"><div class="thumb jungle"></div><div class="mname">Jungle</div><div class="soon">Coming soon</div></div>
+          <div class="map locked"><div class="thumb construction"></div><div class="mname">Construction Site</div><div class="soon">Coming soon</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Gun Game Order</h3>
+        <div id="ladderPreview" class="ladder-preview"></div>
+        <p class="rules">Every kill upgrades your weapon. Get a kill with all nine — the <b>knife</b> kill wins. Melee someone (<b>V</b>) to <b>humiliate</b> them and knock them back a weapon. 3-kill streak = <b>UAV</b>. Grab <span class="pu s">Speed</span> <span class="pu h">Health</span> <span class="pu d">Double&nbsp;Damage</span> power-ups.</p>
+      </div>
+      <div class="card controls" id="controlsCard">
+        <h3>Controls</h3>
+        <div class="keys">
+          <span><kbd>W A S D</kbd> Move</span><span><kbd>Mouse</kbd> Look</span><span><kbd>LMB</kbd> Fire</span><span><kbd>RMB</kbd> Aim</span>
+          <span><kbd>Shift</kbd> Sprint</span><span><kbd>Space</kbd> Jump</span><span><kbd>C</kbd> Crouch</span><span><kbd>R</kbd> Reload</span>
+          <span><kbd>V</kbd> Melee</span><span><kbd>E</kbd> Use</span><span><kbd>Tab</kbd> Scores</span><span><kbd>Esc</kbd> Pause</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- pause -->
+<div id="pause" class="overlay hidden">
+  <div class="panel center">
+    <h2>PAUSED</h2>
+    <button class="btn" id="resumeBtn">RESUME</button>
+    <label class="row"><span>Sensitivity <b id="pSensVal"></b></span><input type="range" id="pSens" min="0.2" max="3" step="0.05"></label>
+    <label class="row"><span>Volume <b id="pVolVal"></b></span><input type="range" id="pVol" min="0" max="1" step="0.05"></label>
+    <button class="btn ghost" id="quitBtn">QUIT TO MENU</button>
+  </div>
+</div>
+
+<!-- end of match -->
+<div id="endscreen" class="overlay hidden">
+  <div class="panel center">
+    <div id="endTitle" class="end-title">VICTORY</div>
+    <div id="endSub" class="end-sub"></div>
+    <table class="end-stats"><thead><tr><th></th><th>Kills</th><th>Deaths</th><th>Best streak</th><th>Accuracy</th><th>Headshots</th><th>Weapon</th></tr></thead><tbody id="endBody"></tbody></table>
+    <div class="end-btns">
+      <button class="btn" id="againBtn">PLAY AGAIN</button>
+      <button class="btn ghost" id="menuBtn">MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+<div id="rotate" class="overlay hidden"><div class="panel center"><h2>Rotate your device</h2><p>Gun Game plays best in landscape.</p></div></div>
+<div id="fatal" class="overlay" style="display:none"><div class="panel center"><h2>Oops</h2><p></p></div></div>
+<noscript><div class="overlay" style="display:flex"><div class="panel center"><h2>JavaScript required</h2></div></div></noscript>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
