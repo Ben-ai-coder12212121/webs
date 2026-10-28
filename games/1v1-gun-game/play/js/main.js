@@ -282,7 +282,6 @@ class Game {
       if (e.code === 'KeyR') I.reloadQueued = true;
       if (e.code === 'KeyV' || e.code === 'KeyF') I.meleeQueued = true;
       if (e.code === 'KeyE') this.tryInteract();
-      if (e.code === 'KeyC' || e.code === 'ControlLeft') I.crouchToggle = !I.crouchToggle;
       if (e.code === 'KeyP') this.pause();
     };
     const up = (e) => {
@@ -748,7 +747,8 @@ class Game {
     it.mz = -fx * sy - fz * cy;
     it.sprint = sprint && fz > 0.3;
     it.jump = I.jumpQueued; I.jumpQueued = false;
-    it.crouch = I.crouchToggle || !!k.ControlLeft;
+    // hold C (or Ctrl) to crouch; the touch CROUCH button toggles
+    it.crouch = !!(k.KeyC || k.ControlLeft) || I.crouchToggle;
     it.fire = I.fire;
     it.ads = I.ads || !!k.KeyQ;
     it.reload = I.reloadQueued; I.reloadQueued = false;
