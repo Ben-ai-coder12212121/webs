@@ -10,6 +10,7 @@ import { makeTextures } from './textures.js';
 import { clamp, lerp, rand, pick, angleDiff, dirFromYawPitch, yawTo, loadSettings, saveSettings } from './util.js';
 import { Hud } from './hud.js';
 import { TouchControls } from './touch.js';
+import { Online } from './online.js';
 
 const DEFAULTS = {
   name: 'BenAsm', skin: 'blue', difficulty: 'normal', kpw: 1, time: 10, sens: 1.0, fov: 78, volume: 0.7, lighting: 'day',
@@ -17,6 +18,10 @@ const DEFAULTS = {
 const BOT_NAMES = ['Viper', 'Havoc', 'Reaper', 'Spectre', 'Nomad', 'Blitz', 'Ghost', 'Rook'];
 const BASE_SPEED = 5.4;
 const VM_SCALE = 0.78; // first-person weapon size
+const NET_RATE = 1 / 20; // position updates per second sent to the opponent
+const NET_DELAY = 100;   // ms the opponent is drawn in the past, so motion stays smooth
+const WEAPON_IDS = new Set([...WEAPONS.map((w) => w.id), 'melee']);
+const r2 = (v) => Math.round(v * 100) / 100;
 const tmpV = new THREE.Vector3(), tmpV2 = new THREE.Vector3();
 
 class Fighter {
@@ -96,6 +101,8 @@ class Game {
     this.input = { keys: {}, fire: false, ads: false, jumpQueued: false, reloadQueued: false, meleeQueued: false, crouchToggle: false, lookDX: 0, lookDY: 0 };
     this.setupInput();
     if (this.isTouch) this.touch = new TouchControls(this);
+    this.net = null;              // the Online session while an online match runs
+    this.online = new Online(this);
 
     this.menuAngle = 0;
     this.shake = 0;
@@ -322,19 +329,25 @@ class Game {
   }
 
   // ---------------------------------------------------------------- match flow
-  startMatch() {
-    const S = this.settings;
+  // opts.online: {role, kpw, time, foe:{name, skin}} from the Online session
+  startMatch(opts = {}) {
+    const S = this.settings, on = !!opts.online;
+    this.net = on ? this.online : null;
+    this.netRole = on ? opts.role : null;
+    this.netPause = false;
     this.audio.unlock();
     this.audio.setVolume(S.volume);
-    this.kpw = S.kpw;
+    this.kpw = on ? opts.kpw : S.kpw;
     this.maxProgress = WEAPONS.length * this.kpw;
-    this.timeLeft = S.time * 60;
+    this.timeLeft = (on ? opts.time : S.time) * 60;
     this.player.name = S.name || 'Player';
     this.player.resetMatch();
     this.bot.resetMatch();
-    this.bot.name = pick(BOT_NAMES);
+    this.bot.name = on ? opts.foe.name : pick(BOT_NAMES);
+    this.bot.isBot = !on;
     this.brain.setDifficulty(S.difficulty);
-    const skin = pick(RED_SKINS);
+    // the opponent shows in red-team colours; their own skin choice is kept otherwise
+    const skin = on ? ({ blue: 'red', urban: 'urban', desert: 'desert', camo: 'camo' }[opts.foe.skin] || 'red') : pick(RED_SKINS);
     if (skin !== this.botSkin) {
       this.scene.remove(this.botModel);
       this.botSkin = skin;
@@ -350,10 +363,16 @@ class Game {
     if (!world.boxes.includes(b.collider)) world.boxes.push(b.collider);
     this.bunkerT = 0;
 
-    // fixed opening spawns: player in the south back yard, bot in the north
-    this.spawnAt(this.player, this.map.spawns.find((s) => s.side === 1 && s.x === -15));
-    this.spawnAt(this.bot, this.map.spawns.find((s) => s.side === -1 && s.x === 15));
+    // fixed opening spawns: south back yard and north back yard (an online guest starts north)
+    const south = this.map.spawns.find((s) => s.side === 1 && s.x === -15), north = this.map.spawns.find((s) => s.side === -1 && s.x === 15);
+    const guest = on && opts.role === 'guest';
+    this.spawnAt(this.player, guest ? north : south);
+    this.spawnAt(this.bot, guest ? south : north);
     this.brain.reset();
+    // seq: last position update applied (they can arrive out of order); deadN: opponent's death count from 'died'
+    this.remote = { buf: [], last: performance.now(), stepAcc: 0, prev: null, seq: -1, deadN: 0 };
+    this.netSendT = 0;
+    this.netSeq = 0;
     this.buildViewWeapon(this.player.wi);
     this.input.crouchToggle = false;
     this.feed = [];
@@ -362,11 +381,21 @@ class Game {
     this.countdown = 3.0;
     this.lastCount = 4;
     this.deathCam = 0;
-    this.lockPointer();
+    // an online match starts from a network message, not a click, so the browser won't lock the mouse yet
+    if (!on) this.lockPointer();
+    else if (!this.isTouch) this.hud.toast('Click the game to take control');
   }
 
   pause() {
     if (this.state !== 'playing' && this.state !== 'countdown') return;
+    if (this.net) {
+      // an online match can't stop for one player: show the menu, keep the match running
+      this.netPause = true;
+      this.input.fire = false; this.input.ads = false; this.input.keys = {};
+      this.hud.showPause(true, true);
+      if (document.pointerLockElement) document.exitPointerLock();
+      return;
+    }
     this.prevState = this.state;
     this.state = 'paused';
     this.input.fire = false; this.input.ads = false; this.input.keys = {};
@@ -375,6 +404,12 @@ class Game {
   }
 
   resume() {
+    if (this.net && this.netPause) {
+      this.netPause = false;
+      this.hud.showPause(false);
+      this.lockPointer();
+      return;
+    }
     if (this.state !== 'paused') return;
     this.state = this.prevState || 'playing';
     this.hud.showPause(false);
@@ -383,18 +418,26 @@ class Game {
   }
 
   quitToMenu() {
+    if (this.net || this.online.active) this.online.leave();
+    this.net = null;
+    this.netPause = false;
     this.state = 'menu';
     if (document.pointerLockElement) document.exitPointerLock();
     this.botModel.visible = false;
     this.hud.showMenu();
   }
 
-  endMatch(winner) {
+  // tell: let the opponent's game know (false when the result came from them)
+  endMatch(winner, note = null, tell = true) {
     if (this.state === 'ended') return;
     this.state = 'ended';
+    this.netPause = false;
+    this.hud.showPause(false);
     this.input.fire = false; this.input.ads = false;
     if (document.pointerLockElement) document.exitPointerLock();
-    this.hud.showEnd(winner);
+    // fin: won by finishing the ladder (not on time), so the loser's screen says so
+    if (this.net && tell) this.net.send({ t: 'end', r: winner === this.player ? 'sender' : winner ? 'receiver' : 'draw', fin: winner && winner.progress >= this.maxProgress ? 1 : 0 });
+    this.hud.showEnd(winner, { note, online: !!this.net });
     // tell the Detourr game page (it records wins for the leaderboard)
     if (window.parent !== window) {
       try { window.parent.postMessage({ gungame: 'end', win: winner === this.player, kills: this.player.kills }, location.origin); } catch (e) { /* not embedded on the same site */ }
@@ -499,8 +542,15 @@ class Game {
     const dir = dirFromYawPitch(f.yaw, f.pitch, new THREE.Vector3());
     const spread = this.spreadFor(f, w);
     const muzzle = this.muzzleWorld(f);
-    if (w.projectile) this.spawnRocket(f, w, muzzle, this.applySpread(dir, spread));
-    else for (let i = 0; i < (w.pellets || 1); i++) this.traceShot(f, w, eyeV, this.applySpread(dir, spread), muzzle);
+    const ends = [];
+    if (w.projectile) {
+      const d = this.applySpread(dir, spread);
+      this.spawnRocket(f, w, muzzle, d);
+      if (this.net) this.net.send({ t: 'rk', o: muzzle.toArray().map(r2), d: d.toArray().map((v) => Math.round(v * 1000) / 1000) });
+    } else {
+      for (let i = 0; i < (w.pellets || 1); i++) ends.push(this.traceShot(f, w, eyeV, this.applySpread(dir, spread), muzzle));
+      if (this.net) this.net.send({ t: 'sh', e: ends.map((e) => e.toArray().map(r2)) });
+    }
     if (f.shotHit) f.hits++;
     f.bloom = Math.min(w.spread * 1.5, f.bloom + w.bloom);
 
@@ -547,6 +597,7 @@ class Game {
     } else if (hitW) {
       this.effects.impact(hitW.point, hitW.normal);
     }
+    return end;
   }
 
   melee(f, bash) {
@@ -557,6 +608,7 @@ class Game {
     f.reloadT = 0;
     const foe = this.other(f);
     this.audio.shot(WEAPONS[8], f === this.player ? null : this.eyePos(f));
+    if (this.net && f === this.player) this.net.send({ t: 'ml' });
     if (!foe.alive) return;
     const reach = bash ? 1.9 : w.reach;
     const eye = this.eyePos(f), chest = this.aimPoints(foe).chest;
@@ -608,20 +660,22 @@ class Game {
       r.smokeT -= dt;
       if (r.smokeT <= 0) { r.smokeT = 0.025; this.effects.smokePuff(r.pos.clone().addScaledVector(dir, -0.4)); }
       if (direct || hitW || r.life <= 0) {
-        if (direct) this.damage(direct, r.w.dmg, r.owner, 'rpg', false, false);
+        const mine = !this.net || r.owner === this.player; // online, a rocket only hurts on its owner's screen
+        if (direct && mine) this.damage(direct, r.w.dmg, r.owner, 'rpg', false, false);
         const n = hitW && !direct ? hitW.normal : { x: -dir.x, y: -dir.y, z: -dir.z };
-        this.explode(r.pos.clone().add(new THREE.Vector3(n.x, n.y, n.z).multiplyScalar(0.15)), r.owner, r.w, direct);
+        this.explode(r.pos.clone().add(new THREE.Vector3(n.x, n.y, n.z).multiplyScalar(0.15)), r.owner, r.w, direct, mine);
         this.scene.remove(r.mesh);
         this.rockets.splice(i, 1);
       }
     }
   }
 
-  explode(pos, owner, w, skip) {
+  explode(pos, owner, w, skip, mine = true) {
     this.effects.explosion(pos);
     this.audio.explosion(pos);
     const pd = this.player.alive ? pos.distanceTo(this.player.pos) : 99;
     this.shake = Math.max(this.shake, clamp(1 - pd / 18, 0, 1) * 0.6);
+    if (!mine) return;
     for (const f of [this.player, this.bot]) {
       if (!f.alive || f === skip) continue;
       const c = this.aimPoints(f).chest;
@@ -637,8 +691,18 @@ class Game {
 
   damage(victim, amount, attacker, weaponId, head, bash) {
     if (!victim.alive || this.state !== 'playing') return;
+    if (this.net && victim === this.bot) {
+      // online, the opponent's own game applies damage to them and reports the death
+      if (attacker === this.player) {
+        if (this.player.powers.damage > 0) amount *= 2;
+        this.net.send({ t: 'hit', d: Math.round(amount * 10) / 10, w: weaponId, h: head ? 1 : 0, b: bash ? 1 : 0 });
+        this.hud.hitmarker(head, false);
+        this.audio.hitmarker(head);
+      }
+      return;
+    }
     if (victim.spawnProtect > this.time) amount *= 0.25;
-    if (attacker && attacker !== victim && attacker.powers.damage > 0) amount *= 2;
+    if (!this.net && attacker && attacker !== victim && attacker.powers.damage > 0) amount *= 2;
     victim.health -= amount;
     victim.lastHurt = this.time;
     if (victim === this.player) {
@@ -657,56 +721,69 @@ class Game {
   }
 
   kill(victim, killer, weaponId, head, bash) {
+    const suicide = !killer || killer === victim;
+    this.victimDied(victim, suicide ? null : killer, weaponId, head, bash);
+    // online, the killer's game awards its own kill when it hears about the death
+    if (this.net) this.net.send({ t: 'died', w: weaponId, h: head ? 1 : 0, b: bash ? 1 : 0, s: suicide ? 1 : 0, n: victim.deaths });
+    else if (!suicide) this.awardKill(killer, victim, weaponId, head, bash);
+    this.hud.updateScores();
+  }
+
+  victimDied(victim, killer, weaponId, head, bash) {
     victim.alive = false;
     victim.health = 0;
     victim.deaths++;
     victim.streak = 0;
     victim.respawnT = 3;
     victim.reloadT = 0;
-    const suicide = !killer || killer === victim;
-    if (suicide) {
+    if (!killer) {
       this.demote(victim);
       this.hud.feedAdd(null, weaponId, victim, false);
       if (victim === this.player) this.hud.banner('SUICIDE', 'Demoted a weapon tier', 'bad');
     } else {
-      killer.kills++;
-      killer.streak++;
-      killer.bestStreak = Math.max(killer.bestStreak, killer.streak);
-      if (head) killer.headshots++;
       this.hud.feedAdd(killer, weaponId, victim, head);
       if (bash) {
         this.demote(victim);
-        if (killer === this.player) { this.hud.banner('HUMILIATION!', `${victim.name} was set back a weapon`, 'good'); this.audio.kill(); }
+        if (killer === this.player) this.hud.banner('HUMILIATION!', `${victim.name} was set back a weapon`, 'good');
         else { this.hud.banner('HUMILIATED', 'You were set back a weapon', 'bad'); this.audio.demote(); }
-      } else {
-        const before = Math.floor(killer.progress / this.kpw);
-        killer.progress++;
-        if (killer.progress >= this.maxProgress) {
-          this.hud.updateScores();
-          this.endMatch(killer);
-          return;
-        }
-        const after = Math.floor(killer.progress / this.kpw);
-        if (after !== before) {
-          this.equip(killer, after);
-          if (killer === this.player) {
-            this.hud.banner('WEAPON UPGRADED', WEAPONS[after].name + (after === WEAPONS.length - 1 ? '. Final weapon!' : ''), 'good', WEAPONS[after]);
-            this.audio.levelUp();
-          }
-        } else if (killer === this.player) this.hud.banner('+1 KILL', `${this.kpw - (killer.progress % this.kpw)} more for the next weapon`, 'good');
-        if (killer === this.player) this.audio.kill();
-      }
-      if (killer.streak === 3) {
-        killer.uavT = 20;
-        if (killer === this.player) this.hud.toast('UAV online: enemy shown on the minimap');
-        else this.hud.toast('Enemy UAV spotted!');
       }
     }
-    this.hud.updateScores();
     if (victim === this.player) {
       this.deathCam = 0;
-      this.hud.showRespawn(true, killer && killer !== victim ? killer : null, weaponId);
+      this.hud.showRespawn(true, killer, weaponId);
       this.vm.visible = false;
+    }
+  }
+
+  awardKill(killer, victim, weaponId, head, bash) {
+    killer.kills++;
+    killer.streak++;
+    killer.bestStreak = Math.max(killer.bestStreak, killer.streak);
+    if (head) killer.headshots++;
+    if (bash) {
+      if (killer === this.player) this.audio.kill();
+    } else {
+      const before = Math.floor(killer.progress / this.kpw);
+      killer.progress++;
+      if (killer.progress >= this.maxProgress) {
+        this.hud.updateScores();
+        this.endMatch(killer);
+        return;
+      }
+      const after = Math.floor(killer.progress / this.kpw);
+      if (after !== before) {
+        this.equip(killer, after);
+        if (killer === this.player) {
+          this.hud.banner('WEAPON UPGRADED', WEAPONS[after].name + (after === WEAPONS.length - 1 ? '. Final weapon!' : ''), 'good', WEAPONS[after]);
+          this.audio.levelUp();
+        }
+      } else if (killer === this.player) this.hud.banner('+1 KILL', `${this.kpw - (killer.progress % this.kpw)} more for the next weapon`, 'good');
+      if (killer === this.player) this.audio.kill();
+    }
+    if (killer.streak === 3) {
+      killer.uavT = 20;
+      if (killer === this.player) this.hud.toast('UAV online: enemy shown on the minimap');
+      else this.hud.toast('Enemy UAV spotted!');
     }
   }
 
@@ -732,6 +809,11 @@ class Game {
   // ---------------------------------------------------------------- per-frame updates
   playerIntent(dt) {
     const p = this.player, I = this.input, it = p.intent, S = this.settings;
+    if (this.netPause) {
+      it.mx = it.mz = 0; it.jump = it.fire = it.ads = it.reload = it.melee = it.sprint = false;
+      I.lookDX = I.lookDY = 0; I.jumpQueued = I.reloadQueued = I.meleeQueued = false;
+      return;
+    }
     const k = I.keys;
     let fx = 0, fz = 0;
     if (k.KeyW || k.ArrowUp) fz += 1;
@@ -857,10 +939,11 @@ class Game {
       }
       p.icon.rotation.y += dt * 2;
       p.icon.position.y = 1.0 + Math.sin(p.phase * 2.5) * 0.12;
-      for (const f of [this.player, this.bot]) {
+      for (const f of this.net ? [this.player] : [this.player, this.bot]) {
         if (!f.alive) continue;
         if (Math.hypot(f.pos.x - p.x, f.pos.z - p.z) < 1.0 && Math.abs(f.pos.y - p.y) < 1.5) {
           p.active = false; p.respawnT = 25; p.mesh.visible = false;
+          if (this.net) this.net.send({ t: 'pk', i: this.pickups.indexOf(p) });
           if (p.type === 'health') { f.health = 100; f.powers.regen = 15; }
           else f.powers[p.type] = 15;
           if (f === this.player) { this.audio.pickup(); this.hud.toast(this.pickupDefs[p.type].label + '!'); }
@@ -978,13 +1061,17 @@ class Game {
       p.intent.ads = this.input.ads;
       for (const f of [p, b]) f.switchT = Math.max(0, f.switchT - dt);
       this.updateFighter(p, dt);
-      this.updateFighter(b, dt);
-      this.brain.update(0);
-      b.intent.mx = b.intent.mz = 0; b.intent.fire = false;
+      if (this.net) { this.updateRemote(dt); this.netTick(dt); }
+      else {
+        this.updateFighter(b, dt);
+        this.brain.update(0);
+        b.intent.mx = b.intent.mz = 0; b.intent.fire = false;
+      }
       return;
     }
     this.timeLeft -= dt;
-    if (this.timeLeft <= 0) {
+    if (this.timeLeft <= 0 && this.netRole === 'guest') this.timeLeft = 0; // the host's clock decides
+    else if (this.timeLeft <= 0) {
       this.timeLeft = 0;
       const winner = p.progress > b.progress ? p : b.progress > p.progress ? b : (p.kills >= b.kills ? p : b);
       this.endMatch(p.progress === b.progress && p.kills === b.kills ? null : winner);
@@ -1007,7 +1094,10 @@ class Game {
         this.deathCam = 0;
       }
     }
-    if (b.alive) {
+    if (this.net) {
+      this.updateRemote(dt);
+      if (this.state !== 'ended') this.netTick(dt);
+    } else if (b.alive) {
       this.brain.update(dt);
       this.updateFighter(b, dt);
       this.updateWeapon(b, dt);
@@ -1018,6 +1108,155 @@ class Game {
     this.updateRockets(dt);
     this.updatePickups(dt);
     this.updateBunker(dt);
+  }
+
+  // ---------------------------------------------------------------- online
+  netTick(dt) {
+    this.netSendT -= dt;
+    if (this.netSendT > 0) return;
+    this.netSendT = NET_RATE;
+    const p = this.player;
+    const m = {
+      t: 's', q: this.netSeq++, p: p.pos.toArray().map(r2), v: p.vel.toArray().map((v) => Math.round(v * 10) / 10),
+      y: Math.round(p.yaw * 1000) / 1000, pi: Math.round(p.pitch * 1000) / 1000, c: r2(p.crouch), g: p.onGround ? 1 : 0,
+      a: p.alive ? 1 : 0, w: p.wi, pr: p.progress, k: p.kills, d: p.deaths, st: p.streak, bs: p.bestStreak,
+      sh: p.shots, hi: p.hits, hs: p.headshots, u: p.uavT > 0 ? 1 : 0,
+    };
+    if (this.netRole === 'host') m.tl = Math.round(this.timeLeft * 10) / 10;
+    this.net.send(m, true);
+  }
+
+  onNet(m) {
+    if (!this.net || this.state === 'menu') return;
+    const b = this.bot, live = this.state === 'playing' || this.state === 'countdown';
+    this.remote.last = performance.now();
+    switch (m.t) {
+      case 's': this.onRemoteState(m); break;
+      case 'hit':
+        if (this.state === 'playing' && WEAPON_IDS.has(m.w)) this.damage(this.player, clamp(+m.d || 0, 0, 400), b, m.w, !!m.h, !!m.b);
+        break;
+      case 'died': if (live) this.onRemoteDied(m); break;
+      case 'sh': {
+        if (!live || !Array.isArray(m.e)) break;
+        const w = WEAPONS[b.wi], muzzle = this.muzzleWorld(b);
+        for (const e of m.e.slice(0, 12)) {
+          if (!Array.isArray(e) || e.length !== 3) continue;
+          const end = new THREE.Vector3(+e[0] || 0, +e[1] || 0, +e[2] || 0);
+          this.effects.tracer(muzzle, end, 0xffb080);
+          const n = muzzle.clone().sub(end).normalize();
+          this.effects.impact(end, n);
+        }
+        this.audio.shot(w, muzzle);
+        this.effects.muzzleFlash(muzzle, 0.6);
+        b.lastShot = this.time; b.revealT = this.time + 2.0;
+        break;
+      }
+      case 'rk': {
+        if (!live || !Array.isArray(m.o) || !Array.isArray(m.d)) break;
+        const o = new THREE.Vector3(...m.o.map((v) => +v || 0)), d = new THREE.Vector3(...m.d.map((v) => +v || 0));
+        if (d.lengthSq() < 0.5) break;
+        this.spawnRocket(b, WEAPONS[7], o, d.normalize());
+        this.effects.muzzleFlash(o, 1.0);
+        b.lastShot = this.time; b.revealT = this.time + 2.0;
+        break;
+      }
+      case 'ml': if (live) this.audio.shot(WEAPONS[8], this.eyePos(b)); break;
+      case 'pk': {
+        const p = this.pickups[m.i | 0];
+        if (p && p.active) { p.active = false; p.respawnT = 25; p.mesh.visible = false; }
+        break;
+      }
+      case 'end':
+        if (!live) break;
+        if (m.fin && m.r === 'sender') b.progress = this.maxProgress;
+        this.endMatch(m.r === 'sender' ? b : m.r === 'receiver' ? this.player : null, null, false);
+        break;
+    }
+  }
+
+  onRemoteState(m) {
+    const b = this.bot, R = this.remote;
+    if (!Array.isArray(m.p) || m.p.length !== 3) return;
+    if (typeof m.q === 'number') { if (m.q <= R.seq) return; R.seq = m.q; } // stale update
+    const snap = {
+      t: performance.now(), p: new THREE.Vector3(+m.p[0] || 0, +m.p[1] || 0, +m.p[2] || 0),
+      v: new THREE.Vector3(...(Array.isArray(m.v) ? m.v : [0, 0, 0]).map((v) => +v || 0)),
+      y: +m.y || 0, pi: clamp(+m.pi || 0, -1.6, 1.6), c: clamp(+m.c || 0, 0, 1), g: !!m.g,
+    };
+    // stats are owned by the opponent's game
+    b.progress = clamp(m.pr | 0, 0, this.maxProgress); b.kills = m.k | 0; b.deaths = m.d | 0; b.streak = m.st | 0;
+    b.bestStreak = m.bs | 0; b.shots = m.sh | 0; b.hits = m.hi | 0; b.headshots = m.hs | 0;
+    const wi = clamp(m.w | 0, 0, WEAPONS.length - 1);
+    if (wi !== b.wi) { b.wi = wi; setCharacterWeapon(this.botModel, WEAPONS[wi]); }
+    if (m.u && !R.uav) this.hud.toast('Enemy UAV spotted!');
+    R.uav = !!m.u;
+    if (typeof m.tl === 'number' && this.netRole === 'guest') this.timeLeft = Math.max(0, m.tl - NET_DELAY / 1000);
+    // Deaths only come from the reliable 'died' message; an update sent after that death means they respawned.
+    if (m.a && !b.alive && (m.d | 0) >= R.deadN) {
+      // jump straight to the new spot instead of sliding there
+      b.alive = true; b.health = 100; R.buf = []; R.prev = null;
+    }
+    R.buf.push(snap);
+    if (R.buf.length > 30) R.buf.shift();
+    this.hud.updateScores();
+  }
+
+  onRemoteDied(m) {
+    const b = this.bot, R = this.remote, n = m.n | 0;
+    if (n && n <= R.deadN) return; // already handled
+    R.deadN = n || R.deadN + 1;
+    const wid = WEAPON_IDS.has(m.w) ? m.w : WEAPONS[b.wi].id;
+    b.alive = false; b.health = 0; b.respawnT = 3;
+    if (m.s) this.hud.feedAdd(null, wid, b, false);
+    else {
+      this.hud.feedAdd(this.player, wid, b, !!m.h);
+      if (m.b) this.hud.banner('HUMILIATION!', `${b.name} was set back a weapon`, 'good');
+      this.hud.hitmarker(!!m.h, true);
+      this.awardKill(this.player, b, wid, !!m.h, !!m.b);
+    }
+    this.hud.updateScores();
+  }
+
+  // Draw the opponent slightly in the past, between the two updates around that moment.
+  updateRemote(dt) {
+    const b = this.bot, R = this.remote;
+    b.respawnT -= dt;
+    if (performance.now() - R.last > 8000 && this.state === 'playing') { this.netLost('The connection to your opponent was lost.'); return; }
+    const buf = R.buf;
+    if (!buf.length) return;
+    const rt = performance.now() - NET_DELAY;
+    let a = buf[0], c = null;
+    for (let i = 0; i < buf.length; i++) { if (buf[i].t <= rt) a = buf[i]; else { c = buf[i]; break; } }
+    if (c && a !== c && a.t <= rt) {
+      const k = (rt - a.t) / (c.t - a.t);
+      b.pos.lerpVectors(a.p, c.p, k);
+      b.yaw = a.y + angleDiff(a.y, c.y) * k;
+      b.pitch = lerp(a.pi, c.pi, k);
+      b.crouch = lerp(a.c, c.c, k);
+    } else {
+      const last = buf[buf.length - 1], ahead = clamp((rt - last.t) / 1000, 0, 0.25);
+      b.pos.copy(last.p).addScaledVector(last.v, ahead);
+      b.yaw = last.y; b.pitch = last.pi; b.crouch = last.c;
+    }
+    const top = buf[buf.length - 1];
+    b.vel.copy(top.v);
+    b.onGround = top.g;
+    b.h = 1.75 - 0.55 * b.crouch;
+    // footsteps
+    if (R.prev && b.alive && b.onGround) {
+      R.stepAcc += Math.hypot(b.pos.x - R.prev.x, b.pos.z - R.prev.z);
+      if (R.stepAcc > 2.2) { R.stepAcc = 0; this.audio.footstep(b.pos, b.crouch > 0.5 ? 0.08 : 0.22); }
+    }
+    R.prev = b.pos.clone();
+  }
+
+  netLost(msg) {
+    if (!this.net) return;
+    if (this.state === 'ended') { this.hud.rematchNote(msg, true); this.net = null; return; }
+    if (this.state === 'menu') { this.net = null; return; }
+    this.endMatch(null, msg, false);
+    this.hud.rematchNote(msg, true);
+    this.net = null;
   }
 
   frame() {

@@ -284,4 +284,4 @@ All pages also load `css/site.css`, `js/core.js`, `js/catalog.js` and `js/app.js
 | Knuckle Through | `/games/knuckle-through/` | none | three.js (local, CDN fallback), assets/fonts/ (Big Shoulders Stencil Display, IBM Plex Sans Condensed, Silkscreen) |
 | Lumberjack Tycoon | `/games/lumberjack-tycoon/` | mob, tycoon | none |
 | Fishing Tycoon | `/games/fishing-tycoon/` | mob, tycoon | none |
-| 1v1 Gun Game | `/games/1v1-gun-game/` | none | its own page in `games/1v1-gun-game/play/` (in an iframe): three.js r160 ES module in `play/vendor/`, fonts Lilita One and Oswald in `play/fonts/` |
+| 1v1 Gun Game | `/games/1v1-gun-game/` | none | its own page in `games/1v1-gun-game/play/` (in an iframe): three.js r160 ES module in `play/vendor/`, fonts Lilita One and Oswald in `play/fonts/`; online play uses `/api/mp` |
