@@ -329,7 +329,26 @@ const ITEMS = {
   mill3: { name: 'Sawmill Titan', price: 15000, maxR: 1.2, rate: 4.5, color: 0xc04a3a, desc: 'Eats any log in the world, and fast.' },
   belt: { name: 'Conveyor Belt', price: 40, desc: 'A 4 m belt. Line them up to carry logs into your sawmill.' },
   shop1: { name: 'Woodshop Bench', price: 1500, color: 0x8a5a32, desc: 'Drop planks on it to make beams and furniture crates, which sell for more. Press E at the bench to switch what it makes.' },
+  // storage and utility machines (Bolt & Belt)
+  bin: { name: 'Plank Dumpster', price: 450, cap: 50, foot: [1.2, 1.9], h: 1.6, line: 1, desc: 'Put it at the end of your sawmill: planks, beams and crates that fall in are kept safe (up to 50). Press E to tip them out of the hatch, onto a belt or into a truck.' },
+  hopper: { name: 'Log Hopper', price: 900, cap: 14, foot: [1.4, 1.8], h: 2.2, line: 1, desc: 'Stores up to 14 logs before they are cut. Drop or tip logs in, and it feeds them out of the front one at a time, onto a belt or straight into a sawmill.' },
+  kiln: { name: 'Drying Kiln', price: 4000, cap: 8, foot: [1.5, 3.0], h: 3.2, line: 1, desc: 'Fresh planks go in the back and come out kiln-dried a few seconds later, worth 45% more. Line it up after a sawmill.' },
+  shipbin: { name: 'Shipping Bin', price: 6000, foot: [1.3, 1.3], h: 1.6, line: 1, desc: 'Drop any wood in and it is bought on the spot for 70% of the town price. Slower to earn, but no driving.' },
+  // buildings and yard (bought from the Build menu on your land)
+  cabin: { name: 'Log Cabin', price: 5000, foot: [3.7, 3.4], h: 5.5, build: 'b', desc: 'A cosy home with a bed, a stove and a porch. Sleep in the bed at night to skip to morning.' },
+  garage: { name: 'Truck Garage', price: 3000, foot: [3.7, 5.2], h: 4.5, build: 'b', desc: 'A roof for your trucks. Press E at the front and your vehicles park here.' },
+  shed: { name: 'Tool Shed', price: 800, foot: [1.7, 1.6], h: 3, build: 'b', desc: 'A little shed for your gear. Press E inside to swap axes, saws and tools.' },
+  tower: { name: 'Watchtower', price: 2200, foot: [1.7, 3.9], h: 5.5, build: 'b', desc: 'Climb the stairs for a view over the whole forest.' },
+  lamp: { name: 'Yard Lamp', price: 120, foot: [0.4, 0.4], h: 3.4, build: 'y', desc: 'Lights up your yard after dark.' },
+  mailbox: { name: 'Order Mailbox', price: 250, foot: [0.4, 0.4], h: 1.4, build: 'y', desc: 'Check the Order Board from home.' },
+  table: { name: 'Picnic Table', price: 150, foot: [1.2, 1.1], h: 1, build: 'y', desc: 'Lunch break with a view.' },
+  planter: { name: 'Flower Planter', price: 60, foot: [0.8, 0.45], h: 1, build: 'y', desc: 'A box of flowers to brighten up the yard.' },
+  fence: { name: 'Wood Fence', price: 25, pack: 10, foot: [0.15, 2.0], h: 1.3, build: 'y', desc: 'A 4 m fence. Pieces snap end to end and around corners.' },
+  flag: { name: 'Flag Pole', price: 300, foot: [0.4, 0.4], h: 7, build: 'y', desc: 'Fly your name over your land.' },
 };
+const ITEM_KEYS = Object.keys(ITEMS);
+// machines that sit in a line and snap end to end (belts, mills and the storage machines)
+const isLine = k => k === 'belt' || k.startsWith('mill') || !!(ITEMS[k] && ITEMS[k].line);
 const MOTORS = [{ name: 'Basic belt motor', price: 0, speed: 1.4 }, { name: 'Fast Belt Motor', price: 600, speed: 2.1, desc: 'Makes all your belts and mills feed 50% faster.' }, { name: 'Turbo Belt Motor', price: 2500, speed: 3, desc: 'The fastest belts money can buy.' }];
 // gems drop from trees you fell. They buy classes and perks that stay with you forever
 const CLASSES = {
@@ -353,7 +372,7 @@ const DAY_LEN = 720;
 
 function fresh() {
   return { v: 4, money: 0, earned: 0, axes: ['fists'], axe: 'fists', gems: 0, cls: '', perks: { arms: 0, luck: 0, back: 0, feet: 0 }, pack: [], rack: 0, straps: 0, ownT: ['pickup'], repair: {}, tool: 0, plot: -1, unlock: { n: 0, e: 0, f: 0 }, motor: 0,
-    inv: { mill1: 0, mill2: 0, mill3: 0, belt: 0, shop1: 0 }, placed: [], trucks: [], time: 0.3, day: 1, cam: 2, debt: 5000, remote: 0, seen: {}, stats: { trees: 0, sold: 0, planks: 0, crafted: 0, contracts: 0, giants: 0, storms: 0, hauls: 0 },
+    inv: Object.fromEntries(ITEM_KEYS.map(k => [k, 0])), headlamp: 0, placed: [], trucks: [], time: 0.3, day: 1, cam: 2, debt: 5000, remote: 0, seen: {}, stats: { trees: 0, sold: 0, planks: 0, crafted: 0, contracts: 0, giants: 0, storms: 0, hauls: 0 },
     saws: [], saw: '', fellerLv: 0, workers: { logger: 0, seller: 0 }, orders: [], orderSeq: 1, daily: { day: '', done: 0, streak: 0, last: '' }, ach: {} };
 }
 let S = fresh();
@@ -1970,7 +1989,7 @@ function cutBody(b, s) {
   return pieces;
 }
 // draw all pieces with three instanced meshes
-const bodyMatrix = new THREE.Matrix4();
+const bodyMatrix = new THREE.Matrix4(), DRYC = new THREE.Color(0.42, 0.2, 0.08);
 function drawBodies() {
   let nl = 0, np = 0, nb = 0, nc = 0;
   for (const b of bodies) {
@@ -1988,7 +2007,7 @@ function drawBodies() {
     } else {
       bodyMatrix.compose(b.p, b.q, tmpS.set(b.len, b.pt, b.pw));
       if (b.k === 3 && nc < 60) { crateM.setMatrixAt(nc, bodyMatrix); crateM.setColorAt(nc, LC(s.wood).multiplyScalar(1.5)); nc++; }
-      else { plankM.setMatrixAt(np, bodyMatrix); plankM.setColorAt(np, LC(s.wood).multiplyScalar(b.k === 2 ? 1.25 : 1.6)); np++; }
+      else { plankM.setMatrixAt(np, bodyMatrix); plankM.setColorAt(np, b.dry ? LC(s.wood).multiplyScalar(1.15).lerp(DRYC, 0.3) : LC(s.wood).multiplyScalar(b.k === 2 ? 1.25 : 1.6)); np++; }
     }
   }
   logSide.count = logCap.count = nl; plankM.count = np; bandM.count = nb; crateM.count = nc;
@@ -3776,18 +3795,19 @@ function updateTrucks(dt) {
     engine(Math.abs(t.speed) / t.T.speed);
   }
   // headlights for the truck you drive, after dark
-  if (HQ) {
+  {
     const n = nightK();
-    if (t && n > 0.3) { headLight.intensity = 1.6 * n; headLight.position.set(0, 1.1, t.zF).applyMatrix4(truckM.compose(t.pos, t.q, tmpS.set(1, 1, 1))); headLight.target.position.set(0, 0, t.zF + 14).applyMatrix4(truckM); }
+    if (HQ && t && n > 0.3) { headLight.intensity = 1.6 * n; headLight.position.set(0, 1.1, t.zF).applyMatrix4(truckM.compose(t.pos, t.q, tmpS.set(1, 1, 1))); headLight.target.position.set(0, 0, t.zF + 14).applyMatrix4(truckM); }
+    else if (S.headlamp && !t && n > 0.3) { headLight.intensity = 1.3 * n; camera.getWorldDirection(tmpV3); headLight.position.copy(camera.position).addScaledVector(tmpV3, 0.4); headLight.target.position.copy(camera.position).addScaledVector(tmpV3, 14); }
     else headLight.intensity = 0;
   }
 }
-function returnTruck(t, spot) {
+function returnTruck(t, spot, exact) {
   t = t || trucks[0]; if (!t) return;
   while (t.cargo.length) detachCargo(t.cargo[0]);
   for (let k = 0; k < t.seats.length; k++) if (t.seats[k].who) kickSeat(t, k, '');
   if (!spot) spot = S.plot >= 0 && t.owner === 'me' ? { x: PLOTS[S.plot].x + 6, z: PLOTS[S.plot].z + (PLOTS[S.plot].z < 278 ? 10 : -10), yaw: 0 } : { x: SPAWN.x + 14, z: SPAWN.z + 4, yaw: PI / 2 };
-  const p = freeParking(spot.x, spot.z, t);
+  const p = exact ? [spot.x, spot.z] : freeParking(spot.x, spot.z, t);
   t.pos.set(p[0], 0, p[1]); t.yaw = spot.yaw; t.speed = 0; t.vy = 0;
   settleTruck(t, true); syncTruck(t, 0);
 }
@@ -4043,9 +4063,122 @@ function wakeOnBelts(dt) {
 /* ================= things you place on your land ================= */
 const placed = [];   // { type, x, z, rot, g, cols, ... }
 const FOOT = { mill: [1.6, 4.1], belt: [1.0, 2.0] };
-const footOf = type => type === 'belt' ? FOOT.belt : type === 'shop1' ? [1.6, 1.6] : FOOT.mill;
+const footOf = type => type === 'belt' ? FOOT.belt : type === 'shop1' ? [1.6, 1.6] : ITEMS[type] && ITEMS[type].foot || FOOT.mill;
+const kilnMat = pmat({ color: 0x5a2a10, emissive: 0xff7a2a, ei: 1.1 });
+// soft light pools under yard lamps, faded in after dark
+const yardGlowMat = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const g = cv.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.5, 'rgba(255,255,255,.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: 0xffc870, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
+})();
+const GLOW_G = (() => { const g = new THREE.PlaneGeometry(11, 11); g.rotateX(-PI / 2); return g; })();
+/* models for the storage machines, buildings and yard pieces. M is the main batch, G glows at night (windows, bulbs).
+   Local +z is the front: where wood comes out, or the door. */
+const MODELS = {
+  bin(M) {
+    M.box(0, 0.09, 0, 2.3, 0.18, 3.7, 0x24502c);
+    for (const s of [-1, 1]) { M.box(s * 1.1, 0.4, 0, 0.12, 0.64, 3.7, 0x2f6a3a, 0, 0, 0, 0.05); M.box(s * 1.1, 0.74, 0, 0.2, 0.06, 3.8, 0x1e3a24); }
+    M.box(0, 0.4, -1.8, 2.3, 0.64, 0.12, 0x2f6a3a).box(0, 0.4, 1.8, 2.3, 0.64, 0.12, 0x24502c).box(0, 0.6, 1.88, 1.6, 0.08, 0.04, 0xffd25a);
+    for (const s of [-1, 1]) for (const sz of [-1, 1]) M.cyl(s * 0.95, 0.1, sz * 1.5, 0.1, 0.12, 0x222222, 8, 0, 0, PI / 2);
+  },
+  hopper(M) {
+    M.box(0, 0.1, 0, 2.7, 0.2, 3.5, 0x555555);
+    for (const s of [-1, 1]) { M.box(s * 1.3, 0.85, 0, 0.14, 1.5, 3.5, 0x8a5a32, 0, 0, 0, 0.06); for (const y of [0.5, 1.2]) M.box(s * 1.38, y, 0, 0.04, 0.12, 3.5, 0x444444); }
+    M.box(0, 0.4, -1.7, 2.7, 0.6, 0.14, 0x8a5a32).box(0, 1.15, 1.7, 2.7, 0.9, 0.14, 0x7a4a2a).box(0, 0.45, 1.72, 2.2, 0.5, 0.06, 0x1a1a1a);
+    for (const s of [-1, 1]) for (const sz of [-1, 1]) M.box(s * 1.32, 0.88, sz * 1.72, 0.18, 1.76, 0.18, 0xe0a52a);
+  },
+  kiln(M, G) {
+    M.box(0, 0.45, -2.0, 1.9, 0.9, 2.0, 0x444444).box(0, 0.93, -2.0, 1.8, 0.06, 2.0, 0x2a2a2a);
+    for (let i = 0; i < 4; i++) M.box(0, 0.965, -2.75 + i * 0.5, 1.8, 0.02, 0.08, 0x555555);
+    for (const s of [-1, 1]) M.box(s * 1.0, 1.15, -2.0, 0.1, 0.4, 2.0, 0xe0a52a);
+    M.box(0, 1.4, 0, 3.0, 2.8, 2.0, 0x9a5a3a, 0, 0, 0, 0.05).box(0, 2.9, 0, 3.2, 0.2, 2.3, 0x3a3a3a);
+    M.cyl(0.9, 3.6, -0.4, 0.22, 1.6, 0x555555, 8).box(0, 1.25, -1.02, 1.7, 0.8, 0.06, 0x111111).box(0, 1.25, 1.02, 1.7, 0.8, 0.06, 0x111111);
+    G.box(-0.9, 2.0, 1.03, 0.6, 0.4, 0.04, 0xffffff).box(0.9, 2.0, 1.03, 0.6, 0.4, 0.04, 0xffffff);
+    M.box(0, 0.42, 2.0, 1.9, 0.84, 2.0, 0x444444).box(0, 0.87, 2.0, 1.8, 0.06, 2.0, 0x2a2a2a);
+    for (let i = 0; i < 3; i++) M.box(0, 0.905, 1.4 + i * 0.6, 1.8, 0.02, 0.08, 0x555555);
+  },
+  shipbin(M) {
+    M.box(0, 0.1, 0, 2.5, 0.2, 2.5, 0x5a3e28);
+    for (const s of [-1, 1]) { M.box(s * 1.2, 0.45, 0, 0.12, 0.7, 2.5, 0xb08a5a, 0, 0, 0, 0.08); M.box(0, 0.45, s * 1.2, 2.5, 0.7, 0.12, 0xb08a5a, 0, 0, 0, 0.08); }
+    for (const s of [-1, 1]) for (const sz of [-1, 1]) M.box(s * 1.2, 0.42, sz * 1.2, 0.18, 0.84, 0.18, 0x5a3e28);
+  },
+  cabin(M, G) {
+    const WOOD = [0x8a5a32, 0x7a4a2a];
+    M.box(0, 0.06, -0.5, 7.0, 0.12, 5.6, 0xb08a5a).box(0, 0.12, 2.85, 7.4, 0.2, 1.1, 0xb08a5a);
+    for (let i = 0; i < 10; i++) {
+      const y = 0.15 + i * 0.3, c = WOOD[i % 2];
+      M.cyl(0, y, -3.3, 0.16, 7.3, c, 8, 0, 0, PI / 2);
+      for (const s of [-1, 1]) M.cyl(s * 3.5, y + 0.15, -0.5, 0.16, 6.0, c, 8, 0, PI / 2, 0);
+      if (i < 7) for (const s of [-1, 1]) M.cyl(s * 2.1, y, 2.3, 0.16, 2.9, c, 8, 0, 0, PI / 2);
+      else M.cyl(0, y, 2.3, 0.16, 7.3, c, 8, 0, 0, PI / 2);
+    }
+    // gable ends: shorter logs as the roof closes in
+    for (let i = 0; i < 6; i++) { const l = 5.6 * (1 - (i + 0.5) / 6.4); M.cyl(-3.5, 3.15 + i * 0.3, -0.5, 0.15, l, WOOD[i % 2], 8, 0, PI / 2, 0).cyl(3.5, 3.15 + i * 0.3, -0.5, 0.15, l, WOOD[i % 2], 8, 0, PI / 2, 0); }
+    M.cyl(0, 4.85, -0.5, 0.14, 7.8, 0x6a4024, 8, 0, 0, PI / 2);
+    for (const sz of [-1, 1]) M.box(0, 3.9, -0.5 + sz * 1.55, 8.0, 0.16, 3.75, 0x4a5a3a, 0, sz * 0.57, 0, 0.04);
+    M.box(0, 2.85, 2.95, 7.8, 0.12, 1.5, 0x4a5a3a, 0, 0.18);
+    for (const s of [-1, 1]) M.box(s * 3.55, 1.45, 3.3, 0.16, 2.7, 0.16, 0x5a3e28);
+    M.box(0, 1.1, 2.33, 1.5, 2.2, 0.08, 0x3a2414);   // the doorway's shadow
+    for (const s of [-1, 1]) { G.box(s * 3.68, 1.6, -0.5, 0.06, 0.8, 1.0, 0xffffff); M.box(s * 3.7, 1.6, -0.5, 0.08, 1.0, 1.2, 0x5a3e28); G.box(s * 2.1, 1.6, 2.5, 1.0, 0.8, 0.06, 0xffffff); M.box(s * 2.1, 1.6, 2.52, 1.2, 1.0, 0.08, 0x5a3e28); }
+    // bed, stove, table and a rug
+    M.box(-2.4, 0.3, -2.3, 1.3, 0.4, 2.0, 0x5a3e28).box(-2.4, 0.55, -2.3, 1.2, 0.14, 1.9, 0xf4ecd8).box(-2.4, 0.64, -2.0, 1.22, 0.06, 1.2, 0xc8322a).box(-2.4, 0.66, -3.0, 0.8, 0.12, 0.35, 0xffffff).box(-2.4, 0.8, -3.2, 1.3, 0.9, 0.1, 0x5a3e28);
+    M.box(2.6, 0.5, -2.6, 0.9, 1.0, 0.8, 0x2b2b2b).cyl(2.6, 3.2, -2.6, 0.12, 4.4, 0x2b2b2b, 8); G.box(2.6, 0.45, -2.19, 0.5, 0.3, 0.02, 0xffffff);
+    M.box(0.8, 0.75, -1.0, 1.2, 0.08, 0.9, 0x8a5a32); for (const s of [-1, 1]) for (const sz of [-1, 1]) M.box(0.8 + s * 0.5, 0.37, -1.0 + sz * 0.35, 0.08, 0.74, 0.08, 0x5a3e28);
+    M.box(0.8, 0.13, 0.4, 2.4, 0.02, 1.6, 0x8a2f22);
+  },
+  garage(M) {
+    M.box(0, 0.06, 0, 7.2, 0.12, 10.3, 0x8f8a80);
+    M.box(0, 1.75, -5.0, 7.2, 3.5, 0.2, 0xb9c6cc, 0, 0, 0, 0.04);
+    for (const s of [-1, 1]) { M.box(s * 3.55, 1.75, -0.2, 0.2, 3.5, 9.8, 0xb9c6cc, 0, 0, 0, 0.04); for (let z = -4.6; z < 4.6; z += 0.8) M.box(s * 3.67, 1.75, z, 0.04, 3.5, 0.08, 0x8a979c); M.box(s * 3.55, 1.75, 5.0, 0.24, 3.5, 0.24, 0x5a3e28); }
+    M.box(0, 3.75, -0.1, 7.8, 0.2, 10.8, 0x3c5566, 0, 0.05).box(0, 3.4, 5.05, 7.3, 0.6, 0.15, 0x5a3e28);
+    M.box(-2.6, 0.5, -4.4, 1.2, 1.0, 0.6, 0xc8322a).box(-2.6, 1.02, -4.4, 1.0, 0.06, 0.5, 0x555555).box(0, 0.125, -1, 1.6, 0.01, 1.2, 0x5a5650);
+  },
+  shed(M) {
+    M.box(0, 0.06, 0, 3.2, 0.12, 3.0, 0x8a6a48);
+    M.box(0, 1.25, -1.45, 3.2, 2.5, 0.12, 0xa0623a, 0, 0, 0, 0.06);
+    for (const s of [-1, 1]) { M.box(s * 1.55, 1.25, 0, 0.12, 2.5, 3.0, 0xa0623a, 0, 0, 0, 0.06); M.box(s * 1.05, 1.25, 1.45, 1.1, 2.5, 0.12, 0xa0623a, 0, 0, 0, 0.06); }
+    M.box(0, 2.3, 1.45, 1.0, 0.4, 0.12, 0xa0623a).box(0, 2.7, 0, 3.6, 0.12, 3.6, 0x2f4f7a, 0, 0.12);
+    for (const s of [-1, 1]) M.box(s * 1.6, 1.25, 1.5, 0.08, 2.5, 0.08, 0xf0e6d0);
+    M.box(1.2, 1.2, -1.2, 0.5, 0.06, 0.4, 0x5a3e28).box(1.2, 0.6, -1.2, 0.5, 0.06, 0.4, 0x5a3e28).box(1.2, 0.75, -1.25, 0.3, 0.25, 0.25, 0xc8322a);
+    M.box(-0.6, 1.5, -1.36, 0.08, 0.9, 0.06, 0x8a5a32).box(-0.6, 1.85, -1.33, 0.35, 0.22, 0.05, 0x9aa0a6);
+  },
+  tower(M) {
+    for (const s of [-1, 1]) for (const zp of [-3.75, -0.85]) M.box(s * 1.5, 3.3, zp, 0.24, 6.6, 0.24, 0x5a3e28);
+    M.box(0, 4.4, -2.3, 3.4, 0.2, 3.3, 0xb08a5a, 0, 0, 0, 0.05);
+    M.box(0, 5.0, -3.85, 3.2, 0.1, 0.08, 0x8a5a32).box(0, 4.75, -3.85, 3.2, 0.1, 0.08, 0x8a5a32);
+    for (const s of [-1, 1]) { M.box(s * 1.55, 5.0, -2.3, 0.08, 0.1, 3.0, 0x8a5a32).box(s * 1.55, 4.75, -2.3, 0.08, 0.1, 3.0, 0x8a5a32); M.box(s * 1.1, 5.0, -0.75, 0.9, 0.1, 0.08, 0x8a5a32); }
+    M.box(0, 6.7, -2.3, 3.8, 0.14, 3.8, 0x9c3b2a, 0, 0, 0, 0.05).box(0, 7.0, -2.3, 2.4, 0.5, 2.4, 0x9c3b2a);
+    for (let i = 0; i < 9; i++) { const top = 0.5 * (i + 1); M.box(0, top - 0.04, 3.6 - i * 0.5, 1.2, 0.08, 0.5, 0xb08a5a, 0, 0, 0, 0.08); }
+    for (const s of [-1, 1]) { M.box(s * 0.66, 2.2, 1.6, 0.1, 0.3, 6.3, 0x5a3e28, 0, 0.785); M.box(s * 0.66, 3.15, 1.6, 0.06, 0.06, 6.3, 0x8a5a32, 0, 0.785); M.box(s * 0.66, 0.6, 3.75, 0.1, 1.2, 0.1, 0x5a3e28); }
+  },
+  lamp(M, G) { M.cyl(0, 1.6, 0, 0.07, 3.2, 0x2b2b2b, 6).box(0, 3.15, 0.3, 0.08, 0.08, 0.7, 0x2b2b2b).box(0, 3.12, 0.62, 0.36, 0.1, 0.36, 0x2b2b2b).box(0, 0.08, 0, 0.4, 0.16, 0.4, 0x555555); G.box(0, 2.98, 0.62, 0.26, 0.22, 0.26, 0xffffff); },
+  mailbox(M) { M.box(0, 0.55, 0, 0.1, 1.1, 0.1, 0x5a3e28).box(0, 1.15, 0, 0.35, 0.3, 0.55, 0x2f5fa0).cyl(0, 1.3, 0, 0.175, 0.55, 0x2f5fa0, 10, 0, PI / 2).box(0.2, 1.38, -0.1, 0.03, 0.3, 0.08, 0xd03a2a).box(0, 1.15, 0.28, 0.2, 0.1, 0.01, 0xf4ecd8); },
+  table(M) {
+    M.box(0, 0.76, 0, 0.9, 0.06, 2.0, 0x8a5a32, 0, 0, 0, 0.05).box(0, 0.795, 0, 0.6, 0.01, 1.2, 0xc8322a);
+    for (const s of [-1, 1]) { M.box(s * 0.78, 0.45, 0, 0.35, 0.06, 2.0, 0x8a5a32); for (const sz of [-1, 1]) { M.box(s * 0.3, 0.38, sz * 0.8, 0.08, 0.76, 0.08, 0x5a3e28); M.box(s * 0.78, 0.22, sz * 0.8, 0.08, 0.44, 0.08, 0x5a3e28); } }
+  },
+  planter(M) {
+    M.box(0, 0.3, 0, 1.6, 0.6, 0.9, 0x8a5a32, 0, 0, 0, 0.06).box(0, 0.58, 0, 1.45, 0.05, 0.75, 0x3a2a1a);
+    const FL = [0xe5533d, 0xffd25a, 0xf2f2f2, 0xd86ab0, 0xe8761e];
+    for (let i = 0; i < 10; i++) { const x = -0.6 + (i % 5) * 0.3, z = i < 5 ? -0.18 : 0.18, h = 0.25 + (i * 7 % 4) * 0.06; M.box(x, 0.6 + h / 2, z, 0.03, h, 0.03, 0x3f8f3a).box(x, 0.62 + h, z, 0.12, 0.08, 0.12, FL[i % 5]); }
+  },
+  fence(M) {
+    for (const z of [-1.93, 0, 1.93]) M.box(0, 0.6, z, 0.14, 1.2, 0.14, 0x5a3e28);
+    for (const y of [0.45, 0.95]) M.box(0, y, 0, 0.06, 0.14, 4.0, 0x8a5a32, 0, 0, 0, 0.06);
+  },
+  flag(M) { M.box(0, 0.15, 0, 0.6, 0.3, 0.6, 0x8f8a80).cyl(0, 3.6, 0, 0.06, 6.8, 0xd8d8d8, 8).cyl(0, 7.05, 0, 0.12, 0.2, 0xffd25a, 8); },
+};
 function itemModel(type, mat) {
   const M = new MB(), isMill = type.startsWith('mill');
+  if (MODELS[type]) {
+    const G = mat ? M : new MB();
+    MODELS[type](M, G);
+    const m = M.mesh(mat, !mat);
+    if (G !== M && G.p.length) m.add(new THREE.Mesh(G.geo(), type === 'kiln' ? kilnMat : lampMat));
+    return m;
+  }
   if (type === 'shop1') {
     M.box(0, 0.9, 0, 3.0, 0.14, 2.2, 0xb08a5a);
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) M.box(sx * 1.35, 0.42, sz * 0.95, 0.14, 0.84, 0.14, 0x5a3e28);
@@ -4081,7 +4214,35 @@ function itemCols(type, x, y, z, rot) {
   const ry = rot * PI / 2, P = (lx, lz) => at(lx, lz, x, z, ry), dir = [Math.sin(ry), 0, Math.cos(ry)], sp = MOTORS[S.motor].speed;
   const out = [];
   const add = (lx, ly, lz, hx, hy, hz, o) => { const [wx, wz] = P(lx, lz); out.push(addCol(wx, y + ly, wz, hx, hy, hz, ry, 0, o)); };
-  if (type === 'shop1') { add(0, 0.5, 0, 1.5, 0.47, 1.1, { walk: true }); add(1.9, 0.4, 0, 0.45, 0.4, 0.7); }
+  const W = { walk: true }, belt = { walk: true, sv: [dir[0] * sp, 0, dir[2] * sp], belt: 1 };
+  if (type === 'bin') { add(0, 0.09, 0, 1.15, 0.09, 1.85, W); for (const s of [-1, 1]) { add(s * 1.1, 0.4, 0, 0.06, 0.37, 1.85); add(0, 0.4, s * 1.8, 1.15, 0.37, 0.06); } }
+  else if (type === 'hopper') { add(0, 0.1, 0, 1.35, 0.1, 1.75, W); for (const s of [-1, 1]) add(s * 1.3, 0.85, 0, 0.07, 0.75, 1.75); add(0, 0.4, -1.7, 1.35, 0.3, 0.07); add(0, 0.85, 1.7, 1.35, 0.75, 0.07); }
+  else if (type === 'kiln') {
+    add(0, 0.47, -2.0, 0.9, 0.47, 1.0, belt); for (const s of [-1, 1]) add(s * 1.0, 1.15, -2.0, 0.05, 0.2, 1.0, { sv: belt.sv, belt: 1 });
+    add(0, 1.4, 0, 1.5, 1.4, 1.0); add(0, 0.44, 2.0, 0.9, 0.44, 1.0, { walk: true, sv: [dir[0] * 1.3, 0, dir[2] * 1.3] });
+  } else if (type === 'shipbin') { add(0, 0.1, 0, 1.25, 0.1, 1.25, W); for (const s of [-1, 1]) { add(s * 1.2, 0.45, 0, 0.06, 0.37, 1.25); add(0, 0.45, s * 1.2, 1.25, 0.37, 0.06); } }
+  else if (type === 'cabin') {
+    add(0, 0.06, -0.5, 3.45, 0.06, 2.75, W); add(0, 0.12, 2.85, 3.7, 0.1, 0.5, W);
+    add(0, 1.6, -3.3, 3.65, 1.6, 0.2); for (const s of [-1, 1]) { add(s * 3.5, 1.6, -0.5, 0.2, 1.6, 2.95); add(s * 2.1, 1.6, 2.3, 1.45, 1.6, 0.2); add(s * 3.55, 1.4, 3.3, 0.1, 1.4, 0.1); }
+    add(-2.4, 0.33, -2.3, 0.62, 0.33, 0.98, W); add(2.6, 0.5, -2.6, 0.45, 0.5, 0.4); add(0.8, 0.4, -1.0, 0.6, 0.4, 0.45);
+  } else if (type === 'garage') {
+    add(0, 0.06, 0, 3.6, 0.06, 5.1, W); add(0, 1.75, -5.0, 3.6, 1.75, 0.1);
+    for (const s of [-1, 1]) { add(s * 3.55, 1.75, -0.2, 0.1, 1.75, 4.9); add(s * 3.55, 1.75, 5.0, 0.12, 1.75, 0.12); }
+    add(-2.6, 0.5, -4.4, 0.6, 0.5, 0.3);
+  } else if (type === 'shed') {
+    add(0, 0.06, 0, 1.6, 0.06, 1.5, W); add(0, 1.25, -1.45, 1.6, 1.25, 0.06);
+    for (const s of [-1, 1]) { add(s * 1.55, 1.25, 0, 0.06, 1.25, 1.5); add(s * 1.05, 1.25, 1.45, 0.55, 1.25, 0.06); }
+  } else if (type === 'tower') {
+    for (const s of [-1, 1]) for (const zp of [-3.75, -0.85]) add(s * 1.5, 2.2, zp, 0.12, 2.2, 0.12);
+    add(0, 4.4, -2.3, 1.7, 0.1, 1.65, W);
+    add(0, 5.0, -3.85, 1.6, 0.5, 0.05); for (const s of [-1, 1]) { add(s * 1.55, 5.0, -2.3, 0.05, 0.5, 1.6); add(s * 1.1, 5.0, -0.75, 0.45, 0.5, 0.05); }
+    for (let i = 0; i < 9; i++) { const top = 0.5 * (i + 1); add(0, top / 2, 3.6 - i * 0.5, 0.6, top / 2, 0.25, W); }
+  } else if (type === 'lamp' || type === 'flag') add(0, 1.6, 0, 0.14, 1.6, 0.14);
+  else if (type === 'mailbox') add(0, 0.7, 0, 0.2, 0.7, 0.3);
+  else if (type === 'table') { add(0, 0.4, 0, 0.45, 0.39, 1.0, W); for (const s of [-1, 1]) add(s * 0.78, 0.24, 0, 0.18, 0.24, 1.0, W); }
+  else if (type === 'planter') add(0, 0.3, 0, 0.8, 0.3, 0.45, W);
+  else if (type === 'fence') add(0, 0.6, 0, 0.08, 0.6, 2.0);
+  else if (type === 'shop1') { add(0, 0.5, 0, 1.5, 0.47, 1.1, { walk: true }); add(1.9, 0.4, 0, 0.45, 0.4, 0.7); }
   else if (type === 'belt') {
     add(0, 0.47, 0, 0.9, 0.47, 2, { walk: true, sv: [dir[0] * sp, 0, dir[2] * sp], belt: 1 });
     for (const s of [-1, 1]) add(s * 1.0, 1.12, 0, 0.05, 0.17, 2, { sv: [dir[0] * sp, 0, dir[2] * sp], belt: 1 });
@@ -4105,11 +4266,42 @@ function placeItem(type, x, z, rot) {
     signMesh(tag, 1.36, 0.34, 0, 1.9, 0.85, 0, g);
   }
   scene.add(g);
-  const it = { type, x, z, y, rot, g, blade, cols: itemCols(type, x, y, z, rot), queue: [], work: 0, out: [], outT: 0, warnT: 0, recipe: 0, stock: {}, stockV: {}, stockL: {} };
+  const it = { type, x, z, y, rot, g, blade, cols: itemCols(type, x, y, z, rot), queue: [], work: 0, out: [], outT: 0, warnT: 0, recipe: 0, stock: {}, stockV: {}, stockL: {}, store: [], on: 1 };
   placed.push(it);
+  const ry = rot * PI / 2, W = (lx, lz) => at(lx, lz, x, z, ry), inter = (lx, lz, r, text, act) => { const [wx, wz] = W(lx, lz); it.inter = addInter(wx, wz, r, text, act, { key: type }); };
+  const tagOn = (title, sub, w, h, lx, ly, lz, face) => signMesh(signTex(256, 64, board(title, sub, '#f4ecd8', '#2a2118')), w, h, lx, ly, lz, face || 0, g);
   if (type === 'shop1') {
     const tag = signTex(256, 64, board('Woodshop', '', '#f4ecd8', '#2a2118')); signMesh(tag, 1.2, 0.3, 0, 1.6, -1.12, PI, g);
     it.inter = addInter(x, z, 3.4, () => NET.guest ? null : 'Woodshop is making <b>' + PRODUCTS[it.recipe].name + 's</b> (' + PRODUCTS[it.recipe].planks + ' planks each). Switch', () => { it.recipe = (it.recipe + 1) % PRODUCTS.length; sTool(); toast('Now making ' + PRODUCTS[it.recipe].name + 's.'); }, { key: 'bench' });
+  } else if (type === 'bin') {
+    it.fill = new THREE.Mesh(BOXG, lam(0xc89a62)); it.fill.visible = false; g.add(it.fill);
+    tagOn('Planks', '', 1.0, 0.22, 0, 0.36, 1.87);
+    inter(0, 0, 3.2, () => NET.guest ? null : 'Dumpster: <b>' + it.store.length + '</b> of ' + ITEMS.bin.cap + ' pieces (' + money(storeValue(it)) + '). ' + (!it.store.length ? 'Empty' : it.on === 2 ? 'Stop tipping' : 'Tip them out'), () => { if (!it.store.length) { toast('Nothing in the dumpster yet. Planks that fall in stay here.'); return; } it.on = it.on === 2 ? 1 : 2; sTool(); toast(it.on === 2 ? 'Tipping planks out of the hatch.' : 'Hatch closed.'); });
+  } else if (type === 'hopper') {
+    it.logs = [];
+    const lm = lam(0x7a5236), LG = new THREE.CylinderGeometry(0.3, 0.3, 3.0, 8); LG.rotateX(PI / 2);
+    for (const [lx, ly] of [[-0.6, 0.5], [0, 0.5], [0.6, 0.5], [-0.3, 0.98], [0.3, 0.98], [0, 1.45]]) { const m = new THREE.Mesh(LG, lm); m.position.set(lx, ly, 0); m.visible = false; g.add(m); it.logs.push(m); }
+    tagOn('Log Hopper', '', 1.2, 0.3, 0, 1.3, 1.78);
+    inter(0, 0, 3.3, () => NET.guest ? null : 'Log Hopper: <b>' + it.store.length + '</b> of ' + ITEMS.hopper.cap + ' logs. Feeding is <b>' + (it.on ? 'on' : 'off') + '</b>. ' + (it.on ? 'Pause' : 'Start'), () => { it.on = it.on ? 0 : 1; sTool(); toast(it.on ? 'The hopper feeds logs out of the front.' : 'The hopper holds on to its logs.'); });
+  } else if (type === 'kiln') {
+    tagOn('Drying Kiln', '', 1.6, 0.4, 0, 2.55, 1.04);
+  } else if (type === 'shipbin') {
+    signMesh(signTex(256, 96, board('Shipping', '70% paid on the spot', '#2f5b3a', '#ffe9b0', '#ffd25a')), 1.5, 0.56, 0, 0.45, 1.27, 0, g);
+  } else if (type === 'cabin') {
+    tagOn('Home', '', 1.2, 0.3, 0, 2.55, 2.5);
+    inter(-2.4, -1.4, 1.9, () => NET.guest ? null : nightK() > 0.5 ? 'Sleep until morning' : 'Your bed. Come back after dark to sleep', () => sleepTillMorning());
+  } else if (type === 'garage') {
+    tagOn('Garage', '', 2.4, 0.6, 0, 3.4, 5.14);
+    inter(0, 6.2, 4.2, () => NET.guest ? null : 'Park your vehicles in the garage', () => parkInGarage(it));
+  } else if (type === 'shed') {
+    inter(0, 0, 2.3, () => 'Swap your axe, saw and tools', () => openShop('inv'));
+  } else if (type === 'mailbox') {
+    inter(0, 0.6, 2.2, () => 'Check your orders' + (S.orders.length ? ' (' + S.orders.length + ')' : ''), () => openShop('orders'));
+  } else if (type === 'lamp') {
+    const gl = new THREE.Mesh(GLOW_G, yardGlowMat); gl.position.set(0, 0.06, 0.6); gl.renderOrder = 2; g.add(gl);
+  } else if (type === 'flag') {
+    const nm = NET.guest ? NET.hostName || 'Host' : myNetName();
+    for (const s of [0, PI]) signMesh(signTex(256, 160, board(nm, 'Lumber Co.', '#c8322a', '#fff1d0', '#ffd25a')), 1.6, 1.0, 0, 6.3, s ? -0.01 : 0.01, s, g).position.x = 0.85;
   }
   return it;
 }
@@ -4118,7 +4310,7 @@ function removeItem(it) {
   for (const c of it.cols) removeCol(c);
   if (it.inter) { const k2 = INTER.indexOf(it.inter); if (k2 >= 0) INTER.splice(k2, 1); }
   scene.remove(it.g);
-  it.g.traverse(o => { if (o.geometry && o.geometry !== BOXG) o.geometry.dispose(); });
+  it.g.traverse(o => { if (o.geometry && o.geometry !== BOXG && o.geometry !== GLOW_G) o.geometry.dispose(); });
 }
 function refreshBelts() {
   const sp = MOTORS[S.motor].speed;
@@ -4130,6 +4322,7 @@ function updateMills(dt) {
   for (const it of placed) {
     if (it.type === 'belt') continue;
     if (it.type === 'shop1') { benchTick(it, dt); continue; }
+    if (!it.type.startsWith('mill')) { if (STORE_TICK[it.type]) STORE_TICK[it.type](it, dt); continue; }
     const spec = ITEMS[it.type], ry = it.rot * PI / 2, dx = Math.sin(ry), dz = Math.cos(ry);
     it.warnT -= dt;
     // the mouth: wood that reaches it gets pulled in
@@ -4145,7 +4338,7 @@ function updateMills(dt) {
       const endIn = Math.abs(lx) < 1.6 && lz > -1.9 && lz < 0, midIn = Math.abs(cx0) < 1.4 && cz0 > -1.4 && cz0 < 0;
       if (!(endIn || midIn) || b.p.y > it.y + 3.2 || b.p.y < it.y + 0.4) continue;
       if (b.k >= 1 || b.r > spec.maxR) {
-        b.v.set(-dx * 3, 1.5, -dz * 3); wakeB(b);
+        b.v.set(-dx * 3, 1.5, -dz * 3); wakeB(b); b.rej = 1;
         if (it.warnT <= 0) { it.warnT = 2; toast(b.k ? 'Planks are already cut. Sell them at Riverside Timber.' : 'That log is too thick for the ' + spec.name + '. A bigger mill can take it.', true); sDeny(); }
         continue;
       }
@@ -4214,10 +4407,10 @@ function buildFits(type, x, z, rot) {
 const rotDir = r => [Math.sin(r * PI / 2), Math.cos(r * PI / 2)];
 function parkedBedTruck(t) { return t.T.bedL > 0 && t.kind !== 'feller' && Math.abs(t.speed) < 0.6 && t.tip < 0.02; }
 function snapBuild(ax, az) {
-  const type = build.type; if (type === 'shop1') return null;
+  const type = build.type; if (type === 'fence') return snapFence(ax, az); if (!isLine(type)) return null;
   const gh = footOf(type)[1], ur = build.rot, g = rotDir(ur), C = [];
   for (const it of placed) {
-    if (it.type === 'shop1') continue;
+    if (!isLine(it.type)) continue;
     const h = footOf(it.type)[1], d = rotDir(it.rot), ox = it.x + d[0] * h, oz = it.z + d[1] * h, ix = it.x - d[0] * h, iz = it.z - d[1] * h;
     C.push([ox + d[0] * gh, oz + d[1] * gh, it.rot, 'end', 3.5, ox, oz]);
     C.push([ix - d[0] * gh, iz - d[1] * gh, it.rot, 'end', 3.5, ix, iz]);
@@ -4235,6 +4428,22 @@ function snapBuild(ax, az) {
   // distance to the new piece or to the joint, whichever is closer; a corner only wins when no straight join fits
   for (const c of C) { const d = Math.min(Math.hypot(c[0] - ax, c[1] - az), Math.hypot(c[5] - ax, c[6] - az)) + (c[3] === 'corner' ? 10 : 0); if (d - (c[3] === 'corner' ? 10 : 0) < c[4] && d < bd && buildFits(type, c[0], c[1], c[2])) { bd = d; best = c; } }
   return best && best.slice(0, 4);
+}
+// a fence piece carries on from the end of another one, straight or around a corner
+function snapFence(ax, az) {
+  const ur = build.rot, g = rotDir(ur), C = [];
+  for (const it of placed) {
+    if (it.type !== 'fence') continue;
+    const d = rotDir(it.rot);
+    for (const sg of [1, -1]) {
+      const ex = it.x + sg * d[0] * 2, ez = it.z + sg * d[1] * 2;
+      if ((ur - it.rot + 4) % 2 === 0) C.push([ex + sg * d[0] * 2, ez + sg * d[1] * 2, it.rot]);
+      else for (const s2 of [1, -1]) C.push([ex + s2 * g[0] * 2.16, ez + s2 * g[1] * 2.16, ur]);
+    }
+  }
+  let best = null, bd = 2.6;
+  for (const c of C) { const dd = Math.hypot(c[0] - ax, c[1] - az); if (dd < bd && buildFits('fence', c[0], c[1], c[2])) { bd = dd; best = c; } }
+  return best && [best[0], best[1], best[2], 'fence'];
 }
 /* belts placed before snapping existed: line each one up with the mill or belt end it nearly touches,
    starting at the sawmills and working outward along each line of belts */
@@ -4285,14 +4494,18 @@ function tryPlace() {
   if (!S.inv[build.type]) { cancelBuild(); return; }
   S.inv[build.type]--;
   const it = placeItem(build.type, build.x, build.z, build.prot != null ? build.prot : build.rot);
-  if (build.type !== 'belt') alignBelts();
+  if (isLine(build.type) && build.type !== 'belt') alignBelts();
   sBuild();
-  if (build.type !== 'belt' && !S.seen.milltip) { S.seen.milltip = 1; hint('mill', 'Your sawmill is ready. Drop logs on its belt and planks come out the other end. Aim at it with your hands (<kbd>2</kbd>) and press <kbd>X</kbd> to pick it back up.'); }
+  if (build.type.startsWith('mill') && !S.seen.milltip) { S.seen.milltip = 1; hint('mill', 'Your sawmill is ready. Drop logs on its belt and planks come out the other end. Aim at it with your hands (<kbd>2</kbd>) and press <kbd>X</kbd> to pick it back up.'); }
   if (!S.inv[build.type]) cancelBuild();
   refreshBar();
 }
 function pickUpItem(it) {
-  if (it.queue.length || it.out.length || (it.type === 'shop1' && Object.values(it.stock).some(v => v > 0))) { toast('Wait until it finishes cutting.', true); return; }
+  if (it.queue.length || it.out.length) { toast('Wait until it finishes cutting.', true); return; }
+  if (it.type === 'kiln' && it.store.length) { toast('Wait until the kiln finishes drying.', true); return; }
+  if (it.type === 'bin' && it.store.length) { toast('Empty the dumpster first: press E next to it to tip the planks out.', true); return; }
+  if (it.type === 'hopper' && it.store.length) { toast('Empty the hopper first: let it feed its logs out of the front.', true); return; }
+  if (it.type === 'shop1') returnBenchStock(it);
   removeItem(it);
   S.inv[it.type]++; sTool(); toast(ITEMS[it.type].name + ' picked up. Press B to place it again.'); refreshBar();
 }
@@ -4307,7 +4520,7 @@ function aimItem() {
       const x = o.x + camDir.x * t, y = o.y + camDir.y * t, z = o.z + camDir.z * t;
       if (t > bt) break;
       const r = footRect(it.type, it.x, it.z, it.rot);
-      if (x > r.x0 && x < r.x1 && z > r.z0 && z < r.z1 && y < it.y + 2.5 && y > it.y) { if (t < bt) { bt = t; best = it; } break; }
+      if (x > r.x0 && x < r.x1 && z > r.z0 && z < r.z1 && y < it.y + (ITEMS[it.type].h || 2.5) && y > it.y) { if (t < bt) { bt = t; best = it; } break; }
     }
   }
   return best && Math.hypot(best.x - player.x, best.z - player.z) < 9 ? best : null;
@@ -4435,6 +4648,10 @@ const ACH = [
   ['deer', 'Deer Whisperer', 'Scare off a grumpy deer', null],
   ['raccoon', 'Bandit Buster', 'Get your wood back from the raccoon', null],
   ['debtfree', 'Debt Free', 'Pay off your loan at Pinecrest Bank', null],
+  ['cabin', 'Home Sweet Home', 'Build a Log Cabin on your land', () => !NET.guest && placed.some(p => p.type === 'cabin')],
+  ['dried', 'Dry Run', 'Kiln-dry a plank', () => (S.stats.dried || 0) >= 1],
+  ['stockpile', 'Stockpile', 'Fill a dumpster or a log hopper to the top', () => !NET.guest && placed.some(p => ITEMS[p.type].cap && p.type !== 'kiln' && p.store.length >= ITEMS[p.type].cap)],
+  ['yard', 'Curb Appeal', 'Put 5 buildings or yard pieces on your land', () => !NET.guest && placed.filter(p => ITEMS[p.type].build).length >= 5],
 ];
 function unlock(id) {
   if (S.ach[id]) return; const a = ACH.find(x => x[0] === id); if (!a) return;
@@ -4539,6 +4756,8 @@ function walkTo(w, tx, tz, dt, sp) {
   return false;
 }
 function millDrop() {
+  const hop = placed.find(p => p.type === 'hopper' && p.store.length < ITEMS.hopper.cap);
+  if (hop) return { x: hop.x, z: hop.z, y: hop.y + 2.2 };
   const mill = placed.find(p => p.type.startsWith('mill'));
   if (mill) { const ry = mill.rot * PI / 2; const [x, z] = at(0, -3.5, mill.x, mill.z, ry); return { x, z, y: mill.y + 1.6, mill }; }
   const p = PLOTS[S.plot]; return { x: p.x + 8, z: p.z + 8, y: hAt(p.x + 8, p.z + 8) + 1 };
@@ -4588,7 +4807,19 @@ function workersTick(dt) {
       if (w.state === 'idle' && w.t <= 0) {
         let best = null, bd = 1e9;
         for (const b of bodies) { if (!b.k || b.cargo || b.crane || b === held || b.heldBy || !onMyPlot(b.p.x, b.p.z)) continue; const d = Math.hypot(b.p.x - w.x, b.p.z - w.z); if (d < bd) { bd = d; best = b; } }
-        if (best) { w.target = best; w.state = 'toItem'; } else w.t = 5;
+        const bin = !best && placed.find(p => p.type === 'bin' && p.store.length);
+        if (best) { w.target = best; w.state = 'toItem'; } else if (bin) { w.target = bin; w.state = 'toBin'; } else w.t = 5;
+      } else if (w.state === 'toBin') {
+        const bn = w.target; if (!placed.includes(bn) || !bn.store.length) { w.state = 'idle'; w.t = 1; continue; }
+        const [sx, sz] = at(1.7, 0, bn.x, bn.z, bn.rot * PI / 2);
+        moving = !walkTo(w, sx, sz, dt, 3.4);
+        if (!moving && w.t <= 0) {
+          const pc = bn.store.pop(), v = pc[6] * 0.85, fake = { k: pc[0], sp: pc[1], p: new THREE.Vector3(bn.x, bn.y + 1, bn.z) };
+          S.money += v; S.earned += v; S.stats.sold++;
+          floatText(bn.x, bn.y + 1.5, bn.z, '+' + money(v), 'Sam sold a ' + SP[pc[1]].name + ' ' + KINDN[pc[0]]);
+          orderCredit(fake, 'me'); if (Math.hypot(w.x - player.x, w.z - player.z) < 60) sCoin(v);
+          if (!bn.store.length) w.state = 'idle'; w.t = 1.2;
+        }
       } else if (w.state === 'toItem') {
         const b = w.target; if (!b || b.gone || b.cargo || b === held) { w.state = 'idle'; w.t = 1; continue; }
         moving = !walkTo(w, b.p.x, b.p.z, dt, 3.4);
@@ -4637,6 +4868,157 @@ function benchTick(it, dt) {
     if (b) { b.val = Math.round(v); b.owner = 'me'; S.stats.crafted++; sBuild(); if (!S.seen.craft1) { S.seen.craft1 = 1; hint('craft', 'Crafted! Beams and furniture crates sell for a lot more than planks. Sell them at Riverside Timber.'); } }
     break;
   }
+}
+
+/* ================= storage and utility machines ================= */
+// a stored piece: [k, sp, len, r, pw, pt, value, dried]
+const KILN_MUL = 1.45, SHIP_MUL = 0.7;
+const packPiece = b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), Math.round(bodyValue(b)), b.dry ? 1 : 0];
+const storeValue = it => it.store.reduce((a, p) => a + p[6], 0);
+const loose = b => !b.cargo && b !== held && !b.crane && !b.heldBy;
+const itemDist = it => Math.hypot(it.x - player.x, it.z - player.z);
+// is the piece's centre inside the item's box (half sizes hx, hz in item space, up to `top` above its floor)?
+function inBox(it, b, hx, hz, top) {
+  if (Math.abs(b.p.x - it.x) > 6 || Math.abs(b.p.z - it.z) > 6 || b.p.y > it.y + top || b.p.y < it.y - 0.4) return false;
+  const [lx, lz] = toItem(it, b.p.x, b.p.z); return Math.abs(lx) < hx && Math.abs(lz) < hz;
+}
+function storePiece(it, b) { it.store.push(packPiece(b)); removeBody(b); netEvent({ t: 'del', id: b.id }); }
+// a stored piece comes back out lying along the feed direction, lz metres in front of the item's centre
+function spawnPiece(it, p, lz, y) {
+  const ry = it.rot * PI / 2, dx = Math.sin(ry), dz = Math.cos(ry), [wx, wz] = at(0, lz, it.x, it.z, ry);
+  tmpQ.setFromUnitVectors(XV, tmpV.set(dx, 0, dz));
+  const b = makeBody({ k: p[0], sp: p[1], len: p[2], r: p[3], pw: p[4], pt: p[5], val: p[6], x: wx, y, z: wz, q: tmpQ });
+  if (b) { b.owner = 'me'; if (p[7]) b.dry = 1; b.v.set(dx * 1.4, 0, dz * 1.4); }
+  return b;
+}
+// nothing lying in the strip in front of the item between z0 and z1 (item space)?
+function frontClear(it, z0, z1) {
+  const ry = it.rot * PI / 2, c = Math.cos(ry), s = Math.sin(ry);
+  for (const b of bodies) {
+    if (Math.abs(b.p.x - it.x) > 14 || Math.abs(b.p.z - it.z) > 14 || b.p.y > it.y + 3.5 || b.p.y < it.y - 0.5) continue;
+    const [lx, lz] = toItem(it, b.p.x, b.p.z), hl = b.len / 2, R = b.R, w = (b.k ? b.pw / 2 : b.r) + 0.1;
+    const ez = Math.abs(R[0] * s + R[6] * c) * hl + w, ex = Math.abs(R[0] * c - R[6] * s) * hl + w;
+    if (Math.abs(lx) < 1.0 + ex && lz + ez > z0 && lz - ez < z1) return false;
+  }
+  return true;
+}
+const STORE_TICK = {
+  // planks, beams and crates that fall in stay put until you tip them out of the hatch
+  bin(it, dt) {
+    const cap = ITEMS.bin.cap;
+    it.warnT -= dt;
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const b = bodies[i];
+      if (!b.k || !loose(b) || !inBox(it, b, 1.05, 1.75, 2.4)) continue;
+      if (it.store.length >= cap) { if (it.warnT <= 0) { it.warnT = 4; toast('The dumpster is full. Tip it out (E) or sell some wood.', true); } break; }
+      storePiece(it, b); sPlank(itemDist(it));
+      if (!S.seen.bin1) { S.seen.bin1 = 1; hint('bin', 'Planks are safe in your dumpster. Press <kbd>E</kbd> next to it to tip them out of the hatch. Put a belt at the hatch to carry them to your truck.'); }
+    }
+    if (it.on === 2) {
+      it.outT -= dt;
+      if (!it.store.length) it.on = 1;
+      else if (it.outT <= 0) {
+        const p = it.store[it.store.length - 1];
+        it.outT = 0.5;
+        if (frontClear(it, 1.9, 2.15 + p[2]) && spawnPiece(it, p, 2.05 + p[2] / 2, it.y + 1.02 + p[5] / 2)) { it.store.pop(); sPlank(itemDist(it)); }
+      }
+    }
+    const n = it.store.length;
+    it.fill.visible = n > 0;
+    if (n) { const h = 0.08 + 0.5 * n / cap; it.fill.scale.set(2.05, h, 3.45); it.fill.position.set(0, 0.18 + h / 2, 0); }
+  },
+  // logs dropped in wait here, and go out of the front one at a time when the way is clear
+  hopper(it, dt) {
+    const cap = ITEMS.hopper.cap;
+    it.warnT -= dt;
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const b = bodies[i];
+      if (b.k || b.rej || !loose(b) || !inBox(it, b, 1.25, 1.65, 3.6)) continue;
+      if (it.store.length >= cap) { if (it.warnT <= 0) { it.warnT = 4; toast('The log hopper is full.', true); } break; }
+      storePiece(it, b); sThud(0.3);
+      if (!S.seen.hop1) { S.seen.hop1 = 1; hint('hopper', 'Logs in the hopper go out of the front one at a time. Snap it onto your sawmill belt and it feeds the mill for you. Press <kbd>E</kbd> to pause it.'); }
+    }
+    if (it.on && it.store.length) {
+      it.outT -= dt;
+      if (it.outT <= 0) {
+        const p = it.store[0];
+        it.outT = 0.6;
+        if (frontClear(it, 1.8, 2.05 + p[2]) && spawnPiece(it, p, 1.95 + p[2] / 2, it.y + 1.02 + p[3])) { it.store.shift(); sThud(0.2); }
+      }
+    }
+    const n = Math.ceil(it.store.length * it.logs.length / cap);
+    for (let k = 0; k < it.logs.length; k++) it.logs[k].visible = k < n;
+  },
+  // fresh planks go in the back, dry for a few seconds and come out the front worth more
+  kiln(it, dt) {
+    const ry = it.rot * PI / 2, dx = Math.sin(ry), dz = Math.cos(ry), cap = ITEMS.kiln.cap;
+    it.warnT -= dt;
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const b = bodies[i];
+      if (!loose(b)) continue;
+      if (Math.abs(b.p.x - it.x) > b.len / 2 + 5 || Math.abs(b.p.z - it.z) > b.len / 2 + 5 || b.p.y > it.y + 3.2 || b.p.y < it.y + 0.4) continue;
+      const hl = b.len / 2, R = b.R;
+      let [lx, lz] = toItem(it, b.p.x + R[0] * hl, b.p.z + R[6] * hl);
+      const [lx2, lz2] = toItem(it, b.p.x - R[0] * hl, b.p.z - R[6] * hl);
+      if (lz2 > lz) { lx = lx2; lz = lz2; }
+      const [cx0, cz0] = toItem(it, b.p.x, b.p.z);
+      if (!((Math.abs(lx) < 1.6 && lz > -1.7 && lz < 0.2) || (Math.abs(cx0) < 1.4 && cz0 > -1.6 && cz0 < 0.2))) continue;
+      if (b.k !== 1 || b.dry || it.store.length >= cap) {
+        b.v.set(-dx * 3, 1.5, -dz * 3); wakeB(b);
+        if (it.warnT <= 0) { it.warnT = 2; toast(it.store.length >= cap ? 'The kiln is full. Give it a few seconds.' : b.dry ? 'That plank is already kiln-dried.' : 'The kiln only dries planks. Cut logs at a sawmill first.', true); sDeny(); }
+        continue;
+      }
+      const p = packPiece(b); p.push(9); it.store.push(p);
+      removeBody(b); netEvent({ t: 'del', id: b.id }); sThud(0.15);
+    }
+    if (!it.store.length) return;
+    const spd = MOTORS[S.motor].speed / 1.4;
+    for (const q of it.store) q[8] -= dt * spd;
+    if (fr() < dt * 2.5) { const [cx, cz] = at(0.9, -0.4, it.x, it.z, ry); dustPuff(cx, it.y + 4.5, cz, 0xd8d4cc, 1, 0.5); }
+    it.outT -= dt;
+    const k = it.store.findIndex(q => q[8] <= 0);
+    if (k < 0 || it.outT > 0) return;
+    const p = it.store[k].slice(0, 8); p[6] = Math.round(p[6] * KILN_MUL); p[7] = 1;
+    const b = spawnPiece(it, p, 1.15 + p[2] / 2, it.y + 1.05 + p[5] / 2);
+    if (b) {
+      b.v.set(dx * 1.2, 0, dz * 1.2); it.store.splice(k, 1); it.outT = 0.45; sPlank(itemDist(it)); S.stats.dried = (S.stats.dried || 0) + 1;
+      if (!S.seen.dry1) { S.seen.dry1 = 1; hint('kiln', 'Kiln-dried planks are darker and sell for ' + Math.round((KILN_MUL - 1) * 100) + '% more. Beams and crates made from them are worth more too.'); }
+    } else { it.outT = 2; if (it.warnT <= 0) { it.warnT = 4; toast('Too much wood lying around. Sell some before drying more.', true); } }
+  },
+  // anything dropped in is bought on the spot
+  shipbin(it) {
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const b = bodies[i];
+      if (!loose(b) || !inBox(it, b, 1.15, 1.15, 2.8)) continue;
+      b.val = Math.round(bodyValue(b) * SHIP_MUL); sellBody(b);
+    }
+  },
+};
+function sleepTillMorning() {
+  if (nightK() <= 0.5) { toast('It is still light out. Sleep after dark.'); return; }
+  if (S.time > 0.5) S.day++;
+  S.time = 0.26; sTool(); toast('You slept until morning. Rise and shine!'); save();
+}
+// the biggest vehicle that fits goes inside, backed in so it can drive straight out; the rest park out front
+function parkInGarage(it) {
+  const mine = trucks.filter(t => t.owner === 'me');
+  if (!mine.length) { toast('You have no vehicles to park.'); return; }
+  const ry = it.rot * PI / 2, fit = mine.filter(t => t.L < 9.6).sort((a, b) => b.L - a.L)[0];
+  for (const t of mine) {
+    if (t === fit) { const [gx, gz] = at(0, 0.1, it.x, it.z, ry); returnTruck(t, { x: gx, z: gz, yaw: ry }, true); }
+    else { const [fx, fz] = at(0, 10, it.x, it.z, ry); returnTruck(t, { x: fx, z: fz, yaw: ry }); }
+  }
+  sTool(); toast(mine.length > 1 ? 'Your vehicles are parked at the garage.' : 'Your ' + mine[0].T.name + ' is parked in the garage.');
+}
+// planks left on a woodshop bench come back as planks when you pick it up
+function returnBenchStock(it) {
+  const ry = it.rot * PI / 2; let k = 0;
+  for (const sp in it.stock) {
+    const n = it.stock[sp] | 0; if (n <= 0) continue;
+    const v = Math.round((it.stockV[sp] || 0) / n), len = clamp(it.stockL[sp] || 2, 1, 5);
+    for (let i = 0; i < n; i++, k++) { const [wx, wz] = at(0, -0.6 + (k % 3) * 0.6, it.x, it.z, ry); const b = makeBody({ k: 1, sp: +sp, len, pw: 0.3, pt: 0.1, val: v, x: wx, y: it.y + 1.1 + Math.floor(k / 3) * 0.25, z: wz, q: tmpQ.setFromAxisAngle(UPV, ry + PI / 2) }); if (b) b.owner = 'me'; }
+  }
+  it.stock = {}; it.stockV = {}; it.stockL = {};
 }
 
 /* ================= broken bridges you rebuild with planks ================= */
@@ -5358,6 +5740,24 @@ const svgFist = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="13" 
 const svgLogs = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="22" width="30" height="8" rx="4" fill="#9a6a42" stroke="#0e0c09" stroke-width="2"/><rect x="8" y="12" width="26" height="8" rx="4" fill="#b8844e" stroke="#0e0c09" stroke-width="2"/><circle cx="31" cy="16" r="2.4" fill="#f0dcb0"/><circle cx="31" cy="26" r="2.4" fill="#f0dcb0"/><path d="M12 34L28 8" stroke="#3a2a18" stroke-width="2.4"/></svg>';
 const svgRemote = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="14" width="26" height="18" rx="3" fill="#3a6ec8" stroke="#0e0c09" stroke-width="2"/><circle cx="15" cy="23" r="3.5" fill="#e8302a" stroke="#0e0c09" stroke-width="1.5"/><circle cx="25" cy="23" r="3.5" fill="#e8302a" stroke="#0e0c09" stroke-width="1.5"/><path d="M28 14V4" stroke="#2a2a2a" stroke-width="2.5"/><circle cx="28" cy="4" r="2.5" fill="#ffd25a"/></svg>';
 const svgStrap = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="16" width="32" height="14" rx="3" fill="#b8844e" stroke="#0e0c09" stroke-width="2"/><path d="M14 10v26M26 10v26" stroke="#e5533d" stroke-width="4"/><rect x="11" y="20" width="6" height="6" fill="#c8ccd0" stroke="#0e0c09" stroke-width="1.5"/></svg>';
+const SV = b => '<svg viewBox="0 0 40 40" aria-hidden="true" stroke="#0e0c09" stroke-width="2" stroke-linejoin="round">' + b + '</svg>';
+const svgHouse = (wall, roof) => SV('<path d="M6 20L20 7l14 13" fill="#' + roof.toString(16).padStart(6, '0') + '"/><rect x="9" y="19" width="22" height="15" fill="#' + wall.toString(16).padStart(6, '0') + '"/><rect x="17" y="24" width="6" height="10" fill="#3a2414"/>');
+const ICONS = {
+  bin: SV('<path d="M5 15h30l-3 18H8z" fill="#2f6a3a"/><path d="M4 15h32" stroke-width="3"/><rect x="11" y="9" width="18" height="5" fill="#d8b07a" stroke-width="1.5"/><circle cx="11" cy="35" r="2.5" fill="#222"/><circle cx="29" cy="35" r="2.5" fill="#222"/>'),
+  hopper: SV('<rect x="6" y="12" width="28" height="20" fill="#8a5a32"/><circle cx="14" cy="18" r="4" fill="#f0dcb0" stroke-width="1.5"/><circle cx="24" cy="18" r="4" fill="#f0dcb0" stroke-width="1.5"/><circle cx="19" cy="25" r="4" fill="#f0dcb0" stroke-width="1.5"/><path d="M6 12v22M34 12v22" stroke="#e0a52a" stroke-width="3"/>'),
+  kiln: SV('<rect x="5" y="14" width="30" height="20" fill="#9a5a3a"/><rect x="25" y="5" width="5" height="9" fill="#555"/><rect x="11" y="21" width="8" height="6" fill="#ff9a3a" stroke-width="1.5"/><rect x="22" y="21" width="8" height="6" fill="#ff9a3a" stroke-width="1.5"/>'),
+  shipbin: SV('<rect x="5" y="14" width="30" height="20" fill="#b08a5a"/><path d="M5 21h30M5 28h30" stroke-width="1.5"/><path d="M14 9l6-5 6 5M20 4v12" stroke="#ffd25a" stroke-width="3"/>'),
+  cabin: svgHouse(0x8a5a32, 0x4a5a3a), garage: svgHouse(0xb9c6cc, 0x3c5566), shed: svgHouse(0xa0623a, 0x2f4f7a),
+  tower: SV('<path d="M11 36L15 14M29 36L25 14" stroke="#5a3e28" stroke-width="3"/><rect x="11" y="13" width="18" height="4" fill="#b08a5a"/><path d="M9 11L20 4l11 7z" fill="#9c3b2a"/>'),
+  lamp: SV('<path d="M20 36V8h8" fill="none" stroke="#2b2b2b" stroke-width="3"/><rect x="24" y="9" width="8" height="6" fill="#ffd27a"/>'),
+  mailbox: SV('<path d="M20 36V22" stroke="#5a3e28" stroke-width="3"/><path d="M8 22V14a6 6 0 0 1 6-6h12a6 6 0 0 1 6 6v8z" fill="#2f5fa0"/><path d="M28 8v8" stroke="#d03a2a" stroke-width="3"/>'),
+  table: SV('<rect x="5" y="15" width="30" height="5" fill="#8a5a32"/><path d="M10 20l-3 13M30 20l3 13M4 26h12M24 26h12" stroke="#5a3e28" stroke-width="3"/>'),
+  planter: SV('<rect x="6" y="22" width="28" height="12" fill="#8a5a32"/><circle cx="13" cy="15" r="4" fill="#e5533d"/><circle cx="21" cy="12" r="4" fill="#ffd25a"/><circle cx="28" cy="16" r="4" fill="#d86ab0"/>'),
+  fence: SV('<path d="M8 34V10M20 34V10M32 34V10" stroke="#5a3e28" stroke-width="3.5"/><path d="M4 16h32M4 27h32" stroke="#8a5a32" stroke-width="3.5"/>'),
+  flag: SV('<path d="M10 36V4" stroke="#999" stroke-width="3"/><path d="M11 6h20l-4 6 4 6H11z" fill="#c8322a"/>'),
+};
+const itemIcon = k => k === 'belt' ? svgBelt : k === 'shop1' ? svgBench : k.startsWith('mill') ? svgMill(ITEMS[k].color) : ICONS[k] || svgBolt;
+const svgLampHead = SV('<path d="M8 22a12 12 0 0 1 24 0" fill="#2f6fb0"/><rect x="7" y="21" width="26" height="6" fill="#2f6fb0"/><circle cx="20" cy="24" r="5" fill="#fff2b0"/><path d="M27 14l7-6M30 19l8-2" stroke="#ffd25a" stroke-width="2.5"/>');
 function refreshBar() {
   const a = axeById(S.axe);
   $('#s0').innerHTML = '<span class="k">1</span>' + (a.fists ? svgFist : svgAxe(a)) + '<span class="n">' + (a.fists ? 'Fists' : 'Axe') + '</span>';
@@ -5366,7 +5766,7 @@ function refreshBar() {
   const dt0 = $('#debtTxt'); dt0.hidden = !(S.debt > 0); $('#game').classList.toggle('hasDebt', S.debt > 0); if (S.debt > 0) dt0.textContent = 'Loan: ' + money(S.debt);
   const pk = $('#sPack'); pk.hidden = !S.pack.length; if (S.pack.length) pk.innerHTML = '<span class="k">C</span>' + svgLogs + '<span class="n">' + S.pack.length + '/' + rackCap() + '</span>';
   $('#s1').innerHTML = '<span class="k">2</span>' + svgHand + '<span class="n">Grab</span>';
-  const inv = S.inv.mill1 + S.inv.mill2 + S.inv.mill3 + S.inv.belt + S.inv.shop1;
+  const inv = ITEM_KEYS.reduce((n, k) => n + (S.inv[k] || 0), 0);
   const sw = sawById(S.saw);
   $('#s3').hidden = !sw;
   if (sw) $('#s3').innerHTML = '<span class="k">3</span>' + svgSaw(sw.color) + '<span class="n">Saw</span>';
@@ -5422,10 +5822,10 @@ function findPrompt() {
     }
   }
   if (!best && held && !hold.crane && packable(held)) best = { text: 'Carry it on your back (' + S.pack.length + '/' + rackCap() + ')', act: () => packAction(), key: 'c' };
-  if (!best && S.tool === 1) { const it = aimItem(); if (it) best = { text: 'Pick up the ' + ITEMS[it.type].name, act: () => pickUpItem(it), key: 'x' }; }
+  if (S.tool === 1 && !held) { const it = aimItem(); if (it) { const alt = best && best.key === 'e' ? best : null; best = { text: 'Pick up the ' + ITEMS[it.type].name + (alt && !coarse ? '&nbsp;&nbsp;<kbd>E</kbd> ' + alt.text : ''), act: () => pickUpItem(it), key: 'x', alt }; } }
   return best;
 }
-function usePrompt(key) { key = key || 'e'; if (!playing()) return; if (player.truck) { if (key === 'e') exitTruck(); return; } const p = findPrompt(); if (!p) return; if (coarse || p.key === key) p.act(); }
+function usePrompt(key) { key = key || 'e'; if (!playing()) return; if (player.truck) { if (key === 'e') exitTruck(); return; } const p = findPrompt(); if (!p) return; if (coarse || p.key === key) p.act(); else if (p.alt && p.alt.key === key) p.alt.act(); }
 $('#prompt').addEventListener('click', () => { aInit(); if (curPrompt) curPrompt.act(); });
 const REGNAME = ['Oakvale Woods', 'Silver Birch Grove', 'Ember Maple Hills', 'Frostpine Slopes', 'Murkwater Swamp', 'Glimmer Isle', 'Big Lake', 'Redwood Canyon'];
 const REGSUB = ['Oak and a little Maple', 'Birch', 'Maple', 'Snow Pine', 'Bogwood', 'Glowbark', '', 'Giant Redwood'];
@@ -5542,6 +5942,8 @@ function fillShop() {
     }
     sec('Back racks');
     for (let i = 1; i < RACKS.length; i++) { const r = RACKS[i], own = S.rack >= i, next = S.rack === i - 1; L.append(row(svgLogs, r.name, 'Carry ' + (r.cap + (S.perks.back || 0) + (S.cls === 'hauler' ? 3 : 0)) + ' pieces of wood on your back. Walk into Riverside Timber and they sell themselves.', '', own ? 'Owned' : next ? money(r.price) : 'Locked', own ? 'own' : next && can(r.price) ? '' : 'no', () => { if (!own && next) buyRack(i); })); }
+    sec('Gear');
+    L.append(row(svgLampHead, 'Headlamp', 'Lights the way you look after dark, on foot. It turns on by itself at night.', '', S.headlamp ? 'Owned' : money(HEADLAMP_PRICE), S.headlamp ? 'own' : can(HEADLAMP_PRICE) ? '' : 'no', () => { if (!S.headlamp && pay(HEADLAMP_PRICE, true)) { S.headlamp = 1; toast('Headlamp on your hat. It switches on by itself after dark.'); fillShop(); save(); } }));
     sec('Chainsaws');
     for (const w of SAWS) {
       const own = S.saws.includes(w.id), eq = S.saw === w.id;
@@ -5557,6 +5959,8 @@ function fillShop() {
     for (let i = 1; i < MOTORS.length; i++) { const m = MOTORS[i], own = S.motor >= i, next = S.motor === i - 1; L.append(row(svgBolt, m.name, m.desc, '', own ? 'Owned' : next ? money(m.price) : 'Locked', own ? 'own' : next && can(m.price) ? '' : 'no', () => { if (!own && next) buyMotor(i); })); }
     sec('Workshop');
     { const it = ITEMS.shop1, n = S.inv.shop1 + placed.filter(p => p.type === 'shop1').length; L.append(row(svgBench, it.name + (n ? ' (you have ' + n + ')' : ''), it.desc, '', money(it.price), can(it.price) ? '' : 'no', () => buyItem('shop1'))); }
+    sec('Storage and utility');
+    for (const k of ['bin', 'hopper', 'kiln', 'shipbin']) { const it = ITEMS[k], n = S.inv[k] + placed.filter(p => p.type === k).length; L.append(row(itemIcon(k), it.name + (n ? ' (you have ' + n + ')' : ''), it.desc, '', money(it.price), can(it.price) ? '' : 'no', () => buyItem(k))); }
     sec('Hire help');
     for (const k of ['logger', 'seller']) { const w = WORKERS[k], n = S.workers[k], max = k === 'logger' ? 2 : 1, price = w.price * (1 + n); L.append(row(svgPerson(w.shirt), w.name + (n ? ' (hired' + (max > 1 ? ' x' + n : '') + ')' : ''), w.desc, '', n >= max ? 'Hired' : money(price), n >= max ? 'own' : can(price) ? '' : 'no', () => { if (n < max) buyWorker(k, price); })); }
     if (S.plot < 0) { const p = document.createElement('p'); p.className = 'tag'; p.style.cssText = 'font-size:12px;color:#cbbfa6;margin:4px 0 0'; p.textContent = 'You need your own land for sawmills, benches and workers. Plots are for sale west of town.'; L.append(p); }
@@ -5592,13 +5996,19 @@ function fillShop() {
     }
   } else if (shopKind === 'orders' || shopKind === 'awards' || shopKind === 'online' || shopKind === 'inv') { fillExtra(L, T);
   } else if (shopKind === 'build') {
-    T.innerHTML = 'Build on your land<span class="sub">Pick something to place</span>';
-    let any = false;
-    for (const k of ['mill1', 'mill2', 'mill3', 'belt', 'shop1']) {
-      if (!S.inv[k]) continue; any = true;
-      L.append(row(k === 'belt' ? svgBelt : k === 'shop1' ? svgBench : svgMill(ITEMS[k].color), ITEMS[k].name + ' x' + S.inv[k], k === 'belt' ? 'Belts carry wood toward the yellow dots.' : k === 'shop1' ? 'Drop planks on top; crafted goods pop out the side.' : 'Logs go in on the belt side, planks come out the other end.', '', 'Place', '', () => startPlace(k)));
+    T.innerHTML = 'Build on your land<span class="sub">You have ' + money(S.money) + '</span>';
+    const ready = ITEM_KEYS.filter(k => S.inv[k]);
+    if (ready.length) sec('Ready to place');
+    for (const k of ready) L.append(row(itemIcon(k), ITEMS[k].name + ' x' + S.inv[k], placeTip(k), '', 'Place', '', () => startPlace(k)));
+    for (const [cat, title] of [['b', 'Buildings'], ['y', 'Yard']]) {
+      sec(title);
+      for (const k of ITEM_KEYS) {
+        const it = ITEMS[k]; if (it.build !== cat) continue;
+        const n = placed.filter(p => p.type === k).length, price = it.price * (it.pack || 1);
+        L.append(row(itemIcon(k), it.name + (it.pack ? ' (' + it.pack + ' pieces)' : '') + (n ? ' (' + n + ' built)' : ''), it.desc, '', money(price), can(price) ? '' : 'no', () => buyBuild(k)));
+      }
     }
-    if (!any) { const p = document.createElement('p'); p.style.cssText = 'font-size:14px;color:#cbbfa6;margin:4px 2px'; p.textContent = 'Nothing to place. Buy sawmills and belts at Bolt & Belt in town. To move something you already placed, hold your hands (2), aim at it and press X.'; L.append(p); }
+    const p = document.createElement('p'); p.style.cssText = 'font-size:13px;color:#cbbfa6;margin:6px 2px'; p.textContent = 'Sawmills, belts and storage machines are sold at Bolt & Belt in town. To move something you placed, hold your hands (2), aim at it and press X.'; L.append(p);
   }
 }
 /* inventory (I): everything you own, with your axe, chainsaw and tools to pick from */
@@ -5620,14 +6030,15 @@ function fillInventory(L, T, sec) {
   if (S.autoCrane) L.append(row(svgRemote, 'Auto crane', 'Loads loose wood into your parked truck while you stand near it.', '', S.autoOn === 0 ? 'Turn on' : 'Turn off', 'own', () => { S.autoOn = S.autoOn === 0 ? 1 : 0; toast('Auto crane ' + (S.autoOn ? 'on.' : 'off.')); fillShop(); save(); }));
   sec('Ready to place');
   let any = false;
-  for (const k of ['mill1', 'mill2', 'mill3', 'belt', 'shop1']) { if (!S.inv[k]) continue; any = true;
-    L.append(row(k === 'belt' ? svgBelt : k === 'shop1' ? svgBench : svgMill(ITEMS[k].color), ITEMS[k].name + ' x' + S.inv[k], 'Place it on your land.', '', 'Place', 'own', () => { if (S.plot < 0 && k !== 'belt') { toast('Buy a plot of land first.', true); return; } startPlace(k); })); }
+  for (const k of ITEM_KEYS) { if (!S.inv[k]) continue; any = true;
+    L.append(row(itemIcon(k), ITEMS[k].name + ' x' + S.inv[k], 'Place it on your land.', '', 'Place', 'own', () => { if (S.plot < 0 && k !== 'belt') { toast('Buy a plot of land first.', true); return; } startPlace(k); })); }
   if (!any) note('Nothing waiting to be placed. To move something you placed, hold your hands (2), aim at it and press X.');
   sec('Vehicles and upgrades');
   for (const k of S.ownT || []) if (TRUCKS[k]) L.append(row(svgTruck(TRUCKS[k].color), TRUCKS[k].name, TRUCKS[k].desc || 'Your first truck.', '', 'Owned', 'own', null));
   L.append(row(svgStrap, STRAPS[S.straps || 0].name, 'Load straps on all your vehicles.', '', 'Owned', 'own', null));
   L.append(row(svgLogs, RACKS[S.rack || 0].name, 'Carries ' + rackCap() + ' pieces on your back' + (S.pack.length ? ' (carrying ' + S.pack.length + ' now).' : '.'), '', 'Owned', 'own', null));
   L.append(row(svgBelt, MOTORS[S.motor || 0].name, 'Powers all your belts and mills.', '', 'Owned', 'own', null));
+  if (S.headlamp) L.append(row(svgLampHead, 'Headlamp', 'Turns on by itself after dark and lights the way you look.', '', 'Owned', 'own', null));
   sec('Collection');
   L.append(row(svgBolt, 'Golden pinecones: ' + (S.cones || []).length + ' of ' + CONES.length, 'Hidden all over the map, from the snowy peaks to Redwood Canyon. Look for a faint gold beam. Each one pays ' + money(CONE_V) + '.', statBars([['Found', (S.cones || []).length / CONES.length]]), (S.cones || []).length === CONES.length ? 'All found' : 'Keep looking', 'own', null));
 }
@@ -5664,6 +6075,14 @@ function buyAxe(a) { if (!pay(a.price, true)) return; S.axes.push(a.id); S.axe =
 function buyItem(k) {
   if (k !== 'belt' && S.plot < 0) { toast('Buy a plot of land first. Your sawmill needs somewhere to live.', true); sDeny(); return; }
   if (!pay(ITEMS[k].price)) return; S.inv[k]++; toast(ITEMS[k].name + ' bought. Press B on your land to place it.'); refreshBar(); fillShop(); save();
+}
+const HEADLAMP_PRICE = 500;
+const placeTip = k => k === 'belt' ? 'Belts carry wood toward the yellow dots.' : k === 'shop1' ? 'Drop planks on top; crafted goods pop out the side.' : k.startsWith('mill') ? 'Logs go in on the belt side, planks come out the other end.' : ITEMS[k].desc;
+// buildings and yard pieces are bought right from the Build menu and placed straight away
+function buyBuild(k) {
+  const it = ITEMS[k], n = it.pack || 1;
+  if (!pay(it.price * n)) return;
+  S.inv[k] += n; refreshBar(); save(); startPlace(k);
 }
 function buyMotor(i) { if (!pay(MOTORS[i].price)) return; S.motor = i; refreshBelts(); toast(MOTORS[i].name + ' installed on all your belts.'); fillShop(); save(); }
 function buyTruck(k) {
@@ -5739,7 +6158,7 @@ $('#mHelp').addEventListener('click', () => { closeMenu(); showIntro(true); });
 $('#mAwards').addEventListener('click', () => { closeMenu(); openShop('awards'); });
 $('#mOnline').addEventListener('click', () => { closeMenu(); openShop('online'); });
 $('#bNet').addEventListener('click', () => { aInit(); openShop('online'); });
-$('#mTruck').addEventListener('click', () => { closeMenu(); if (NET.guest) { netAct({ t: 'returnT' }); toast('Your vehicles are back by the town square.'); return; } for (const t of trucks.slice()) if (t.owner === 'me') returnTruck(t); toast('Your vehicles are back ' + (S.plot >= 0 ? 'on your land.' : 'in town.')); });
+$('#mTruck').addEventListener('click', () => { closeMenu(); if (NET.guest) { netAct({ t: 'returnT' }); toast('Your vehicles are back by the town square.'); return; } const gar = placed.find(p => p.type === 'garage'); if (gar) { parkInGarage(gar); return; } for (const t of trucks.slice()) if (t.owner === 'me') returnTruck(t); toast('Your vehicles are back ' + (S.plot >= 0 ? 'on your land.' : 'in town.')); });
 $('#mHome').addEventListener('click', () => { if (player.truck) exitTruck(); player.x = SPAWN.x; player.z = SPAWN.z; player.y = hAt(SPAWN.x, SPAWN.z); player.vx = player.vz = player.vy = 0; closeMenu(); });
 let resetArm = false;
 $('#mReset').addEventListener('click', () => {
@@ -5831,7 +6250,7 @@ function updateSky(dt) {
   const step = SHR * 2 / 2048;
   const fx = Math.round(player.x / step) * step, fz = Math.round(player.z / step) * step;
   sun.target.position.set(fx, player.y, fz); sun.position.set(fx + lightDir.x * 150, player.y + lightDir.y * 150, fz + lightDir.z * 150);
-  lampMat.emissiveIntensity = 0.1 + nk * 2;
+  lampMat.emissiveIntensity = 0.1 + nk * 2; yardGlowMat.opacity = nk * 0.55;
   glowMat.emissiveIntensity = glowMatS.emissiveIntensity = MATS_T[5].far.emissiveIntensity = 0.35 + nk * 1.4;
   waterU.value = clock;
   clouds.children[0].material.color.setScalar(0.35 + 0.65 * day).lerp(C_DUSK, dusk * 0.3);
@@ -5849,11 +6268,11 @@ function serialize() {
   const myT = trucks.filter(t => t.owner === 'me');
   o.drive = player.seat === 0 ? myT.indexOf(player.truck) : -1;
   o.trucks = myT.map(t => [t.type, r3(t.pos.x), r3(t.pos.y), r3(t.pos.z), r3(t.yaw)]);
-  o.placed = placed.map(it => [it.type, it.x, it.z, it.rot, it.queue.map(j => [j.sp, r3(j.len), r3(j.r), r3(j.t)]), it.out.map(p => [p.sp, r3(p.len), r3(p.pw), r3(p.pt)]), it.recipe || 0, it.stock || {}, it.stockV || {}, it.stockL || {}]);
+  o.placed = placed.map(it => [it.type, it.x, it.z, it.rot, it.queue.map(j => [j.sp, r3(j.len), r3(j.r), r3(j.t)]), it.out.map(p => [p.sp, r3(p.len), r3(p.pw), r3(p.pt)]), it.recipe || 0, it.stock || {}, it.stockV || {}, it.stockL || {}, it.store, it.on]);
   o.wv = WORLD_V;
   o.felled = FELLED.map(i => [i, Math.round(tTimer[i]), r3(tCut[i])]);
   o.growing = GROWING.map(i => [i, r3(tGrow[i])]);
-  o.bodies = bodies.filter(b => !b.crane).map(b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), r3(b.p.x), r3(b.p.y), r3(b.p.z), r3(b.q.x), r3(b.q.y), r3(b.q.z), r3(b.q.w), b.cargo ? myT.indexOf(b.cargo) : -1, Math.round(b.val || 0)]);
+  o.bodies = bodies.filter(b => !b.crane).map(b => [b.k, b.sp, r3(b.len), r3(b.r), r3(b.pw), r3(b.pt), r3(b.p.x), r3(b.p.y), r3(b.p.z), r3(b.q.x), r3(b.q.y), r3(b.q.z), r3(b.q.w), b.cargo ? myT.indexOf(b.cargo) : -1, Math.round(b.val || 0), b.dry ? 1 : 0]);
   o.ferry = r3(ferry.t);
   return o;
 }
@@ -5879,7 +6298,7 @@ function apply(d) {
   for (const k of ['player', 'drive', 'trucks', 'placed', 'felled', 'growing', 'bodies', 'ferry', 'lastSeen']) delete S[k];
   for (const t of d.trucks || []) if (TRUCKS[t[0]] && !S.ownT.includes(t[0])) S.ownT.push(t[0]);
   for (const t of d.trucks || []) if (TRUCKS[t[0]] && !trucks.some(q => q.owner === 'me' && q.type === t[0])) makeTruck(t[0], t[1], t[3], t[4], { owner: 'me', lv: t[0] === 'feller' ? S.fellerLv : 0, straps: S.straps });
-  for (const p of d.placed || []) if (ITEMS[p[0]]) { const it = placeItem(p[0], p[1], p[2], p[3] | 0); it.recipe = p[6] || 0; it.stock = p[7] || {}; it.stockV = p[8] || {}; it.stockL = p[9] || {}; for (const j of p[4] || []) it.queue.push({ sp: j[0], len: j[1], r: j[2], t: j[3] }); for (const o of p[5] || []) it.out.push({ sp: o[0], len: o[1], pw: o[2], pt: o[3] }); }
+  for (const p of d.placed || []) if (ITEMS[p[0]]) { const it = placeItem(p[0], p[1], p[2], p[3] | 0); it.recipe = p[6] || 0; it.stock = p[7] || {}; it.stockV = p[8] || {}; it.stockL = p[9] || {}; if (Array.isArray(p[10])) it.store = p[10].filter(q => Array.isArray(q) && SP[q[1]]); if (p[11] != null) it.on = p[11]; for (const j of p[4] || []) it.queue.push({ sp: j[0], len: j[1], r: j[2], t: j[3] }); for (const o of p[5] || []) it.out.push({ sp: o[0], len: o[1], pw: o[2], pt: o[3] }); }
   if (!NET.guest) alignBelts();
   // trees are numbered by where they grow: a save from the smaller map can't keep its felled list
   if (d.wv !== WORLD_V) { d.felled = []; d.growing = []; }
@@ -5889,7 +6308,7 @@ function apply(d) {
     if (!SP[a[1]]) continue;
     const b = makeBody({ k: a[0], sp: a[1], len: a[2], r: a[3], pw: a[4], pt: a[5], x: a[6], y: a[7], z: a[8], q: tmpQ.set(a[9], a[10], a[11], a[12]).normalize(), val: a[14] || 0 });
     if (!b) continue;
-    b.sleep = true;
+    b.sleep = true; if (a[15]) b.dry = 1;
     const t = trucks[a[13]];
     if (t) { truckM.compose(t.pos, t.q, tmpS.set(1, 1, 1)).invert(); b.cl = { p: b.p.clone().applyMatrix4(truckM), q: t.q.clone().invert().multiply(b.q) }; b.cargo = t; b.sleep = false; t.cargo.push(b); }
   }
