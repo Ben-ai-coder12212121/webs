@@ -90,7 +90,13 @@ export class Hud {
     $('playBtn').addEventListener('click', () => g.startMatch());
     $('resumeBtn').addEventListener('click', () => g.resume());
     $('quitBtn').addEventListener('click', () => g.quitToMenu());
-    $('againBtn').addEventListener('click', () => { this.el.end.classList.add('hidden'); g.startMatch(); });
+    $('quickBtn').addEventListener('click', () => g.online.quick());
+    $('friendBtn').addEventListener('click', () => g.online.friend());
+    $('againBtn').addEventListener('click', () => {
+      if (g.net) { g.online.rematch(); return; }
+      this.el.end.classList.add('hidden');
+      g.startMatch();
+    });
     $('menuBtn').addEventListener('click', () => { this.el.end.classList.add('hidden'); g.quitToMenu(); });
     if (g.isTouch) $('controlsCard').querySelector('.keys').innerHTML = '<span>Left stick: move (push far to sprint)</span><span>Drag right side: look</span><span>FIRE also aims while dragging</span><span>AIM toggles sights</span>';
   }
@@ -122,16 +128,24 @@ export class Hud {
     this.updateScores();
   }
 
-  showPause(on) {
+  showPause(on, online = false) {
     this.el.pause.classList.toggle('hidden', !on);
+    $('pauseNote').classList.toggle('hidden', !online);
+    $('quitBtn').textContent = online ? 'LEAVE MATCH' : 'QUIT TO MENU';
     if (on) this.syncSliders();
   }
 
-  showEnd(winner) {
+  // opts.note: why the match stopped early (e.g. the opponent left); opts.online: offer a rematch
+  showEnd(winner, opts = {}) {
     const g = this.g, p = g.player, b = g.bot;
     const t = $('endTitle');
     t.className = 'end-title';
-    if (!winner) { t.textContent = 'DRAW'; t.classList.add('draw'); $('endSub').textContent = 'Time ran out with the scores level.'; }
+    this.showRespawn(false);
+    this.rematchNote(null);
+    $('againBtn').textContent = opts.online ? 'REMATCH' : 'PLAY AGAIN';
+    $('againBtn').disabled = false;
+    if (opts.note) { t.textContent = 'MATCH ENDED'; t.classList.add('draw'); $('endSub').textContent = opts.note; }
+    else if (!winner) { t.textContent = 'DRAW'; t.classList.add('draw'); $('endSub').textContent = 'Time ran out with the scores level.'; }
     else if (winner === p) {
       t.textContent = 'VICTORY';
       $('endSub').textContent = p.progress >= g.maxProgress ? `You finished the ladder with the Knife!` : `Time's up. You were further up the ladder.`;
@@ -144,6 +158,14 @@ export class Hud {
     this.el.end.classList.remove('hidden');
     this.el.sb.classList.add('hidden');
     $('touch').classList.add('hidden');
+  }
+
+  // A line under the end-of-match stats; disable: no rematch possible (the opponent is gone).
+  rematchNote(text, disable = false) {
+    const n = $('endNote');
+    n.textContent = text || '';
+    n.classList.toggle('hidden', !text);
+    if (disable) { $('againBtn').disabled = true; $('againBtn').textContent = 'REMATCH'; }
   }
 
   showScoreboard(on) {

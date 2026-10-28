@@ -105,7 +105,11 @@
         <div class="l2">GUN GAME</div>
         <div class="ribbon">NUKETOWN (STYLE)</div>
       </div>
-      <button id="playBtn" class="btn-play">PLAY</button>
+      <button id="playBtn" class="btn-play">PLAY VS BOT</button>
+      <div class="online-row">
+        <button id="quickBtn" class="btn-online">QUICK MATCH<small>Random opponent</small></button>
+        <button id="friendBtn" class="btn-online">PLAY A FRIEND<small>Room code</small></button>
+      </div>
       <div class="card">
         <h3>Match Settings</h3>
         <label class="row"><span>Your name</span><input id="optName" maxlength="14" autocomplete="off"></label>
@@ -155,6 +159,7 @@
 <div id="pause" class="overlay hidden">
   <div class="panel center">
     <h2>PAUSED</h2>
+    <p id="pauseNote" class="pause-note hidden">Online match: it keeps going while this menu is open.</p>
     <button class="btn" id="resumeBtn">RESUME</button>
     <label class="row"><span>Sensitivity <b id="pSensVal"></b></span><input type="range" id="pSens" min="0.2" max="3" step="0.05"></label>
     <label class="row"><span>Volume <b id="pVolVal"></b></span><input type="range" id="pVol" min="0" max="1" step="0.05"></label>
@@ -168,10 +173,29 @@
     <div id="endTitle" class="end-title">VICTORY</div>
     <div id="endSub" class="end-sub"></div>
     <table class="end-stats"><thead><tr><th></th><th>Kills</th><th>Deaths</th><th>Best streak</th><th>Accuracy</th><th>Headshots</th><th>Weapon</th></tr></thead><tbody id="endBody"></tbody></table>
+    <p id="endNote" class="end-note hidden"></p>
     <div class="end-btns">
       <button class="btn" id="againBtn">PLAY AGAIN</button>
       <button class="btn ghost" id="menuBtn">MAIN MENU</button>
     </div>
+  </div>
+</div>
+
+<!-- online matchmaking -->
+<div id="online" class="overlay hidden">
+  <div class="panel center online-panel">
+    <h2 id="onTitle">QUICK MATCH</h2>
+    <p id="onStatus" class="on-status"></p>
+    <div id="onCode" class="on-code hidden"></div>
+    <button class="btn ghost hidden" id="onCopy" type="button">COPY INVITE LINK</button>
+    <div id="onFriend" class="hidden">
+      <button class="btn" id="onCreate" type="button">CREATE A ROOM</button>
+      <div class="on-or">or join a friend's room</div>
+      <div class="on-row"><input id="onJoinCode" maxlength="8" placeholder="CODE" autocomplete="off" spellcheck="false" aria-label="Room code"><button class="btn" id="onJoin" type="button">JOIN</button></div>
+    </div>
+    <p id="onErr" class="on-err hidden"></p>
+    <p class="on-note">Players connect directly. Some school and work networks block this.</p>
+    <button class="btn ghost" id="onCancel" type="button">CANCEL</button>
   </div>
 </div>
 
