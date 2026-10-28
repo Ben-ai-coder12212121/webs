@@ -287,5 +287,6 @@ G.push(
 {"id":"growop","name":"Green Thumb Grow Co.","kind":"sim","tint":"#6fbf45","url":"/games/green-thumb-grow-co/","wide":true,"big":true,"tags":["3D","tycoon"],"age":16,"fmt":b=>{const u=['','K','M','B'];let i=0;while(b>=1000&&i<3){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
 {"id":"sk_hole","name":"Rim Runner","kind":"arcade","tint":"#07061a","url":"/games/rim-runner/","fmt":b=>(b/10).toFixed(1)+'s'},
 {"id":"hustle3d","name":"Corner Hustle","kind":"sim","tint":"#8df58a","url":"/games/corner-hustle/","wide":true,"big":true,"tags":["3D","sim","tycoon"],"age":16,"fmt":b=>{const u=['','K','M','B'];let i=0;while(b>=1000&&i<3){b/=1000;i++}return'\x24'+(i?b.toFixed(b<10?2:b<100?1:0):Math.floor(b))+u[i]}},
-{"id":"climb3d","name":"Summit Fall","kind":"game","tint":"#d8582c","url":"/games/summit-fall/","wide":true,"big":true,"tags":["3D","climbing","co-op","online"],"fmt":b=>b+' m'}
+{"id":"climb3d","name":"Summit Fall","kind":"game","tint":"#d8582c","url":"/games/summit-fall/","wide":true,"big":true,"tags":["3D","climbing","co-op","online"],"fmt":b=>b+' m'},
+{"id":"gungame1v1","name":"1v1 Gun Game","kind":"game","tint":"#ffc21a","url":"/games/1v1-gun-game/","wide":true,"big":true,"fmt":b=>b+(b===1?' win':' wins')}
 );
