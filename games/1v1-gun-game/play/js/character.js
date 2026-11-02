@@ -103,7 +103,7 @@ export function setCharacterWeapon(ch, weapon) {
 }
 
 // Pose the character. speed in m/s, crouch 0..1, pitch in radians.
-export function animateCharacter(ch, dt, { speed, crouch, pitch, dead, firing }) {
+export function animateCharacter(ch, dt, { speed, crouch, pitch, dead, firing, flinch = 0 }) {
   const u = ch.userData;
   if (dead) {
     if (u.deathT < 0) u.deathT = 0;
@@ -123,7 +123,8 @@ export function animateCharacter(ch, dt, { speed, crouch, pitch, dead, firing })
   u.legs[1].rotation.x = -Math.sin(u.walk) * swing - crouch * 0.9;
   for (const l of u.legs) l.position.y = 0.9 - crouchDrop * 0.6;
   u.upper.position.y = 0.9 - crouchDrop;
-  u.upper.rotation.x = pitch * 0.45;
+  u.upper.rotation.x = pitch * 0.45 - flinch * 0.22;
+  u.upper.rotation.z = flinch * 0.12;
   u.head.rotation.x = pitch * 0.4;
   // arms hold the weapon forward
   const recoil = firing ? 0.06 : 0;

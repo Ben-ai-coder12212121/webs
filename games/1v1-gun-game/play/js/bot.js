@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { lineOfSight, world, rayBox } from './physics.js';
 import { angleDiff, yawTo, rand, clamp } from './util.js';
-import { WEAPONS } from './weapons.js';
 
 export const DIFFICULTY = {
   easy:    { label: 'Easy',    react: 0.8,  turn: 3.2, err: 0.085, burst: [0.2, 0.45], pause: [0.5, 0.9],  head: 0.05, hint: 14, fov: 1.7, strafe: 0.4, melee: 0.0, semiDelay: 0.35, dmgTaken: 1.0 },
@@ -46,6 +45,7 @@ export class BotBrain {
     this.stuckT = 0; this.lastPos = this.me.pos.clone(); this.wanderGoal = null;
     this.nextHint = this.game.time + this.D.hint * 0.5;
     this.crouchT = 0; this.pickupGoal = null;
+    this.nextNade = this.game.time + rand(4, 9); this.coverGoal = null; this.coverT = 0;
   }
 
   hear(pos, loud = 1) {
@@ -80,10 +80,10 @@ export class BotBrain {
 
   update(dt) {
     const me = this.me, foe = this.foe, g = this.game, I = me.intent, D = this.D;
-    I.mx = 0; I.mz = 0; I.jump = false; I.fire = false; I.ads = false; I.reload = false; I.melee = false; I.sprint = false; I.crouch = false;
+    I.mx = 0; I.mz = 0; I.jump = false; I.fire = false; I.ads = false; I.reload = false; I.melee = false; I.sprint = false; I.crouch = false; I.grenade = false;
     if (!me.alive) return;
     const t = g.time;
-    const w = WEAPONS[me.wi];
+    const w = g.W(me);
 
     this.visT -= dt;
     if (this.visT <= 0) {
@@ -129,7 +129,10 @@ export class BotBrain {
     else aim = (this.headPref ?? (this.headPref = Math.random() < D.head)) ? pts.head : pts.chest;
     const eye = g.eyePos(me);
     const dx = aim.x - eye.x, dy = aim.y - eye.y, dz = aim.z - eye.z;
-    const wantYaw = yawTo(dx, dz), wantPitch = Math.atan2(dy, Math.hypot(dx, dz));
+    const wantYaw = yawTo(dx, dz);
+    let wantPitch = Math.atan2(dy, Math.hypot(dx, dz));
+    // lob arcing projectiles (grenade launcher, crossbow) a bit higher
+    if (w.gravity) wantPitch += 0.5 * Math.asin(clamp((Math.hypot(dx, dz) * w.gravity) / (w.projectile * w.projectile), 0, 1));
 
     // aim error drifts and tightens while tracking
     this.errT -= dt;
@@ -158,6 +161,7 @@ export class BotBrain {
       if (dist < w.reach + 0.3 && reacted) I.fire = true;
     } else if (reacted && off < tol * (w.pellets ? 2 : 1)) {
       if (dist < 1.9 && Math.random() < D.melee * dt * 4) I.melee = true;
+      else if (w.spinup) I.fire = true; // keep the barrels turning
       else if (w.auto) {
         if (this.pauseT > 0) this.pauseT -= dt;
         else {
@@ -171,6 +175,23 @@ export class BotBrain {
       }
     }
 
+    // the occasional grenade at mid range
+    if (me.grenades > 0 && t > this.nextNade && D.melee > 0 && dist > 8 && dist < 16 && reacted && !w.melee && !w.splash) {
+      if (this.lobAt(foe.pos, dist)) return;
+    }
+
+    // badly hurt: fall back to a spot the enemy can't see, still shooting on the way
+    if (me.health < 38 && D.strafe >= 0.75 && !w.melee && dist > 5) {
+      this.coverT -= dt;
+      if (this.coverT <= 0 || !this.coverGoal) { this.coverT = 1.0; this.coverGoal = this.findCover(); }
+      if (this.coverGoal) {
+        const keepFire = I.fire;
+        this.navTo(this.coverGoal, dt);
+        I.fire = keepFire; I.sprint = false;
+        return;
+      }
+    } else this.coverGoal = null;
+
     // movement: hold preferred range, strafe
     this.strafeT -= dt;
     if (this.strafeT <= 0 || me.hitWall) { this.strafeT = rand(0.5, 1.4); this.strafeDir *= -1; }
@@ -180,7 +201,9 @@ export class BotBrain {
       this.navTo(foe.pos, dt);
       mx = I.mx; mz = I.mz;
       if (w.melee && dist < 6 && lineOfSight(this.game.eyePos(me), pts.chest)) { mx = fx; mz = fz; }
-      I.sprint = w.melee && dist > 4;
+      I.sprint = (w.melee || w.pellets) && dist > 4;
+      // slide in on the target
+      if (me.sprinting && dist < 11 && dist > 4 && Math.random() < dt * 2 * D.strafe) I.crouch = true;
     } else if (dist < w.pref * 0.45 && !w.pellets) { mx = -fx * 0.7; mz = -fz * 0.7; }
     if (!w.melee) {
       mx += -fz * this.strafeDir * D.strafe;
@@ -193,7 +216,37 @@ export class BotBrain {
     // occasional crouch-spray at range
     this.crouchT -= dt;
     if (this.crouchT <= 0) this.crouchT = rand(1, 3), this.crouching = !w.melee && dist > 10 && Math.random() < D.strafe * 0.3;
-    I.crouch = !!this.crouching;
+    I.crouch = I.crouch || !!this.crouching;
+  }
+
+  // Turn toward a spot and throw a grenade that lands there. Returns true while busy aiming.
+  lobAt(target, dist) {
+    const me = this.me, I = me.intent, g = this.game, D = this.D;
+    I.fire = false;
+    const v = 17, grav = 17;
+    const theta = 0.5 * Math.asin(clamp((dist * grav) / (v * v), 0, 1));
+    const wantPitch = theta - 0.16 + rand(-0.03, 0.03);
+    const wantYaw = yawTo(target.x - me.pos.x, target.z - me.pos.z);
+    const turn = D.turn * 0.033;
+    me.yaw += clamp(angleDiff(me.yaw, wantYaw), -turn, turn);
+    me.pitch += clamp(wantPitch - me.pitch, -turn, turn);
+    if (Math.abs(angleDiff(me.yaw, wantYaw)) < 0.08 && Math.abs(me.pitch - wantPitch) < 0.06) {
+      I.grenade = true;
+      this.nextNade = g.time + rand(7, 14) / Math.max(0.3, D.melee);
+    }
+    return true;
+  }
+
+  findCover() {
+    const me = this.me, g = this.game, foeEye = g.eyePos(this.foe);
+    let best = null, bestD = Infinity;
+    for (const w of g.map.waypoints) {
+      const d = Math.hypot(w.x - me.pos.x, w.z - me.pos.z);
+      if (d < 3 || d > 14 || Math.abs(w.y - me.pos.y) > 1) continue;
+      if (lineOfSight(foeEye, { x: w.x, y: w.y + 1.4, z: w.z })) continue;
+      if (d < bestD) { bestD = d; best = w; }
+    }
+    return best ? new THREE.Vector3(best.x, best.y, best.z) : null;
   }
 
   hunt(dt, w) {
@@ -215,8 +268,13 @@ export class BotBrain {
       if (!this.wanderGoal || me.pos.distanceTo(this.wanderGoal) < 1.5) this.wanderGoal = this.randomWaypoint();
       goal = this.wanderGoal;
     }
+    const kd = Math.hypot(this.lastKnown.x - me.pos.x, this.lastKnown.z - me.pos.z);
+    if (me.grenades > 0 && t > this.nextNade && D.melee > 0 && t - this.knowsAt < 3 && t - this.lastSeen < 6 && kd > 7 && kd < 17 && !w.melee) {
+      if (this.lobAt(this.lastKnown, kd)) return;
+    }
     this.navTo(goal, dt);
     I.sprint = me.pos.distanceTo(goal) > 8 && t - this.lastSeen > 1.5;
+    if (I.sprint && me.sprinting && Math.random() < dt * 0.25) I.crouch = true; // slide now and then
 
     // look where we're going (or where we last heard the enemy)
     let lookYaw = Math.hypot(I.mx, I.mz) > 0.1 ? yawTo(I.mx, I.mz) : me.yaw;

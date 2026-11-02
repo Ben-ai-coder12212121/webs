@@ -26,7 +26,7 @@
 </div>
 <div hidden aria-hidden="true"><div id="grid"></div><button id="bigBtn"></button><input id="search"><span id="count"></span><button id="muteHome"></button><div id="rndPlate"></div><div id="about"><button id="aboutClose"></button></div><button id="aboutBtn"></button><button id="imgCredits"></button><div id="imgList"></div></div>
 <div class="seo">
-<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>1v1 Gun Game</h1><p>First-person 1v1 Gun Game on a Nuketown-style street. Every kill upgrades your weapon, from pistol to rocket launcher. Land the final kill with the knife to win. Face a bot from Easy to Veteran.</p></div></main></div>
+<div class="wrap"><div class="top"><a class="pill" href="/">← All games</a></div><main class="card"><div class="body"><h1>1v1 Gun Game</h1><p>First-person 1v1 Gun Game with 20 weapons and 6 maps, from a suburban street to a frozen research base and a neon arena. Every kill upgrades your weapon, from pistol to minigun, railgun and rocket launcher. Grenades, slides, jump pads and killstreaks. Land the final kill with the knife to win. Face a bot from Easy to Veteran, or play online.</p></div></main></div>
 </div>
 <!-- shared code (see /js/). Only the libraries this game needs are loaded. -->
 <script src="/js/core.js"></script>
@@ -36,7 +36,7 @@
 // The game itself is a standalone three.js (r160) app in ./play/ (ES modules, see play/README.md).
 // This page embeds it and records match wins as the score.
 G.push({id:'gungame1v1',name:'1v1 Gun Game',kind:'game',wide:true,big:true,tint:'#ffc21a',
-blurb:'First-person 1v1 Gun Game on a Nuketown-style street. Every kill upgrades your weapon, from pistol to rocket launcher. Land the final kill with the knife to win. Face a bot from Easy to Veteran.',
+blurb:'First-person 1v1 Gun Game with 20 weapons and 6 maps, from a suburban street to a frozen research base and a neon arena. Every kill upgrades your weapon, from pistol to minigun, railgun and rocket launcher. Grenades, slides, jump pads and killstreaks. Land the final kill with the knife to win. Face a bot from Easy to Veteran, or play online.',
 fmt:b=>b+(b===1?' win':' wins'),
 art:'<rect x="8" y="10" width="50" height="40" rx="5" fill="#2F6FE0" stroke="#1D1A2F" stroke-width="3"/><rect x="62" y="10" width="50" height="40" rx="5" fill="#D6363C" stroke="#1D1A2F" stroke-width="3"/><text x="60" y="40" font-family="Impact,Arial Black,sans-serif" font-size="24" text-anchor="middle" fill="#FFC21A" stroke="#1D1A2F" stroke-width="2" paint-order="stroke">1v1</text><g stroke="#FFFDF6" stroke-width="3" stroke-linecap="round"><path d="M15 30H27M21 24V36"/><path d="M93 30H105M99 24V36"/></g>',
 run(root,c){

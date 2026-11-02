@@ -97,10 +97,27 @@ export class Audio {
     if (!this.ctx) return;
     const s = weapon.sound, dest = this.out(pos);
     if (weapon.melee) { this.noise(dest, { f: 3000, type: 'bandpass', q: 1.5, d: 0.12, g: 0.25, fEnd: 900 }); return; }
+    if (s.twang) { // crossbow
+      this.tone(dest, { f: 180, fEnd: 90, type: 'sawtooth', d: 0.18, g: 0.25 });
+      this.noise(dest, { f: 2500, type: 'bandpass', q: 2, d: 0.08, g: 0.3 });
+      return;
+    }
+    if (s.zap) { // railgun
+      this.tone(dest, { f: 2400, fEnd: 120, type: 'sawtooth', d: 0.45, g: 0.35 });
+      this.tone(dest, { f: 1200, fEnd: 60, type: 'square', d: 0.35, g: 0.18 });
+      this.noise(dest, { f: 5000, type: 'highpass', d: 0.25, g: 0.4 });
+      this.tone(dest, { f: 60, fEnd: 30, type: 'sine', d: 0.4, g: 0.6 });
+      return;
+    }
+    if (s.thump) { // grenade launcher
+      this.tone(dest, { f: 160, fEnd: 50, type: 'sine', d: 0.25, g: 0.8 });
+      this.noise(dest, { f: 900, d: 0.15, g: 0.45, fEnd: 200 });
+      return;
+    }
     this.noise(dest, { f: s.f, d: s.d, g: s.g, fEnd: s.f * 0.25 });
     this.noise(dest, { f: 6000, type: 'highpass', d: 0.04, g: s.g * 0.5 });
     if (s.low) this.tone(dest, { f: s.low * 1.6, fEnd: s.low * 0.5, type: 'triangle', d: s.d * 0.9, g: s.g * 0.9 });
-    if (weapon.id === 'shotgun' || weapon.id === 'sniper') this.noise(dest, { f: 900, type: 'bandpass', q: 3, d: 0.06, g: 0.15, delay: 0.38 });
+    if (['shotgun', 'sniper', 'lever', 'dbarrel'].includes(weapon.id)) this.noise(dest, { f: 900, type: 'bandpass', q: 3, d: 0.06, g: 0.15, delay: 0.38 });
   }
 
   explosion(pos) {
@@ -110,15 +127,87 @@ export class Audio {
     this.tone(dest, { f: 90, fEnd: 30, type: 'sine', d: 1.0, g: 0.9 });
   }
 
-  footstep(pos, g = 0.12) {
+  footstep(pos, g = 0.12, zone = null) {
     if (!this.ctx) return;
+    if (zone === 'water') { this.noise(this.out(pos), { f: 1400 + Math.random() * 600, type: 'bandpass', q: 1.2, d: 0.16, g: g * 1.4 }); return; }
+    if (zone === 'ice') { this.noise(this.out(pos), { f: 3000 + Math.random() * 1000, type: 'bandpass', q: 2, d: 0.05, g: g * 0.8 }); return; }
     this.noise(this.out(pos), { f: 500 + Math.random() * 300, d: 0.08, g, type: 'lowpass' });
   }
 
-  hitmarker(head) {
+  hitmarker(head, killed = false) {
     if (!this.ctx) return;
     this.tone(this.master, { f: head ? 2400 : 1800, type: 'square', d: 0.05, g: 0.08 });
-    if (head) this.noise(this.master, { f: 5000, type: 'highpass', d: 0.05, g: 0.12 });
+    if (head) { this.noise(this.master, { f: 5000, type: 'highpass', d: 0.05, g: 0.12 }); this.tone(this.master, { f: 3200, type: 'sine', d: 0.18, g: 0.08, delay: 0.02 }); }
+    if (killed) this.tone(this.master, { f: 520, fEnd: 260, type: 'triangle', d: 0.2, g: 0.14, delay: 0.03 });
+  }
+
+  medal(n = 1) {
+    if (!this.ctx) return;
+    for (let i = 0; i < Math.min(4, n); i++) {
+      this.tone(this.master, { f: 1175 + i * 220, type: 'triangle', d: 0.18, g: 0.09, delay: 0.25 + i * 0.12 });
+      this.tone(this.master, { f: 1760 + i * 330, type: 'sine', d: 0.25, g: 0.05, delay: 0.3 + i * 0.12 });
+    }
+  }
+
+  reward() {
+    if (!this.ctx) return;
+    [392, 523, 659, 784, 1047].forEach((f, i) => this.tone(this.master, { f, type: 'square', d: 0.16, g: 0.06, delay: i * 0.08 }));
+  }
+
+  slide(pos = null) {
+    if (!this.ctx) return;
+    this.noise(this.out(pos), { f: 900, type: 'bandpass', q: 0.8, d: 0.55, g: pos ? 0.25 : 0.12, fEnd: 300 });
+  }
+
+  land() {
+    if (!this.ctx) return;
+    this.noise(this.master, { f: 300, d: 0.12, g: 0.25 });
+  }
+
+  pad(pos = null) {
+    if (!this.ctx) return;
+    const d = this.out(pos);
+    this.tone(d, { f: 220, fEnd: 880, type: 'sine', d: 0.35, g: 0.25 });
+    this.noise(d, { f: 1200, type: 'bandpass', q: 1, d: 0.3, g: 0.25, fEnd: 4000 });
+  }
+
+  spinUp() {
+    if (!this.ctx) return;
+    this.tone(this.master, { f: 120, fEnd: 900, type: 'sawtooth', d: 0.55, g: 0.06 });
+  }
+
+  throwNade(pos = null) {
+    if (!this.ctx) return;
+    this.noise(this.out(pos), { f: 1800, type: 'bandpass', q: 3, d: 0.05, g: 0.25 });
+    this.noise(this.out(pos), { f: 700, type: 'bandpass', q: 1, d: 0.25, g: 0.15, delay: 0.05, fEnd: 1500 });
+  }
+
+  clink(pos) {
+    if (!this.ctx) return;
+    this.tone(this.out(pos), { f: 2600 + Math.random() * 600, type: 'triangle', d: 0.07, g: 0.2 });
+  }
+
+  thud(pos) {
+    if (!this.ctx) return;
+    this.noise(this.out(pos), { f: 600, d: 0.08, g: 0.4 });
+  }
+
+  jet() {
+    if (!this.ctx) return;
+    this.noise(this.master, { f: 300, d: 3.2, g: 0.35, attack: 1.2, fEnd: 2000 });
+    this.tone(this.master, { f: 220, fEnd: 70, type: 'sawtooth', d: 3, g: 0.05, attack: 1.0 });
+  }
+
+  siren() {
+    if (!this.ctx) return;
+    for (let i = 0; i < 3; i++) this.tone(this.master, { f: 700, fEnd: 1100, type: 'square', d: 0.35, g: 0.05, delay: i * 0.4 });
+  }
+
+  finale(win) {
+    if (!this.ctx) return;
+    const notes = win ? [523, 659, 784, 1047, 1319] : [440, 392, 349, 330, 262];
+    notes.forEach((f, i) => this.tone(this.master, { f, type: 'triangle', d: 0.5, g: 0.12, delay: 0.15 + i * 0.16 }));
+    this.tone(this.master, { f: 70, fEnd: 35, type: 'sine', d: 1.5, g: 0.5 });
   }
 
   hurt() {

@@ -1,5 +1,6 @@
 import * as Net from './net.js';
 import { BLUE_SKINS } from './character.js';
+import { ladderIds } from './weapons.js';
 
 // Matchmaking (Quick Match and friend rooms) plus the start / rematch / leave handshake.
 // Everything that happens during a match is forwarded to game.onNet().
@@ -225,7 +226,8 @@ export class Online {
 
   startAsHost() {
     const S = this.g.settings;
-    const m = { t: 'start', kpw: S.kpw === 2 ? 2 : 1, time: [5, 10, 15].includes(S.time) ? S.time : 10 };
+    // the host's map and weapon ladder are used (a random ladder is rolled once, here)
+    const m = { t: 'start', kpw: S.kpw === 2 ? 2 : 1, time: [5, 10, 15].includes(S.time) ? S.time : 10, map: S.map, lad: ladderIds(S.ladder) };
     this.send(m);
     this.launch(m);
   }
@@ -233,7 +235,7 @@ export class Online {
   launch(m) {
     this.closePanel();
     this.meAgain = false; this.foeAgain = false;
-    this.g.startMatch({ online: true, role: this.link.role, kpw: m.kpw === 2 ? 2 : 1, time: [5, 10, 15].includes(m.time) ? m.time : 10, foe: this.foe });
+    this.g.startMatch({ online: true, role: this.link.role, kpw: m.kpw === 2 ? 2 : 1, time: [5, 10, 15].includes(m.time) ? m.time : 10, map: m.map, ladder: m.lad, foe: this.foe });
   }
 
   onMsg(m) {

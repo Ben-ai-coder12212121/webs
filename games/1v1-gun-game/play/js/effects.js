@@ -50,7 +50,20 @@ export class Effects {
     this.flashTex = flashTexture();
     this.smokeTex = smokeTexture();
     this.fireTex = glowTexture('rgba(255,230,160,1)', 'rgba(255,90,10,0)');
+    this.dotTex = glowTexture('rgba(255,255,255,1)', 'rgba(255,255,255,0)');
     this.sprites = [];
+
+    // railgun beams: a bright core plus a soft glow, both fading out
+    this.beams = [];
+    const bGeo = new THREE.CylinderGeometry(1, 1, 1, 6, 1, true);
+    bGeo.rotateX(Math.PI / 2); bGeo.translate(0, 0, -0.5);
+    for (let i = 0; i < 6; i++) {
+      const core = new THREE.Mesh(bGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+      const glow = new THREE.Mesh(bGeo, new THREE.MeshBasicMaterial({ color: 0x5fe8ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+      core.visible = glow.visible = false;
+      scene.add(core); scene.add(glow);
+      this.beams.push({ core, glow, life: 0 });
+    }
 
     this.light = new THREE.PointLight(0xffb060, 0, 14, 1.5);
     scene.add(this.light);
@@ -100,6 +113,33 @@ export class Effects {
     t.life = 0.07;
   }
 
+  beam(from, to, color = 0x5fe8ff) {
+    const b = this.beams.find((x) => x.life <= 0) || this.beams[0];
+    const len = Math.hypot(to.x - from.x, to.y - from.y, to.z - from.z);
+    for (const [m, r] of [[b.core, 0.012], [b.glow, 0.05]]) {
+      m.position.set(from.x, from.y, from.z);
+      m.lookAt(to.x, to.y, to.z);
+      m.scale.set(r, r, len);
+      m.visible = true;
+    }
+    b.glow.material.color.setHex(color);
+    b.life = b.max = 0.45;
+    // sparkles along the beam
+    for (let i = 0; i < 26; i++) {
+      const k = Math.random();
+      this.spawn(from.x + (to.x - from.x) * k, from.y + (to.y - from.y) * k, from.z + (to.z - from.z) * k,
+        (Math.random() - 0.5) * 0.8, (Math.random() - 0.2) * 0.8, (Math.random() - 0.5) * 0.8, 0.5, 0.9, 1, 0.5 + Math.random() * 0.4, 0.4);
+    }
+  }
+
+  padBurst(pos) {
+    for (let i = 0; i < 26; i++) {
+      const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 2;
+      this.spawn(pos.x, pos.y, pos.z, Math.cos(a) * s, 4 + Math.random() * 5, Math.sin(a) * s, 0.4, 0.9, 1, 0.5 + Math.random() * 0.3, 6);
+    }
+    this.sprite(this.dotTex, { x: pos.x, y: pos.y + 0.3, z: pos.z }, 1.5, 0.3, { grow: 2.5, color: 0x66ccff });
+  }
+
   sprite(tex, pos, size, life, { grow = 1, color = 0xffffff, additive = true, rise = 0, opacity = 1 } = {}) {
     let s = this.sprites.find((x) => x.life <= 0);
     if (!s) {
@@ -130,23 +170,24 @@ export class Effects {
     this.lightT = t;
   }
 
-  explosion(pos) {
-    this.sprite(this.fireTex, pos, 2.5, 0.35, { grow: 3.2 });
-    this.sprite(this.fireTex, { x: pos.x, y: pos.y + 0.6, z: pos.z }, 2, 0.45, { grow: 2.5, color: 0xff9944 });
+  explosion(pos, k = 1) {
+    this.sprite(this.fireTex, pos, 2.5 * k, 0.35, { grow: 3.2 });
+    this.sprite(this.fireTex, { x: pos.x, y: pos.y + 0.6 * k, z: pos.z }, 2 * k, 0.45, { grow: 2.5, color: 0xff9944 });
+    this.sprite(this.dotTex, pos, 4 * k, 0.12, { grow: 3, color: 0xfff2cc });
     for (let i = 0; i < 6; i++) {
-      this.sprite(this.smokeTex, { x: pos.x + (Math.random() - 0.5) * 2, y: pos.y + Math.random() * 1.5, z: pos.z + (Math.random() - 0.5) * 2 },
-        1.8 + Math.random(), 1.6 + Math.random(), { grow: 2.2, color: 0x555555, additive: false, rise: 1.2, opacity: 0.7 });
+      this.sprite(this.smokeTex, { x: pos.x + (Math.random() - 0.5) * 2 * k, y: pos.y + Math.random() * 1.5 * k, z: pos.z + (Math.random() - 0.5) * 2 * k },
+        (1.8 + Math.random()) * k, 1.6 + Math.random(), { grow: 2.2, color: 0x555555, additive: false, rise: 1.2, opacity: 0.7 });
     }
     for (let i = 0; i < 50; i++) {
-      const a = Math.random() * Math.PI * 2, e = Math.random() * 1.2, s = 4 + Math.random() * 9;
+      const a = Math.random() * Math.PI * 2, e = Math.random() * 1.2, s = (4 + Math.random() * 9) * k;
       this.spawn(pos.x, pos.y + 0.3, pos.z, Math.cos(a) * Math.cos(e) * s, Math.sin(e) * s + 2, Math.sin(a) * Math.cos(e) * s,
         1, 0.5 + Math.random() * 0.4, 0.1, 0.5 + Math.random() * 0.6);
     }
     this.flashLight(pos, 0.3, 40);
   }
 
-  smokePuff(pos) {
-    this.sprite(this.smokeTex, pos, 0.35, 0.6, { grow: 3, color: 0xdddddd, additive: false, rise: 0.4, opacity: 0.5 });
+  smokePuff(pos, k = 1) {
+    this.sprite(this.smokeTex, pos, 0.35 * k, 0.6, { grow: 3, color: 0xdddddd, additive: false, rise: 0.4, opacity: 0.5 });
   }
 
   update(dt) {
@@ -167,6 +208,14 @@ export class Effects {
       t.m.material.opacity = Math.max(0, t.life / 0.07) * 0.85;
       if (t.life <= 0) t.m.visible = false;
     }
+    for (const b of this.beams) {
+      if (b.life <= 0) continue;
+      b.life -= dt;
+      const k = Math.max(0, b.life / b.max);
+      b.core.material.opacity = k; b.glow.material.opacity = k * 0.6;
+      b.glow.scale.x = b.glow.scale.y = 0.05 + (1 - k) * 0.08;
+      if (b.life <= 0) b.core.visible = b.glow.visible = false;
+    }
     for (const s of this.sprites) {
       if (s.life <= 0) continue;
       s.life -= dt;
@@ -184,6 +233,8 @@ export class Effects {
 
   clear() {
     for (const d of this.decals) d.visible = false;
+    for (const b of this.beams) { b.life = 0; b.core.visible = b.glow.visible = false; }
+    for (const s of this.sprites) { s.life = 0; s.m.visible = false; }
     for (const p of this.parts) p.life = 0;
     this.pPos.fill(-9999);
   }

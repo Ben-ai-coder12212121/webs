@@ -5,7 +5,7 @@
 
 const API = '/api/mp';
 export const GAME = 'gungame1v1';
-export const PROTO = 1; // bump when the match messages change, so old and new versions never meet
+export const PROTO = 2; // bump when the match messages change, so old and new versions never meet
 const ICE = { iceServers: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }, { urls: 'stun:stun.cloudflare.com:3478' }] };
 
 const rid = () => (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).replace(/[^a-z0-9]/g, '').slice(0, 16);

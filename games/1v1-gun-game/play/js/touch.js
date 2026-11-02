@@ -78,6 +78,7 @@ export class TouchControls {
     btn('tCrouch', (el) => { I.crouchToggle = !I.crouchToggle; el.classList.toggle('on', I.crouchToggle); });
     btn('tReload', () => { I.reloadQueued = true; });
     btn('tMelee', () => { I.meleeQueued = true; });
+    btn('tNade', () => { I.grenadeQueued = true; });
     btn('tUse', () => game.tryInteract());
     btn('tPause', () => game.pause());
     btn('tScore', () => game.hud.showScoreboard(true), () => game.hud.showScoreboard(false));

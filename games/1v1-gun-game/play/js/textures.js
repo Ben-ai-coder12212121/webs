@@ -151,6 +151,135 @@ export function makeTextures() {
     }
     T.camo = tex(c);
   }
+  { // sand (tinted lightly)
+    const [c, g] = canvas(256);
+    g.fillStyle = '#e3c08a'; g.fillRect(0, 0, 256, 256);
+    speckle(g, 256, 256, 3500, ['#d8b27a', '#ecd09e', '#cfa86e', '#f0d8aa', '#c79f66'], [1, 2]);
+    g.strokeStyle = 'rgba(160,120,70,0.18)'; g.lineWidth = 2;
+    for (let i = 0; i < 14; i++) {
+      const y = Math.random() * 256; g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= 256; x += 16) g.lineTo(x, y + Math.sin(x / 30 + i) * 5);
+      g.stroke();
+    }
+    T.sand = tex(c);
+  }
+  { // stucco / adobe (tinted)
+    const [c, g] = canvas(128);
+    g.fillStyle = '#f2f2f2'; g.fillRect(0, 0, 128, 128);
+    speckle(g, 128, 128, 1800, ['#e2e2e2', '#fafafa', '#d6d6d6', '#ececec'], [1, 4]);
+    g.strokeStyle = 'rgba(120,120,120,0.25)'; g.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      let x = Math.random() * 128, y = Math.random() * 128; g.beginPath(); g.moveTo(x, y);
+      for (let k = 0; k < 4; k++) { x += Math.random() * 16 - 8; y += Math.random() * 16; g.lineTo(x, y); }
+      g.stroke();
+    }
+    T.stucco = tex(c);
+  }
+  { // sandbags
+    const [c, g] = canvas(128);
+    g.fillStyle = '#9a9a9a'; g.fillRect(0, 0, 128, 128);
+    for (let row = 0; row < 4; row++) {
+      const off = row % 2 ? 21 : 0;
+      for (let x = -42; x < 128; x += 42) {
+        const v = 200 + Math.random() * 40;
+        g.fillStyle = `rgb(${v},${v},${v})`;
+        g.beginPath(); g.ellipse(x + off + 21, row * 32 + 16, 20, 14, 0, 0, Math.PI * 2); g.fill();
+      }
+    }
+    T.bags = tex(c);
+  }
+  { // wooden crate
+    const [c, g] = canvas(128);
+    g.fillStyle = '#b8874f'; g.fillRect(0, 0, 128, 128);
+    for (let y = 0; y < 128; y += 16) { g.fillStyle = `rgb(${170 + Math.random() * 30},${125 + Math.random() * 20},${70 + Math.random() * 15})`; g.fillRect(0, y + 1, 128, 14); }
+    g.fillStyle = '#7a5530';
+    g.fillRect(0, 0, 128, 10); g.fillRect(0, 118, 128, 10); g.fillRect(0, 0, 10, 128); g.fillRect(118, 0, 10, 128);
+    g.save(); g.translate(64, 64); g.rotate(Math.PI / 4); g.fillRect(-90, -6, 180, 12); g.restore();
+    g.fillStyle = '#3a3a3a'; for (const [x, y] of [[5, 5], [123, 5], [5, 123], [123, 123]]) g.fillRect(x - 2, y - 2, 4, 4);
+    T.crate = tex(c);
+  }
+  { // snow
+    const [c, g] = canvas(256);
+    g.fillStyle = '#eef3f8'; g.fillRect(0, 0, 256, 256);
+    speckle(g, 256, 256, 2600, ['#ffffff', '#e2eaf2', '#dbe5ee', '#f6f9fc'], [1, 3]);
+    g.strokeStyle = 'rgba(170,190,215,0.25)'; g.lineWidth = 3;
+    for (let i = 0; i < 10; i++) {
+      const y = Math.random() * 256; g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= 256; x += 16) g.lineTo(x, y + Math.sin(x / 40 + i) * 7);
+      g.stroke();
+    }
+    T.snow = tex(c);
+  }
+  { // ice
+    const [c, g] = canvas(256);
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 256, 256);
+    speckle(g, 256, 256, 800, ['#eef7fb', '#e0eff6', '#f8fcfe'], [2, 6]);
+    g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 1.2;
+    for (let i = 0; i < 12; i++) {
+      let x = Math.random() * 256, y = Math.random() * 256; g.beginPath(); g.moveTo(x, y);
+      for (let k = 0; k < 5; k++) { x += Math.random() * 50 - 25; y += Math.random() * 50 - 25; g.lineTo(x, y); }
+      g.stroke();
+    }
+    T.ice = tex(c);
+  }
+  { // corrugated container steel (tinted)
+    const [c, g] = canvas(128);
+    for (let x = 0; x < 128; x += 16) {
+      const grd = g.createLinearGradient(x, 0, x + 16, 0);
+      grd.addColorStop(0, '#c8c8c8'); grd.addColorStop(0.5, '#ffffff'); grd.addColorStop(1, '#b4b4b4');
+      g.fillStyle = grd; g.fillRect(x, 0, 16, 128);
+    }
+    speckle(g, 128, 128, 200, ['rgba(120,90,60,0.35)', 'rgba(90,90,90,0.25)'], [1, 3]);
+    T.ribbed = tex(c);
+  }
+  { // hazard stripes
+    const [c, g] = canvas(128);
+    g.fillStyle = '#f2c200'; g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#1c1c1c';
+    for (let x = -128; x < 256; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 16, 0); g.lineTo(x + 144, 128); g.lineTo(x + 128, 128); g.fill(); }
+    T.hazard = tex(c);
+  }
+  { // plywood sheets
+    const [c, g] = canvas(128);
+    g.fillStyle = '#f0f0f0'; g.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 40; i++) {
+      g.strokeStyle = `rgba(150,150,150,${0.15 + Math.random() * 0.2})`; g.lineWidth = 1 + Math.random() * 2;
+      const y = Math.random() * 128; g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= 128; x += 16) g.lineTo(x, y + Math.sin(x / 20 + i) * 3);
+      g.stroke();
+    }
+    g.fillStyle = '#9a9a9a'; g.fillRect(0, 0, 128, 2); g.fillRect(0, 0, 2, 128);
+    T.plywood = tex(c);
+  }
+  { // metal grating
+    const [c, g] = canvas(64);
+    g.fillStyle = '#d0d0d0'; g.fillRect(0, 0, 64, 64);
+    g.fillStyle = '#5a5a5a';
+    for (let y = 2; y < 64; y += 8) for (let x = 2; x < 64; x += 8) g.fillRect(x, y, 5, 5);
+    T.grate = tex(c);
+  }
+  { // carved stone blocks
+    const [c, g] = canvas(128);
+    g.fillStyle = '#8b8678'; g.fillRect(0, 0, 128, 128);
+    for (let row = 0; row < 4; row++) {
+      const off = row % 2 ? 32 : 0;
+      for (let x = -64; x < 128; x += 64) {
+        const v = 150 + Math.random() * 50;
+        g.fillStyle = `rgb(${v},${v * 0.97},${v * 0.88})`;
+        g.fillRect(x + off + 2, row * 32 + 2, 60, 28);
+      }
+    }
+    speckle(g, 128, 128, 900, ['rgba(80,80,70,0.3)', 'rgba(220,215,200,0.3)'], [1, 3]);
+    T.stone = tex(c);
+  }
+  { // shooting target
+    const [c, g] = canvas(128);
+    g.fillStyle = '#f4efe2'; g.fillRect(0, 0, 128, 128);
+    for (const [r, col] of [[56, '#1c1c1c'], [44, '#f4efe2'], [32, '#1c1c1c'], [20, '#f4efe2'], [9, '#d8343a']]) {
+      g.fillStyle = col; g.beginPath(); g.arc(64, 64, r, 0, Math.PI * 2); g.fill();
+    }
+    T.target = tex(c);
+  }
   return T;
 }
 
