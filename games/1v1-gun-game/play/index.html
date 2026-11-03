@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <title>1v1 Gun Game | Detourr</title>
-<meta name="description" content="A browser 1v1 first-person Gun Game on a Nuketown-style map. Get a kill with every weapon and finish with the knife.">
+<meta name="description" content="A browser 1v1 first-person Gun Game: 20 weapons, 6 maps, grenades, sliding, jump pads and killstreaks. Get a kill with every weapon and finish with the knife.">
 <link rel="stylesheet" href="style.css">
 <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
 </head>
@@ -45,7 +45,9 @@
       <div class="ammo"><span id="ammoMag">12</span><span class="res">/<span id="ammoRes">60</span></span></div>
       <div id="nextWeapon">NEXT: SMG</div>
     </div>
-    <div id="healthbar"><div id="healthfill"></div></div>
+    <div id="nades"></div>
+    <div id="spinbar"><i></i></div>
+    <div id="healthbar"><div id="healthfill"></div><div id="armorfill"></div></div>
   </div>
 
   <div id="crosshair"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="dot"></i></div>
@@ -60,6 +62,10 @@
   <div id="toast"></div>
   <div id="hint"></div>
   <div id="lowammo"></div>
+  <div id="medals"></div>
+  <div id="dmgnums"></div>
+  <div id="nadewarn"></div>
+  <div id="finale"><div class="f-title">FINAL KILL</div></div>
 
   <div id="respawn" class="hidden">
     <div class="r-killed" id="killedBy"></div>
@@ -72,7 +78,7 @@
 
   <div id="scoreboard" class="hidden">
     <div class="panel">
-      <div class="sbd-head"><span>GUN GAME: NUKETOWN</span><span id="sbdTimer"></span></div>
+      <div class="sbd-head"><span id="sbdMap">GUN GAME</span><span id="sbdTimer"></span></div>
       <table>
         <thead><tr><th></th><th>Player</th><th>Weapon</th><th>Lvl</th><th>K</th><th>D</th><th>Streak</th><th>Acc</th><th>HS</th></tr></thead>
         <tbody id="sbdBody"></tbody>
@@ -91,6 +97,7 @@
   <button class="tbtn small" id="tCrouch">CROUCH</button>
   <button class="tbtn small" id="tReload">RELOAD</button>
   <button class="tbtn small" id="tMelee">MELEE</button>
+  <button class="tbtn small" id="tNade">NADE</button>
   <button class="tbtn small hidden" id="tUse">USE</button>
   <button class="tbtn tiny" id="tPause">II</button>
   <button class="tbtn tiny" id="tScore">TAB</button>
@@ -103,7 +110,7 @@
       <div class="logo">
         <div class="l1">1v1</div>
         <div class="l2">GUN GAME</div>
-        <div class="ribbon">NUKETOWN (STYLE)</div>
+        <div class="ribbon" id="ribbon">NUKETOWN (STYLE)</div>
       </div>
       <button id="playBtn" class="btn-play">PLAY VS BOT</button>
       <div class="online-row">
@@ -114,6 +121,7 @@
         <h3>Match Settings</h3>
         <label class="row"><span>Your name</span><input id="optName" maxlength="14" autocomplete="off"></label>
         <div class="row"><span>Bot difficulty</span><div class="seg" id="optDiff"></div></div>
+        <div class="row"><span>Weapon ladder</span><div class="seg wrap" id="optLadder"></div></div>
         <div class="row"><span>Kills per weapon</span><div class="seg" id="optKpw"></div></div>
         <div class="row"><span>Time limit</span><div class="seg" id="optTime"></div></div>
         <div class="row"><span>Lighting</span><div class="seg" id="optLight"></div></div>
@@ -129,26 +137,20 @@
         <div id="skinPicker" class="skins"></div>
       </div>
       <div class="card">
-        <h3>Map</h3>
-        <div class="maps">
-          <div class="map active"><div class="thumb nuketown"><span>Welcome to<b>NUKETOWN</b></span></div><div class="mname">Nuketown (Style)</div></div>
-          <div class="map locked"><div class="thumb desert"></div><div class="mname">Desert Base</div><div class="soon">Coming soon</div></div>
-          <div class="map locked"><div class="thumb snowy"></div><div class="mname">Snowy Base</div><div class="soon">Coming soon</div></div>
-          <div class="map locked"><div class="thumb jungle"></div><div class="mname">Jungle</div><div class="soon">Coming soon</div></div>
-          <div class="map locked"><div class="thumb construction"></div><div class="mname">Construction Site</div><div class="soon">Coming soon</div></div>
-        </div>
+        <h3>Map <span class="muted">click to preview</span></h3>
+        <div class="maps" id="mapPicker"></div>
       </div>
       <div class="card">
-        <h3>Gun Game Order</h3>
+        <h3>Gun Game Order <span class="muted" id="ladderCount"></span></h3>
         <div id="ladderPreview" class="ladder-preview"></div>
-        <p class="rules">Every kill upgrades your weapon. Get a kill with all nine; the <b>knife</b> kill wins. Melee someone (<b>V</b>) to <b>humiliate</b> them and knock them back a weapon. 3-kill streak = <b>UAV</b>. Grab <span class="pu s">Speed</span> <span class="pu h">Health</span> <span class="pu d">Double&nbsp;Damage</span> power-ups.</p>
+        <p class="rules">Every kill upgrades your weapon; the <b>knife</b> kill wins. Melee someone (<b>V</b>) to <b>humiliate</b> them and knock them back a weapon. Streaks: <b>3</b> UAV, <b>5</b> Armor, <b>7</b> Airstrike. Two <b>grenades</b> per life (<b>G</b>). Sprint + crouch to <b>slide</b>. Rockets and grenades knock you around: rocket-jump! Grab <span class="pu s">Speed</span> <span class="pu h">Health</span> <span class="pu d">Double&nbsp;Damage</span> <span class="pu a">Armor</span>.</p>
       </div>
       <div class="card controls" id="controlsCard">
         <h3>Controls</h3>
         <div class="keys">
           <span><kbd>W A S D</kbd> Move</span><span><kbd>Mouse</kbd> Look</span><span><kbd>LMB</kbd> Fire</span><span><kbd>RMB</kbd>/<kbd>Q</kbd> Aim</span>
           <span><kbd>Shift</kbd> Sprint</span><span><kbd>Space</kbd> Jump</span><span><kbd>C</kbd> Crouch (hold)</span><span><kbd>R</kbd> Reload</span>
-          <span><kbd>V</kbd> Melee</span><span><kbd>E</kbd> Use</span><span><kbd>Tab</kbd> Scores</span><span><kbd>Esc</kbd> Pause</span>
+          <span><kbd>V</kbd> Melee</span><span><kbd>G</kbd>/<kbd>MMB</kbd> Grenade</span><span><kbd>C</kbd> while sprinting: Slide</span><span><kbd>E</kbd> Use</span><span><kbd>Tab</kbd> Scores</span><span><kbd>Esc</kbd> Pause</span>
         </div>
       </div>
     </div>
@@ -172,7 +174,7 @@
   <div class="panel center">
     <div id="endTitle" class="end-title">VICTORY</div>
     <div id="endSub" class="end-sub"></div>
-    <table class="end-stats"><thead><tr><th></th><th>Kills</th><th>Deaths</th><th>Best streak</th><th>Accuracy</th><th>Headshots</th><th>Weapon</th></tr></thead><tbody id="endBody"></tbody></table>
+    <table class="end-stats"><thead><tr><th></th><th>Kills</th><th>Deaths</th><th>Best streak</th><th>Accuracy</th><th>Headshots</th><th>Medals</th><th>Weapon</th></tr></thead><tbody id="endBody"></tbody></table>
     <p id="endNote" class="end-note hidden"></p>
     <div class="end-btns">
       <button class="btn" id="againBtn">PLAY AGAIN</button>
